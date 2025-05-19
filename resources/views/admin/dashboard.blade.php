@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    @include('partials.header')
+    @include('admin.partials.header')
 </head>
 <body>
   <!-- Google Tag Manager noscript -->
@@ -12,22 +12,22 @@
 
   <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">
-        @include('partials.sidebar')
+        @include('admin.partials.sidebar')
 
         <div class="layout-page">
-            @include('partials.navbar')
+            @include('admin.partials.navbar')
 
             <div class="content-wrapper">
                 <div class="container-xxl flex-grow-1 container-p-y">
                     @yield('content')
                 </div>
 
-                @include('partials.footer')
+                @include('admin.partials.footer')
             </div>
         </div>
     </div>
   </div>
 
-  @include('partials.scripts')
+  @include('admin.partials.scripts')
 </body>
 </html>
