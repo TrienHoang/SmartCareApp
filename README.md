@@ -12,7 +12,7 @@ composer update
 3. Install js briary
 ```bash
 #create node_modules
-nmp i
+npm i
 ```
 
 4. Create .env file
