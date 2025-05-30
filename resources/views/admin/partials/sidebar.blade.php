@@ -1,6 +1,6 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
 
-  
+
   <div class="app-brand demo ">
     <a href="index.html" class="app-brand-link">
       <span class="app-brand-logo demo">
@@ -35,20 +35,20 @@
       <span class="app-brand-text demo menu-text fw-bold ms-2">SmartCare</span>
     </a>
 
-    
+
   </div>
 
-  
+
   <div class="menu-divider mt-0  ">
   </div>
 
   <div class="menu-inner-shadow"></div>
 
-  
-  
+
+
   <ul class="menu-inner py-1">
     <!-- Apps & Pages -->
-    
+
     <li class="menu-item">
       <a href="app-email.html" class="menu-link">
         <i class="menu-icon tf-icons bx bx-envelope"></i>
@@ -62,12 +62,12 @@
       </a>
     </li>
     <!-- e-commerce-app menu start -->
-    
+
     <!-- e-commerce-app menu end -->
     <!-- Academy menu start -->
-    
+
     <!-- Academy menu end -->
-    
+
     <li class="menu-item">
       <a href="javascript:void(0);" class="menu-link menu-toggle">
         <i class='menu-icon tf-icons bx bx-food-menu'></i>
@@ -98,13 +98,13 @@
       </ul>
     </li>
     <li class="menu-item">
-      <a href="javascript:void(0);" class="menu-link menu-toggle">
+      <a href="{{ route('admin.users.index') }}" class="menu-link menu-toggle">
         <i class="menu-icon tf-icons bx bx-user"></i>
         <div data-i18n="Users">Users</div>
       </a>
       <ul class="menu-sub">
         <li class="menu-item">
-          <a href="app-user-list.html" class="menu-link">
+          <a href="{{ route('admin.users.index') }}" class="menu-link">
             <div data-i18n="List">List</div>
           </a>
         </li>
@@ -161,13 +161,13 @@
         </li>
       </ul>
     </li>
-  
-    
-     
 
-    
+
+
+
+
   </ul>
-  
-  
+
+
 
 </aside>

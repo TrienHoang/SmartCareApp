@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Http\Controllers\admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Http\Request;
+
+class UserController extends Controller
+{
+    public function index()
+    {
+        $users = User::paginate(10);
+        return view('admin.users.index', compact('users'));
+    }
+    public function show($id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            return redirect()->route('admin.users.index')->with('error', 'User not found');
+        }
+        return view('admin.users.show', compact('user'));
+    }
+    public function edit($id)
+    {
+        $user = User::findOrFail($id);
+
+        if (auth()->id() === $user->id) {
+            return redirect()->route('admin.users.index')->with('error', 'Bạn không thể sửa quyền của chính mình.');
+        }
+
+        $roles = Role::all();
+        return view('admin.users.edit', compact('user', 'roles'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        if (auth()->id() === $user->id) {
+            return redirect()->route('admin.users.index')->with('error', 'Bạn không thể sửa quyền của chính mình.');
+        }
+
+        $request->validate([
+            'role_id' => 'required|exists:roles,id',
+        ]);
+
+        $user->role_id = $request->role_id;
+        $user->save();
+
+        return redirect()->route('admin.users.index')->with('success', 'Cập nhật quyền người dùng thành công.');
+    }
+}
