@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -7,10 +8,14 @@ Route::get('/', function () {
     return view('admin.dashboard');
 });
 
-Route::get('/admin/dashboard', function () {
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('postLogin');
+
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('postRegister');
+
+Route::get('/dashboard', function () {
     return view('admin.dashboard');
-})->name('admin.dashboard');
+})->middleware('auth')->name('dashboard');
+
 Route::get('admin/users', [UserController::class, 'index'])->name('admin.users.index');
-Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admin.users.show');
-Route::get('/admin/users/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
-Route::put('/admin/users/{id}', [UserController::class, 'update'])->name('admin.users.update');
