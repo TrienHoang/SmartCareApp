@@ -4,13 +4,19 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="card">
+    <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Danh sách người dùng</h5>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover text-center align-middle" style="min-width: 1200px;">
+        @if(session('error'))
+            <div class="alert alert-danger m-3">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        <div class="table-responsive px-3">
+            <table class="table table-bordered table-hover text-center align-middle">
                 <thead class="table-dark">
                     <tr>
                         <th>ID</th>
@@ -19,7 +25,6 @@
                         <th>Email</th>
                         <th>Điện thoại</th>
                         <th>Giới tính</th>
-                        <th>Ngày sinh</th>
                         <th>Địa chỉ</th>
                         <th>Vai trò</th>
                         <th>Ảnh đại diện</th>
@@ -35,7 +40,6 @@
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->phone }}</td>
                             <td>{{ $user->gender }}</td>
-                            <td>{{ \Carbon\Carbon::parse($user->date_of_birth)->format('d/m/Y') }}</td>
                             <td>{{ $user->address }}</td>
                             <td>{{ $user->role->name ?? 'Chưa phân quyền' }}</td>
                             <td>
@@ -52,16 +56,29 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="13" class="text-muted">Không có người dùng nào.</td>
+                            <td colspan="10" class="text-muted">Không có người dùng nào.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        <div class="card-footer d-flex justify-content-center">
-            {{ $users->links() }}
+        <div class="card-footer d-flex justify-content-end">
+            {{ $users->links('pagination::bootstrap-5') }}
         </div>
     </div>
 </div>
+
+{{-- Custom styles --}}
+<style>
+    .container-fluid svg {
+        width: 20px !important;
+        height: 20px !important;
+    }
+
+    /* Đảm bảo table rộng khi nhiều cột */
+    .table {
+        min-width: 1200px;
+    }
+</style>
 @endsection

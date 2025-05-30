@@ -24,21 +24,21 @@ class UserController extends Controller
     }
     public function edit($id)
     {
-        $user = User::findOrFail($id);
-
-        if (auth()->id() === $user->id) {
+        // Không cho phép người dùng chỉnh sửa quyền của chính mình
+        if (auth()->id() == $id) {
             return redirect()->route('admin.users.index')->with('error', 'Bạn không thể sửa quyền của chính mình.');
         }
 
+        $user = User::findOrFail($id);
         $roles = Role::all();
+
         return view('admin.users.edit', compact('user', 'roles'));
     }
 
     public function update(Request $request, $id)
     {
-        $user = User::findOrFail($id);
-
-        if (auth()->id() === $user->id) {
+        // Không cho phép người dùng chỉnh sửa quyền của chính mình
+        if (auth()->id() == $id) {
             return redirect()->route('admin.users.index')->with('error', 'Bạn không thể sửa quyền của chính mình.');
         }
 
@@ -46,9 +46,10 @@ class UserController extends Controller
             'role_id' => 'required|exists:roles,id',
         ]);
 
+        $user = User::findOrFail($id);
         $user->role_id = $request->role_id;
         $user->save();
 
-        return redirect()->route('admin.users.index')->with('success', 'Cập nhật quyền người dùng thành công.');
+        return redirect()->route('admin.users.index')->with('success', 'Cập nhật quyền thành công.');
     }
 }
