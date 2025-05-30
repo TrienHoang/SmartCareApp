@@ -18,6 +18,7 @@ Route::get('/dashboard', function () {
     return view('admin.dashboard');
 })->middleware('auth')->name('dashboard');
 
+
 Route::get('admin/users', [UserController::class, 'index'])->name('admin.users.index');
 Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admin.users.show');
 Route::get('admin/users/edit/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');

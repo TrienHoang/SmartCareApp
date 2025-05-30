@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 
 class AuthController extends Controller
 {
@@ -21,15 +23,15 @@ class AuthController extends Controller
         return view('auth.login', compact('title'));
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'username' => 'required',
-            'password' => 'required'
-        ], [
-            'username.required' => 'Vui lòng nhập tên đăng nhập',
-            'password.required' => 'Vui lòng nhập mật khẩu'
-        ]);
+        // $request->validate([
+        //     'username' => 'required',
+        //     'password' => 'required'
+        // ], [
+        //     'username.required' => 'Vui lòng nhập tên đăng nhập',
+        //     'password.required' => 'Vui lòng nhập mật khẩu'
+        // ]);
 
         $credentials = $request->only('username', 'password');
 
@@ -49,21 +51,21 @@ class AuthController extends Controller
             ->withErrors(['username' => 'Sai tên đăng nhập hoặc mật khẩu']);
     }
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $request->validate([
-            'username' => 'required|unique:users,username',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-        ], [
-            'username.required' => 'Vui lòng nhập tên đăng nhập',
-            'username.unique' => 'Tên đăng nhập đã tồn tại',
-            'email.required' => 'Vui lòng nhập email',
-            'email.unique' => 'Email đã tồn tại',
-            'email.email' => 'Email không hợp lệ',
-            'password.required' => 'Vui lòng nhập mật khẩu',
-            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
-        ]);
+        // $request->validate([
+        //     'username' => 'required|unique:users,username',
+        //     'email' => 'required|email|unique:users',
+        //     'password' => 'required|min:6',
+        // ], [
+        //     'username.required' => 'Vui lòng nhập tên đăng nhập',
+        //     'username.unique' => 'Tên đăng nhập đã tồn tại',
+        //     'email.required' => 'Vui lòng nhập email',
+        //     'email.unique' => 'Email đã tồn tại',
+        //     'email.email' => 'Email không hợp lệ',
+        //     'password.required' => 'Vui lòng nhập mật khẩu',
+        //     'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
+        // ]);
 
 
         User::create([
