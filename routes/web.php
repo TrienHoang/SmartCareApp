@@ -1,8 +1,10 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\admin\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 
 Route::get('/', function () {
     return view('admin.dashboard');
@@ -23,4 +25,3 @@ Route::get('admin/users', [UserController::class, 'index'])->name('admin.users.i
 Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admin.users.show');
 Route::get('admin/users/edit/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
 Route::put('admin/users/edit/{id}', [UserController::class, 'update'])->name('admin.users.update');
-Route::get('admin/users/search', [UserController::class, 'search'])->name('admin.users.search');
