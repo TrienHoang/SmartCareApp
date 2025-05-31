@@ -58,7 +58,6 @@ class UserController extends Controller
         $users = User::where('username', 'like', '%' . $search . '%')
             ->orWhere('email', 'like', '%' . $search . '%')
             ->paginate(10);
-
         return view('admin.users.search', compact('users'));
     }
 }
