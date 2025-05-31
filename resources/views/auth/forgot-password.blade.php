@@ -278,7 +278,7 @@
             left: 0;
             transform: translateY(-50%);
         }
-        
+
         .back {
             margin-top: 20px;
             margin-left: 10px;
@@ -289,6 +289,20 @@
             color: #0d6efd;
             text-decoration: none;
             font-size: 14px;
+        }
+
+        .input-error {
+            border: 1px solid red;
+            background-color: #fff4f4;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         /* Trên trái */
@@ -315,7 +329,9 @@
                     @csrf
                     <input type="email" name="email" placeholder="Email đăng ký...">
                     @error('email')
-                        <p class="error">{{ $message }}</p>
+                        <p class="error-message" role="alert">
+                            <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                        </p>
                     @enderror
                     <button type="submit">Gửi liên kết</button>
                 </form>

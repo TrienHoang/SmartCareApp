@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Mail\PasswordChangedMail;
+use Illuminate\Support\Facades\Mail;
+
 
 class ResetPasswordController extends Controller
 {
@@ -46,6 +49,7 @@ class ResetPasswordController extends Controller
                     'password' => Hash::make($password),
                     'remember_token' => Str::random(60),
                 ])->save();
+                 Mail::to($user->email)->send(new PasswordChangedMail($user));
             }
         );
         // dd($status);

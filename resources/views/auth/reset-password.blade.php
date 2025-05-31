@@ -283,6 +283,28 @@
             text-decoration: none;
             font-size: 14px;
         }
+
+        .input-with-icon {
+            width: 100%;
+            padding: 12px 42px 12px 14px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        .input-error {
+            border: 1px solid red;
+            background-color: #fff4f4;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
     </style>
 </head>
 
@@ -301,22 +323,20 @@
                     <input type="hidden" name="email" value="{{ $email }}">
 
                     <div class="field-wrapper">
-                        <input type="password" name="password" placeholder="Mật khẩu mới" id="password"
-                            class="input-with-icon">
+                        <input type="password" id="password" name="password" placeholder="Mật khẩu mới"
+                            class="input-with-icon" oninput="validatePassword()">
                         <i class="fas fa-eye toggle-password" onclick="togglePassword('password')"></i>
-                        @error('password')
-                            <p class="error">{{ $message }}</p>
-                        @enderror
+                        <p id="password-error" class="error-message" style="display: none;"></p>
                     </div>
 
                     <div class="field-wrapper">
-                        <input type="password" name="password_confirmation" placeholder="Xác nhận mật khẩu"
-                            id="confirm">
-                        <i class="fas fa-eye toggle-password" onclick="togglePassword('confirm')"></i>
-                        @error('password_confirmation')
-                            <p class="error">{{ $message }}</p>
-                        @enderror
+                        <input type="password" id="password_confirmation" name="password_confirmation"
+                            placeholder="Xác nhận mật khẩu" class="input-with-icon" oninput="validatePasswordConfirm()">
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('password_confirmation')"></i>
+                        <p id="confirm-error" class="error-message" style="display: none;"></p>
                     </div>
+
+
 
                     <button type="submit">Xác nhận đặt lại</button>
                 </form>
@@ -358,6 +378,39 @@
                 input.type = "password";
                 icon.classList.remove("fa-eye-slash");
                 icon.classList.add("fa-eye");
+            }
+        }
+
+        function validatePassword() {
+            const pass = document.getElementById('password');
+            const error = document.getElementById('password-error');
+
+            if (pass.value.length < 8) {
+                pass.classList.add('input-error');
+                error.textContent = 'Mật khẩu phải có ít nhất 8 ký tự.';
+                error.style.display = 'block';
+            } else {
+                pass.classList.remove('input-error');
+                error.textContent = '';
+                error.style.display = 'none';
+            }
+
+            validatePasswordConfirm(); // kiểm tra luôn xác nhận khi nhập pass
+        }
+
+        function validatePasswordConfirm() {
+            const pass = document.getElementById('password').value;
+            const confirm = document.getElementById('password_confirmation');
+            const error = document.getElementById('confirm-error');
+
+            if (confirm.value !== pass) {
+                confirm.classList.add('input-error');
+                error.textContent = 'Xác nhận mật khẩu không khớp.';
+                error.style.display = 'block';
+            } else {
+                confirm.classList.remove('input-error');
+                error.textContent = '';
+                error.style.display = 'none';
             }
         }
     </script>
