@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('password')->comment('Mật khẩu đã mã hóa');
             $table->string('full_name', 100)->nullable()->comment('Họ tên đầy đủ');
             $table->string('email')->unique();
-            $table->string('facebook_id')->unique();
+            $table->string('facebook_id')->nullable()->unique();
             $table->string('google_id')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
