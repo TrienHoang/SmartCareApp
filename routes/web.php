@@ -19,7 +19,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('postRegiste
 
 // đăng nhập bằng facebook
 Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
-// Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('facebook.callback');
+Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('facebook.callback');
 
 Route::get('/dashboard', function () {
     return view('admin.dashboard');
