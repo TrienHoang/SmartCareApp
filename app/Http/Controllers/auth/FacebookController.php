@@ -40,7 +40,7 @@ class FacebookController extends Controller
             return redirect('/dashboard');
         }
     } catch (Exception $e) {
-        dd($e->getMessage()); // Xem chi tiết lỗi nếu có
+        // dd($e->getMessage()); // Xem chi tiết lỗi nếu có
         return redirect('/login')->withErrors(['facebook' => 'Đăng nhập thất bại']);
     }
 }

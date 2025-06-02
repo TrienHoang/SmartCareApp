@@ -31,7 +31,7 @@
             <p class="social-text">Hoặc đăng nhập bằng nền tảng</p>
             <div class="social-media">
                 <a href="{{ route('facebook.login') }}" class="social-icon"><i class="fab fa-facebook"></i></a>
-                <a href="#" class="social-icon"><i class="fab fa-google"></i></a>
+                <a href="{{ route('google.login') }}" class="social-icon"><i class="fab fa-google"></i></a>
             </div>
 
             <p class="account-text">Quên mật khẩu? - <a href="#" id="sign-up-btn2">Đăng ký</a></p>

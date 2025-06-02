@@ -4,6 +4,7 @@
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\auth\FacebookController;
 use App\Http\Controllers\auth\AuthController;
+use App\Http\Controllers\auth\GoogleController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,6 +21,10 @@ Route::post('/register', [AuthController::class, 'register'])->name('postRegiste
 // đăng nhập bằng facebook
 Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
 Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('facebook.callback');
+
+// đăng nhập bằng google
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+// Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 
 Route::get('/dashboard', function () {
     return view('admin.dashboard');

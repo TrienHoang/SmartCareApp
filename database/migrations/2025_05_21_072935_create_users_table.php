@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('full_name', 100)->nullable()->comment('Họ tên đầy đủ');
             $table->string('email')->unique();
             $table->string('facebook_id')->unique();
+            $table->string('google_id')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->string('phone', 20)->nullable()->comment('Số điện thoại');
