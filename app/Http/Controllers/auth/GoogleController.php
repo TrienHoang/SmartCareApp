@@ -18,31 +18,44 @@ class GoogleController extends Controller
 
     public function handleGoogleCallback()
     {
-         try {
-            $user = Socialite::driver('google')->user();
+        try {
+            $googleUser = Socialite::driver('google')->user();
 
-            $finduser = User::where('google_id', $user->id)->first();
-
-            if ($finduser) {
-                Auth::login($finduser);
-                return redirect('/dashboard')->with('message', 'Đăng nhập bằng Google thành công!');
-            } else {
-                $newUser = User::create([
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'username' => Str::slug($user->name) . rand(1000, 9999),
-                    'google_id' => $user->id,
-                    'password' => bcrypt(Str::random(16)),
-                    'role_id' => 3
+            if (!$googleUser->getEmail()) {
+                return redirect('/login')->withErrors([
+                    'google' => 'Không lấy được email từ Google. Vui lòng sử dụng phương thức đăng nhập khác.'
                 ]);
-
-                Auth::login($newUser);
-                return redirect('/dashboard')->with('message', 'Đăng ký & đăng nhập thành công bằng Google!');
             }
+
+            $findUserByGoogleId = User::where('google_id', $googleUser->getId())->first();
+            if ($findUserByGoogleId) {
+                Auth::login($findUserByGoogleId);
+                return redirect('/dashboard')->with('message', 'Đăng nhập bằng Google thành công!');
+            }
+
+            $existingUser = User::where('email', $googleUser->getEmail())->first();
+            if ($existingUser) {
+                return redirect('/login')->withErrors([
+                    'google' => 'Email của bạn đã được đăng ký. Vui lòng đăng nhập bằng phương thức cũ.'
+                ]);
+            }
+
+            $newUser = User::create([
+                'name' => $googleUser->getName(),
+                'email' => $googleUser->getEmail(),
+                'username' => Str::slug($googleUser->getName()) . rand(1000, 9999),
+                'google_id' => $googleUser->getId(),
+                'password' => bcrypt(Str::random(16)),
+                'role_id' => 3
+            ]);
+
+            Auth::login($newUser);
+            return redirect('/dashboard')->with('message', 'Đăng ký & đăng nhập thành công bằng Google!');
+
         } catch (Exception $e) {
-            // dd($e->getMessage());
-            return redirect('/login')->withErrors(['google' => 'Lỗi đăng nhập Google: ' . $e->getMessage()]);
+            return redirect('/login')->withErrors([
+                'google' => 'Lỗi đăng nhập Google: ' . $e->getMessage()
+            ]);
         }
     }
-    
 }
