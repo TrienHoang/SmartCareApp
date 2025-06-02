@@ -16,6 +16,7 @@ class UserFactory extends Factory
             'full_name' => fake()->name(),
             'phone' => fake()->phoneNumber(),
             'email' => $this->faker->unique()->safeEmail,
+            'facebook_id' => fake()->uuid(),
             'gender' => fake()->randomElement(['Nam', 'Nữ']),
             'date_of_birth' => fake()->date(),
             'address' => fake()->address(),

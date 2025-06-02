@@ -1,7 +1,9 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+// use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\admin\UserController;
+use App\Http\Controllers\auth\FacebookController;
+use App\Http\Controllers\auth\AuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,6 +15,11 @@ Route::post('/login', [AuthController::class, 'login'])->name('postLogin');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('postRegister');
+
+
+// đăng nhập bằng facebook
+Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
+// Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('facebook.callback');
 
 Route::get('/dashboard', function () {
     return view('admin.dashboard');
