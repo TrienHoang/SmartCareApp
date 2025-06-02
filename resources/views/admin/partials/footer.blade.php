@@ -6,8 +6,6 @@
     </div>
     <div class="d-none d-lg-inline-block">
       
-      <a href="https://themeforest.net/licenses/standard" class="footer-link me-4" target="_blank">License</a>
-      <a href="https://1.envato.market/pixinvent_portfolio" target="_blank" class="footer-link me-4">More Themes</a>
       
       <a href="https://demos.pixinvent.com/frest-html-admin-template/documentation/" target="_blank" class="footer-link me-4">Documentation</a>
       
@@ -40,9 +38,6 @@
   <!-- / Layout wrapper -->
 
   
-  <div class="buy-now">
-    <a href="https://1.envato.market/frest_admin" target="_blank" class="btn btn-danger btn-buy-now">Buy Now</a>
-  </div>
   
 
   
