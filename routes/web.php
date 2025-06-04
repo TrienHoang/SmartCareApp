@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\admin\AppointmentController;
+use App\Http\Controllers\admin\SchedulesController;
 use App\Http\Controllers\admin\UserController;
+use App\Http\Controllers\admin\VoucherController;
 use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\auth\FacebookController;
 use App\Http\Controllers\auth\GoogleController;
@@ -46,13 +48,28 @@ Route::get('/test-email', function () {
 Route::get('/dashboard', function () {
     return view('admin.dashboard');
 })->middleware('auth')->name('dashboard');
-
+//Quản lý user
 Route::get('admin/users', [UserController::class, 'index'])->name('admin.users.index');
 Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admin.users.show');
 Route::get('admin/users/edit/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
 Route::put('admin/users/edit/{id}', [UserController::class, 'update'])->name('admin.users.update');
 Route::get('admin/users/search', [UserController::class, 'search'])->name('admin.users.search');
-
+// Quản lý voucher
+Route::get('admin/vouchers', [VoucherController::class, 'index'])->name('admin.vouchers.index');
+Route::get('admin/vouchers/create', [VoucherController::class, 'create'])->name('admin.vouchers.create');
+Route::post('admin/vouchers/create', [VoucherController::class, 'store'])->name('admin.vouchers.store');
+Route::get('admin/vouchers/edit/{id}', [VoucherController::class, 'edit'])->name('admin.vouchers.edit');
+Route::put('admin/vouchers/edit/{id}', [VoucherController::class, 'update'])->name('admin.vouchers.update');
+Route::delete('admin/vouchers/destroy/{id}', [VoucherController::class, 'destroy'])->name('admin.vouchers.destroy');
+Route::get('admin/vouchers/show/{id}', [VoucherController::class, 'show'])->name('admin.vouchers.show');
+// quản lý lịch làm việc
+Route::get('admin/schedules', [SchedulesController::class, 'index'])->name('admin.schedules.index');
+Route::get('admin/schedules/create', [SchedulesController::class, 'create'])->name('admin.schedules.create');
+Route::post('admin/schedules/create', [SchedulesController::class, 'store'])->name('admin.schedules.store');
+Route::get('admin/schedules/edit/{id}', [SchedulesController::class, 'edit'])->name('admin.schedules.edit');
+Route::put('admin/schedules/edit/{id}', [SchedulesController::class, 'update'])->name('admin.schedules.update');
+Route::delete('admin/schedules/destroy/{id}', [SchedulesController::class, 'destroy'])->name('admin.schedules.destroy');
+Route::get('admin/schedules/show/{id}', [SchedulesController::class, 'show'])->name('admin.schedules.show');
 // quản lý lịch hẹn khám
 Route::prefix('admin/appointments')->name('admin.appointments.')->group(function () {
     Route::get('/', [AppointmentController::class, 'index'])->name('index');
@@ -60,4 +77,6 @@ Route::prefix('admin/appointments')->name('admin.appointments.')->group(function
     Route::post('/store', [AppointmentController::class, 'store'])->name('store');
     Route::get('/edit/{id}', [AppointmentController::class, 'edit'])->name('edit');
     Route::put('/update/{id}', [AppointmentController::class, 'update'])->name('update');
+    Route::patch('/{id}/cancel', [AppointmentController::class, 'cancel'])->name('cancel');
+    Route::get('/{id}', [AppointmentController::class, 'show'])->name('show');
 });
