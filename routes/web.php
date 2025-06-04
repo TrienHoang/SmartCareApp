@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\admin\AppointmentController;
 use App\Http\Controllers\admin\UserController;
+use App\Http\Controllers\admin\VoucherController;
 use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\auth\FacebookController;
 use App\Http\Controllers\auth\GoogleController;
@@ -46,12 +47,20 @@ Route::get('/test-email', function () {
 Route::get('/dashboard', function () {
     return view('admin.dashboard');
 })->middleware('auth')->name('dashboard');
-
+//Quản lý user
 Route::get('admin/users', [UserController::class, 'index'])->name('admin.users.index');
 Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admin.users.show');
 Route::get('admin/users/edit/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
 Route::put('admin/users/edit/{id}', [UserController::class, 'update'])->name('admin.users.update');
 Route::get('admin/users/search', [UserController::class, 'search'])->name('admin.users.search');
+// Quản lý voucher
+Route::get('admin/vouchers', [VoucherController::class, 'index'])->name('admin.vouchers.index');
+Route::get('admin/vouchers/create', [VoucherController::class, 'create'])->name('admin.vouchers.create');
+Route::post('admin/vouchers/create', [VoucherController::class, 'store'])->name('admin.vouchers.store');
+Route::get('admin/vouchers/edit/{id}', [VoucherController::class, 'edit'])->name('admin.vouchers.edit');
+Route::put('admin/vouchers/edit/{id}', [VoucherController::class, 'update'])->name('admin.vouchers.update');
+Route::delete('admin/vouchers/destroy/{id}', [VoucherController::class, 'destroy'])->name('admin.vouchers.destroy');
+Route::get('admin/vouchers/show/{id}', [VoucherController::class, 'show'])->name('admin.vouchers.show');
 
 // quản lý lịch hẹn khám
 Route::prefix('admin/appointments')->name('admin.appointments.')->group(function () {

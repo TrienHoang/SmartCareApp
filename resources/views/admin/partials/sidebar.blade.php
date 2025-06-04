@@ -58,9 +58,9 @@
         <!-- Apps & Pages -->
 
         <li class="menu-item">
-            <a href="app-email.html" class="menu-link">
+            <a href="{{ route('admin.vouchers.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-envelope"></i>
-                <div data-i18n="Email">Email</div>
+                <div data-i18n="vouchers">Vouchers</div>
             </a>
         </li>
         <li class="menu-item">
@@ -102,7 +102,7 @@
                     <a href="app-invoice-edit.html" class="menu-link">
                         <div data-i18n="Edit">Edit</div>
                     </a>
-                </li>              
+                </li>
             </ul>
         </li>
         <li class="menu-item">
