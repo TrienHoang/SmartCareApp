@@ -59,8 +59,8 @@
 
         <li class="menu-item">
             <a href="{{ route('admin.vouchers.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-envelope"></i>
-                <div data-i18n="vouchers">Vouchers</div>
+                <i class="menu-icon tf-icons bx bx-receipt"></i>
+                <div data-i18n="Vouchers">Vouchers</div>
             </a>
         </li>
         <li class="menu-item">
