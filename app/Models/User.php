@@ -21,4 +21,14 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
+    
+    public function permissions()
+    {
+        return $this->role?->permissions(); // dùng được như $user->permissions
+    }
+    
+    public function hasPermission($permissionName): bool
+    {
+        return $this->permissions()->where('name', $permissionName)->exists();
+    }
 }

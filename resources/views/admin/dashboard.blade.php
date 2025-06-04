@@ -31,5 +31,8 @@
   </div>
 
   @include('admin.partials.scripts')
+
+  @stack('scripts')
+
 </body>
 </html>

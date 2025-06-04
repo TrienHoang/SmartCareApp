@@ -42,9 +42,9 @@ class AuthController extends Controller
 
             // Chuyển hướng tùy theo vai trò
             if (Auth::user()->role_id == 1) {
-                return redirect()->route('dashboard')->with('message', 'Chào mừng quản trị viên!');
+                return redirect()->route('admin.dashboard')->with('message', 'Chào mừng quản trị viên!');
             } else {
-                return redirect()->route('dashboard')->with('message', 'Đăng nhập thành công!');
+                return redirect()->route('home')->with('message', 'Đăng nhập thành công!');
             }
         }
 

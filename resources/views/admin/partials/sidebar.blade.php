@@ -108,5 +108,19 @@
             <div data-i18n="List">List</div>
           </a>
         </li>
-  </ul>
+      </ul>
+    </li>
+    <li class="menu-item">
+      <a href="{{ route('admin.roles.index') }}" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-user"></i>
+        <div data-i18n="Roles">Roles</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="{{ route('admin.roles.index') }}" class="menu-link">
+            <div data-i18n="List">List</div>
+          </a>
+        </li>
+      </ul>
+    </li>
 </aside>
