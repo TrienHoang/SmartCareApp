@@ -39,9 +39,9 @@
                         </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
-                        @forelse ($appointments as $appointment)
+                        @forelse ($appointments as $key => $appointment)
                             <tr>
-                                <td>{{ $appointment->id }}</td>
+                                <td>{{ $appointments->firstItem() + $key }}</td>
                                 <td>{{ $appointment->patient->full_name ?? 'N/A' }}</td>
                                 <td>{{ $appointment->doctor->user->full_name ?? 'N/A' }}</td>
                                 <td>{{ $appointment->service->name ?? 'N/A' }}</td>
@@ -62,23 +62,26 @@
                                     </span>
                                 </td>
                                 <td>
-                                    {{-- <a href="{{ route('admin.appointments.show', $appointment->id) }}" class="btn btn-sm btn-info">
-                                        <i class="bx bx-show"></i>
-                                    </a> --}}
+                                    <a href="{{ route('admin.appointments.edit', $appointment->id) }}"
+                                        class="btn btn-sm btn-edit">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
 
-                                    @if ($appointment->status === 'pending')
-                                        {{-- <a href="{{ route('admin.appointments.confirm', $appointment->id) }}" class="btn btn-sm btn-success">
-                                            <i class="bx bx-check-circle"></i>
-                                        </a>
-                                        <a href="{{ route('admin.appointments.cancel', $appointment->id) }}" class="btn btn-sm btn-danger"
-                                           onclick="return confirm('Bạn có chắc muốn hủy lịch hẹn này?')">
-                                            <i class="bx bx-x-circle"></i>
-                                        </a> --}}
-                                    @elseif ($appointment->status === 'confirmed')
-                                        {{-- <a href="{{ route('admin.appointments.complete', $appointment->id) }}" class="btn btn-sm btn-success">
-                                            <i class="bx bx-check-double"></i>
-                                        </a> --}}
-                                    @endif
+                                    <a href="{{ route('admin.appointments.cancel', $appointment->id) }}"
+                                        class="btn btn-sm btn-danger"
+                                        onclick="event.preventDefault(); 
+                                        if(confirm('Bạn có chắc muốn hủy lịch hẹn này?')) {
+                                        document.getElementById('cancel-form-{{ $appointment->id }}').submit();
+                                    }">
+                                        <i class="bx bx-x-circle"></i>
+                                    </a>
+
+                                    <form id="cancel-form-{{ $appointment->id }}"
+                                        action="{{ route('admin.appointments.cancel', $appointment->id) }}" method="POST"
+                                        style="display: none;">
+                                        @csrf
+                                        @method('PATCH')
+                                    </form>
                                 </td>
                             </tr>
                         @empty

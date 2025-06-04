@@ -92,7 +92,7 @@ form.sign-up-form{
 .input-field input{
     flex: 5;
     background: none;
-    border: none;
+    border: #ADD8E6;
     outline: none;
     width: 100%;
     font-size: 18px;
@@ -219,7 +219,9 @@ a{
 .container.sign-up-mode .left-panel{
     pointer-events: all;
 }
-
+.input-field input::placeholder {
+        color: #ADD8E6;
+    }
 /*responsive*/
 @media(max-width:779px){
     .container{
