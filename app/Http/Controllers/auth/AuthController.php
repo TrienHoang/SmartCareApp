@@ -31,7 +31,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             session()->put('user_id', Auth::id());
 
-            if (Auth::user()->role_id == 1) {
+            if (Auth::user()->role_id == 3) {
                 return redirect()->route('admin.dashboard')->with('message', 'Chào mừng quản trị viên!');
             } else {
                 return redirect()->route('home')->with('message', 'Đăng nhập thành công!');
