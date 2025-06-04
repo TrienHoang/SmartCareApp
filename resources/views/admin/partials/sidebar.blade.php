@@ -93,7 +93,10 @@
                         <div data-i18n="Add">Add</div>
                     </a>
                 </li>
+<<<<<<< HEAD
 
+=======
+>>>>>>> hieudev
             </ul>
         </li>
         <li class="menu-item">

@@ -78,5 +78,6 @@ Route::prefix('admin/appointments')->name('admin.appointments.')->group(function
     Route::get('/edit/{id}', [AppointmentController::class, 'edit'])->name('edit');
     Route::put('/update/{id}', [AppointmentController::class, 'update'])->name('update');
     Route::patch('/{id}/cancel', [AppointmentController::class, 'cancel'])->name('cancel');
+    Route::get('/{id}', [AppointmentController::class, 'show'])->name('show');
 });
 

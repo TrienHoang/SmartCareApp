@@ -83,4 +83,9 @@ class AppointmentController extends Controller
 
         return redirect()->route('admin.appointments.index')->withErrors(['status' => 'Không thể hủy lịch hẹn đã hoàn thành hoặc đã hủy.']);
     }
+    public function show($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+        return view('admin.Appointment.show', compact('appointment'));
+    }
 }

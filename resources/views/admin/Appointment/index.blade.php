@@ -62,11 +62,24 @@
                                     </span>
                                 </td>
                                 <td>
+<<<<<<< HEAD
                                     <a href="{{ route('admin.appointments.edit', $appointment->id) }}"
                                         class="btn btn-sm btn-edit">
                                         <i class="bx bx-edit"></i>
                                     </a>
 
+=======
+                                    <a href="{{ route('admin.appointments.show', $appointment->id) }}"
+                                        class="btn btn-sm btn-primary">
+                                        <i class="bx bx-show"></i>
+                                    </a>
+
+                                    <a href="{{ route('admin.appointments.edit', $appointment->id) }}"
+                                        class="btn btn-warning btn-sm">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
+
+>>>>>>> hieudev
                                     <a href="{{ route('admin.appointments.cancel', $appointment->id) }}"
                                         class="btn btn-sm btn-danger"
                                         onclick="event.preventDefault(); 
