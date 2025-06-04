@@ -42,11 +42,6 @@ Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFaceboo
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 
-// test tạm thời
-Route::get('/test-email', function () {
-    return \Illuminate\Support\Facades\Password::sendResetLink(['email' => 'youremail@gmail.com']);
-});
-
 
 Route::group([
     'prefix' => 'admin',
