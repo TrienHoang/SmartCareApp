@@ -64,9 +64,9 @@
             </a>
         </li>
         <li class="menu-item">
-            <a href="app-chat.html" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-chat"></i>
-                <div data-i18n="Chat">Chat</div>
+            <a href="{{ route('admin.schedules.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-plus-medical"></i>
+                <div data-i18n="Lịch làm việc bác sĩ">Lịch làm việc bác sĩ </div>
             </a>
         </li>
         <!-- e-commerce-app menu start -->
