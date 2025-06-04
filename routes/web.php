@@ -54,4 +54,7 @@ Route::put('admin/users/edit/{id}', [UserController::class, 'update'])->name('ad
 Route::get('admin/users/search', [UserController::class, 'search'])->name('admin.users.search');
 
 // quản lý lịch hẹn khám
-Route::get('admin/appointments', [AppointmentController::class, 'index'])->name('admin.appointments.index');
+Route::prefix('admin/appointments')->name('admin.appointments.')->group(function () {
+    Route::get('/', [AppointmentController::class, 'index'])->name('index');
+    Route::get('/create', [AppointmentController::class, 'create'])->name('create');
+});
