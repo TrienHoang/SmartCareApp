@@ -94,15 +94,15 @@
                     </a>
                 </li>
                 <li class="menu-item">
+                    <a href="{{ route('admin.appointments.edit', ['id' => $appointment->id]) }}" class="menu-link">
+                        <div data-i18n="Edit">Edit</div>
+                    </a>
+                </li>
+                <li class="menu-item">
                     <a href="app-invoice-preview.html" class="menu-link">
                         <div data-i18n="Preview">Preview</div>
                     </a>
                 </li>
-                <li class="menu-item">
-                    <a href="app-invoice-edit.html" class="menu-link">
-                        <div data-i18n="Edit">Edit</div>
-                    </a>
-                </li>              
             </ul>
         </li>
         <li class="menu-item">

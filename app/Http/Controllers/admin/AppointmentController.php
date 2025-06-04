@@ -36,4 +36,13 @@ class AppointmentController extends Controller
 
         return redirect()->route('admin.appointments.index')->with('success', 'Tạo lịch hẹn thành công');
     }
+    public function edit($id){
+        $appointment = Appointment::findOrFail($id);
+        return view('admin.Appointment.edit', [
+            'appointment' => $appointment,
+            'patients' => User::where('role_id', 3)->get(),
+            'doctors' => Doctor::with('user')->get(),
+            'services' => Service::all(),
+        ]);
+    }
 }

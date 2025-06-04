@@ -62,9 +62,9 @@
                                     </span>
                                 </td>
                                 <td>
-                                    {{-- <a href="{{ route('admin.appointments.show', $appointment->id) }}" class="btn btn-sm btn-info">
-                                        <i class="bx bx-show"></i>
-                                    </a> --}}
+                                    <a href="{{ route('admin.appointments.edit', $appointment->id) }}" class="btn btn-sm btn-edit">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
 
                                     @if ($appointment->status === 'pending')
                                         {{-- <a href="{{ route('admin.appointments.confirm', $appointment->id) }}" class="btn btn-sm btn-success">
