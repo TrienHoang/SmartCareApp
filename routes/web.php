@@ -57,4 +57,5 @@ Route::get('admin/users/search', [UserController::class, 'search'])->name('admin
 Route::prefix('admin/appointments')->name('admin.appointments.')->group(function () {
     Route::get('/', [AppointmentController::class, 'index'])->name('index');
     Route::get('/create', [AppointmentController::class, 'create'])->name('create');
+    Route::post('/store', [AppointmentController::class, 'store'])->name('store');
 });

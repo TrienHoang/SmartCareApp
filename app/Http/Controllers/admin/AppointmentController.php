@@ -17,9 +17,23 @@ class AppointmentController extends Controller
     }
     public function create(){
         return view('admin.Appointment.create', [
-            'patients' => User::where('role_id', 'patient')->get(),
+            'patients' => User::where('role_id', 3)->get(),
             'doctors' => Doctor::with('user')->get(),
             'services' => Service::all(),
         ]);
+    }
+    public function store(Request $request){
+        $request->validate([
+            'patient_id' => 'required|exists:users,id',
+            'doctor_id' => 'required|exists:doctors,id',
+            'service_id' => 'required|exists:services,id',
+            'appointment_time' => 'required|date',
+            'status' => 'required|in:pending,confirmed,cancelled',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        Appointment::create($request->all());
+
+        return redirect()->route('admin.appointments.index')->with('success', 'Tạo lịch hẹn thành công');
     }
 }
