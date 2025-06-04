@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('admin.dashboard');
-});
+})->middleware('auth')->name('dashboard');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('postLogin');
@@ -28,13 +28,7 @@ Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showRese
 // Gửi mật khẩu mới về server để cập nhật
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
-//test tạm thờithời
-Route::get('/test-email', function () {
-    return \Illuminate\Support\Facades\Password::sendResetLink(['email' => 'youremail@gmail.com']);
-});
-Route::get('/dashboard', function () {
-    return view('admin.dashboard');
-})->middleware('auth')->name('dashboard');
+
 
 
 Route::get('admin/users', [UserController::class, 'index'])->name('admin.users.index');
