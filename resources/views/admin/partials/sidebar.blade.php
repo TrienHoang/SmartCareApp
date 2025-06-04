@@ -69,14 +69,14 @@
     <!-- Academy menu end -->
 
     <li class="menu-item">
-      <a href="javascript:void(0);" class="menu-link menu-toggle">
+      <a href="{{ route('admin.appointments.index') }}" class="menu-link menu-toggle">
         <i class='menu-icon tf-icons bx bx-food-menu'></i>
-        <div data-i18n="Invoice">Invoice</div>
+        <div data-i18n="Invoice">Quản lý lịch hẹn khám</div>
         <div class="badge bg-danger rounded-pill ms-auto">4</div>
       </a>
       <ul class="menu-sub">
         <li class="menu-item">
-          <a href="app-invoice-list.html" class="menu-link">
+          <a href="{{ route('admin.appointments.index') }}" class="menu-link">
             <div data-i18n="List">List</div>
           </a>
         </li>

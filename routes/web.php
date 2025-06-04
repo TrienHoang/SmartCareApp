@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\AppointmentController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\auth\FacebookController;
@@ -51,3 +52,6 @@ Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admi
 Route::get('admin/users/edit/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
 Route::put('admin/users/edit/{id}', [UserController::class, 'update'])->name('admin.users.update');
 Route::get('admin/users/search', [UserController::class, 'search'])->name('admin.users.search');
+
+// quản lý lịch hẹn khám
+Route::get('admin/appointments', [AppointmentController::class, 'index'])->name('admin.appointments.index');
