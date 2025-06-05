@@ -13,7 +13,10 @@ class PrescriptionController extends Controller
 {
     public function index()
     {
-        $prescriptions = Prescription::with(['medicalRecord.appointment.patient'])
+        $prescriptions = Prescription::with([
+            'medicalRecord.appointment.doctor.user',
+            'prescriptionItems.medicine'              
+        ])
             ->orderByDesc('prescribed_at')
             ->paginate(10);
 
@@ -100,7 +103,8 @@ class PrescriptionController extends Controller
         return redirect()->route('admin.prescriptions.index')->with('success', 'Đơn thuốc đã được cập nhật thành công.');
     }
 
-    public function show($id){
+    public function show($id)
+    {
         $prescription = Prescription::with(['medicalRecord.appointment.patient', 'items.medicine'])
             ->findOrFail($id);
 
