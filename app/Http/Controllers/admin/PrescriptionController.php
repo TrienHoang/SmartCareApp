@@ -27,8 +27,9 @@ class PrescriptionController extends Controller
 
         return view('admin.prescriptions.create', compact('medicalRecords', 'medicines'));
     }
-    public function store(Request $request){
-       $request->validate([
+    public function store(Request $request)
+    {
+        $request->validate([
             'medical_record_id' => 'required|exists:medical_records,id',
             'prescribed_at' => 'required|date',
             'notes' => 'nullable|string',
@@ -44,7 +45,7 @@ class PrescriptionController extends Controller
             'notes' => $request->notes,
         ]);
 
-        foreach($request->medicines as $item){
+        foreach ($request->medicines as $item) {
             PrescriptionItem::create([
                 'prescription_id' => $prescription->id,
                 'medicine_id' => $item['medicine_id'],
@@ -54,5 +55,14 @@ class PrescriptionController extends Controller
         }
 
         return redirect()->route('admin.prescriptions.index')->with('success', 'Đơn thuốc đã được tạo thành công.');
+    }
+
+    public function edit($id)
+    {
+        $prescription = Prescription::with('items.medicine')->findOrFail($id);
+        $medicalRecords = MedicalRecord::with('appointment.patient')->get();
+        $medicines = Medicine::all();
+
+        return view('admin.prescriptions.edit', compact('prescription', 'medicalRecords', 'medicines'));
     }
 }

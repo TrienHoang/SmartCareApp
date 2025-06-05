@@ -52,7 +52,7 @@
                                         <i class="bx bx-printer"></i> In
                                     </a> --}}
                                     {{-- Thêm nút sửa nếu cần --}}
-                                    {{-- <a href="{{ route('prescriptions.edit', $prescription->id) }}" class="btn btn-warning btn-sm">Sửa</a> --}}
+                                    <a href="{{ route('admin.prescriptions.edit', $prescription->id) }}" class="btn btn-warning btn-sm">Sửa</a>
                                 </td>
                             </tr>
                         @endforeach
