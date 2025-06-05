@@ -12,7 +12,7 @@
                 <h5>Chỉnh sửa Đơn thuốc</h5>
             </div>
             <div class="card-body">
-                <form action="" method="POST">
+                <form action="{{ route('admin.prescriptions.update', $prescription->id) }}" method="POST">
                     @csrf
                     @method('PUT')
 
@@ -27,6 +27,7 @@
                                 </option>
                             @endforeach
                         </select>
+                        <input type="hidden" name="medical_record_id" value="{{ $prescription->medical_record_id }}">
                         @error('medical_record_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -81,7 +82,7 @@
 
                     <br>
                     <button type="submit" class="btn btn-primary">Cập nhật</button>
-                    <a href="{{ route('admin.prescriptions.index') }}" class="btn btn-secondary">Hủy</a>
+                    <a href="{{ route('admin.prescriptions.index') }}" class="btn btn-danger">Hủy</a>
                 </form>
             </div>
         </div>
