@@ -65,7 +65,7 @@ Route::get('admin/vouchers/show/{id}', [VoucherController::class, 'show'])->name
 // quản lý lịch làm việc
 Route::get('admin/schedules', [SchedulesController::class, 'index'])->name('admin.schedules.index');
 Route::get('admin/schedules/create', [SchedulesController::class, 'create'])->name('admin.schedules.create');
-Route::post('admin/schedules/create', [SchedulesController::class, 'store'])->name('admin.schedules.store');
+Route::post('admin/schedules/store', [SchedulesController::class, 'store'])->name('admin.schedules.store');
 Route::get('admin/schedules/edit/{id}', [SchedulesController::class, 'edit'])->name('admin.schedules.edit');
 Route::put('admin/schedules/edit/{id}', [SchedulesController::class, 'update'])->name('admin.schedules.update');
 Route::delete('admin/schedules/destroy/{id}', [SchedulesController::class, 'destroy'])->name('admin.schedules.destroy');
