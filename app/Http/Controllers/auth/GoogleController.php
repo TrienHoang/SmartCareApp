@@ -30,7 +30,7 @@ class GoogleController extends Controller
             $findUserByGoogleId = User::where('google_id', $googleUser->getId())->first();
             if ($findUserByGoogleId) {
                 Auth::login($findUserByGoogleId);
-                return redirect('/dashboard')->with('message', 'Đăng nhập bằng Google thành công!');
+                return redirect('/')->with('message', 'Đăng nhập bằng Google thành công!');
             }
 
             $existingUser = User::where('email', $googleUser->getEmail())->first();
@@ -50,7 +50,7 @@ class GoogleController extends Controller
             ]);
 
             Auth::login($newUser);
-            return redirect('/dashboard')->with('message', 'Đăng ký & đăng nhập thành công bằng Google!');
+            return redirect('/')->with('message', 'Đăng ký & đăng nhập thành công bằng Google!');
 
         } catch (Exception $e) {
             return redirect('/login')->withErrors([

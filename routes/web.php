@@ -5,6 +5,7 @@ use App\Http\Controllers\admin\AppointmentController;
 use App\Http\Controllers\admin\SchedulesController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\VoucherController;
+use App\Http\Controllers\admin\PrescriptionController;
 use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\auth\FacebookController;
 use App\Http\Controllers\auth\GoogleController;
@@ -186,6 +187,15 @@ Route::group([
             ->middleware('check_permission:cancel_appointments')->name('cancel');
     
         Route::get('/{id}', [AppointmentController::class, 'show'])->name('show');
-    });    
+    });
+    
+    // quản lý đơn thuốc
+    Route::group([
+        'prefix' => 'prescriptions',
+        'as' => 'prescriptions.',
+        'middleware' => 'check_permission:view_prescriptions'
+    ], function () {
+        Route::get('/', [PrescriptionController::class, 'index'])->name('index');
+    });
 });
 
