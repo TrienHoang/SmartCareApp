@@ -124,7 +124,7 @@
         </li>
         <li class="menu-item">
           <a href="{{ route('admin.prescriptions.index') }}" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-user"></i>
+            <i class="menu-icon fas fa-file-medical"></i>
             <div data-i18n="Quản lý đơn thuốc">Quản lý đơn thuốc</div>
           </a>
           <ul class="menu-sub">
