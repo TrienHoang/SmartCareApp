@@ -133,6 +133,11 @@
                 <div data-i18n="List">List</div>
               </a>
             </li>
+            <li class="menu-item">
+              <a href="{{ route('admin.prescriptions.create') }}" class="menu-link">
+                <div data-i18n="Add">Add</div>
+              </a>
+            </li>
           </ul>
         </li>
       </ul>

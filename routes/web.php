@@ -196,6 +196,12 @@ Route::group([
         'middleware' => 'check_permission:view_prescriptions'
     ], function () {
         Route::get('/', [PrescriptionController::class, 'index'])->name('index');
+
+        Route::get('/create', [PrescriptionController::class, 'create'])
+            ->middleware('check_permission:create_prescriptions')->name('create');
+
+        Route::post('/store', [PrescriptionController::class, 'store'])
+            ->middleware('check_permission:create_prescriptions')->name('store');
     });
 });
 
