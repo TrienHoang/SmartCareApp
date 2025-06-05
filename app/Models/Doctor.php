@@ -26,5 +26,8 @@ class Doctor extends Model
     {
         return $this->belongsTo(Room::class);
     }
+
+
+    
     public $timestamps = true;
 }

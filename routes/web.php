@@ -116,25 +116,25 @@ Route::group([
         'middleware' => 'check_permission:view_coupons'
     ], function () {
         Route::get('/', [VoucherController::class, 'index'])->name('index');
-    
+
         Route::get('/create', [VoucherController::class, 'create'])
             ->middleware('check_permission:create_coupons')->name('create');
-    
+
         Route::post('/create', [VoucherController::class, 'store'])
             ->middleware('check_permission:create_coupons')->name('store');
-    
+
         Route::get('/edit/{id}', [VoucherController::class, 'edit'])
             ->middleware('check_permission:edit_coupons')->name('edit');
-    
+
         Route::put('/edit/{id}', [VoucherController::class, 'update'])
             ->middleware('check_permission:edit_coupons')->name('update');
-    
+
         Route::delete('/destroy/{id}', [VoucherController::class, 'destroy'])
             ->middleware('check_permission:delete_coupons')->name('destroy');
-    
+
         Route::get('/show/{id}', [VoucherController::class, 'show'])->name('show');
     });
-    
+
     // quản lý lịch làm việc
     Route::group([
         'prefix' => 'schedules',
@@ -142,25 +142,25 @@ Route::group([
         'middleware' => 'check_permission:view_schedules'
     ], function () {
         Route::get('/', [SchedulesController::class, 'index'])->name('index');
-    
+
         Route::get('/create', [SchedulesController::class, 'create'])
             ->middleware('check_permission:create_schedules')->name('create');
-    
+
         Route::post('/create', [SchedulesController::class, 'store'])
             ->middleware('check_permission:create_schedules')->name('store');
-    
+
         Route::get('/edit/{id}', [SchedulesController::class, 'edit'])
             ->middleware('check_permission:edit_schedules')->name('edit');
-    
+
         Route::put('/edit/{id}', [SchedulesController::class, 'update'])
             ->middleware('check_permission:edit_schedules')->name('update');
-    
+
         Route::delete('/destroy/{id}', [SchedulesController::class, 'destroy'])
             ->middleware('check_permission:delete_schedules')->name('destroy');
-    
+
         Route::get('/show/{id}', [SchedulesController::class, 'show'])->name('show');
     });
-    
+
 
     // quản lý lịch hẹn khám
     Route::group([
@@ -169,23 +169,22 @@ Route::group([
         'middleware' => 'check_permission:view_appointments'
     ], function () {
         Route::get('/', [AppointmentController::class, 'index'])->name('index');
-    
+
         Route::get('/create', [AppointmentController::class, 'create'])
             ->middleware('check_permission:create_appointments')->name('create');
-    
+
         Route::post('/store', [AppointmentController::class, 'store'])
             ->middleware('check_permission:create_appointments')->name('store');
-    
+
         Route::get('/edit/{id}', [AppointmentController::class, 'edit'])
             ->middleware('check_permission:edit_appointments')->name('edit');
-    
+
         Route::put('/update/{id}', [AppointmentController::class, 'update'])
             ->middleware('check_permission:edit_appointments')->name('update');
-    
+
         Route::patch('/{id}/cancel', [AppointmentController::class, 'cancel'])
             ->middleware('check_permission:cancel_appointments')->name('cancel');
-    
-        Route::get('/{id}', [AppointmentController::class, 'show'])->name('show');
-    });    
-});
 
+        Route::get('/{id}', [AppointmentController::class, 'show'])->name('show');
+    });
+});
