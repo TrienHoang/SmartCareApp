@@ -77,7 +77,7 @@
             margin-bottom: 20px;
         }
 
-        .form-box input[type=email] {
+        .form-box input[type=text] {
             width: 100%;
             padding: 12px 14px;
             margin-bottom: 15px;
@@ -327,7 +327,7 @@
 
                 <form method="POST" action="{{ route('password.email') }}">
                     @csrf
-                    <input type="email" name="email" placeholder="Email đăng ký...">
+                    <input type="text" name="email" placeholder="Email đăng ký...">
                     @error('email')
                         <p class="error-message" role="alert">
                             <i class="fas fa-exclamation-circle"></i> {{ $message }}
