@@ -5,7 +5,7 @@
 <div class="container">
     <h2>Thêm Toa Thuốc</h2>
 
-    <form action="" method="POST">
+    <form action="{{ route('admin.prescriptions.store') }}" method="POST">
         @csrf
 
         <div class="mb-3">
