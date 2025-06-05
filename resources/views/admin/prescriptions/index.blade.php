@@ -45,10 +45,10 @@
                                 <td>{{ $prescription->formatted_date }}</td>
                                 <td>{{ $prescription->notes ?? '-' }}</td>
                                 <td>
-                                    {{-- <a href="{{ route('prescriptions.show', $prescription->id) }}" class="btn btn-info btn-sm">
+                                    <a href="{{ route('admin.prescriptions.show', $prescription->id) }}" class="btn btn-info btn-sm">
                                         <i class="bx bx-show"></i> Xem
                                     </a>
-                                    <a href="{{ route('prescriptions.print', $prescription->id) }}" target="_blank" class="btn btn-secondary btn-sm">
+                                    {{-- <a href="{{ route('prescriptions.print', $prescription->id) }}" target="_blank" class="btn btn-secondary btn-sm">
                                         <i class="bx bx-printer"></i> In
                                     </a> --}}
                                     {{-- Thêm nút sửa nếu cần --}}

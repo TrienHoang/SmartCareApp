@@ -99,4 +99,11 @@ class PrescriptionController extends Controller
 
         return redirect()->route('admin.prescriptions.index')->with('success', 'Đơn thuốc đã được cập nhật thành công.');
     }
+
+    public function show($id){
+        $prescription = Prescription::with(['medicalRecord.appointment.patient', 'items.medicine'])
+            ->findOrFail($id);
+
+        return view('admin.prescriptions.show', compact('prescription'));
+    }
 }

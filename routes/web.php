@@ -208,6 +208,8 @@ Route::group([
 
         Route::put('/{id}', [PrescriptionController::class, 'update'])
             ->middleware('check_permission:edit_prescriptions')->name('update');
+
+        Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show');
     });
 });
 
