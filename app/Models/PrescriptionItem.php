@@ -12,5 +12,11 @@ class PrescriptionItem extends Model
         'prescription_id', 'medicine_id', 'quantity', 'usage_instructions'
     ];
     public $timestamps = false;
+    public function prescription(){
+        return $this->belongsTo(Prescription::class);
+    }
+    public function medicine(){
+        return $this->belongsTo(Medicine::class);
+    }
 }
 

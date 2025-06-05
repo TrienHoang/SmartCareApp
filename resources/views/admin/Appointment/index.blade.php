@@ -62,13 +62,6 @@
                                     </span>
                                 </td>
                                 <td>
-<<<<<<< HEAD
-                                    <a href="{{ route('admin.appointments.edit', $appointment->id) }}"
-                                        class="btn btn-sm btn-edit">
-                                        <i class="bx bx-edit"></i>
-                                    </a>
-
-=======
                                     <a href="{{ route('admin.appointments.show', $appointment->id) }}"
                                         class="btn btn-sm btn-primary">
                                         <i class="bx bx-show"></i>
@@ -79,12 +72,11 @@
                                         <i class="bx bx-edit"></i>
                                     </a>
 
->>>>>>> hieudev
                                     <a href="{{ route('admin.appointments.cancel', $appointment->id) }}"
                                         class="btn btn-sm btn-danger"
                                         onclick="event.preventDefault(); 
-                                        if(confirm('Bạn có chắc muốn hủy lịch hẹn này?')) {
-                                        document.getElementById('cancel-form-{{ $appointment->id }}').submit();
+                                            if(confirm('Bạn có chắc muốn hủy lịch hẹn này?')) {
+                                            document.getElementById('cancel-form-{{ $appointment->id }}').submit();
                                     }">
                                         <i class="bx bx-x-circle"></i>
                                     </a>
@@ -95,6 +87,7 @@
                                         @csrf
                                         @method('PATCH')
                                     </form>
+
                                 </td>
                             </tr>
                         @empty
