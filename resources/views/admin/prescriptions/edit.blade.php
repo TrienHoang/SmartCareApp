@@ -88,7 +88,7 @@
 
                     <div class="d-flex justify-content-between">
                         <a href="{{ route('admin.prescriptions.index') }}" class="btn btn-danger">
-                            <i class="bx bx-arrow-back"></i> Hủy
+                            <i class="bx bx-arrow-back"></i> Quay lại
                         </a>
                         <button type="submit" class="btn btn-primary">
                             <i class="bx bx-save"></i> Cập nhật

@@ -63,12 +63,12 @@
                                 <td>{{ $prescription->notes ?? '-' }}</td>
                                 <td>
                                     <a href="{{ route('admin.prescriptions.show', $prescription->id) }}"
-                                        class="btn btn-sm btn-info me-1">
-                                        <i class="bx bx-show"></i> Xem
+                                        class="btn btn-sm btn-info">
+                                        <i class="bx bx-show"></i>
                                     </a>
                                     <a href="{{ route('admin.prescriptions.edit', $prescription->id) }}"
                                         class="btn btn-sm btn-warning">
-                                        <i class="bx bx-edit-alt"></i> Sửa
+                                        <i class="bx bx-edit-alt"></i>
                                     </a>
                                 </td>
                             </tr>
