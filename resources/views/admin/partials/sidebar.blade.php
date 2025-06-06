@@ -79,7 +79,7 @@
         <li class="menu-item">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class='menu-icon tf-icons bx bx-food-menu'></i>
-                <div>Quản lý lịch hẹn khám</div>
+                <div data-i18n="Invoice">Invoice</div>
                 <div class="badge bg-danger rounded-pill ms-auto">4</div>
             </a>
             <ul class="menu-sub">
@@ -110,37 +110,37 @@
         </li>
 
         <li class="menu-item">
-          <a href="{{ route('admin.roles.index') }}" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-user"></i>
-            <div data-i18n="Roles">Roles</div>
-          </a>
-          <ul class="menu-sub">
-            <li class="menu-item">
-              <a href="{{ route('admin.roles.index') }}" class="menu-link">
-                <div data-i18n="List">List</div>
-              </a>
-            </li>
-          </ul>
+            <a href="{{ route('admin.roles.index') }}" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-user"></i>
+                <div data-i18n="Roles">Roles</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('admin.roles.index') }}" class="menu-link">
+                        <div data-i18n="List">List</div>
+                    </a>
+                </li>
+            </ul>
         </li>
         <li class="menu-item">
-          <a href="{{ route('admin.prescriptions.index') }}" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-user"></i>
-            <div data-i18n="Quản lý đơn thuốc">Quản lý đơn thuốc</div>
-          </a>
-          <ul class="menu-sub">
-            <li class="menu-item">
-              <a href="{{ route('admin.prescriptions.index') }}" class="menu-link">
-                <div data-i18n="List">List</div>
-              </a>
-            </li>
-            <li class="menu-item">
-              <a href="{{ route('admin.prescriptions.create') }}" class="menu-link">
-                <div data-i18n="Add">Add</div>
-              </a>
-            </li>
-          </ul>
+            <a href="{{ route('admin.prescriptions.index') }}" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-user"></i>
+                <div data-i18n="Quản lý đơn thuốc">Quản lý đơn thuốc</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('admin.prescriptions.index') }}" class="menu-link">
+                        <div data-i18n="List">List</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.prescriptions.create') }}" class="menu-link">
+                        <div data-i18n="Add">Add</div>
+                    </a>
+                </li>
+            </ul>
         </li>
-      </ul>
+    </ul>
     </li>
 
 </aside>
