@@ -139,6 +139,55 @@
       </ul>
     </li>
 
+    <li class="menu-item">
+      <a href="{{ route('admin.doctors.index') }}" class="menu-link menu-toggle">
+        <i class="menu-icon fas fa-user-md"></i>
+        <div data-i18n="Quản Lý Bác Sỹ">Quản Lý bác sỹ</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="{{ route('admin.doctors.index') }}" class="menu-link">
+            <div data-i18n="List">List</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <li class="menu-item">
+      <a href="{{ route('admin.departments.index') }}" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-table"></i>
+        <div data-i18n="Quản Lý Phòng Ban">Quản Lý phòng</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="{{ route('admin.departments.index') }}" class="menu-link">
+            <div data-i18n="List">List</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <li class="menu-item">
+      <a href="{{ route('admin.payments.index') }}" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-wallet"></i>
+        <div data-i18n="Quản Lý Lịch xử Thanh Toán">payments</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="{{ route('admin.payments.index') }}" class="menu-link">
+            <div data-i18n="List">List</div>
+          </a>
+        </li>
+
+        <li class="menu-item">
+          <a href="{{ route('logout') }}" class="menu-link">
+            <div data-i18n="Đăng xuất">Đăng xuất</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+
 
 
   </ul>

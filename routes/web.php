@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\admin\RoleController;
 use App\Http\Controllers\admin\AppointmentController;
+use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\admin\SchedulesController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\VoucherController;
@@ -51,7 +53,7 @@ Route::group([
 ], function () {
     // Dashboard
     Route::get('/dashboard', function () {
-        return view('admin.dashboard');
+        return view(view: 'admin.dashboard');
     })->name('dashboard');
 
     // Nhóm users
@@ -202,5 +204,61 @@ Route::group([
 
         Route::post('/store', [PrescriptionController::class, 'store'])
             ->middleware('check_permission:create_prescriptions')->name('store');
+    });
+
+
+
+
+
+
+
+    // Nhóm quản lý bác sĩ
+    Route::group([
+        'prefix' => 'doctors',
+        'as' => 'doctors.',
+        'middleware' => 'check_permission:view_doctors'
+    ], function () {
+        Route::get('/', [DoctorController::class, 'index'])->name('index');
+
+        Route::get('/create', [DoctorController::class, 'create'])
+            ->middleware('check_permission:create_doctors')->name('create');
+
+        Route::post('/store', [DoctorController::class, 'store'])
+            ->middleware('check_permission:create_doctors')->name('store');
+
+        Route::get('/edit/{doctor}', [DoctorController::class, 'edit'])
+            ->middleware('check_permission:edit_doctors')->name('edit');
+
+        Route::put('/update/{doctor}', [DoctorController::class, 'update'])
+            ->middleware('check_permission:edit_doctors')->name('update');
+
+        Route::delete('/delete/{doctor}', [DoctorController::class, 'destroy'])
+            ->middleware('check_permission:delete_doctors')->name('destroy');
+    });
+
+
+    // Quản lý phòng ban
+
+    Route::group([
+        'prefix' => 'departments',
+        'as' => 'departments.',
+        'middleware' => 'check_permission:view_departments'
+    ], function () {
+        Route::get('/', [DepartmentController::class, 'index'])->name('index');
+        Route::get('/create', [DepartmentController::class, 'create'])->middleware('check_permission:create_departments')->name('create');
+        Route::post('/', [DepartmentController::class, 'store'])->middleware('check_permission:create_departments')->name('store');
+        Route::get('/{department}/edit', [DepartmentController::class, 'edit'])->middleware('check_permission:edit_departments')->name('edit');
+        Route::put('/{department}', [DepartmentController::class, 'update'])->middleware('check_permission:edit_departments')->name('update');
+        Route::delete('/{department}', [DepartmentController::class, 'destroy'])->middleware('check_permission:delete_departments')->name('destroy');
+    });
+
+    // Quản lý lịch sử thanh toán
+    Route::group([
+        'prefix' => 'payments',
+        'as' => 'payments.',
+        'middleware' => 'check_permission:view_payment_history'
+    ], function () {
+        Route::get('/', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('index');
+        Route::get('/{payment}', [\App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('show');
     });
 });
