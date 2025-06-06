@@ -124,6 +124,13 @@
         <div data-i18n="Danh mục dịch vụ">Danh mục dịch vụ</div>
       </a>
     </li>
+    <!-- dịch vụ -->
+    <li class="menu-item">
+      <a href="{{ route('admin.services.index') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-cog"></i>
+        <div data-i18n="Dịch vụ">Dịch vụ</div>
+      </a>
+    </li>
 
     <!-- Quản lý bác sỹ -->
     <li class="menu-item">
@@ -155,7 +162,7 @@
       </ul>
     </li>
 
-    <!-- Quản lý lịch xử thanh toán -->
+    <!-- Quản lý lịch sử thanh toán -->
     <li class="menu-item">
       <a href="{{ route('admin.payments.index') }}" class="menu-link menu-toggle">
         <i class="menu-icon tf-icons bx bx-wallet"></i>
@@ -167,14 +174,15 @@
             <div data-i18n="List">Danh sách</div>
           </a>
         </li>
-        <li class="menu-item">
-          <a href="{{ route('logout') }}" class="menu-link">
-            <div data-i18n="Đăng xuất">Đăng xuất</div>
-          </a>
-        </li>
+        
       </ul>
     </li>
-
+    <!-- Đăng xuất -->
+    <li class="menu-item">
+      <a href="{{ route('logout') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-log-out"></i>
+        <div data-i18n="Đăng xuất">Đăng xuất</div>
+      </a>
+    </li>
   </ul>
-
 </aside>

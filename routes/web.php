@@ -19,7 +19,7 @@ use App\Http\Controllers\admin\ServiceCategoryController;
 use App\Http\Controllers\Admin\ServiceController;
 
 Route::get('/', function () {
-    echo "Trang chủ của ứng dụng";
+    return view('client.home');
 })->name('home');
 
 
