@@ -13,6 +13,8 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\admin\ServiceCategoryController;
+
 
 Route::get('/', function () {
     echo "Trang chủ của ứng dụng";
@@ -204,3 +206,19 @@ Route::group([
             ->middleware('check_permission:create_prescriptions')->name('store');
     });
 });
+
+
+Route::get('admin/users', [UserController::class, 'index'])->name('admin.users.index');
+Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admin.users.show');
+Route::get('admin/users/edit/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
+Route::put('admin/users/edit/{id}', [UserController::class, 'update'])->name('admin.users.update');
+Route::get('admin/users/search', [UserController::class, 'search'])->name('admin.users.search');
+
+// quản lý danh mục dịch vụ
+Route::get('admin/categories', [ServiceCategoryController::class, 'index'])->name('admin.categories.index');
+Route::get('admin/categories/create', [ServiceCategoryController::class, 'create'])->name('admin.categories.create');
+Route::post('admin/categories/store', [ServiceCategoryController::class, 'store'])->name('admin.categories.store');
+Route::get('admin/categories/edit/{id}', [ServiceCategoryController::class, 'edit'])->name('admin.categories.edit');
+Route::put('admin/categories/edit/{id}', [ServiceCategoryController::class, 'update'])->name('admin.categories.update');
+Route::delete('admin/categories/destroy/{id}', [ServiceCategoryController::class, 'destroy'])->name('admin.categories.destroy');
+Route::get('admin/categories/show/{id}', [ServiceCategoryController::class, 'show'])->name('admin.categories.show');
