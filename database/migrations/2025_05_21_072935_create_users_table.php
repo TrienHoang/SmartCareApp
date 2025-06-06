@@ -28,10 +28,11 @@ return new class extends Migration
             $table->string('address')->nullable()->comment('Địa chỉ');
             $table->foreignId('role_id')->nullable()->constrained('roles')->nullOnDelete()->comment('Vai trò (liên kết bảng roles)');
             $table->string('avatar')->nullable()->comment('Đường dẫn ảnh đại diện');
+            $table->enum('status', ['online', 'offline'])->default('offline')->comment('Trạng thái hoạt động');
             $table->timestamps();
         });
 
-    
+
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
