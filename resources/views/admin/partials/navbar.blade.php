@@ -14,7 +14,7 @@
         <!-- Search -->
         <div class="navbar-nav align-items-center">
           <div class="nav-item navbar-search-wrapper mb-0">
-           <form action="{{ route('admin.users.search') }}" method="get" class="d-flex">
+           <form action="" method="get" class="d-flex">
              <input type="text" name="search" class="form-control me-2" placeholder="Nhập từ khóa..." required>
              <button type="submit" class="btn btn-sm btn-primary">Tìm</button>
            </form>
