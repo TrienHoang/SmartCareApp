@@ -25,6 +25,16 @@ class Prescription extends Model
         return $this->belongsTo(MedicalRecord::class);
     }
 
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
+    }
+
+    public function prescriptionItems()
+    {
+        return $this->hasMany(PrescriptionItem::class);
+    }
+
     public function getFormattedDateAttribute()
     {
         return \Carbon\Carbon::parse($this->prescribed_at)->format('d/m/Y');

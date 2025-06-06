@@ -7,55 +7,76 @@
             <span class="text-muted fw-light">Prescriptions /</span> Danh sách Đơn thuốc
         </h4>
 
-        <div class="card">
+        <div class="card shadow-sm">
             <div class="card-header">
-                <h5 class="mb-0">Danh sách đơn thuốc</h5>
+                <h5 class="mb-0">Danh sách Đơn thuốc</h5>
             </div>
 
             @if (session('success'))
                 <div class="alert alert-success m-3">
-                    {{ session('success') }}
+                    <i class="bx bx-check-circle"></i> {{ session('success') }}
                 </div>
             @endif
 
             @if (session('error'))
                 <div class="alert alert-danger m-3">
-                    {{ session('error') }}
+                    <i class="bx bx-error-circle"></i> {{ session('error') }}
                 </div>
             @endif
 
-            <div class="table-responsive text-nowrap">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-light">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table-light text-center">
                         <tr>
                             <th>STT</th>
-                            <th>Mã hồ sơ Y tế</th>
-                            <th>Bệnh nhân</th>
+                            <th>Mã đơn thuốc</th>
+                            <th>Tên bệnh nhân</th>
                             <th>Ngày kê đơn</th>
+                            <th>Bác sĩ kê</th>
+                            <th>Tên thuốc</th>
+                            <th>Liều dùng</th>
                             <th>Ghi chú</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @foreach ($prescriptions as $prescription)
+                    <tbody class="text-center">
+                        @forelse ($prescriptions as $prescription)
                             <tr>
-                                <td>{{ $loop->iteration + ($prescriptions->currentPage() - 1) * $prescriptions->perPage() }}</td>
+                                <td>{{ $loop->iteration + ($prescriptions->currentPage() - 1) * $prescriptions->perPage() }}
+                                </td>
                                 <td>{{ $prescription->medicalRecord->code ?? 'N/A' }}</td>
                                 <td>{{ $prescription->medicalRecord->appointment->patient->full_name ?? 'N/A' }}</td>
-                                <td>{{ $prescription->formatted_date }}</td>
+                                <td>{{ $prescription->formatted_date ?? '-' }}</td>
+                                <td>
+                                    {{ $prescription->medicalRecord->appointment->doctor->user->full_name ?? 'N/A' }}
+                                </td>
+                                <td>
+                                    @foreach ($prescription->prescriptionItems as $item)
+                                        <div>{{ $item->medicine->name ?? 'N/A' }}</div>
+                                    @endforeach
+                                </td>
+                                <td>
+                                    @foreach ($prescription->prescriptionItems as $item)
+                                        <div>{{ $item->usage_instructions ?? 'N/A' }}</div>
+                                    @endforeach
+                                </td>
                                 <td>{{ $prescription->notes ?? '-' }}</td>
                                 <td>
-                                    {{-- <a href="{{ route('prescriptions.show', $prescription->id) }}" class="btn btn-info btn-sm">
-                                        <i class="bx bx-show"></i> Xem
+                                    <a href="{{ route('admin.prescriptions.show', $prescription->id) }}"
+                                        class="btn btn-sm btn-info">
+                                        <i class="bx bx-show"></i>
                                     </a>
-                                    <a href="{{ route('prescriptions.print', $prescription->id) }}" target="_blank" class="btn btn-secondary btn-sm">
-                                        <i class="bx bx-printer"></i> In
-                                    </a> --}}
-                                    {{-- Thêm nút sửa nếu cần --}}
-                                    {{-- <a href="{{ route('prescriptions.edit', $prescription->id) }}" class="btn btn-warning btn-sm">Sửa</a> --}}
+                                    <a href="{{ route('admin.prescriptions.edit', $prescription->id) }}"
+                                        class="btn btn-sm btn-warning">
+                                        <i class="bx bx-edit-alt"></i>
+                                    </a>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="9" class="text-muted">Không có đơn thuốc nào.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

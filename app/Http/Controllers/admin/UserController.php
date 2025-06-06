@@ -60,4 +60,13 @@ class UserController extends Controller
             ->paginate(10);
         return view('admin.users.search', compact('users'));
     }
+    public function toggleStatus($id)
+    {
+        $user = User::findOrFail($id);
+
+        $user->status = $user->status === 'online' ? 'offline' : 'online';
+        $user->save();
+
+        return back()->with('success', 'Trạng thái người dùng đã được cập nhật.');
+    }
 }
