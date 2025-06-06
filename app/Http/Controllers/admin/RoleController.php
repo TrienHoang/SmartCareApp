@@ -17,7 +17,7 @@ class RoleController extends Controller
 
     public function create()
     {
-        $permissions = Permission::all();
+        $permissions = Permission::all()->groupBy('group')->toArray();
         return view('admin.roles.create', compact('permissions'));
     }
 
@@ -37,26 +37,42 @@ class RoleController extends Controller
     public function show($id)
     {
         $role = Role::with('permissions')->findOrFail($id);
-        return view('admin.roles.show', compact('role'));
+    
+        // Kiểm tra vai trò mặc định
+        if ($role->name === 'super-admin') {
+            return redirect()->back()->with('error', 'Không thể xem chi tiết vai trò hệ thống mặc định.');
+        }
+    
+        // Kiểm tra vai trò của chính người dùng
+        // if ($role->users()->where('users.id', auth()->id())->exists()) {
+        //     return redirect()->back()->with('error', 'Bạn không thể xem chi tiết vai trò của chính mình.');
+        // }
+    
+        // Nhóm quyền của vai trò theo cột 'group'
+        $permissions = $role->permissions->groupBy('group')->toArray();
+    
+        return view('admin.roles.show', compact('role', 'permissions'));
     }
-
     public function edit($id)
     {
-        $role = Role::findOrFail($id);
-
+        $role = Role::with('permissions')->findOrFail($id);
+    
         // Kiểm tra vai trò mặc định
-        if ($role->name === 'admin') {
+        if ($role->name === 'super-admin') {
             return redirect()->back()->with('error', 'Không thể chỉnh sửa vai trò hệ thống mặc định.');
         }
-
+    
         // Kiểm tra vai trò của chính người dùng
         if ($role->users()->where('users.id', auth()->id())->exists()) {
             return redirect()->back()->with('error', 'Bạn không thể chỉnh sửa vai trò của chính mình.');
         }
-
-        $permissions = Permission::all();
-        $rolePermissions = $role->permissions()->pluck('id')->toArray();
-
+    
+        // Nhóm quyền theo cột 'group' trong bảng permissions
+        $permissions = Permission::all()->groupBy('group')->toArray();
+    
+        // Lấy danh sách ID quyền đã gán cho vai trò
+        $rolePermissions = $role->permissions->pluck('id')->toArray();
+    
         return view('admin.roles.edit', compact('role', 'permissions', 'rolePermissions'));
     }
 
