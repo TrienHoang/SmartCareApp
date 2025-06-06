@@ -10,5 +10,4 @@ class ServiceCategory extends Model
     use HasFactory;
 
     protected $fillable = ['name', 'description'];
-    public $timestamps = true;
 }

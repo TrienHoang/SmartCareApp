@@ -56,6 +56,19 @@
     <!-- Apps & Pages -->
 
     <li class="menu-item">
+      <a href="app-email.html" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-envelope"></i>
+        <div data-i18n="Email">Email</div>
+      </a>
+    </li>
+    <li class="menu-item">
+      <a href="app-chat.html" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-chat"></i>
+        <div data-i18n="Chat">Chat</div>
+      </a>
+    </li>
+    <!-- e-commerce-app menu start -->
+    <li class="menu-item">
       <a href="{{ route('admin.vouchers.index') }}" class="menu-link">
         <i class="menu-icon tf-icons bx bx-receipt"></i>
         <div data-i18n="Vouchers">Vouchers</div>
@@ -93,6 +106,9 @@
         </li>
       </ul>
     </li>
+
+
+
     <li class="menu-item">
       <a href="{{ route('admin.users.index') }}" class="menu-link menu-toggle">
         <i class="menu-icon tf-icons bx bx-user"></i>
@@ -103,82 +119,10 @@
           <a href="{{ route('admin.users.index') }}" class="menu-link">
             <div data-i18n="List">List</div>
           </a>
-        <li class="menu-item">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class='menu-icon tf-icons bx bx-food-menu'></i>
-            <div data-i18n="Invoice">Invoice</div>
-            <div class="badge bg-danger rounded-pill ms-auto">4</div>
-          </a>
-          <ul class="menu-sub">
-            <li class="menu-item">
-              <a href="{{ route('admin.appointments.index') }}" class="menu-link">
-                <div data-i18n="List">List</div>
-              </a>
-            </li>
-            <li class="menu-item">
-              <a href="{{ route('admin.appointments.create') }}" class="menu-link">
-                <div data-i18n="Add">Add</div>
-              </a>
-            </li>
-          </ul>
-        </li>
-        <li class="menu-item">
-          <a href="{{ route('admin.users.index') }}" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-user"></i>
-            <div data-i18n="Users">Users</div>
-          </a>
-          <ul class="menu-sub">
-            <li class="menu-item">
-              <a href="{{ route('admin.users.index') }}" class="menu-link">
-                <div data-i18n="List">List</div>
-              </a>
-            </li>
-          </ul>
-        </li>
 
-        <li class="menu-item">
-          <a href="{{ route('admin.roles.index') }}" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-user"></i>
-            <div data-i18n="Roles">Roles</div>
-          </a>
-          <ul class="menu-sub">
-            <li class="menu-item">
-              <a href="{{ route('admin.roles.index') }}" class="menu-link">
-                <div data-i18n="List">List</div>
-              </a>
-            </li>
-          </ul>
         </li>
-
 
       </ul>
-    </li>
-
-    <li class="menu-item">
-      <a href="{{ route('admin.prescriptions.index') }}" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bx-user"></i>
-        <div data-i18n="Quản lý đơn thuốc">Quản lý đơn thuốc</div>
-      </a>
-      <ul class="menu-sub">
-        <li class="menu-item">
-          <a href="{{ route('admin.prescriptions.index') }}" class="menu-link">
-            <div data-i18n="List">List</div>
-          </a>
-        </li>
-        <li class="menu-item">
-          <a href="{{ route('admin.prescriptions.create') }}" class="menu-link">
-            <div data-i18n="Add">Add</div>
-          </a>
-        </li>
-      </ul>
-    </li>
-
-    <li class="menu-item">
-      <a href="{{ route('admin.categories.index') }}" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-category"></i>
-        <div data-i18n="Danh mục dịch vụ">Danh mục dịch vụ</div>
-      </a>
-    </li>
 
     <li class="menu-item">
       <a href="{{ route('admin.roles.index') }}" class="menu-link menu-toggle">
@@ -193,60 +137,136 @@
         </li>
       </ul>
     </li>
-
     <li class="menu-item">
-      <a href="{{ route('admin.doctors.index') }}" class="menu-link menu-toggle">
-        <i class="menu-icon fas fa-user-md"></i>
-        <div data-i18n="Quản Lý Bác Sỹ">Quản Lý bác sỹ</div>
+      <a href="{{ route('admin.prescriptions.index') }}" class="menu-link menu-toggle">
+        <i class="menu-icon fas fa-file-medical"></i>
+        <div data-i18n="Quản lý đơn thuốc">Quản lý đơn thuốc</div>
       </a>
       <ul class="menu-sub">
         <li class="menu-item">
-          <a href="{{ route('admin.doctors.index') }}" class="menu-link">
+          <a href="{{ route('admin.prescriptions.index') }}" class="menu-link">
             <div data-i18n="List">List</div>
           </a>
         </li>
+        <li class="menu-item">
+          <a href="{{ route('admin.prescriptions.create') }}" class="menu-link">
+            <div data-i18n="Add">Add</div>
+          </a>
+        </li>
       </ul>
-    </li>
 
+    </li>
     <li class="menu-item">
-      <a href="{{ route('admin.departments.index') }}" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bx-table"></i>
-        <div data-i18n="Quản Lý Phòng Ban">Quản Lý phòng</div>
+      <a href="{{ route('admin.categories.index') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-category"></i> {{-- icon danh mục --}}
+        <div data-i18n="Danh mục dịch vụ">Danh mục dịch vụ</div>
       </a>
-      <ul class="menu-sub">
-        <li class="menu-item">
-          <a href="{{ route('admin.departments.index') }}" class="menu-link">
-            <div data-i18n="List">List</div>
-          </a>
-        </li>
-      </ul>
-    </li>
 
-    <li class="menu-item">
-      <a href="{{ route('admin.payments.index') }}" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bx-wallet"></i>
-        <div data-i18n="Quản Lý Lịch xử Thanh Toán">payments</div>
-      </a>
-      <ul class="menu-sub">
-        <li class="menu-item">
-          <a href="{{ route('admin.payments.index') }}" class="menu-link">
-            <div data-i18n="List">List</div>
-          </a>
-        </li>
 
-        <li class="menu-item">
-          <a href="{{ route('logout') }}" class="menu-link">
-            <div data-i18n="Đăng xuất">Đăng xuất</div>
-          </a>
-        </li>
-      </ul>
-    </li>
+  </ul>
+  </li>
+
+
+  <li class="menu-item">
+    <a href="{{ route('admin.prescriptions.index') }}" class="menu-link menu-toggle">
+      <i class="menu-icon tf-icons bx bx-user"></i>
+      <div data-i18n="Quản lý đơn thuốc">Quản lý đơn thuốc</div>
+    </a>
+    <ul class="menu-sub">
+      <li class="menu-item">
+        <a href="{{ route('admin.prescriptions.index') }}" class="menu-link">
+          <div data-i18n="List">List</div>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a href="{{ route('admin.prescriptions.create') }}" class="menu-link">
+          <div data-i18n="Add">Add</div>
+        </a>
+      </li>
+    </ul>
+  </li>
+
+  <li class="menu-item">
+    <a href="{{ route('admin.categories.index') }}" class="menu-link">
+      <i class="menu-icon tf-icons bx bx-category"></i>
+      <div data-i18n="Danh mục dịch vụ">Danh mục dịch vụ</div>
+    </a>
+  </li>
+
+  <li class="menu-item">
+    <a href="{{ route('admin.roles.index') }}" class="menu-link menu-toggle">
+      <i class="menu-icon tf-icons bx bx-user"></i>
+      <div data-i18n="Roles">Roles</div>
+    </a>
+    <ul class="menu-sub">
+      <li class="menu-item">
+        <a href="{{ route('admin.roles.index') }}" class="menu-link">
+          <div data-i18n="List">List</div>
+        </a>
+      </li>
+    </ul>
+  </li>
+
+  <li class="menu-item">
+    <a href="{{ route('admin.doctors.index') }}" class="menu-link menu-toggle">
+      <i class="menu-icon fas fa-user-md"></i>
+      <div data-i18n="Quản Lý Bác Sỹ">Quản Lý bác sỹ</div>
+    </a>
+    <ul class="menu-sub">
+      <li class="menu-item">
+        <a href="{{ route('admin.doctors.index') }}" class="menu-link">
+          <div data-i18n="List">List</div>
+        </a>
+      </li>
+    </ul>
+  </li>
+
+  <li class="menu-item">
+    <a href="{{ route('admin.departments.index') }}" class="menu-link menu-toggle">
+      <i class="menu-icon tf-icons bx bx-table"></i>
+      <div data-i18n="Quản Lý Phòng Ban">Quản Lý phòng</div>
+    </a>
+    <ul class="menu-sub">
+      <li class="menu-item">
+        <a href="{{ route('admin.departments.index') }}" class="menu-link">
+          <div data-i18n="List">List</div>
+        </a>
+      </li>
+    </ul>
+  </li>
+
+  <li class="menu-item">
+    <a href="{{ route('admin.payments.index') }}" class="menu-link menu-toggle">
+      <i class="menu-icon tf-icons bx bx-wallet"></i>
+      <div data-i18n="Quản Lý Lịch xử Thanh Toán">payments</div>
+    </a>
+    <ul class="menu-sub">
+      <li class="menu-item">
+        <a href="{{ route('admin.payments.index') }}" class="menu-link">
+          <div data-i18n="List">List</div>
+        </a>
+      </li>
+
+      <li class="menu-item">
+        <a href="{{ route('logout') }}" class="menu-link">
+          <div data-i18n="Đăng xuất">Đăng xuất</div>
+        </a>
+      </li>
+
+    </ul>
+
+  <li class="menu-item">
+    <a href="{{ route('admin.services.index') }}" class="menu-link">
+      <i class="menu-icon tf-icons bx bx-cog"></i> {{-- icon dịch vụ --}}
+      <div data-i18n="Dịch vụ">Dịch vụ</div>
+    </a>
+  </li>
+  </li>
 
 
 
 
   </ul>
   </li>
-
 
 </aside>
