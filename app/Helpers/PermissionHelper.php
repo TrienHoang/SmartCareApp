@@ -89,3 +89,28 @@ if (!function_exists('getPermissionLabel')) {
         return $labels[$permission] ?? $permission;
     }
 }
+
+if (!function_exists('getPermissionGroupLabel')) {
+    function getPermissionGroupLabel($group)
+    {
+        $groups = [
+            'Users' => 'Người dùng',
+            'Doctors' => 'Bác sĩ',
+            'Departments' => 'Phòng ban',
+            'schedules' => 'Lịch làm việc',
+            'appointments' => 'Lịch hẹn',
+            'services' => 'Dịch vụ',
+            'prescriptions' => 'Đơn thuốc',
+            'coupons' => 'Mã giảm giá',
+            'orders' => 'Đơn hàng & thanh toán',
+            'medical_records' => 'Hồ sơ bệnh án',
+            'treatment_plans' => 'Kế hoạch điều trị',
+            'documents' => 'Tài liệu',
+            'reviews' => 'Đánh giá',
+            'support' => 'Hỗ trợ & Thông báo',
+            'statistics' => 'Thống kê',
+        ];
+
+        return $labels[$group] ?? ucfirst(str_replace('_', ' ', $group));
+    }
+}
