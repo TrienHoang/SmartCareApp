@@ -5,6 +5,7 @@ use App\Http\Controllers\admin\AppointmentController;
 use App\Http\Controllers\admin\SchedulesController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\VoucherController;
+use App\Http\Controllers\admin\PrescriptionController;
 use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\auth\FacebookController;
 use App\Http\Controllers\auth\GoogleController;
@@ -12,6 +13,8 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\admin\ServiceCategoryController;
+
 
 Route::get('/', function () {
     echo "Trang chủ của ứng dụng";
@@ -116,25 +119,25 @@ Route::group([
         'middleware' => 'check_permission:view_coupons'
     ], function () {
         Route::get('/', [VoucherController::class, 'index'])->name('index');
-    
+
         Route::get('/create', [VoucherController::class, 'create'])
             ->middleware('check_permission:create_coupons')->name('create');
-    
+
         Route::post('/create', [VoucherController::class, 'store'])
             ->middleware('check_permission:create_coupons')->name('store');
-    
+
         Route::get('/edit/{id}', [VoucherController::class, 'edit'])
             ->middleware('check_permission:edit_coupons')->name('edit');
-    
+
         Route::put('/edit/{id}', [VoucherController::class, 'update'])
             ->middleware('check_permission:edit_coupons')->name('update');
-    
+
         Route::delete('/destroy/{id}', [VoucherController::class, 'destroy'])
             ->middleware('check_permission:delete_coupons')->name('destroy');
-    
+
         Route::get('/show/{id}', [VoucherController::class, 'show'])->name('show');
     });
-    
+
     // quản lý lịch làm việc
     Route::group([
         'prefix' => 'schedules',
@@ -142,25 +145,25 @@ Route::group([
         'middleware' => 'check_permission:view_schedules'
     ], function () {
         Route::get('/', [SchedulesController::class, 'index'])->name('index');
-    
+
         Route::get('/create', [SchedulesController::class, 'create'])
             ->middleware('check_permission:create_schedules')->name('create');
-    
+
         Route::post('/create', [SchedulesController::class, 'store'])
             ->middleware('check_permission:create_schedules')->name('store');
-    
+
         Route::get('/edit/{id}', [SchedulesController::class, 'edit'])
             ->middleware('check_permission:edit_schedules')->name('edit');
-    
+
         Route::put('/edit/{id}', [SchedulesController::class, 'update'])
             ->middleware('check_permission:edit_schedules')->name('update');
-    
+
         Route::delete('/destroy/{id}', [SchedulesController::class, 'destroy'])
             ->middleware('check_permission:delete_schedules')->name('destroy');
-    
+
         Route::get('/show/{id}', [SchedulesController::class, 'show'])->name('show');
     });
-    
+
 
     // quản lý lịch hẹn khám
     Route::group([
@@ -169,23 +172,53 @@ Route::group([
         'middleware' => 'check_permission:view_appointments'
     ], function () {
         Route::get('/', [AppointmentController::class, 'index'])->name('index');
-    
+
         Route::get('/create', [AppointmentController::class, 'create'])
             ->middleware('check_permission:create_appointments')->name('create');
-    
+
         Route::post('/store', [AppointmentController::class, 'store'])
             ->middleware('check_permission:create_appointments')->name('store');
-    
+
         Route::get('/edit/{id}', [AppointmentController::class, 'edit'])
             ->middleware('check_permission:edit_appointments')->name('edit');
-    
+
         Route::put('/update/{id}', [AppointmentController::class, 'update'])
             ->middleware('check_permission:edit_appointments')->name('update');
-    
+
         Route::patch('/{id}/cancel', [AppointmentController::class, 'cancel'])
             ->middleware('check_permission:cancel_appointments')->name('cancel');
-    
+
         Route::get('/{id}', [AppointmentController::class, 'show'])->name('show');
-    });    
+    });
+
+    // quản lý đơn thuốc
+    Route::group([
+        'prefix' => 'prescriptions',
+        'as' => 'prescriptions.',
+        'middleware' => 'check_permission:view_prescriptions'
+    ], function () {
+        Route::get('/', [PrescriptionController::class, 'index'])->name('index');
+
+        Route::get('/create', [PrescriptionController::class, 'create'])
+            ->middleware('check_permission:create_prescriptions')->name('create');
+
+        Route::post('/store', [PrescriptionController::class, 'store'])
+            ->middleware('check_permission:create_prescriptions')->name('store');
+    });
 });
 
+
+Route::get('admin/users', [UserController::class, 'index'])->name('admin.users.index');
+Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admin.users.show');
+Route::get('admin/users/edit/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
+Route::put('admin/users/edit/{id}', [UserController::class, 'update'])->name('admin.users.update');
+Route::get('admin/users/search', [UserController::class, 'search'])->name('admin.users.search');
+
+// quản lý danh mục dịch vụ
+Route::get('admin/categories', [ServiceCategoryController::class, 'index'])->name('admin.categories.index');
+Route::get('admin/categories/create', [ServiceCategoryController::class, 'create'])->name('admin.categories.create');
+Route::post('admin/categories/store', [ServiceCategoryController::class, 'store'])->name('admin.categories.store');
+Route::get('admin/categories/edit/{id}', [ServiceCategoryController::class, 'edit'])->name('admin.categories.edit');
+Route::put('admin/categories/edit/{id}', [ServiceCategoryController::class, 'update'])->name('admin.categories.update');
+Route::delete('admin/categories/destroy/{id}', [ServiceCategoryController::class, 'destroy'])->name('admin.categories.destroy');
+Route::get('admin/categories/show/{id}', [ServiceCategoryController::class, 'show'])->name('admin.categories.show');
