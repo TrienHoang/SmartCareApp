@@ -14,7 +14,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\ServiceCategoryController;
-
+use App\Http\Controllers\Admin\ServiceController;
 
 Route::get('/', function () {
     echo "Trang chủ của ứng dụng";
@@ -222,3 +222,12 @@ Route::get('admin/categories/edit/{id}', [ServiceCategoryController::class, 'edi
 Route::put('admin/categories/edit/{id}', [ServiceCategoryController::class, 'update'])->name('admin.categories.update');
 Route::delete('admin/categories/destroy/{id}', [ServiceCategoryController::class, 'destroy'])->name('admin.categories.destroy');
 Route::get('admin/categories/show/{id}', [ServiceCategoryController::class, 'show'])->name('admin.categories.show');
+
+// quản lý dịch vụ
+Route::get('admin/services', [ServiceController::class, 'index'])->name('admin.services.index');
+Route::get('admin/services/create', [ServiceController::class, 'create'])->name('admin.services.create');
+Route::post('admin/services/store', [ServiceController::class, 'store'])->name('admin.services.store');
+Route::get('admin/services/edit/{id}', [ServiceController::class, 'edit'])->name('admin.services.edit');
+Route::put('admin/services/edit/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
+Route::delete('admin/services/destroy/{id}', [ServiceController::class, 'destroy'])->name('admin.services.destroy');
+Route::get('admin/services/show/{id}', [ServiceController::class, 'show'])->name('admin.services.show');
