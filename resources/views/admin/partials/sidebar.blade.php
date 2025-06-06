@@ -140,7 +140,14 @@
                 </li>
             </ul>
         </li>
+        <li class="menu-item">
+            <a href="{{ route('admin.categories.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-category"></i> {{-- icon danh mục --}}
+                <div data-i18n="Danh mục dịch vụ">Danh mục dịch vụ</div>
+            </a>
+        </li>
     </ul>
     </li>
+
 
 </aside>
