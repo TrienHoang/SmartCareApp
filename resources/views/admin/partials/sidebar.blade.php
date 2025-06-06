@@ -123,6 +123,7 @@
             </ul>
         </li>
         <li class="menu-item">
+<<<<<<< HEAD
             <a href="{{ route('admin.prescriptions.index') }}" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-user"></i>
                 <div data-i18n="Quản lý đơn thuốc">Quản lý đơn thuốc</div>
@@ -139,6 +140,24 @@
                     </a>
                 </li>
             </ul>
+=======
+          <a href="{{ route('admin.prescriptions.index') }}" class="menu-link menu-toggle">
+            <i class="menu-icon fas fa-file-medical"></i>
+            <div data-i18n="Quản lý đơn thuốc">Quản lý đơn thuốc</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="{{ route('admin.prescriptions.index') }}" class="menu-link">
+                <div data-i18n="List">List</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="{{ route('admin.prescriptions.create') }}" class="menu-link">
+                <div data-i18n="Add">Add</div>
+              </a>
+            </li>
+          </ul>
+>>>>>>> hieudev
         </li>
         <li class="menu-item">
             <a href="{{ route('admin.categories.index') }}" class="menu-link">

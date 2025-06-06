@@ -204,6 +204,14 @@ Route::group([
 
         Route::post('/store', [PrescriptionController::class, 'store'])
             ->middleware('check_permission:create_prescriptions')->name('store');
+
+        Route::get('/{id}/edit', [PrescriptionController::class, 'edit'])
+            ->middleware('check_permission:edit_prescriptions')->name('edit');
+
+        Route::put('/{id}', [PrescriptionController::class, 'update'])
+            ->middleware('check_permission:edit_prescriptions')->name('update');
+
+        Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show');
     });
 });
 
