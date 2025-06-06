@@ -58,15 +58,15 @@
         <!-- Apps & Pages -->
 
         <li class="menu-item">
-            <a href="{{ route('admin.vouchers.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-receipt"></i>
-                <div data-i18n="Vouchers">Vouchers</div>
+            <a href="app-email.html" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-envelope"></i>
+                <div data-i18n="Email">Email</div>
             </a>
         </li>
         <li class="menu-item">
-            <a href="{{ route('admin.schedules.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-plus-medical"></i>
-                <div data-i18n="Lịch làm việc bác sĩ">Lịch làm việc bác sĩ </div>
+            <a href="app-chat.html" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-chat"></i>
+                <div data-i18n="Chat">Chat</div>
             </a>
         </li>
         <!-- e-commerce-app menu start -->
@@ -84,12 +84,22 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a href="{{ route('admin.appointments.index') }}" class="menu-link">
+                    <a href="app-invoice-list.html" class="menu-link">
                         <div data-i18n="List">List</div>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{ route('admin.appointments.create') }}" class="menu-link">
+                    <a href="app-invoice-preview.html" class="menu-link">
+                        <div data-i18n="Preview">Preview</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-invoice-edit.html" class="menu-link">
+                        <div data-i18n="Edit">Edit</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-invoice-add.html" class="menu-link">
                         <div data-i18n="Add">Add</div>
                     </a>
                 </li>
@@ -123,9 +133,8 @@
             </ul>
         </li>
         <li class="menu-item">
-<<<<<<< HEAD
             <a href="{{ route('admin.prescriptions.index') }}" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-user"></i>
+                <i class="menu-icon fas fa-file-medical"></i>
                 <div data-i18n="Quản lý đơn thuốc">Quản lý đơn thuốc</div>
             </a>
             <ul class="menu-sub">
@@ -140,24 +149,7 @@
                     </a>
                 </li>
             </ul>
-=======
-          <a href="{{ route('admin.prescriptions.index') }}" class="menu-link menu-toggle">
-            <i class="menu-icon fas fa-file-medical"></i>
-            <div data-i18n="Quản lý đơn thuốc">Quản lý đơn thuốc</div>
-          </a>
-          <ul class="menu-sub">
-            <li class="menu-item">
-              <a href="{{ route('admin.prescriptions.index') }}" class="menu-link">
-                <div data-i18n="List">List</div>
-              </a>
-            </li>
-            <li class="menu-item">
-              <a href="{{ route('admin.prescriptions.create') }}" class="menu-link">
-                <div data-i18n="Add">Add</div>
-              </a>
-            </li>
-          </ul>
->>>>>>> hieudev
+
         </li>
         <li class="menu-item">
             <a href="{{ route('admin.categories.index') }}" class="menu-link">
@@ -165,8 +157,11 @@
                 <div data-i18n="Danh mục dịch vụ">Danh mục dịch vụ</div>
             </a>
         </li>
-    </ul>
-    </li>
-
+        <li class="menu-item">
+            <a href="{{ route('admin.services.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-cog"></i> {{-- icon dịch vụ --}}
+                <div data-i18n="Dịch vụ">Dịch vụ</div>
+            </a>
+        </li>
 
 </aside>
