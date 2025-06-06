@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\admin\RoleController;
 use App\Http\Controllers\admin\AppointmentController;
+use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\admin\SchedulesController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\VoucherController;
@@ -14,7 +16,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\ServiceCategoryController;
-
+use App\Http\Controllers\Admin\ServiceController;
 
 Route::get('/', function () {
     echo "Trang chủ của ứng dụng";
@@ -53,7 +55,7 @@ Route::group([
 ], function () {
     // Dashboard
     Route::get('/dashboard', function () {
-        return view('admin.dashboard');
+        return view(view: 'admin.dashboard');
     })->name('dashboard');
 
     // Nhóm users
@@ -120,23 +122,30 @@ Route::group([
     ], function () {
         Route::get('/', [VoucherController::class, 'index'])->name('index');
 
+
         Route::get('/create', [VoucherController::class, 'create'])
             ->middleware('check_permission:create_coupons')->name('create');
+
 
         Route::post('/create', [VoucherController::class, 'store'])
             ->middleware('check_permission:create_coupons')->name('store');
 
+
         Route::get('/edit/{id}', [VoucherController::class, 'edit'])
             ->middleware('check_permission:edit_coupons')->name('edit');
+
 
         Route::put('/edit/{id}', [VoucherController::class, 'update'])
             ->middleware('check_permission:edit_coupons')->name('update');
 
+
         Route::delete('/destroy/{id}', [VoucherController::class, 'destroy'])
             ->middleware('check_permission:delete_coupons')->name('destroy');
 
+
         Route::get('/show/{id}', [VoucherController::class, 'show'])->name('show');
     });
+
 
     // quản lý lịch làm việc
     Route::group([
@@ -146,23 +155,30 @@ Route::group([
     ], function () {
         Route::get('/', [SchedulesController::class, 'index'])->name('index');
 
+
         Route::get('/create', [SchedulesController::class, 'create'])
             ->middleware('check_permission:create_schedules')->name('create');
+
 
         Route::post('/create', [SchedulesController::class, 'store'])
             ->middleware('check_permission:create_schedules')->name('store');
 
+
         Route::get('/edit/{id}', [SchedulesController::class, 'edit'])
             ->middleware('check_permission:edit_schedules')->name('edit');
+
 
         Route::put('/edit/{id}', [SchedulesController::class, 'update'])
             ->middleware('check_permission:edit_schedules')->name('update');
 
+
         Route::delete('/destroy/{id}', [SchedulesController::class, 'destroy'])
             ->middleware('check_permission:delete_schedules')->name('destroy');
 
+
         Route::get('/show/{id}', [SchedulesController::class, 'show'])->name('show');
     });
+
 
 
     // quản lý lịch hẹn khám
@@ -173,23 +189,30 @@ Route::group([
     ], function () {
         Route::get('/', [AppointmentController::class, 'index'])->name('index');
 
+
         Route::get('/create', [AppointmentController::class, 'create'])
             ->middleware('check_permission:create_appointments')->name('create');
+
 
         Route::post('/store', [AppointmentController::class, 'store'])
             ->middleware('check_permission:create_appointments')->name('store');
 
+
         Route::get('/edit/{id}', [AppointmentController::class, 'edit'])
             ->middleware('check_permission:edit_appointments')->name('edit');
+
 
         Route::put('/update/{id}', [AppointmentController::class, 'update'])
             ->middleware('check_permission:edit_appointments')->name('update');
 
+
         Route::patch('/{id}/cancel', [AppointmentController::class, 'cancel'])
             ->middleware('check_permission:cancel_appointments')->name('cancel');
 
+
         Route::get('/{id}', [AppointmentController::class, 'show'])->name('show');
     });
+
 
     // quản lý đơn thuốc
     Route::group([
@@ -204,8 +227,73 @@ Route::group([
 
         Route::post('/store', [PrescriptionController::class, 'store'])
             ->middleware('check_permission:create_prescriptions')->name('store');
+
+        Route::get('/{id}/edit', [PrescriptionController::class, 'edit'])
+            ->middleware('check_permission:edit_prescriptions')->name('edit');
+
+        Route::put('/{id}', [PrescriptionController::class, 'update'])
+            ->middleware('check_permission:edit_prescriptions')->name('update');
+
+        Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show');
+    });
+
+
+
+
+
+
+
+    // Nhóm quản lý bác sĩ
+    Route::group([
+        'prefix' => 'doctors',
+        'as' => 'doctors.',
+        'middleware' => 'check_permission:view_doctors'
+    ], function () {
+        Route::get('/', [DoctorController::class, 'index'])->name('index');
+
+        Route::get('/create', [DoctorController::class, 'create'])
+            ->middleware('check_permission:create_doctors')->name('create');
+
+        Route::post('/store', [DoctorController::class, 'store'])
+            ->middleware('check_permission:create_doctors')->name('store');
+
+        Route::get('/edit/{doctor}', [DoctorController::class, 'edit'])
+            ->middleware('check_permission:edit_doctors')->name('edit');
+
+        Route::put('/update/{doctor}', [DoctorController::class, 'update'])
+            ->middleware('check_permission:edit_doctors')->name('update');
+
+        Route::delete('/delete/{doctor}', [DoctorController::class, 'destroy'])
+            ->middleware('check_permission:delete_doctors')->name('destroy');
+    });
+
+
+    // Quản lý phòng ban
+
+    Route::group([
+        'prefix' => 'departments',
+        'as' => 'departments.',
+        'middleware' => 'check_permission:view_departments'
+    ], function () {
+        Route::get('/', [DepartmentController::class, 'index'])->name('index');
+        Route::get('/create', [DepartmentController::class, 'create'])->middleware('check_permission:create_departments')->name('create');
+        Route::post('/', [DepartmentController::class, 'store'])->middleware('check_permission:create_departments')->name('store');
+        Route::get('/{department}/edit', [DepartmentController::class, 'edit'])->middleware('check_permission:edit_departments')->name('edit');
+        Route::put('/{department}', [DepartmentController::class, 'update'])->middleware('check_permission:edit_departments')->name('update');
+        Route::delete('/{department}', [DepartmentController::class, 'destroy'])->middleware('check_permission:delete_departments')->name('destroy');
+    });
+
+    // Quản lý lịch sử thanh toán
+    Route::group([
+        'prefix' => 'payments',
+        'as' => 'payments.',
+        'middleware' => 'check_permission:view_payment_history'
+    ], function () {
+        Route::get('/', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('index');
+        Route::get('/{payment}', [\App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('show');
     });
 });
+
 
 
 Route::get('admin/users', [UserController::class, 'index'])->name('admin.users.index');
@@ -223,3 +311,12 @@ Route::get('admin/categories/edit/{id}', [ServiceCategoryController::class, 'edi
 Route::put('admin/categories/edit/{id}', [ServiceCategoryController::class, 'update'])->name('admin.categories.update');
 Route::delete('admin/categories/destroy/{id}', [ServiceCategoryController::class, 'destroy'])->name('admin.categories.destroy');
 Route::get('admin/categories/show/{id}', [ServiceCategoryController::class, 'show'])->name('admin.categories.show');
+
+// quản lý dịch vụ
+Route::get('admin/services', [ServiceController::class, 'index'])->name('admin.services.index');
+Route::get('admin/services/create', [ServiceController::class, 'create'])->name('admin.services.create');
+Route::post('admin/services/store', [ServiceController::class, 'store'])->name('admin.services.store');
+Route::get('admin/services/edit/{id}', [ServiceController::class, 'edit'])->name('admin.services.edit');
+Route::put('admin/services/edit/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
+Route::delete('admin/services/destroy/{id}', [ServiceController::class, 'destroy'])->name('admin.services.destroy');
+Route::get('admin/services/show/{id}', [ServiceController::class, 'show'])->name('admin.services.show');
