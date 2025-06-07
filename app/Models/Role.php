@@ -10,13 +10,13 @@ class Role extends Model
     protected $fillable = ['name', 'description'];
     public $timestamps = true;
 
-    public function users()
-    {
-        return $this->hasMany(User::class);
-    }
-
     public function permissions()
     {
         return $this->belongsToMany(Permission::class, 'role_permission');
+    }
+    
+    public function users()
+    {
+        return $this->hasMany(User::class);
     }
 }
