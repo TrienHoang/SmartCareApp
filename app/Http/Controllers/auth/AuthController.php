@@ -54,7 +54,7 @@ class AuthController extends Controller
             'gender' => '',
             'date_of_birth' => null,
             'address' => '',
-            'role_id' => 1,
+            'role_id' => 3,
             'avatar' => '',
         ]);
 

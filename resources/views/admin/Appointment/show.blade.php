@@ -33,14 +33,47 @@
                 <tr>
                     <th>Trạng thái</th>
                     <td>
-                        @if ($appointment->status === 'pending')
-                            <span class="badge bg-warning">Chờ xác nhận</span>
-                        @elseif ($appointment->status === 'confirmed')
-                            <span class="badge bg-success">Đã xác nhận</span>
-                        @elseif ($appointment->status === 'cancelled')
-                            <span class="badge bg-danger">Đã hủy</span>
-                        @else
-                            <span class="badge bg-secondary">{{ $appointment->status }}</span>
+                        @php
+                            $statusConfig = [
+                                'pending' => [
+                                    'color' => 'warning',
+                                    'text' => 'Chờ xác nhận',
+                                    'icon' => 'bx-time',
+                                ],
+                                'confirmed' => [
+                                    'color' => 'info',
+                                    'text' => 'Đã xác nhận',
+                                    'icon' => 'bx-check',
+                                ],
+                                'completed' => [
+                                    'color' => 'success',
+                                    'text' => 'Hoàn thành',
+                                    'icon' => 'bx-check-double',
+                                ],
+                                'cancelled' => ['color' => 'danger', 'text' => 'Đã hủy', 'icon' => 'bx-x'],
+                            ];
+                            $config = $statusConfig[$appointment->status] ?? [
+                                'color' => 'secondary',
+                                'text' => $appointment->status,
+                                'icon' => 'bx-help',
+                            ];
+                        @endphp
+
+                        <span class="badge bg-{{ $config['color'] }} status-badge">
+                            <i class="bx {{ $config['icon'] }}"></i> {{ $config['text'] }}
+                        </span>
+
+                        @if ($appointment->status == 'pending')
+                            <div class="quick-status-buttons">
+                                <button class="btn btn-success quick-status-btn"
+                                    onclick="updateStatus({{ $appointment->id }}, 'confirmed')">
+                                    Xác nhận
+                                </button>
+                                <button class="btn btn-danger quick-status-btn"
+                                    onclick="updateStatus({{ $appointment->id }}, 'cancelled')">
+                                    Hủy
+                                </button>
+                            </div>
                         @endif
                     </td>
                 </tr>
@@ -48,6 +81,11 @@
                     <th>Ghi chú</th>
                     <td>{{ $appointment->reason ?? 'Không có ghi chú' }}</td>
                 </tr>
+                <tr>
+                    <th>Lí do hủy</th>
+                    <th>{{ $appointment->cancel_reason ?? 'Không' }}</th>
+                </tr>
+               
                 <tr>
                     <th>Ngày tạo</th>
                     <td>{{ $appointment->created_at->format('d/m/Y H:i') }}</td>

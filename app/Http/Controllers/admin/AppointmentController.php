@@ -4,17 +4,94 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\Service;
 use App\Models\User;
+use App\Models\WorkingSchedule;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = Appointment::orderBy('created_at', 'desc')->paginate(10);
-        return view('admin.Appointment.index', compact('appointments'));
+        $query = Appointment::with([
+            'patient:id,full_name,phone,email',
+            'doctor.user:id,full_name',
+            'doctor.department:id,name',
+            'doctor.room:id,name',
+            'service:id,name,price',
+        ]);
+
+        // Lọc theo trạng thái
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Lọc theo bác sĩ
+        if ($request->filled('doctor_id')) {
+            $query->where('doctor_id', $request->doctor_id);
+        }
+
+        // Lọc theo khoa
+        if ($request->filled('department_id')) {
+            $query->whereHas('doctor', function ($q) use ($request) {
+                $q->where('department_id', $request->department_id);
+            });
+        }
+
+        // Lọc theo dịch vụ
+        if ($request->filled('service_id')) {
+            $query->where('service_id', $request->service_id);
+        }
+
+        // Lọc theo ngày
+        if ($request->filled('date_from')) {
+            $query->whereDate('appointment_time', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('appointment_time', '<=', $request->date_to);
+        }
+
+        // Tìm kiếm theo tên bệnh nhân
+        if ($request->filled('search')) {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('full_name', 'like', '%' . $request->search . '%')
+                    ->orWhere('phone', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Sắp xếp
+        $sortBy = $request->get('sort_by', 'appointment_time');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        $appointments = $query->paginate(15)->appends($request->all());
+
+        // Dữ liệu cho filter
+        $doctors = Doctor::with('user:id,full_name')->get();
+        $departments = Department::all();
+        $services = Service::where('status', 'active')->get();
+
+        // Thống kê nhanh
+        $stats = [
+            'total' => Appointment::count(),
+            'pending' => Appointment::where('status', 'pending')->count(),
+            'confirmed' => Appointment::where('status', 'confirmed')->count(),
+            'completed' => Appointment::where('status', 'completed')->count(),
+            'cancelled' => Appointment::where('status', 'cancelled')->count(),
+            'today' => Appointment::whereDate('appointment_time', Carbon::today())->count(),
+        ];
+
+        return view('admin.Appointment.index', compact(
+            'appointments',
+            'doctors',
+            'departments',
+            'services',
+            'stats'
+        ));
     }
 
     public function create()
@@ -36,6 +113,19 @@ class AppointmentController extends Controller
             'status' => 'required|in:pending,confirmed,cancelled',
             'reason' => 'nullable|string|max:255',
         ]);
+
+        $appointmentDate = Carbon::parse($request->appointment_time);
+        $dayOfWeek = $appointmentDate->format('l');
+
+        $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
+            ->where('day_of_week', $dayOfWeek)
+            ->exists();
+
+        if (!$working) {
+            return back()->withErrors([
+                'doctor_id' => 'Bác sĩ không làm việc vào ngày bạn chọn. Vui lòng chọn ngày khác.'
+            ])->withInput();
+        }
 
         Appointment::create($request->all());
 
@@ -66,6 +156,12 @@ class AppointmentController extends Controller
             return redirect()->back()->withErrors(['status' => 'Không thể thay đổi trạng thái khi lịch hẹn đã hoàn thành.']);
         }
 
+        if ($appointment->status === 'completed' && $appointment->status === 'cancelled'){
+            if ($request->status !== 'cancelled'){
+                return redirect()->back()->withErrors(['status' => 'Không thể thay đổi trạng thái khi lịch hẹn đã hủy.']);
+            }
+        }
+
         $appointment->update($request->all());
 
         return redirect()->route('admin.appointments.index')->with('success', 'Cập nhật lịch hẹn thành công');
@@ -87,5 +183,32 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
         return view('admin.Appointment.show', compact('appointment'));
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $appointment = Appointment::findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,completed,cancelled',
+            'note' => 'nullable|string|max:500'
+        ]);
+
+        $oldStatus = $appointment->status;
+        $appointment->update([
+            'status' => $request->status,
+            'cancel_reason' => $request->status === 'cancelled' ? $request->note : null
+        ]);
+
+        // Log thay đổi trạng thái
+        $appointment->logs()->create([
+            'changed_by' => auth()->id(),
+            'status_before' => $oldStatus,
+            'status_after' => $request->status,
+            'change_time' => now(),
+            'note' => $request->note
+        ]);
+
+        return redirect()->back()->with('success', 'Cập nhật trạng thái thành công!');
     }
 }

@@ -205,6 +205,8 @@ Route::group([
         Route::put('/update/{id}', [AppointmentController::class, 'update'])
             ->middleware('check_permission:edit_appointments')->name('update');
 
+        Route::patch('/{id}/update-status', [AppointmentController::class, 'updateStatus'])
+            ->middleware('check_permission:edit_appointments')->name('update-status');
 
         Route::patch('/{id}/cancel', [AppointmentController::class, 'cancel'])
             ->middleware('check_permission:cancel_appointments')->name('cancel');

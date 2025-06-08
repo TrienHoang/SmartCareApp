@@ -78,30 +78,30 @@
 
                     <div class="mb-3">
                         <label for="status" class="form-label">Trạng thái</label>
+                        @php
+                            $currentStatus = $appointment->status;
+                        @endphp
                         <select name="status" id="status" class="form-select @error('status') is-invalid @enderror">
-                            @php
-                                $currentStatus = $appointment->status;
-                            @endphp
 
-                            <option value="pending" {{ $currentStatus == 'pending' ? 'selected' : '' }}
-                                {{ in_array($currentStatus, ['confirmed', 'completed', 'cancelled']) ? 'disabled' : '' }}>
+                            <option value="pending" {{ $currentStatus === 'pending' ? 'selected' : '' }} disabled>
                                 Chờ xác nhận
                             </option>
 
-                            <option value="confirmed" {{ $currentStatus == 'confirmed' ? 'selected' : '' }}
-                                {{ in_array($currentStatus, ['completed', 'cancelled']) ? 'disabled' : '' }}>
+                            <option value="confirmed" {{ $currentStatus === 'confirmed' ? 'selected' : '' }}
+                                {{ !in_array($currentStatus, ['pending']) ? 'disabled' : '' }}>
                                 Đã xác nhận
                             </option>
 
-                            <option value="cancelled" {{ $currentStatus == 'cancelled' ? 'selected' : '' }}
-                                {{ $currentStatus != 'cancelled' ? 'disabled' : '' }}>
+                            <option value="completed" {{ $currentStatus === 'completed' ? 'selected' : '' }}
+                                {{ $currentStatus !== 'confirmed' ? 'disabled' : '' }}>
+                                Hoàn thành
+                            </option>
+
+                            <option value="cancelled" {{ $currentStatus === 'cancelled' ? 'selected' : '' }}
+                                {{ !in_array($currentStatus, ['pending', 'confirmed']) ? 'disabled' : '' }}>
                                 Đã hủy
                             </option>
 
-                            <option value="completed" {{ $currentStatus == 'completed' ? 'selected' : '' }}
-                                {{ $currentStatus != 'completed' && $currentStatus == 'cancelled' ? 'disabled' : '' }}>
-                                Đã hoàn thành
-                            </option>
                         </select>
                         @error('status')
                             <div class="invalid-feedback">{{ $message }}</div>
