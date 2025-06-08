@@ -18,6 +18,7 @@ if (!function_exists('getPermissionLabel')) {
             'edit_doctors' => 'Sửa bác sĩ',
             'delete_doctors' => 'Xóa bác sĩ',
 
+
             // 3. Phòng ban
             'view_departments' => 'Xem phòng ban',
             'create_departments' => 'Thêm phòng ban',

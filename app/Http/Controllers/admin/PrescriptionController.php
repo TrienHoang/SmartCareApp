@@ -15,7 +15,7 @@ class PrescriptionController extends Controller
     {
         $prescriptions = Prescription::with([
             'medicalRecord.appointment.doctor.user',
-            'prescriptionItems.medicine'              
+            'prescriptionItems.medicine'
         ])
             ->orderByDesc('prescribed_at')
             ->paginate(10);

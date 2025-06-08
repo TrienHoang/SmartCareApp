@@ -38,14 +38,6 @@
       </a>
     </li>
 
-    <!-- Lịch làm việc bác sĩ -->
-    <li class="menu-item">
-      <a href="{{ route('admin.schedules.index') }}" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-calendar-check"></i>
-        <div data-i18n="Lịch làm việc bác sĩ">Lịch làm việc bác sĩ</div>
-      </a>
-    </li>
-
     <!-- Quản lý lịch hẹn khám -->
     <li class="menu-item">
       <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -96,7 +88,6 @@
         </li>
       </ul>
     </li>
-
     <!-- Quản lý đơn thuốc -->
     <li class="menu-item">
       <a href="{{ route('admin.prescriptions.index') }}" class="menu-link menu-toggle">
@@ -141,7 +132,12 @@
       <ul class="menu-sub">
         <li class="menu-item">
           <a href="{{ route('admin.doctors.index') }}" class="menu-link">
-            <div data-i18n="List">Danh sách</div>
+            <div data-i18n="Danh sách bác sĩ">Danh sách bác sĩ</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="{{ route('admin.schedules.index') }}" class="menu-link">
+            <div data-i18n="Lịch làm việc bác sĩ">Lịch làm việc bác sĩ</div>
           </a>
         </li>
       </ul>
@@ -174,7 +170,7 @@
             <div data-i18n="List">Danh sách</div>
           </a>
         </li>
-        
+
       </ul>
     </li>
     <!-- Đăng xuất -->

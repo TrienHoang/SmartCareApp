@@ -237,12 +237,7 @@ Route::group([
         Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show');
     });
 
-
-
-
-
-
-
+    
     // Nhóm quản lý bác sĩ
     Route::group([
         'prefix' => 'doctors',
