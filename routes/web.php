@@ -331,3 +331,23 @@ Route::prefix('admin/doctor_leaves')->name('admin.doctor_leaves.')->group(functi
     Route::get('/edit/{id}', [\App\Http\Controllers\admin\DoctorLeaveController::class, 'edit'])->name('edit');
     Route::put('/update/{id}', [\App\Http\Controllers\admin\DoctorLeaveController::class, 'update'])->name('update');
 });
+// Quản lý danh mục dịch vụ
+Route::prefix('admin/categories')->name('admin.categories.')->group(function () {
+    Route::get('/', [ServiceCategoryController::class, 'index'])->name('index');
+    Route::get('/create', [ServiceCategoryController::class, 'create'])->name('create');
+    Route::post('/store', [ServiceCategoryController::class, 'store'])->name('store');
+    Route::get('/edit/{id}', [ServiceCategoryController::class, 'edit'])->name('edit');
+    Route::put('/update/{id}', [ServiceCategoryController::class, 'update'])->name('update');
+    Route::delete('/destroy/{id}', [ServiceCategoryController::class, 'destroy'])->name('destroy');
+    Route::get('/show/{id}', [ServiceCategoryController::class, 'show'])->name('show');
+});
+// Quản lý dịch vụ
+Route::prefix('admin/services')->name('admin.services.')->group(function () {
+    Route::get('/', [ServiceController::class, 'index'])->name('index');
+    Route::get('/create', [ServiceController::class, 'create'])->name('create');
+    Route::post('/store', [ServiceController::class, 'store'])->name('store');
+    Route::get('/edit/{id}', [ServiceController::class, 'edit'])->name('edit');
+    Route::put('/update/{id}', [ServiceController::class, 'update'])->name('update');
+    Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])->name('destroy');
+    Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
+});

@@ -1,6 +1,5 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-
-    <div class="app-brand demo ">
+    <div class="app-brand demo">
         <a href="index.html" class="app-brand-link">
             <span class="app-brand-logo demo">
                 <!-- SVG logo giữ nguyên -->
@@ -14,30 +13,76 @@
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
-        <!-- Email -->
+        <!-- Quản lý hệ thống -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Quản lý hệ thống</span>
+        </li>
+        <!-- Người dùng -->
         <li class="menu-item">
-            <a href="app-email.html" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-envelope"></i>
-                <div data-i18n="Email">Email</div>
+            <a href="{{ route('admin.users.index') }}" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-user-circle"></i>
+                <div data-i18n="Users">Người dùng</div>
             </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('admin.users.index') }}" class="menu-link">
+                        <div data-i18n="List">Danh sách</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <!-- Vai trò -->
+        <li class="menu-item">
+            <a href="{{ route('admin.roles.index') }}" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-shield-quarter"></i>
+                <div data-i18n="Roles">Vai trò</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('admin.roles.index') }}" class="menu-link">
+                        <div data-i18n="List">Danh sách</div>
+                    </a>
+                </li>
+            </ul>
         </li>
 
-        <!-- Chat -->
+        <!-- Quản lý bác sĩ và phòng ban -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Quản lý bác sĩ & phòng ban</span>
+        </li>
+        <!-- Quản lý bác sĩ -->
         <li class="menu-item">
-            <a href="app-chat.html" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-chat"></i>
-                <div data-i18n="Chat">Chat</div>
+            <a href="{{ route('admin.doctors.index') }}" class="menu-link menu-toggle">
+                <i class="menu-icon fas fa-user-md"></i>
+                <div data-i18n="Quản Lý Bác Sỹ">Quản lý bác sĩ</div>
             </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('admin.doctors.index') }}" class="menu-link">
+                        <div data-i18n="List">Danh sách</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <!-- Quản lý phòng ban -->
+        <li class="menu-item">
+            <a href="{{ route('admin.departments.index') }}" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-building-house"></i>
+                <div data-i18n="Quản Lý Phòng Ban">Quản lý phòng ban</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('admin.departments.index') }}" class="menu-link">
+                        <div data-i18n="List">Danh sách</div>
+                    </a>
+                </li>
+            </ul>
         </li>
 
-        <!-- Vouchers -->
-        <li class="menu-item">
-            <a href="{{ route('admin.vouchers.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons fas fa-ticket-alt"></i> <!-- vé giảm giá -->
-                <div data-i18n="Vouchers">Vouchers</div>
-            </a>
+        <!-- Quản lý lịch -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Quản lý lịch</span>
         </li>
-
         <!-- Lịch làm việc bác sĩ -->
         <li class="menu-item">
             <a href="{{ route('admin.schedules.index') }}" class="menu-link">
@@ -45,21 +90,14 @@
                 <div data-i18n="Lịch làm việc bác sĩ">Lịch làm việc bác sĩ</div>
             </a>
         </li>
-
-        <!-- Quản lý lịch hẹn khám -->
-          <li class="menu-item">
+        <!-- Lịch nghỉ bác sĩ -->
+        <li class="menu-item">
             <a href="{{ route('admin.doctor_leaves.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-plus-medical"></i>
-                <div data-i18n="Lịch nghỉ bác sĩ">Lịch nghỉ bác sĩ </div>
+                <div data-i18n="Lịch nghỉ bác sĩ">Lịch nghỉ bác sĩ</div>
             </a>
         </li>
-        <!-- e-commerce-app menu start -->
-
-        <!-- e-commerce-app menu end -->
-        <!-- Academy menu start -->
-
-        <!-- Academy menu end -->
-
+        <!-- Quản lý lịch hẹn khám -->
         <li class="menu-item">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class='menu-icon tf-icons bx bx-calendar'></i>
@@ -80,41 +118,28 @@
             </ul>
         </li>
 
-
-        <!-- Users -->
-        <li class="menu-item">
-            <a href="{{ route('admin.users.index') }}" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-user-circle"></i>
-                <div data-i18n="Users">Người dùng</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ route('admin.users.index') }}" class="menu-link">
-                        <div data-i18n="List">Danh sách</div>
-                    </a>
-                </li>
-            </ul>
+        <!-- Quản lý dịch vụ và đơn thuốc -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Dịch vụ & đơn thuốc</span>
         </li>
-
-        <!-- Roles -->
+        <!-- Danh mục dịch vụ -->
         <li class="menu-item">
-            <a href="{{ route('admin.roles.index') }}" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-shield-quarter"></i> <!-- biểu tượng bảo mật -->
-                <div data-i18n="Roles">Vai trò</div>
+            <a href="{{ route('admin.categories.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-category"></i>
+                <div data-i18n="Danh mục dịch vụ">Danh mục dịch vụ</div>
             </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ route('admin.roles.index') }}" class="menu-link">
-                        <div data-i18n="List">Danh sách</div>
-                    </a>
-                </li>
-            </ul>
         </li>
-
+        <!-- Dịch vụ -->
+        <li class="menu-item">
+            <a href="{{ route('admin.services.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-cog"></i>
+                <div data-i18n="Dịch vụ">Dịch vụ</div>
+            </a>
+        </li>
         <!-- Quản lý đơn thuốc -->
         <li class="menu-item">
             <a href="{{ route('admin.prescriptions.index') }}" class="menu-link menu-toggle">
-                <i class="menu-icon fas fa-file-prescription"></i> <!-- icon đơn thuốc FontAwesome -->
+                <i class="menu-icon fas fa-file-prescription"></i>
                 <div data-i18n="Quản lý đơn thuốc">Quản lý đơn thuốc</div>
             </a>
             <ul class="menu-sub">
@@ -130,57 +155,23 @@
                 </li>
             </ul>
         </li>
-
-        <!-- Danh mục dịch vụ -->
+        <!-- Vouchers -->
         <li class="menu-item">
-            <a href="{{ route('admin.categories.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-category"></i>
-                <div data-i18n="Danh mục dịch vụ">Danh mục dịch vụ</div>
-            </a>
-        </li>
-        <!-- dịch vụ -->
-        <li class="menu-item">
-            <a href="{{ route('admin.services.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-cog"></i>
-                <div data-i18n="Dịch vụ">Dịch vụ</div>
+            <a href="{{ route('admin.vouchers.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons fas fa-ticket-alt"></i>
+                <div data-i18n="Vouchers">Vouchers</div>
             </a>
         </li>
 
-        <!-- Quản lý bác sỹ -->
-        <li class="menu-item">
-            <a href="{{ route('admin.doctors.index') }}" class="menu-link menu-toggle">
-                <i class="menu-icon fas fa-user-md"></i>
-                <div data-i18n="Quản Lý Bác Sỹ">Quản lý bác sỹ</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ route('admin.doctors.index') }}" class="menu-link">
-                        <div data-i18n="List">Danh sách</div>
-                    </a>
-                </li>
-            </ul>
+        <!-- Quản lý thanh toán -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Thanh toán</span>
         </li>
-
-        <!-- Quản lý phòng ban -->
-        <li class="menu-item">
-            <a href="{{ route('admin.departments.index') }}" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-building-house"></i> <!-- biểu tượng phòng ban -->
-                <div data-i18n="Quản Lý Phòng Ban">Quản lý phòng ban</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ route('admin.departments.index') }}" class="menu-link">
-                        <div data-i18n="List">Danh sách</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
         <!-- Quản lý lịch sử thanh toán -->
         <li class="menu-item">
             <a href="{{ route('admin.payments.index') }}" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-wallet"></i>
-                <div data-i18n="Quản Lý Lịch xử Thanh Toán">Thanh toán</div>
+                <div data-i18n="Quản Lý Lịch sử Thanh Toán">Thanh toán</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
@@ -188,10 +179,32 @@
                         <div data-i18n="List">Danh sách</div>
                     </a>
                 </li>
-
             </ul>
         </li>
+
+        <!-- Liên lạc -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Liên lạc</span>
+        </li>
+        <!-- Email -->
+        <li class="menu-item">
+            <a href="app-email.html" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-envelope"></i>
+                <div data-i18n="Email">Email</div>
+            </a>
+        </li>
+        <!-- Chat -->
+        <li class="menu-item">
+            <a href="app-chat.html" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-chat"></i>
+                <div data-i18n="Chat">Chat</div>
+            </a>
+        </li>
+
         <!-- Đăng xuất -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Tài khoản</span>
+        </li>
         <li class="menu-item">
             <a href="{{ route('logout') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-log-out"></i>
