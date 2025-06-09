@@ -69,6 +69,12 @@
                 <div data-i18n="Lịch làm việc bác sĩ">Lịch làm việc bác sĩ </div>
             </a>
         </li>
+          <li class="menu-item">
+            <a href="{{ route('admin.doctor_leaves.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-plus-medical"></i>
+                <div data-i18n="Lịch nghỉ bác sĩ">Lịch nghỉ bác sĩ </div>
+            </a>
+        </li>
         <!-- e-commerce-app menu start -->
 
         <!-- e-commerce-app menu end -->

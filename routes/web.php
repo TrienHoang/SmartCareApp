@@ -76,3 +76,9 @@ Route::prefix('admin/appointments')->name('admin.appointments.')->group(function
     Route::get('/create', [AppointmentController::class, 'create'])->name('create');
     Route::post('/store', [AppointmentController::class, 'store'])->name('store');
 });
+// Quản lý lịch nghỉ của bác sĩ
+Route::prefix('admin/doctor_leaves')->name('admin.doctor_leaves.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\admin\DoctorLeaveController::class, 'index'])->name('index');
+    Route::get('/edit/{id}', [\App\Http\Controllers\admin\DoctorLeaveController::class, 'edit'])->name('edit');
+    Route::put('/update/{id}', [\App\Http\Controllers\admin\DoctorLeaveController::class, 'update'])->name('update');
+});
