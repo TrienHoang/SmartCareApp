@@ -63,7 +63,7 @@
                 <input type="text" name="username" placeholder="Tên đăng nhập">
             </div>
             <div class="input-field">
-                <i class="fas fa-envelope"></i>
+                <i class="fas fa-envelope" style="color: #5a8dee;"></i>
                 <input type="email" name="email" placeholder="Email">
             </div>
             <div class="input-field">
@@ -84,7 +84,7 @@
         <div class="panel left-panel">
             <div class="content">
                 <h3>Đã có tài khoản?</h3>
-                <p>Chào mừng đến với SmartCare - cửa hàng điện thoại số 1 Việt Nam.</p>
+                <p>Chào mừng đến với SmartCare - dịch vụ đặt lịch khám số 1 tại Việt Nam.</p>
                 <button class="btn" id="sign-in-btn">Đăng nhập</button>
             </div>
             <img src="{{ asset('LayoutClient/img/icon1.png') }}" alt="" class="image">
@@ -93,7 +93,7 @@
         <div class="panel right-panel">
             <div class="content">
                 <h3>Chưa có tài khoản?</h3>
-                <p>Chào mừng đến với SmartCare - cửa hàng điện thoại số 1 Việt Nam.</p>
+                <p>Chào mừng đến với SmartCare - dịch vụ đặt lịch khám số 1 tại Việt Nam.</p>
                 <button class="btn" id="sign-up-btn">Đăng ký</button>
             </div>
             <img src="{{ asset('LayoutClient/img/icon2.png') }}" alt="" class="image">

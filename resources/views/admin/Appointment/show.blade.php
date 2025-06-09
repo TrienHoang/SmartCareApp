@@ -1,0 +1,100 @@
+@extends('admin.dashboard')
+@section('title', 'Chi tiết Lịch hẹn khám')
+@section('content')
+    <div class="container">
+        <h1>Chi tiết Lịch hẹn khám #{{ $appointment->id }}</h1>
+
+        <a href="{{ route('admin.appointments.index') }}" class="btn btn-secondary mb-3">
+            <i class="bx bx-arrow-back"></i> Quay lại danh sách
+        </a>
+
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th>Bệnh nhân</th>
+                    <td>{{ $appointment->patient->full_name ?? 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <th>Bác sĩ</th>
+                    <td>{{ $appointment->doctor->user->full_name ?? 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <th>Dịch vụ khám</th>
+                    <td>{{ $appointment->service->name ?? 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <th>Phòng khám</th>
+                    <td>{{ $appointment->doctor->room->name ?? 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <th>Ngày giờ khám</th>
+                    <td>{{ $appointment->formatted_time }}</td>
+                </tr>
+                <tr>
+                    <th>Trạng thái</th>
+                    <td>
+                        @php
+                            $statusConfig = [
+                                'pending' => [
+                                    'color' => 'warning',
+                                    'text' => 'Chờ xác nhận',
+                                    'icon' => 'bx-time',
+                                ],
+                                'confirmed' => [
+                                    'color' => 'info',
+                                    'text' => 'Đã xác nhận',
+                                    'icon' => 'bx-check',
+                                ],
+                                'completed' => [
+                                    'color' => 'success',
+                                    'text' => 'Hoàn thành',
+                                    'icon' => 'bx-check-double',
+                                ],
+                                'cancelled' => ['color' => 'danger', 'text' => 'Đã hủy', 'icon' => 'bx-x'],
+                            ];
+                            $config = $statusConfig[$appointment->status] ?? [
+                                'color' => 'secondary',
+                                'text' => $appointment->status,
+                                'icon' => 'bx-help',
+                            ];
+                        @endphp
+
+                        <span class="badge bg-{{ $config['color'] }} status-badge">
+                            <i class="bx {{ $config['icon'] }}"></i> {{ $config['text'] }}
+                        </span>
+
+                        @if ($appointment->status == 'pending')
+                            <div class="quick-status-buttons">
+                                <button class="btn btn-success quick-status-btn"
+                                    onclick="updateStatus({{ $appointment->id }}, 'confirmed')">
+                                    Xác nhận
+                                </button>
+                                <button class="btn btn-danger quick-status-btn"
+                                    onclick="updateStatus({{ $appointment->id }}, 'cancelled')">
+                                    Hủy
+                                </button>
+                            </div>
+                        @endif
+                    </td>
+                </tr>
+                <tr>
+                    <th>Ghi chú</th>
+                    <td>{{ $appointment->reason ?? 'Không có ghi chú' }}</td>
+                </tr>
+                <tr>
+                    <th>Lí do hủy</th>
+                    <th>{{ $appointment->cancel_reason ?? 'Không' }}</th>
+                </tr>
+               
+                <tr>
+                    <th>Ngày tạo</th>
+                    <td>{{ $appointment->created_at->format('d/m/Y H:i') }}</td>
+                </tr>
+                <tr>
+                    <th>Cập nhật lần cuối</th>
+                    <td>{{ $appointment->updated_at->format('d/m/Y H:i') }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+@endsection
