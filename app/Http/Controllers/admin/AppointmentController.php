@@ -122,8 +122,18 @@ class AppointmentController extends Controller
             ->exists();
 
         if (!$working) {
+            $workingDays = WorkingSchedule::where('doctor_id', $request->doctor_id)
+                ->pluck('day_of_week')
+                ->map(function ($day) {
+                    return __('days.' . strtolower($day));
+                })
+                ->toArray();
+
+            $daysText = implode(', ', $workingDays);
+
             return back()->withErrors([
-                'doctor_id' => 'Bác sĩ không làm việc vào ngày bạn chọn. Vui lòng chọn ngày khác.'
+                'doctor_id' => 'Bác sĩ không làm việc vào ngày bạn chọn. Vui lòng chọn ngày khác. '
+                    . 'Các ngày làm việc của bác sĩ là: ' . $daysText . '.'
             ])->withInput();
         }
 
@@ -147,25 +157,46 @@ class AppointmentController extends Controller
     {
         $request->validate([
             'appointment_time' => 'required|date|after:now',
-            'status' => 'required|in:pending,confirmed,completed,cancelled'
+            'status' => ['nullable', 'in:pending,confirmed,completed,cancelled'],
         ]);
 
         $appointment = Appointment::findOrFail($id);
 
-        if ($appointment->status === 'completed' && $request->status !== 'completed') {
-            return redirect()->back()->withErrors(['status' => 'Không thể thay đổi trạng thái khi lịch hẹn đã hoàn thành.']);
+        // Nếu lịch hẹn đã hoàn thành hoặc đã hủy thì không cho cập nhật nữa
+        if (in_array($appointment->status, ['completed', 'cancelled'])) {
+            return redirect()->back()->withErrors([
+                'status' => 'Không thể cập nhật lịch hẹn đã hoàn thành hoặc đã hủy.'
+            ]);
         }
 
-        if ($appointment->status === 'completed' && $appointment->status === 'cancelled'){
-            if ($request->status !== 'cancelled'){
-                return redirect()->back()->withErrors(['status' => 'Không thể thay đổi trạng thái khi lịch hẹn đã hủy.']);
-            }
+        // Kiểm tra lịch làm việc của bác sĩ cho thời gian mới
+        $appointmentDate = Carbon::parse($request->appointment_time);
+        $dayOfWeek = $appointmentDate->format('l');
+
+        $working = WorkingSchedule::where('doctor_id', $appointment->doctor_id)
+            ->where('day_of_week', $dayOfWeek)
+            ->exists();
+
+        if (!$working) {
+            $workingDays = WorkingSchedule::where('doctor_id', $appointment->doctor_id)
+                ->pluck('day_of_week')
+                ->map(function ($day) {
+                    return __('days.' . strtolower($day));
+                })
+                ->toArray();
+
+            $daysText = implode(', ', $workingDays);
+
+            return back()->withErrors([
+                'appointment_time' => 'Bác sĩ không làm việc vào ngày này. Các ngày làm việc là: ' . $daysText . '.'
+            ])->withInput();
         }
 
         $appointment->update($request->all());
 
         return redirect()->route('admin.appointments.index')->with('success', 'Cập nhật lịch hẹn thành công');
     }
+
 
     public function cancel($id)
     {
