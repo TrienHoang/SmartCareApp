@@ -17,6 +17,8 @@ class DoctorLeave extends Model
         'created_at',
         'approved'
     ];
+
+    public $timestamps = false;
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);

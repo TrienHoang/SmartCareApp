@@ -11,13 +11,11 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        $roles = Role::all();
-        $permissions = Permission::all();
+        $role = Role::find(1); // lấy role_id = 1
 
-        foreach ($roles as $role) {
-            $role->permissions()->attach(
-                $permissions->random(rand(2, 5))->pluck('id')->toArray()
-            );
+        if ($role) {
+            $permissionIds = range(1, 57); // tạo mảng từ 1 đến 52
+            $role->permissions()->sync($permissionIds);
         }
     }
 }

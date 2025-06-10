@@ -13,6 +13,6 @@ class ReviewSeeder extends Seeder
      */
     public function run(): void
     {
-        Review::factory()->count(550)->create();
+        Review::factory()->count(10)->create();
     }
 }
