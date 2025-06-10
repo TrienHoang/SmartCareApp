@@ -102,7 +102,6 @@
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class='menu-icon tf-icons bx bx-calendar'></i>
                 <div>Quản lý lịch hẹn khám</div>
-                <div class="badge bg-danger rounded-pill ms-auto">4</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">

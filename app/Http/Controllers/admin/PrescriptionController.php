@@ -7,6 +7,7 @@ use App\Models\MedicalRecord;
 use App\Models\Medicine;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class PrescriptionController extends Controller
@@ -14,8 +15,9 @@ class PrescriptionController extends Controller
     public function index()
     {
         $prescriptions = Prescription::with([
+            'medicalRecord.appointment.patient',
             'medicalRecord.appointment.doctor.user',
-            'prescriptionItems.medicine'              
+            'prescriptionItems.medicine'
         ])
             ->orderByDesc('prescribed_at')
             ->paginate(10);
@@ -34,7 +36,7 @@ class PrescriptionController extends Controller
     {
         $request->validate([
             'medical_record_id' => 'required|exists:medical_records,id',
-            'prescribed_at' => 'required|date',
+            'prescribed_at' => ['required', 'date', 'before_or_equal:now'],
             'notes' => 'nullable|string',
             'medicines' => 'required|array|min:1',
             'medicines.*.medicine_id' => 'required|exists:medicines,id',
@@ -42,9 +44,11 @@ class PrescriptionController extends Controller
             'medicines.*.usage_instructions' => 'nullable|string',
         ]);
 
+        $prescribedAt = \Carbon\Carbon::parse($request->prescribed_at);
+
         $prescription = Prescription::create([
             'medical_record_id' => $request->medical_record_id,
-            'prescribed_at' => $request->prescribed_at,
+            'prescribed_at' => $prescribedAt,
             'notes' => $request->notes,
         ]);
 
@@ -59,6 +63,7 @@ class PrescriptionController extends Controller
 
         return redirect()->route('admin.prescriptions.index')->with('success', 'Đơn thuốc đã được tạo thành công.');
     }
+
 
     public function edit($id)
     {
@@ -109,5 +114,15 @@ class PrescriptionController extends Controller
             ->findOrFail($id);
 
         return view('admin.prescriptions.show', compact('prescription'));
+    }
+
+    public function exportPdf($id)
+    {
+        $prescription = Prescription::with(['medicalRecord.appointment.patient', 'items.medicine'])
+            ->findOrFail($id);
+
+        $pdf = PDF::loadView('admin.prescriptions.pdf', compact('prescription'));
+
+        return $pdf->download('don-thuoc-' . $prescription->id . '.pdf');
     }
 }

@@ -237,6 +237,7 @@ Route::group([
             ->middleware('check_permission:edit_prescriptions')->name('update');
 
         Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show');
+        Route::get('/{id}/print', [PrescriptionController::class, 'exportPdf'])->name('print');
     });
 
 
