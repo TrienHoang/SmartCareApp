@@ -42,6 +42,6 @@ class DatabaseSeeder extends Seeder
             NotificationSeeder::class,
             FaqSeeder::class
         ]);
+        $this->call(ReviewSeeder::class);
     }
-    
 }
