@@ -17,6 +17,8 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\ServiceCategoryController;
 use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\ReviewController;
+
 
 Route::get('/', function () {
     return view('client.home');
@@ -237,7 +239,7 @@ Route::group([
         Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show');
     });
 
-    
+
     // Nhóm quản lý bác sĩ
     Route::group([
         'prefix' => 'doctors',
@@ -315,3 +317,17 @@ Route::get('admin/services/edit/{id}', [ServiceController::class, 'edit'])->name
 Route::put('admin/services/edit/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
 Route::delete('admin/services/destroy/{id}', [ServiceController::class, 'destroy'])->name('admin.services.destroy');
 Route::get('admin/services/show/{id}', [ServiceController::class, 'show'])->name('admin.services.show');
+
+// Quản lý đánh giá
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+    Route::group([
+        'prefix' => 'reviews',
+        'as' => 'admin.reviews.',
+        'middleware' => 'check_permission:view_reviews'
+    ], function () {
+        Route::get('/', [ReviewController::class, 'index'])->name('index');
+        Route::get('/{id}', [ReviewController::class, 'show'])->name('show');
+        Route::post('/{id}/toggle', [ReviewController::class, 'toggleVisibility'])
+            ->middleware('check_permission:edit_reviews')->name('toggle');
+    });
+});

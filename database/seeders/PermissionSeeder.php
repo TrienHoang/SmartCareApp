@@ -82,6 +82,7 @@ class PermissionSeeder extends Seeder
             // Reviews
             ['name' => 'view_reviews', 'description' => 'Xem đánh giá', 'group' => 'Reviews'],
             ['name' => 'delete_reviews', 'description' => 'Xoá đánh giá', 'group' => 'Reviews'],
+            ['name' => 'edit_reviews', 'description' => 'Chỉnh sửa đánh giá', 'group' => 'Reviews'],
 
             // Notifications & Content
             ['name' => 'manage_support_content', 'description' => 'Quản lý nội dung hỗ trợ', 'group' => 'Content'],
@@ -89,6 +90,7 @@ class PermissionSeeder extends Seeder
 
             // Statistics
             ['name' => 'view_statistics', 'description' => 'Xem thống kê', 'group' => 'Statistics'],
+
         ];
 
         DB::table('permissions')->insert($permissions);
