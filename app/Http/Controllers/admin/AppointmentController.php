@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreAppointmentRequest;
+use App\Http\Requests\UpdateStatusAppointmentRequest;
 use App\Models\Appointment;
 use App\Models\Department;
 use App\Models\Doctor;
@@ -103,17 +105,8 @@ class AppointmentController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreAppointmentRequest $request)
     {
-        $request->validate([
-            'patient_id' => 'required|exists:users,id',
-            'doctor_id' => 'required|exists:doctors,id',
-            'service_id' => 'required|exists:services,id',
-            'appointment_time' => 'required|date',
-            'status' => 'required|in:pending,confirmed,cancelled',
-            'reason' => 'nullable|string|max:255',
-        ]);
-
         $appointmentDate = Carbon::parse($request->appointment_time);
         $dayOfWeek = $appointmentDate->format('l');
 
@@ -155,11 +148,6 @@ class AppointmentController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'appointment_time' => 'required|date|after:now',
-            'status' => ['nullable', 'in:pending,confirmed,completed,cancelled'],
-        ]);
-
         $appointment = Appointment::findOrFail($id);
 
         // Nếu lịch hẹn đã hoàn thành hoặc đã hủy thì không cho cập nhật nữa
@@ -216,15 +204,9 @@ class AppointmentController extends Controller
         return view('admin.Appointment.show', compact('appointment'));
     }
 
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(UpdateStatusAppointmentRequest $request, $id)
     {
         $appointment = Appointment::findOrFail($id);
-
-        $request->validate([
-            'status' => 'required|in:pending,confirmed,completed,cancelled',
-            'note' => 'nullable|string|max:500'
-        ]);
-
         $oldStatus = $appointment->status;
         $appointment->update([
             'status' => $request->status,
