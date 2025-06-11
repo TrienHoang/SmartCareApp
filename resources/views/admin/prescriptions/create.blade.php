@@ -31,7 +31,7 @@
                                         <label for="medical_record_id">Hồ sơ bệnh án <span
                                                 class="text-danger">*</span></label>
                                         <select name="medical_record_id" id="medical_record_id" class="form-control select2"
-                                            required>
+                                            >
                                             <option value="">-- Chọn hồ sơ bệnh án --</option>
                                             @foreach ($medicalRecords as $record)
                                                 <option value="{{ $record->id }}"
@@ -48,7 +48,7 @@
                                         <label for="prescribed_at">Ngày kê đơn <span class="text-danger">*</span></label>
                                         <input type="datetime-local" name="prescribed_at" id="prescribed_at"
                                             class="form-control"
-                                            value="{{ old('prescribed_at', now()->format('Y-m-d\TH:i')) }}" required>
+                                            value="{{ old('prescribed_at', now()->format('Y-m-d\TH:i')) }}" >
                                     </div>
                                 </div>
                             </div>
@@ -67,7 +67,7 @@
                                             <div class="form-group">
                                                 <label>Thuốc <span class="text-danger">*</span></label>
                                                 <select name="medicines[0][medicine_id]"
-                                                    class="form-control medicine-select" required>
+                                                    class="form-control medicine-select">
                                                     <option value="">-- Chọn thuốc --</option>
                                                     @foreach ($medicines as $medicine)
                                                         <option value="{{ $medicine->id }}"
@@ -84,7 +84,7 @@
                                             <div class="form-group">
                                                 <label>Số lượng <span class="text-danger">*</span></label>
                                                 <input type="number" name="medicines[0][quantity]" class="form-control"
-                                                    min="1" required>
+                                                    min="1" >
                                             </div>
                                         </div>
                                         <div class="col-md-5">

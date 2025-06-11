@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePrescriptionRequest;
+use App\Http\Requests\UpdatePrescriptionRequest;
 use App\Models\Department;
 use App\Models\MedicalRecord;
 use App\Models\Medicine;
@@ -70,17 +72,8 @@ class PrescriptionController extends Controller
 
         return view('admin.prescriptions.create', compact('medicalRecords', 'medicines'));
     }
-    public function store(Request $request)
+    public function store(StorePrescriptionRequest $request)
     {
-        $request->validate([
-            'medical_record_id' => 'required|exists:medical_records,id',
-            'prescribed_at' => ['required', 'date', 'before_or_equal:now'],
-            'notes' => 'nullable|string',
-            'medicines' => 'required|array|min:1',
-            'medicines.*.medicine_id' => 'required|exists:medicines,id',
-            'medicines.*.quantity' => 'required|integer|min:1',
-            'medicines.*.usage_instructions' => 'nullable|string',
-        ]);
 
         $prescribedAt = \Carbon\Carbon::parse($request->prescribed_at);
 
@@ -114,19 +107,8 @@ class PrescriptionController extends Controller
         return view('admin.prescriptions.edit', compact('prescription', 'medicalRecords', 'medicines'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdatePrescriptionRequest $request, $id)
     {
-        $request->validate([
-            'medical_record_id' => 'required|exists:medical_records,id',
-            'prescribed_at' => 'required|date',
-            'notes' => 'nullable|string',
-            'medicines' => 'required|array|min:1',
-            'medicines.*.medicine_id' => 'required|exists:medicines,id',
-            'medicines.*.quantity' => 'required|integer|min:1',
-            'medicines.*.usage_instructions' => 'nullable|string',
-            'prescribed_at' => ['required', 'date', 'before_or_equal:now'],
-        ]);
-
         $prescription = Prescription::findOrFail($id);
         $prescription->update([
             'medical_record_id' => $request->medical_record_id,
@@ -163,8 +145,8 @@ class PrescriptionController extends Controller
     {
         $prescription = Prescription::with(['medicalRecord.appointment.patient', 'items.medicine'])
             ->findOrFail($id);
-        
-        $prescription->items = $prescription->items->filter(function ($item){
+
+        $prescription->items = $prescription->items->filter(function ($item) {
             return $item->medicine->created_at->gte(now()->subMonths(6));
         });
 
