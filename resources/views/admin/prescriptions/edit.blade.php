@@ -63,6 +63,7 @@
                                                 <option value="{{ $med->id }}"
                                                     {{ $item->medicine_id == $med->id ? 'selected' : '' }}>
                                                     {{ $med->name }} ({{ $med->unit }})
+                                                    - {{ $med->formatted_price }}
                                                 </option>
                                             @endforeach
                                         </select>

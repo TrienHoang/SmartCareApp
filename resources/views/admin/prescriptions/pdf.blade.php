@@ -145,23 +145,6 @@
             text-align: right;
         }
 
-        .signature-section {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 40px;
-        }
-
-        .signature-box {
-            text-align: center;
-            width: 200px;
-        }
-
-        .signature-line {
-            border-top: 1px solid #333;
-            margin-top: 60px;
-            margin-bottom: 5px;
-        }
-
         @media print {
             body {
                 margin: 0;
@@ -182,59 +165,66 @@
         <div style="font-size: 14px; margin-top: 10px;">Số: {{ str_pad($prescription->id, 6, '0', STR_PAD_LEFT) }}</div>
     </div>
 
-    <div class="patient-doctor-info">
-        <div class="patient-info">
-            <div class="section-title">THÔNG TIN BỆNH NHÂN</div>
-            <div class="info-row">
-                <span class="info-label">Họ và tên:</span>
-                <span>{{ $prescription->medicalRecord->appointment->patient->full_name }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Giới tính:</span>
-                <span>{{ $prescription->medicalRecord->appointment->patient->gender ?? 'Không xác định' }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Ngày sinh:</span>
-                <span>
-                    @if ($prescription->medicalRecord->appointment->patient->date_of_birth)
-                        {{ \Carbon\Carbon::parse($prescription->medicalRecord->appointment->patient->date_of_birth)->format('d/m/Y') }}
-                        ({{ \Carbon\Carbon::parse($prescription->medicalRecord->appointment->patient->date_of_birth)->age }}
-                        tuổi)
-                    @else
-                        Không xác định
-                    @endif
-                </span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Điện thoại:</span>
-                <span>{{ $prescription->medicalRecord->appointment->patient->phone }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Địa chỉ:</span>
-                <span>{{ $prescription->medicalRecord->appointment->patient->address ?? 'Không xác định' }}</span>
-            </div>
-        </div>
-
-        <div class="doctor-info">
-            <div class="section-title">THÔNG TIN BÁC SĨ</div>
-            <div class="info-row">
-                <span class="info-label">Bác sĩ:</span>
-                <span>{{ $prescription->medicalRecord->appointment->doctor->user->full_name }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Chuyên môn:</span>
-                <span>{{ $prescription->medicalRecord->appointment->doctor->specialization }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Ngày kê đơn:</span>
-                <span>{{ $prescription->prescribed_at->format('d/m/Y H:i') }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Hồ sơ BA:</span>
-                <span>{{ $prescription->medicalRecord->code }}</span>
-            </div>
-        </div>
-    </div>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+        <tr>
+            <td style="width: 50%; vertical-align: top; padding-right: 20px;">
+                <div style="font-size: 14px; font-weight: bold; color: #2c5aa0; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">THÔNG TIN BỆNH NHÂN</div>
+                
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="font-weight: bold; width: 120px; padding: 4px 0; color: #333;">Họ và tên:</td>
+                        <td style="color: #333; padding: 4px 0;">{{ $prescription->medicalRecord->appointment->patient->full_name }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold; width: 120px; padding: 4px 0; color: #333;">Giới tính:</td>
+                        <td style="color: #333; padding: 4px 0;">{{ $prescription->medicalRecord->appointment->patient->gender ?? 'Không xác định' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold; width: 120px; padding: 4px 0; color: #333;">Ngày sinh:</td>
+                        <td style="color: #333; padding: 4px 0;">
+                            @if ($prescription->medicalRecord->appointment->patient->date_of_birth)
+                                {{ \Carbon\Carbon::parse($prescription->medicalRecord->appointment->patient->date_of_birth)->format('d/m/Y') }}
+                                ({{ \Carbon\Carbon::parse($prescription->medicalRecord->appointment->patient->date_of_birth)->age }} tuổi)
+                            @else
+                                Không xác định
+                            @endif
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold; width: 120px; padding: 4px 0; color: #333;">Điện thoại:</td>
+                        <td style="color: #333; padding: 4px 0;">{{ $prescription->medicalRecord->appointment->patient->phone }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold; width: 120px; padding: 4px 0; color: #333; vertical-align: top;">Địa chỉ:</td>
+                        <td style="color: #333; padding: 4px 0;">{{ $prescription->medicalRecord->appointment->patient->address ?? 'Không xác định' }}</td>
+                    </tr>
+                </table>
+            </td>
+            
+            <td style="width: 50%; vertical-align: top; padding-left: 20px;">
+                <div style="font-size: 14px; font-weight: bold; color: #2c5aa0; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">THÔNG TIN BÁC SĨ</div>
+                
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="font-weight: bold; width: 120px; padding: 4px 0; color: #333;">Bác sĩ:</td>
+                        <td style="color: #333; padding: 4px 0;">{{ $prescription->medicalRecord->appointment->doctor->user->full_name }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold; width: 120px; padding: 4px 0; color: #333;">Chuyên môn:</td>
+                        <td style="color: #333; padding: 4px 0;">{{ $prescription->medicalRecord->appointment->doctor->specialization }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold; width: 120px; padding: 4px 0; color: #333;">Ngày kê đơn:</td>
+                        <td style="color: #333; padding: 4px 0;">{{ $prescription->prescribed_at->format('d/m/Y H:i') }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold; width: 120px; padding: 4px 0; color: #333;">Hồ sơ BA:</td>
+                        <td style="color: #333; padding: 4px 0;">{{ $prescription->medicalRecord->code }}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 
     @if ($prescription->medicalRecord->diagnosis)
         <div class="info-section">
@@ -314,26 +304,31 @@
             <li><strong>Không tự ý thay đổi:</strong> Không tự ý tăng, giảm liều hoặc ngừng thuốc mà không có sự đồng ý
                 của bác sĩ</li>
             <li><strong>Theo dõi tác dụng phụ:</strong> Nếu có triệu chứng bất thường, hãy liên hệ ngay với bác sĩ</li>
-            <li><strong>Bảo quản thuốc:</strong> Để thuốc ở nơi khô ráo, thoáng mát, tránh ánh sáng trực tiếp</li>
+            <li><strong>Bảo quản thuốc:</strong> Để thuốc ở nơi khô ráo, thông thoáng, tránh ánh sáng trực tiếp</li>
             <li><strong>Hạn sử dụng:</strong> Kể từ 6 tháng trước khi sản xuất</li>
             <li><strong>Tái khám:</strong> Đến tái khám đúng lịch hẹn để theo dõi hiệu quả điều trị</li>
         </ul>
     </div>
 
     <div class="signature-section">
-        <div class="signature-box">
-            <div><strong>BỆNH NHÂN</strong></div>
-            <div>(Ký và ghi rõ họ tên)</div>
-            <div class="signature-line"></div>
-            <div>{{ $prescription->medicalRecord->appointment->patient->full_name }}</div>
-        </div>
-
-        <div class="signature-box">
-            <div><strong>BÁC SĨ KÊ ĐơN</strong></div>
-            <div>(Ký và ghi rõ họ tên)</div>
-            <div class="signature-line"></div>
-            <div>{{ $prescription->medicalRecord->appointment->doctor->user->full_name }}</div>
-        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 40px;">
+            <tr>
+                <td style="width: 50%; text-align: left; vertical-align: top; padding: 10px;">
+                    <div style="color: #333; font-weight: bold; font-size: 12px; margin-bottom: 5px;">BỆNH NHÂN</div>
+                    <div style="color: #333; font-size: 11px; margin-bottom: 5px;">(Ký và ghi rõ họ tên)</div>
+                    <div style="height: 80px;"></div>
+                    <div style="border-top: 1px solid #333; width: 200px; margin: 10px 0;"></div>
+                    <div style="color: #333; font-size: 12px;">{{ $prescription->medicalRecord->appointment->patient->full_name }}</div>
+                </td>
+                <td style="width: 50%; text-align: right; vertical-align: top; padding: 10px;">
+                    <div style="color: #333; font-weight: bold; font-size: 12px; margin-bottom: 5px;">BÁC SĨ KÊ ĐƠN</div>
+                    <div style="color: #333; font-size: 11px; margin-bottom: 5px;">(Ký và ghi rõ họ tên)</div>
+                    <div style="height: 80px;"></div>
+                    <div style="border-top: 1px solid #333; width: 200px; margin: 10px 0 10px auto;"></div>
+                    <div style="color: #333; font-size: 12px;">{{ $prescription->medicalRecord->appointment->doctor->user->full_name }}</div>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <div class="footer">

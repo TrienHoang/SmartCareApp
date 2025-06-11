@@ -60,11 +60,6 @@
                                         <td>{{ $prescription->formatted_date }}</td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Ngày tạo đơn:</strong></td>
-                                        <td>{{ $prescription->created_at }}</td>
-                                    </tr>
-
-                                    <tr>
                                         <td><strong>Hồ sơ bệnh án:</strong></td>
                                         <td>{{ $prescription->medicalRecord->code }}</td>
                                     </tr>
@@ -109,13 +104,22 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($prescription->items as $index => $item)
-                                                <tr>
+                                                @php
+                                                    $expired = $item->medicine->created_at->lt(
+                                                        \Carbon\Carbon::now()->subMonths(6),
+                                                    );
+                                                @endphp
+                                                <tr class="{{ $expired ? 'table-danger' : '' }}">
                                                     <td>{{ $index + 1 }}</td>
                                                     <td>
                                                         <strong>{{ $item->medicine->name }}</strong>
                                                         @if ($item->medicine->dosage)
                                                             <br><small
                                                                 class="text-muted">{{ $item->medicine->dosage }}</small>
+                                                        @endif
+                                                        @if ($expired)
+                                                            <br><span class="text-danger font-weight-bold">Thuốc đã hết
+                                                                hạn</span>
                                                         @endif
                                                     </td>
                                                     <td>{{ $item->medicine->unit }}</td>
@@ -129,6 +133,8 @@
                                                     </td>
                                                 </tr>
                                             @endforeach
+
+
                                         </tbody>
                                         <tfoot>
                                             <tr class="bg-light">
