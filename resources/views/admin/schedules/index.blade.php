@@ -14,6 +14,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Doctor</th>
+                        <th>Day</th>
                         <th>Day of Week</th>
                         <th>Start Time</th>
                         <th>End Time</th>
@@ -25,6 +26,7 @@
                         <tr>
                             <td>{{ $schedule->id }}</td>
                             <td>{{ $schedule->doctor->user->full_name }}</td>
+                            <td>{{ \Carbon\Carbon::parse($schedule->day)->format('d/m/Y') }}</td>
                             <td>{{ $schedule->day_of_week }}</td>
                             <td>{{ $schedule->start_time }}</td>
                             <td>{{ $schedule->end_time }}</td>

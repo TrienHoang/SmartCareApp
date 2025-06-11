@@ -84,6 +84,10 @@ if (!function_exists('getPermissionLabel')) {
 
             // 14. Thống kê
             'view_statistics' => 'Xem thống kê',
+            // 15. Quản lý đơn xin nghỉ phép của bác sĩ
+            'view_doctor_leaves' => 'Xem đơn xin nghỉ phép của bác sĩ',
+            'edit_doctor_leaves' => 'Duyệt đơn xin nghỉ phép của bác sĩ',
+
         ];
 
         return $labels[$permission] ?? $permission;

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\DoctorLeaveController;
 use App\Http\Controllers\admin\RoleController;
 use App\Http\Controllers\admin\AppointmentController;
 use App\Http\Controllers\Admin\DepartmentController;
@@ -327,11 +328,20 @@ Route::prefix('admin/appointments')->name('admin.appointments.')->group(function
     Route::post('/store', [AppointmentController::class, 'store'])->name('store');
 });
 // Quản lý lịch nghỉ của bác sĩ
-Route::prefix('admin/doctor_leaves')->name('admin.doctor_leaves.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\admin\DoctorLeaveController::class, 'index'])->name('index');
-    Route::get('/edit/{id}', [\App\Http\Controllers\admin\DoctorLeaveController::class, 'edit'])->name('edit');
-    Route::put('/update/{id}', [\App\Http\Controllers\admin\DoctorLeaveController::class, 'update'])->name('update');
+Route::group([
+    'prefix' => 'admin/doctor_leaves',
+    'as' => 'admin.doctor_leaves.',
+    'middleware' => 'check_permission:view_doctor_leaves'
+], function () {
+    Route::get('/', [DoctorLeaveController::class, 'index'])->name('index');
+
+    Route::get('/edit/{id}', [DoctorLeaveController::class, 'edit'])
+        ->middleware('check_permission:edit_doctor_leaves')->name('edit');
+
+    Route::put('/update/{id}', [DoctorLeaveController::class, 'update'])
+        ->middleware('check_permission:edit_doctor_leaves')->name('update');
 });
+
 // Quản lý danh mục dịch vụ
 Route::prefix('admin/categories')->name('admin.categories.')->group(function () {
     Route::get('/', [ServiceCategoryController::class, 'index'])->name('index');
