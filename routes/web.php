@@ -19,7 +19,7 @@ use App\Http\Controllers\admin\ServiceCategoryController;
 use App\Http\Controllers\Admin\ServiceController;
 
 Route::get('/', function () {
-    echo "Trang chủ của ứng dụng";
+    return view('client.home');
 })->name('home');
 
 
@@ -301,6 +301,7 @@ Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admi
 Route::get('admin/users/edit/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
 Route::put('admin/users/edit/{id}', [UserController::class, 'update'])->name('admin.users.update');
 Route::get('admin/users/search', [UserController::class, 'search'])->name('admin.users.search');
+Route::patch('admin/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('admin.users.toggleStatus');
 
 // quản lý danh mục dịch vụ
 Route::get('admin/categories', [ServiceCategoryController::class, 'index'])->name('admin.categories.index');

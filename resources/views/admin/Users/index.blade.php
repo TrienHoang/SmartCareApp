@@ -16,6 +16,11 @@
             </form>
         </div>
 
+        @if (session('success'))
+            <div class="alert alert-success mx-3 mt-3">
+                {{ session('success') }}
+            </div>
+        @endif
         @if (session('error'))
             <div class="alert alert-danger mx-3 mt-3">
                 {{ session('error') }}
@@ -34,6 +39,7 @@
                         <th>Giới tính</th>
                         <th>Địa chỉ</th>
                         <th>Vai trò</th>
+                        <th>Trạng thái</th>
                         <th>Ảnh đại diện</th>
                         <th>Thao tác</th>
                     </tr>
@@ -60,6 +66,15 @@
                                 @endif
                             </td>
                             <td>
+                                <form action="{{ route('admin.users.toggleStatus', $user->id) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-sm {{ $user->status === 'online' ? 'btn-success' : 'btn-secondary' }}">
+                                        {{ ucfirst($user->status) }}
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
                                 @if ($user->avatar)
                                     <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar" class="rounded-circle border"
                                         style="width: 45px; height: 45px; object-fit: cover;">
@@ -78,7 +93,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="text-center text-muted py-4">Không có người dùng nào.</td>
+                            <td colspan="11" class="text-center text-muted py-4">Không có người dùng nào.</td>
                         </tr>
                     @endforelse
                 </tbody>
