@@ -249,19 +249,6 @@
                                     <span class="badge bg-{{ $config['color'] }} status-badge">
                                         <i class="bx {{ $config['icon'] }}"></i> {{ $config['text'] }}
                                     </span>
-
-                                    @if ($appointment->status == 'pending')
-                                        <div class="quick-status-buttons">
-                                            <button class="btn btn-success quick-status-btn"
-                                                onclick="updateStatus({{ $appointment->id }}, 'confirmed')">
-                                                Xác nhận
-                                            </button>
-                                            <button class="btn btn-danger quick-status-btn"
-                                                onclick="updateStatus({{ $appointment->id }}, 'cancelled')">
-                                                Hủy
-                                            </button>
-                                        </div>
-                                    @endif
                                 </td>
                                 <td>
                                     <div class="table-actions">

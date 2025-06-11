@@ -62,19 +62,6 @@
                         <span class="badge bg-{{ $config['color'] }} status-badge">
                             <i class="bx {{ $config['icon'] }}"></i> {{ $config['text'] }}
                         </span>
-
-                        @if ($appointment->status == 'pending')
-                            <div class="quick-status-buttons">
-                                <button class="btn btn-success quick-status-btn"
-                                    onclick="updateStatus({{ $appointment->id }}, 'confirmed')">
-                                    Xác nhận
-                                </button>
-                                <button class="btn btn-danger quick-status-btn"
-                                    onclick="updateStatus({{ $appointment->id }}, 'cancelled')">
-                                    Hủy
-                                </button>
-                            </div>
-                        @endif
                     </td>
                 </tr>
                 <tr>
@@ -85,7 +72,14 @@
                     <th>Lí do hủy</th>
                     <th>{{ $appointment->cancel_reason ?? 'Không' }}</th>
                 </tr>
-               
+                <tr>
+                    <th>Note sau khi hoàn thành</th>
+                    <td>
+                        {{ optional(
+                            $appointment->logs->where('status_after', 'completed')->sortByDesc('change_time')->first(),
+                        )->note ?? 'Không có ghi chú' }}
+                    </td>
+                </tr>
                 <tr>
                     <th>Ngày tạo</th>
                     <td>{{ $appointment->created_at->format('d/m/Y H:i') }}</td>

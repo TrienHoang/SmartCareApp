@@ -4,10 +4,12 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppointmentRequest;
+use App\Http\Requests\UpdateAppointmentRequest;
 use App\Http\Requests\UpdateStatusAppointmentRequest;
 use App\Models\Appointment;
 use App\Models\Department;
 use App\Models\Doctor;
+use App\Models\DoctorLeave;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\WorkingSchedule;
@@ -70,7 +72,8 @@ class AppointmentController extends Controller
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
-        $appointments = $query->paginate(15)->appends($request->all());
+        $perPage = $request->get('per_page', 15);
+        $appointments = $query->paginate($perPage)->appends($request->all());
 
         // Dữ liệu cho filter
         $doctors = Doctor::with('user:id,full_name')->get();
@@ -109,10 +112,11 @@ class AppointmentController extends Controller
     {
         $appointmentDate = Carbon::parse($request->appointment_time);
         $dayOfWeek = $appointmentDate->format('l');
+        $timeOnly = $appointmentDate->format('H:i');
 
         $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
             ->where('day_of_week', $dayOfWeek)
-            ->exists();
+            ->first();
 
         if (!$working) {
             $workingDays = WorkingSchedule::where('doctor_id', $request->doctor_id)
@@ -125,8 +129,28 @@ class AppointmentController extends Controller
             $daysText = implode(', ', $workingDays);
 
             return back()->withErrors([
-                'doctor_id' => 'Bác sĩ không làm việc vào ngày bạn chọn. Vui lòng chọn ngày khác. '
-                    . 'Các ngày làm việc của bác sĩ là: ' . $daysText . '.'
+                'doctor_id' => 'Bác sĩ không làm việc vào ngày bạn chọn. Các ngày làm việc là: ' . $daysText . '.'
+            ])->withInput();
+        }
+
+        // Kiểm tra giờ làm việc
+
+        if ($timeOnly < $working->start_time || $timeOnly >= $working->end_time) {
+            return back()->withErrors([
+                'appointment_time' => 'Giờ hẹn không nằm trong khung giờ làm việc của bác sĩ. '
+                    . 'Khung giờ làm việc là từ ' . $working->start_time . ' đến ' . $working->end_time . '.'
+            ])->withInput();
+        }
+
+
+        $onLeave = DoctorLeave::where('doctor_id', $request->doctor_id)
+            ->where('start_date', '<=', $appointmentDate)
+            ->where('end_date', '>=', $appointmentDate)
+            ->where('approved', true)
+            ->exists();
+        if ($onLeave) {
+            return back()->withErrors([
+                'doctor_id' => 'Bác sĩ đang trong thời gian nghỉ phép vào ngày bạn chọn. Vui lòng chọn ngày khác.'
             ])->withInput();
         }
 
@@ -146,27 +170,27 @@ class AppointmentController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateAppointmentRequest $request, $id)
     {
         $appointment = Appointment::findOrFail($id);
 
-        // Nếu lịch hẹn đã hoàn thành hoặc đã hủy thì không cho cập nhật nữa
+
         if (in_array($appointment->status, ['completed', 'cancelled'])) {
             return redirect()->back()->withErrors([
                 'status' => 'Không thể cập nhật lịch hẹn đã hoàn thành hoặc đã hủy.'
             ]);
         }
 
-        // Kiểm tra lịch làm việc của bác sĩ cho thời gian mới
         $appointmentDate = Carbon::parse($request->appointment_time);
         $dayOfWeek = $appointmentDate->format('l');
+        $timeOnly = $appointmentDate->format('H:i');
 
-        $working = WorkingSchedule::where('doctor_id', $appointment->doctor_id)
+        $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
             ->where('day_of_week', $dayOfWeek)
-            ->exists();
+            ->first();
 
         if (!$working) {
-            $workingDays = WorkingSchedule::where('doctor_id', $appointment->doctor_id)
+            $workingDays = WorkingSchedule::where('doctor_id', $request->doctor_id)
                 ->pluck('day_of_week')
                 ->map(function ($day) {
                     return __('days.' . strtolower($day));
@@ -177,6 +201,24 @@ class AppointmentController extends Controller
 
             return back()->withErrors([
                 'appointment_time' => 'Bác sĩ không làm việc vào ngày này. Các ngày làm việc là: ' . $daysText . '.'
+            ])->withInput();
+        }
+
+        if ($timeOnly < $working->start_time || $timeOnly >= $working->end_time) {
+            return back()->withErrors([
+                'appointment_time' => 'Giờ hẹn không nằm trong khung giờ làm việc của bác sĩ. '
+                    . 'Khung giờ làm việc là từ ' . $working->start_time . ' đến ' . $working->end_time . '.'
+            ])->withInput();
+        }
+
+        $onLeave = DoctorLeave::where('doctor_id', $request->doctor_id)
+            ->where('start_date', '<=', $appointmentDate)
+            ->where('end_date', '>=', $appointmentDate)
+            ->where('approved', true)
+            ->exists();
+        if ($onLeave) {
+            return back()->withErrors([
+                'appointment_time' => 'Bác sĩ đang trong thời gian nghỉ phép vào ngày bạn chọn. Vui lòng chọn ngày khác.'
             ])->withInput();
         }
 
@@ -200,7 +242,8 @@ class AppointmentController extends Controller
     }
     public function show($id)
     {
-        $appointment = Appointment::findOrFail($id);
+        // $appointment = Appointment::findOrFail($id);
+        $appointment = Appointment::with(['patient', 'doctor.user', 'doctor.room', 'service', 'logs'])->findOrFail($id);
         return view('admin.Appointment.show', compact('appointment'));
     }
 
