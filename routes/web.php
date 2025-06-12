@@ -322,11 +322,11 @@ Route::put('admin/schedules/edit/{id}', [SchedulesController::class, 'update'])-
 Route::delete('admin/schedules/destroy/{id}', [SchedulesController::class, 'destroy'])->name('admin.schedules.destroy');
 Route::get('admin/schedules/show/{id}', [SchedulesController::class, 'show'])->name('admin.schedules.show');
 // quản lý lịch hẹn khám
-Route::prefix('admin/appointments')->name('admin.appointments.')->group(function () {
-    Route::get('/', [AppointmentController::class, 'index'])->name('index');
-    Route::get('/create', [AppointmentController::class, 'create'])->name('create');
-    Route::post('/store', [AppointmentController::class, 'store'])->name('store');
-});
+// Route::prefix('admin/appointments')->name('admin.appointments.')->group(function () {
+//     Route::get('/', [AppointmentController::class, 'index'])->name('index');
+//     Route::get('/create', [AppointmentController::class, 'create'])->name('create');
+//     Route::post('/store', [AppointmentController::class, 'store'])->name('store');
+// });
 // Quản lý lịch nghỉ của bác sĩ
 Route::group([
     'prefix' => 'admin/doctor_leaves',

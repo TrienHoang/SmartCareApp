@@ -113,9 +113,11 @@ class AppointmentController extends Controller
         $appointmentDate = Carbon::parse($request->appointment_time);
         $dayOfWeek = $appointmentDate->format('l');
         $timeOnly = $appointmentDate->format('H:i');
+        $day = $appointmentDate->format('Y-m-d');
 
         $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
             ->where('day_of_week', $dayOfWeek)
+            ->whereDate('day', $day)
             ->first();
 
         if (!$working) {
@@ -184,9 +186,11 @@ class AppointmentController extends Controller
         $appointmentDate = Carbon::parse($request->appointment_time);
         $dayOfWeek = $appointmentDate->format('l');
         $timeOnly = $appointmentDate->format('H:i');
+        $day = $appointmentDate->format('Y-m-d');
 
         $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
             ->where('day_of_week', $dayOfWeek)
+            ->whereDate('day', $day)
             ->first();
 
         if (!$working) {
@@ -242,8 +246,8 @@ class AppointmentController extends Controller
     }
     public function show($id)
     {
-        // $appointment = Appointment::findOrFail($id);
-        $appointment = Appointment::with(['patient', 'doctor.user', 'doctor.room', 'service', 'logs'])->findOrFail($id);
+        $appointment = Appointment::findOrFail($id);
+        // $appointment = Appointment::with(['patient', 'doctor.user', 'doctor.room', 'service', 'logs'])->findOrFail($id);
         return view('admin.Appointment.show', compact('appointment'));
     }
 
