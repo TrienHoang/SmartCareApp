@@ -41,7 +41,7 @@
                 @if ($shouldShowEndTime)
                     <tr>
                         <th>Thời gian kết thúc Dự kiến</th>
-                        <td>{{ $appointment->end_time->format('d-m-Y H:i') }}</td>
+                        <td> {{ $appointment->end_time ? \Carbon\Carbon::parse($appointment->end_time)->format('d/m/Y H:i') : '—' }}</td>
                     </tr>
                 @endif
 

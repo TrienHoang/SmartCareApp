@@ -217,7 +217,6 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
 
-
         if (in_array($appointment->status, ['completed', 'cancelled'])) {
             return redirect()->back()->withErrors([
                 'status' => 'Không thể cập nhật lịch hẹn đã hoàn thành hoặc đã hủy.'
@@ -229,7 +228,7 @@ class AppointmentController extends Controller
         $timeOnly = $appointmentDate->format('H:i');
         $day = $appointmentDate->format('Y-m-d');
 
-        // Kiểm tra xem bác sĩ có lịch hẹn trùng không
+        // Kiểm tra trùng lịch
         $conflict = AppointmentHelper::isConflict(
             $request->doctor_id,
             $request->appointment_time,
@@ -262,9 +261,7 @@ class AppointmentController extends Controller
         if (!$working) {
             $workingDays = WorkingSchedule::where('doctor_id', $request->doctor_id)
                 ->pluck('day_of_week')
-                ->map(function ($day) {
-                    return __('days.' . strtolower($day));
-                })
+                ->map(fn($day) => __('days.' . strtolower($day)))
                 ->toArray();
 
             $daysText = implode(', ', $workingDays);
@@ -292,12 +289,29 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        // Cập nhật lịch hẹn
+        if ($request->status === 'completed') {
+            $today = Carbon::today();
+            if ($appointmentDate->gt($today)) {
+                return back()->with('error', 'Chỉ có thể hoàn thành lịch hẹn trong ngày hôm nay hoặc trước đó.');
+            }
+        }
+
+        $endTime = $appointmentDate->copy()->addMinutes(30);
+
+        $requestData = $request->only([
+            'doctor_id',
+            'service_id',
+            'appointment_time',
+            'status',
+            'reason'
+        ]);
+        $requestData['end_time'] = $endTime;
+
         $changes = [];
 
         if ($appointment->appointment_time != $request->appointment_time) {
             $changes[] = 'Thay đổi thời gian khám từ ' .
-                $appointment->appointment_time->format('d/m/Y H:i') . ' sang ' .
+                optional($appointment->appointment_time)->format('d/m/Y H:i') . ' sang ' .
                 Carbon::parse($request->appointment_time)->format('d/m/Y H:i');
         }
 
@@ -313,20 +327,6 @@ class AppointmentController extends Controller
             $changes[] = 'Thay đổi dịch vụ từ ' . $oldService . ' sang ' . $newService;
         }
 
-        // Cập nhật thời gian kết thúc dự kiến
-        $appointmentTime = Carbon::parse($request->appointment_time);
-        $endTime = $appointmentTime->copy()->addMinutes(30);
-
-        $requestData = $request->only([
-            'doctor_id',
-            'service_id',
-            'appointment_time',
-            'status',
-            'reason'
-        ]);
-
-        $requestData['end_time'] = $endTime;
-
         $appointment->update($requestData);
 
         if (!empty($changes)) {
@@ -334,7 +334,7 @@ class AppointmentController extends Controller
                 'appointment_id' => $appointment->id,
                 'changed_by' => auth()->id(),
                 'status_before' => $appointment->status,
-                'status_after' => $appointment->status,
+                'status_after' => $request->status,
                 'change_time' => now(),
                 'note' => implode("\n", $changes),
             ]);
@@ -367,6 +367,15 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
         $oldStatus = $appointment->status;
+
+        if ($request->status === 'completed') {
+            $appointmentDate = Carbon::parse($appointment->appointment_time)->startOfDay();
+            $today = Carbon::today();
+
+            if ($appointmentDate->gt($today)) {
+                return redirect()->back()->with('error', 'Chỉ có thể hoàn thành lịch hẹn trong ngày hôm nay hoặc ngày trước đó.');
+            }
+        }
         $appointment->update([
             'status' => $request->status,
             'cancel_reason' => $request->status === 'cancelled' ? $request->note : null
