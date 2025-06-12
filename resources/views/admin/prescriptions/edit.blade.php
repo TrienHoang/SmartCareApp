@@ -57,12 +57,13 @@
                                 <div class="row g-2">
                                     <div class="col-md-4">
                                         <label class="form-label">Tên thuốc</label>
-                                        <select name="medicines[{{ $index }}][medicine_id]" class="form-select" required>
+                                        <select name="medicines[{{ $index }}][medicine_id]" class="form-select" >
                                             <option value="">-- Chọn thuốc --</option>
                                             @foreach ($medicines as $med)
                                                 <option value="{{ $med->id }}"
                                                     {{ $item->medicine_id == $med->id ? 'selected' : '' }}>
                                                     {{ $med->name }} ({{ $med->unit }})
+                                                    - {{ $med->formatted_price }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -70,7 +71,7 @@
                                     <div class="col-md-2">
                                         <label class="form-label">Số lượng</label>
                                         <input type="number" name="medicines[{{ $index }}][quantity]"
-                                            class="form-control" min="1" value="{{ $item->quantity }}" required>
+                                            class="form-control" min="1" value="{{ $item->quantity }}" >
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Hướng dẫn sử dụng</label>

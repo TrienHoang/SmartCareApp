@@ -15,6 +15,9 @@ class Prescription extends Model
         'notes'
     ];
     public $timestamps = false;
+    protected $casts = [
+        'prescribed_at' => 'datetime'
+    ];
     public function items()
     {
         return $this->hasMany(PrescriptionItem::class);
@@ -38,5 +41,15 @@ class Prescription extends Model
     public function getFormattedDateAttribute()
     {
         return \Carbon\Carbon::parse($this->prescribed_at)->format('d/m/Y');
+    }
+
+    public function getTotalMedicineTypesAttribute()
+    {
+        return $this->prescriptionItems->count();
+    }
+
+    public function getTotalQuantityAttribute()
+    {
+        return $this->prescriptionItems->sum('quantity');
     }
 }
