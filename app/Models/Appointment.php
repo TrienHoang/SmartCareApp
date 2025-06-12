@@ -18,6 +18,7 @@ class Appointment extends Model
         'status',
         'reason',
         'cancel_reason',
+        'end_time',
         'created_at',
         'updated_at'
     ];
@@ -26,6 +27,7 @@ class Appointment extends Model
         'appointment_time' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'end_time' => 'datetime',
     ];
 
     // Relationship với User (Patient)

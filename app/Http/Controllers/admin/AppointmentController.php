@@ -137,9 +137,14 @@ class AppointmentController extends Controller
         }
 
         $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
-            ->where('day_of_week', $dayOfWeek)
             ->whereDate('day', $day)
             ->first();
+
+        if (!$working) {
+            $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
+                ->where('day_of_week', $dayOfWeek)
+                ->first();
+        }
 
         if (!$working) {
             $workingDays = WorkingSchedule::where('doctor_id', $request->doctor_id)
@@ -177,7 +182,22 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        Appointment::create($request->all());
+        // thời gian kết thúc dự kiến
+        $appointmentTime = Carbon::parse($request->appointment_time);
+        $endTime = $appointmentTime->copy()->addMinutes(30);
+
+        $requestData = $request->only([
+            'patient_id',
+            'doctor_id',
+            'service_id',
+            'appointment_time',
+            'status',
+            'reason'
+        ]);
+
+        $requestData['end_time'] = $endTime;
+
+        Appointment::create($requestData);
 
         return redirect()->route('admin.appointments.index')->with('success', 'Tạo lịch hẹn thành công');
     }
@@ -230,9 +250,14 @@ class AppointmentController extends Controller
         }
 
         $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
-            ->where('day_of_week', $dayOfWeek)
             ->whereDate('day', $day)
             ->first();
+
+        if (!$working) {
+            $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
+                ->where('day_of_week', $dayOfWeek)
+                ->first();
+        }
 
         if (!$working) {
             $workingDays = WorkingSchedule::where('doctor_id', $request->doctor_id)
@@ -271,7 +296,8 @@ class AppointmentController extends Controller
         $changes = [];
 
         if ($appointment->appointment_time != $request->appointment_time) {
-            $appointment->appointment_time->format('d/m/Y H:i') . ' sang ' .
+            $changes[] = 'Thay đổi thời gian khám từ ' .
+                $appointment->appointment_time->format('d/m/Y H:i') . ' sang ' .
                 Carbon::parse($request->appointment_time)->format('d/m/Y H:i');
         }
 
@@ -287,7 +313,21 @@ class AppointmentController extends Controller
             $changes[] = 'Thay đổi dịch vụ từ ' . $oldService . ' sang ' . $newService;
         }
 
-        $appointment->update($request->all());
+        // Cập nhật thời gian kết thúc dự kiến
+        $appointmentTime = Carbon::parse($request->appointment_time);
+        $endTime = $appointmentTime->copy()->addMinutes(30);
+
+        $requestData = $request->only([
+            'doctor_id',
+            'service_id',
+            'appointment_time',
+            'status',
+            'reason'
+        ]);
+
+        $requestData['end_time'] = $endTime;
+
+        $appointment->update($requestData);
 
         if (!empty($changes)) {
             AppointmentLog::create([

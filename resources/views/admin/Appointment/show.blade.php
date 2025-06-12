@@ -30,6 +30,22 @@
                     <th>Ngày giờ khám</th>
                     <td>{{ $appointment->formatted_time }}</td>
                 </tr>
+                @php
+                    use Carbon\Carbon;
+
+                    $now = Carbon::now();
+                    $appointmentTime = Carbon::parse($appointment->appointment_time);
+                    $shouldShowEndTime = $appointmentTime->isPast() || $appointment->status === 'completed';
+                @endphp
+
+                @if ($shouldShowEndTime)
+                    <tr>
+                        <th>Thời gian kết thúc Dự kiến</th>
+                        <td>{{ $appointment->end_time->format('d-m-Y H:i') }}</td>
+                    </tr>
+                @endif
+
+
                 <tr>
                     <th>Trạng thái</th>
                     <td>
@@ -109,7 +125,9 @@
                             <tr>
                                 <td>{{ $log->user->full_name ?? 'N/A' }}</td>
                                 <td>{{ $log->change_time->format('d/m/Y H:i') }}</td>
-                                <td><pre class="mb-0">{{ $log->note ?? 'Không có ghi chú' }}</pre></td>
+                                <td>
+                                    <pre class="mb-0">{{ $log->note ?? 'Không có ghi chú' }}</pre>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

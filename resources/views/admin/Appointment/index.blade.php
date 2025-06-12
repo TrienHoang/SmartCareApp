@@ -214,9 +214,14 @@
                                 </td>
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <span>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('d/m/Y') }}</span>
-                                        <small
-                                            class="text-primary fw-bold">{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i') }}</small>
+                                        <span>{{ $appointment->formatted_time }}</span>
+                                        @php
+                                            $endTime = \Carbon\Carbon::parse($appointment->appointment_time)
+                                                ->addMinutes($appointment->service->duration ?? 30);
+                                        @endphp
+                                        <small class="text-muted">
+                                            {{ $endTime->format('H:i') }} (Dự kiến)
+                                        </small>
                                     </div>
                                 </td>
                                 <td>
