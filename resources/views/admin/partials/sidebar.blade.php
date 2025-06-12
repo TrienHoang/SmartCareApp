@@ -106,12 +106,12 @@
             <ul class="menu-sub">
                 <li class="menu-item">
                     <a href="{{ route('admin.appointments.index') }}" class="menu-link">
-                        <div data-i18n="List">Danh sách</div>
+                        <div data-i18n="Danh sách">Danh sách</div>
                     </a>
                 </li>
                 <li class="menu-item">
                     <a href="{{ route('admin.appointments.create') }}" class="menu-link">
-                        <div data-i18n="Add">Thêm mới</div>
+                        <div data-i18n="Danh sách">Thêm mới</div>
                     </a>
                 </li>
             </ul>
@@ -144,12 +144,12 @@
             <ul class="menu-sub">
                 <li class="menu-item">
                     <a href="{{ route('admin.prescriptions.index') }}" class="menu-link">
-                        <div data-i18n="List">Danh sách</div>
+                        <div data-i18n="Danh sách">Danh sách</div>
                     </a>
                 </li>
                 <li class="menu-item">
                     <a href="{{ route('admin.prescriptions.create') }}" class="menu-link">
-                        <div data-i18n="Add">Thêm mới</div>
+                        <div data-i18n="Thêm mới">Thêm mới</div>
                     </a>
                 </li>
             </ul>
