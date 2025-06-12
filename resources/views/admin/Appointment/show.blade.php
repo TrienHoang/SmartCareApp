@@ -75,9 +75,8 @@
                 <tr>
                     <th>Note sau khi hoàn thành</th>
                     <td>
-                        {{ optional(
-                            $appointment->logs->where('status_after', 'completed')->sortByDesc('change_time')->first(),
-                        )->note ?? 'Không có ghi chú' }}
+                        {{ optional($appointment->logs->where('status_after', 'completed')->sortByDesc('change_time')->first())->note ??
+                            'Không có ghi chú' }}
                     </td>
                 </tr>
                 <tr>
@@ -90,5 +89,32 @@
                 </tr>
             </tbody>
         </table>
+
+        <h4>Lịch sử cập nhật</h4>
+
+        @if ($appointment->logs->isEmpty())
+            <p class="text-muted">Không có lịch sử cập nhật.</p>
+        @else
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Người thay đổi</th>
+                            <th>Thời gian</th>
+                            <th>Ghi chú thay đổi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($appointment->logs->sortByDesc('change_time') as $log)
+                            <tr>
+                                <td>{{ $log->user->full_name ?? 'N/A' }}</td>
+                                <td>{{ $log->change_time->format('d/m/Y H:i') }}</td>
+                                <td><pre class="mb-0">{{ $log->note ?? 'Không có ghi chú' }}</pre></td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
     </div>
 @endsection

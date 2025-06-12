@@ -8,6 +8,7 @@ use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
 use App\Http\Requests\UpdateStatusAppointmentRequest;
 use App\Models\Appointment;
+use App\Models\AppointmentLog;
 use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\DoctorLeave;
@@ -123,13 +124,13 @@ class AppointmentController extends Controller
             $request->service_id
         );
 
-        if($conflict['doctor_conflict']){
+        if ($conflict['doctor_conflict']) {
             return back()->withErrors([
                 'appointment_time' => 'Bác sĩ đã có lịch hẹn vào thời gian bạn chọn. Vui lòng chọn thời gian khác.'
             ])->withInput();
         }
 
-        if($conflict['room_conflict']){
+        if ($conflict['room_conflict']) {
             return back()->withErrors([
                 'appointment_time' => 'Phòng khám đã có lịch hẹn vào thời gian bạn chọn. Vui lòng chọn thời gian khác.'
             ])->withInput();
@@ -216,13 +217,13 @@ class AppointmentController extends Controller
             $appointment->id
         );
 
-        if($conflict['doctor_conflict']){
+        if ($conflict['doctor_conflict']) {
             return back()->withErrors([
                 'appointment_time' => 'Bác sĩ đã có lịch hẹn vào thời gian bạn chọn. Vui lòng chọn thời gian khác.'
             ])->withInput();
         }
 
-        if($conflict['room_conflict']){
+        if ($conflict['room_conflict']) {
             return back()->withErrors([
                 'appointment_time' => 'Phòng khám đã có lịch hẹn vào thời gian bạn chọn. Vui lòng chọn thời gian khác.'
             ])->withInput();
@@ -266,7 +267,38 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
+        // Cập nhật lịch hẹn
+        $changes = [];
+
+        if ($appointment->appointment_time != $request->appointment_time) {
+            $appointment->appointment_time->format('d/m/Y H:i') . ' sang ' .
+                Carbon::parse($request->appointment_time)->format('d/m/Y H:i');
+        }
+
+        if ($appointment->doctor_id != $request->doctor_id) {
+            $oldDoctor = $appointment->doctor->user->full_name ?? 'Chưa xác định';
+            $newDoctor = Doctor::with('user')->find($request->doctor_id)->user->full_name ?? 'Chưa xác định';
+            $changes[] = 'Thay đổi bác sĩ từ ' . $oldDoctor . ' sang ' . $newDoctor;
+        }
+
+        if ($appointment->service_id != $request->service_id) {
+            $oldService = $appointment->service->name ?? 'Không xác định';
+            $newService = Service::find($request->service_id)->name ?? 'Không xác định';
+            $changes[] = 'Thay đổi dịch vụ từ ' . $oldService . ' sang ' . $newService;
+        }
+
         $appointment->update($request->all());
+
+        if (!empty($changes)) {
+            AppointmentLog::create([
+                'appointment_id' => $appointment->id,
+                'changed_by' => auth()->id(),
+                'status_before' => $appointment->status,
+                'status_after' => $appointment->status,
+                'change_time' => now(),
+                'note' => implode("\n", $changes),
+            ]);
+        }
 
         return redirect()->route('admin.appointments.index')->with('success', 'Cập nhật lịch hẹn thành công');
     }
