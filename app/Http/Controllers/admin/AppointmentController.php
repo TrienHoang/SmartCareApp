@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Helpers\AppointmentHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
@@ -115,6 +116,25 @@ class AppointmentController extends Controller
         $timeOnly = $appointmentDate->format('H:i');
         $day = $appointmentDate->format('Y-m-d');
 
+        // Kiểm tra xem bác sĩ có lịch hẹn trùng không
+        $conflict = AppointmentHelper::isConflict(
+            $request->doctor_id,
+            $request->appointment_time,
+            $request->service_id
+        );
+
+        if($conflict['doctor_conflict']){
+            return back()->withErrors([
+                'appointment_time' => 'Bác sĩ đã có lịch hẹn vào thời gian bạn chọn. Vui lòng chọn thời gian khác.'
+            ])->withInput();
+        }
+
+        if($conflict['room_conflict']){
+            return back()->withErrors([
+                'appointment_time' => 'Phòng khám đã có lịch hẹn vào thời gian bạn chọn. Vui lòng chọn thời gian khác.'
+            ])->withInput();
+        }
+
         $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
             ->where('day_of_week', $dayOfWeek)
             ->whereDate('day', $day)
@@ -187,6 +207,26 @@ class AppointmentController extends Controller
         $dayOfWeek = $appointmentDate->format('l');
         $timeOnly = $appointmentDate->format('H:i');
         $day = $appointmentDate->format('Y-m-d');
+
+        // Kiểm tra xem bác sĩ có lịch hẹn trùng không
+        $conflict = AppointmentHelper::isConflict(
+            $request->doctor_id,
+            $request->appointment_time,
+            $request->service_id,
+            $appointment->id
+        );
+
+        if($conflict['doctor_conflict']){
+            return back()->withErrors([
+                'appointment_time' => 'Bác sĩ đã có lịch hẹn vào thời gian bạn chọn. Vui lòng chọn thời gian khác.'
+            ])->withInput();
+        }
+
+        if($conflict['room_conflict']){
+            return back()->withErrors([
+                'appointment_time' => 'Phòng khám đã có lịch hẹn vào thời gian bạn chọn. Vui lòng chọn thời gian khác.'
+            ])->withInput();
+        }
 
         $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
             ->where('day_of_week', $dayOfWeek)
