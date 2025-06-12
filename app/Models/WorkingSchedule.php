@@ -9,7 +9,7 @@ class WorkingSchedule extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['doctor_id', 'day_of_week', 'start_time', 'end_time', 'date'];
+    protected $fillable = ['doctor_id', 'day_of_week', 'start_time', 'end_time', 'day'];
     public $timestamps = false;
     public function doctor()
     {
