@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Notifications\CustomResetPassword;
@@ -11,13 +12,19 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'username', 'password', 'full_name', 'email' , 'facebook_id' , 'google_id' , 'phone', 'gender', 'date_of_birth',
-        'address', 'role_id', 'avatar'
-    ];
-
-    // Thêm đoạn này để Laravel tự động cast date_of_birth thành Carbon instance
-    protected $casts = [
-        'date_of_birth' => 'date',
+        'username',
+        'password',
+        'full_name',
+        'email',
+        'facebook_id',
+        'google_id',
+        'phone',
+        'gender',
+        'date_of_birth',
+        'address',
+        'role_id',
+        'avatar',
+        'status'
     ];
 
     public $timestamps = true;
@@ -26,6 +33,7 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
+
 
     public function permissions()
     {

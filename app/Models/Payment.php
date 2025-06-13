@@ -11,6 +11,7 @@ class Payment extends Model
 {
     use HasFactory;
 
+
     protected $fillable = [
         'appointment_id',
         'promotion_id',
@@ -23,6 +24,8 @@ class Payment extends Model
     protected $casts = [
         'paid_at' => 'datetime',
     ];
+
+    public $timestamps = false;
 
     public function appointment(): BelongsTo
     {

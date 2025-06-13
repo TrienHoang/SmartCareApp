@@ -30,23 +30,70 @@
                     <th>Ngày giờ khám</th>
                     <td>{{ $appointment->formatted_time }}</td>
                 </tr>
+                @php
+                    use Carbon\Carbon;
+
+                    $now = Carbon::now();
+                    $appointmentTime = Carbon::parse($appointment->appointment_time);
+                    $shouldShowEndTime = $appointmentTime->isPast() || $appointment->status === 'completed';
+                @endphp
+
+                @if ($shouldShowEndTime)
+                    <tr>
+                        <th>Thời gian kết thúc Dự kiến</th>
+                        <td> {{ $appointment->end_time ? \Carbon\Carbon::parse($appointment->end_time)->format('d/m/Y H:i') : '—' }}</td>
+                    </tr>
+                @endif
+
+
                 <tr>
                     <th>Trạng thái</th>
                     <td>
-                        @if ($appointment->status === 'pending')
-                            <span class="badge bg-warning">Chờ xác nhận</span>
-                        @elseif ($appointment->status === 'confirmed')
-                            <span class="badge bg-success">Đã xác nhận</span>
-                        @elseif ($appointment->status === 'cancelled')
-                            <span class="badge bg-danger">Đã hủy</span>
-                        @else
-                            <span class="badge bg-secondary">{{ $appointment->status }}</span>
-                        @endif
+                        @php
+                            $statusConfig = [
+                                'pending' => [
+                                    'color' => 'warning',
+                                    'text' => 'Chờ xác nhận',
+                                    'icon' => 'bx-time',
+                                ],
+                                'confirmed' => [
+                                    'color' => 'info',
+                                    'text' => 'Đã xác nhận',
+                                    'icon' => 'bx-check',
+                                ],
+                                'completed' => [
+                                    'color' => 'success',
+                                    'text' => 'Hoàn thành',
+                                    'icon' => 'bx-check-double',
+                                ],
+                                'cancelled' => ['color' => 'danger', 'text' => 'Đã hủy', 'icon' => 'bx-x'],
+                            ];
+                            $config = $statusConfig[$appointment->status] ?? [
+                                'color' => 'secondary',
+                                'text' => $appointment->status,
+                                'icon' => 'bx-help',
+                            ];
+                        @endphp
+
+                        <span class="badge bg-{{ $config['color'] }} status-badge">
+                            <i class="bx {{ $config['icon'] }}"></i> {{ $config['text'] }}
+                        </span>
                     </td>
                 </tr>
                 <tr>
                     <th>Ghi chú</th>
                     <td>{{ $appointment->reason ?? 'Không có ghi chú' }}</td>
+                </tr>
+                <tr>
+                    <th>Lí do hủy</th>
+                    <th>{{ $appointment->cancel_reason ?? 'Không' }}</th>
+                </tr>
+                <tr>
+                    <th>Note sau khi hoàn thành</th>
+                    <td>
+                        {{ optional($appointment->logs->where('status_after', 'completed')->sortByDesc('change_time')->first())->note ??
+                            'Không có ghi chú' }}
+                    </td>
                 </tr>
                 <tr>
                     <th>Ngày tạo</th>
@@ -58,5 +105,34 @@
                 </tr>
             </tbody>
         </table>
+
+        <h4>Lịch sử cập nhật</h4>
+
+        @if ($appointment->logs->isEmpty())
+            <p class="text-muted">Không có lịch sử cập nhật.</p>
+        @else
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Người thay đổi</th>
+                            <th>Thời gian</th>
+                            <th>Ghi chú thay đổi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($appointment->logs->sortByDesc('change_time') as $log)
+                            <tr>
+                                <td>{{ $log->user->full_name ?? 'N/A' }}</td>
+                                <td>{{ $log->change_time->format('d/m/Y H:i') }}</td>
+                                <td>
+                                    <pre class="mb-0">{{ $log->note ?? 'Không có ghi chú' }}</pre>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
     </div>
 @endsection

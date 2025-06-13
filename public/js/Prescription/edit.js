@@ -1,22 +1,33 @@
 function addMedicine() {
     const container = document.getElementById('medicine-list');
 
-    // Tạo dropdown option từ biến medicineOptions
     let optionsHtml = '<option value="">-- Chọn thuốc --</option>';
     medicineOptions.forEach(med => {
-        optionsHtml += `<option value="${med.id}">${med.name} (${med.unit})</option>`;
+        optionsHtml += `<option value="${med.id}">
+            ${med.name} (${med.unit}) - ${med.formatted_price} – Còn: ${med.stock}
+        </option>`;
     });
 
     const item = `
-        <div class="medicine-item border p-2 mb-2">
-            <select name="medicines[${medicineIndex}][medicine_id]" class="form-select mb-2" required>
-                ${optionsHtml}
-            </select>
-
-            <input type="number" name="medicines[${medicineIndex}][quantity]"
-                class="form-control mb-2" placeholder="Số lượng" min="1" required>
-
-            <textarea name="medicines[${medicineIndex}][usage_instructions]" class="form-control" placeholder="Hướng dẫn sử dụng"></textarea>
+        <div class="medicine-item border rounded p-3 mb-3 shadow-sm bg-light">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <label class="form-label">Tên thuốc</label>
+                    <select name="medicines[${medicineIndex}][medicine_id]" class="form-select" required>
+                        ${optionsHtml}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Số lượng</label>
+                    <input type="number" name="medicines[${medicineIndex}][quantity]"
+                        class="form-control" min="1" value="1" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Hướng dẫn sử dụng</label>
+                    <textarea name="medicines[${medicineIndex}][usage_instructions]" rows="2"
+                        class="form-control" placeholder="Ví dụ: Uống sau ăn"></textarea>
+                </div>
+            </div>
         </div>
     `;
 

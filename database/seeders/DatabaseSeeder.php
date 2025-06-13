@@ -39,9 +39,9 @@ class DatabaseSeeder extends Seeder
             FileUploadSeeder::class,
             UploadHistorySeeder::class,
             BlogSeeder::class,
-            NotificationSeeder::class,
+            // NotificationSeeder::class,
             FaqSeeder::class
         ]);
+        $this->call(ReviewSeeder::class);
     }
-    
 }
