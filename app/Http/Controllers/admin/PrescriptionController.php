@@ -264,10 +264,18 @@ class PrescriptionController extends Controller
 
     public function destroy($id)
     {
-        $prescription = Prescription::findOrFail($id);
+        $prescription = Prescription::with('items')->findOrFail($id);
+
+        foreach ($prescription->items as $item) {
+            $medicine = Medicine::find($item->medicine_id);
+            if ($medicine) {
+                $medicine->increment('stock', $item->quantity);
+            }
+        }
+
         $prescription->delete();
         return redirect()->route('admin.prescriptions.index')
-            ->with('success', 'Đơn thuốc đã được xóa mềm thành công.');
+            ->with('success', 'Đơn thuốc đã được xóa mềm và hoàn lại vào thuốc kho.');
     }
 
     // Hiển thị danh sách đơn thuốc đã xóa
@@ -297,10 +305,22 @@ class PrescriptionController extends Controller
     // Khôi phục đơn thuốc đã xóa
     public function restore($id)
     {
-        $prescription = Prescription::onlyTrashed()->findOrFail($id);
+        $prescription = Prescription::onlyTrashed()->with('items')->findOrFail($id);
+
+        foreach ($prescription->items as $item) {
+            $medicine = Medicine::find($item->medicine_id);
+            if ($medicine) {
+                if ($medicine->stock < $item->quantity) {
+                    return redirect()->route('admin.prescriptions.trashed')
+                        ->with('error', 'Không thể khôi phục đơn thuốc "' . $prescription->id . '" vì thuốc "' . $medicine->name . '" không đủ tồn kho. Cần ' . $item->quantity . ', hiện tại chỉ còn ' . $medicine->stock . '.');
+                }
+                $medicine->decrement('stock', $item->quantity);
+            }
+        }
+
         $prescription->restore();
 
         return redirect()->route('admin.prescriptions.trashed')
-            ->with('success', 'Đơn thuốc đã được khôi phục.');
+            ->with('success', 'Đơn thuốc đã được khôi phục và trừ lại thuốc từ kho.');
     }
 }
