@@ -12,6 +12,7 @@ use App\Models\Prescription;
 use App\Models\PrescriptionHistory;
 use App\Models\PrescriptionItem;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PrescriptionController extends Controller
@@ -75,8 +76,21 @@ class PrescriptionController extends Controller
     }
     public function store(StorePrescriptionRequest $request)
     {
+        $prescribedAt = Carbon::parse($request->prescribed_at);
 
-        $prescribedAt = \Carbon\Carbon::parse($request->prescribed_at);
+        $errors = [];
+        foreach ($request->medicines as $i => $item) {
+            $medicine = Medicine::find($item['medicine_id']);
+            if (!$medicine) {
+                $errors["medicines.$i.medicine_id"] = 'Thuốc không tồn tại.';
+            } elseif ($medicine->stock < $item['quantity']) {
+                $errors["medicines.$i.quantity"] = 'Thuốc "' . $medicine->name . '" không đủ tồn kho. (Còn: ' . $medicine->stock . ')';
+            }
+        }
+
+        if (!empty($errors)) {
+            return redirect()->back()->withInput()->withErrors($errors);
+        }
 
         $prescription = Prescription::create([
             'medical_record_id' => $request->medical_record_id,
@@ -91,6 +105,9 @@ class PrescriptionController extends Controller
                 'quantity' => $item['quantity'],
                 'usage_instructions' => $item['usage_instructions'] ?? null,
             ]);
+
+            $medicine = Medicine::find($item['medicine_id']);
+            $medicine->decrement('stock', $item['quantity']);
         }
 
         return redirect()->route('admin.prescriptions.index')->with('success', 'Đơn thuốc đã được tạo thành công.');
@@ -112,7 +129,6 @@ class PrescriptionController extends Controller
     {
         $prescription = Prescription::with('items')->findOrFail($id);
 
-        // Ghi lại dữ liệu cũ trước khi update
         $oldData = [
             'prescribed_at' => $prescription->prescribed_at,
             'notes' => $prescription->notes,
@@ -125,14 +141,33 @@ class PrescriptionController extends Controller
             })->toArray(),
         ];
 
-        // Cập nhật đơn thuốc
+        foreach ($prescription->items as $oldItem) {
+            $medicine = Medicine::find($oldItem->medicine_id);
+            if ($medicine) {
+                $medicine->increment('stock', $oldItem->quantity);
+            }
+        }
+
+        $errors = [];
+        foreach ($request->medicines as $i => $item) {
+            $medicine = Medicine::find($item['medicine_id']);
+            if (!$medicine) {
+                $errors["medicines.$i.medicine_id"] = 'Thuốc không tồn tại.';
+            } elseif ($medicine->stock < $item['quantity']) {
+                $errors["medicines.$i.quantity"] = 'Thuốc "' . $medicine->name . '" không đủ tồn kho. (Còn: ' . $medicine->stock . ')';
+            }
+        }
+
+        if (!empty($errors)) {
+            return redirect()->back()->withInput()->withErrors($errors);
+        }
+
         $prescription->update([
             'medical_record_id' => $request->medical_record_id,
             'prescribed_at' => $request->prescribed_at,
             'notes' => $request->notes,
         ]);
 
-        // Xóa các item cũ và tạo lại
         $prescription->items()->delete();
 
         foreach ($request->medicines as $item) {
@@ -142,16 +177,17 @@ class PrescriptionController extends Controller
                 'quantity' => $item['quantity'],
                 'usage_instructions' => $item['usage_instructions'] ?? null,
             ]);
+
+            $medicine = Medicine::find($item['medicine_id']);
+            $medicine->decrement('stock', $item['quantity']);
         }
 
-        // Ghi dữ liệu mới
         $newData = [
             'prescribed_at' => $request->prescribed_at,
             'notes' => $request->notes,
             'medicines' => $request->medicines,
         ];
 
-        // Lưu lịch sử
         PrescriptionHistory::create([
             'prescription_id' => $prescription->id,
             'updated_by' => auth()->id(),
@@ -170,7 +206,7 @@ class PrescriptionController extends Controller
             'items.medicine',
             'histories.user'
         ])->findOrFail($id);
-        
+
         $prescription->items = $prescription->items->filter(function ($item) {
             return $item->medicine->created_at->gte(now()->subMonths(6));
         });
