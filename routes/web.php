@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\admin\RoleController;
 use App\Http\Controllers\admin\AppointmentController;
 use App\Http\Controllers\Admin\DepartmentController;
@@ -18,7 +19,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\ServiceCategoryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ReviewController;
-
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('client.home');
@@ -363,4 +366,33 @@ Route::group([
             ->middleware('check_permission:delete_services')->name('destroy');
         Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
     });
+
+    Route::resource('notifications', AdminNotificationController::class);
+    Route::post('notifications/{notification}/send-now', [AdminNotificationController::class, 'sendNow'])->name('notifications.sendNow');
+
+    // Route để lấy danh sách người dùng cho Select2 
+    Route::get('notifications/get-users', function (Request $request) {
+        $search = $request->query('search'); 
+        $users = User::when($search, function ($query, $search) {
+            return $query->where('full_name', 'like', '%' . $search . '%')
+                         ->orWhere('email', 'like', '%' . $search . '%');
+        })
+        ->limit(20) // Giới hạn số lượng trả về
+        ->get(['id', 'full_name', 'email']);
+
+        $results = $users->map(function ($user) {
+            return ['id' => $user->id, 'text' => $user->full_name . ' (' . $user->email . ')'];
+        });
+
+        return response()->json(['results' => $results]);
+    })->name('notifications.getUsers');
+
+    // Route để lấy danh sách vai trò cho Select2 
+    Route::get('notifications/get-roles', function (Request $request) {
+        $roles = Role::all(['id', 'name']);
+        $results = $roles->map(function ($role) {
+            return ['id' => $role->name, 'text' => ucfirst($role->name)];
+        });
+        return response()->json(['results' => $results]);
+    })->name('notifications.getRoles');
 });
