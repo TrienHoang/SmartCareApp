@@ -13,11 +13,11 @@ use App\Http\Controllers\auth\FacebookController;
 use App\Http\Controllers\auth\GoogleController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\ServiceCategoryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\FaqController;
 
 
 Route::get('/', function () {
@@ -330,4 +330,8 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::post('/{id}/toggle', [ReviewController::class, 'toggleVisibility'])
             ->middleware('check_permission:edit_reviews')->name('toggle');
     });
+});
+// Quản lý câu hỏi thường gặp
+Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+    Route::resource('faqs', \App\Http\Controllers\Admin\FaqController::class);
 });

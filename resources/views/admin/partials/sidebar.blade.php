@@ -163,6 +163,14 @@
                 <div data-i18n="Quản lý đánh giá">Quản lý đánh giá</div>
             </a>
         </li>
+        <!-- Quản lý FAQ -->
+        <li class="menu-item">
+            <a href="{{ route('admin.faqs.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-help-circle"></i> {{-- icon câu hỏi --}}
+                <div data-i18n="Quản lý FAQ">Quản lý FAQ</div>
+            </a>
+        </li>
+
 
         <!-- Quản lý lịch sử thanh toán -->
         <li class="menu-item">
