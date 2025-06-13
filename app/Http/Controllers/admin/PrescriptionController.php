@@ -9,6 +9,7 @@ use App\Models\Department;
 use App\Models\MedicalRecord;
 use App\Models\Medicine;
 use App\Models\Prescription;
+use App\Models\PrescriptionHistory;
 use App\Models\PrescriptionItem;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -109,13 +110,29 @@ class PrescriptionController extends Controller
 
     public function update(UpdatePrescriptionRequest $request, $id)
     {
-        $prescription = Prescription::findOrFail($id);
+        $prescription = Prescription::with('items')->findOrFail($id);
+
+        // Ghi lại dữ liệu cũ trước khi update
+        $oldData = [
+            'prescribed_at' => $prescription->prescribed_at,
+            'notes' => $prescription->notes,
+            'medicines' => $prescription->items->map(function ($item) {
+                return [
+                    'medicine_id' => $item->medicine_id,
+                    'quantity' => $item->quantity,
+                    'usage_instructions' => $item->usage_instructions,
+                ];
+            })->toArray(),
+        ];
+
+        // Cập nhật đơn thuốc
         $prescription->update([
             'medical_record_id' => $request->medical_record_id,
             'prescribed_at' => $request->prescribed_at,
             'notes' => $request->notes,
         ]);
 
+        // Xóa các item cũ và tạo lại
         $prescription->items()->delete();
 
         foreach ($request->medicines as $item) {
@@ -127,16 +144,49 @@ class PrescriptionController extends Controller
             ]);
         }
 
+        // Ghi dữ liệu mới
+        $newData = [
+            'prescribed_at' => $request->prescribed_at,
+            'notes' => $request->notes,
+            'medicines' => $request->medicines,
+        ];
+
+        // Lưu lịch sử
+        PrescriptionHistory::create([
+            'prescription_id' => $prescription->id,
+            'updated_by' => auth()->id(),
+            'old_data' => $oldData,
+            'new_data' => $newData,
+            'changed_at' => now(),
+        ]);
+
         return redirect()->route('admin.prescriptions.index')->with('success', 'Đơn thuốc đã được cập nhật thành công.');
     }
 
     public function show($id)
     {
-        $prescription = Prescription::with(['medicalRecord.appointment.patient', 'items.medicine'])
-            ->findOrFail($id);
+        $prescription = Prescription::with([
+            'medicalRecord.appointment.patient',
+            'items.medicine',
+            'histories.user'
+        ])->findOrFail($id);
+        
         $prescription->items = $prescription->items->filter(function ($item) {
             return $item->medicine->created_at->gte(now()->subMonths(6));
         });
+
+        $medicineMap = Medicine::pluck('name', 'id')->toArray();
+
+        foreach ($prescription->histories as $history) {
+            $newData = $history->new_data;
+
+            foreach ($newData['medicines'] as &$med) {
+                $med['medicine_name'] = $medicineMap[$med['medicine_id']] ?? 'Không xác định';
+            }
+
+            $history->new_data = $newData;
+        }
+
 
         return view('admin.prescriptions.show', compact('prescription'));
     }
