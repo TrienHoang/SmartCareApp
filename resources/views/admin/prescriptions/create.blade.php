@@ -90,6 +90,7 @@
                                                                 {{ $medicine->name }} ({{ $medicine->unit }}) -
                                                                 {{ $medicine->formatted_price }} – Còn:
                                                                 {{ $medicine->stock }}
+                                                                {{ $medicine->stock < 10 ? '⚠️ Cảnh báo: gần hết' : '' }}
                                                             </option>
                                                         @endforeach
                                                     </select>
