@@ -9,11 +9,29 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::paginate(10);
-        return view('admin.users.index', compact('users'));
+        $query = User::query();
+
+        if ($request->filled('role_id') && $request->role_id !== 'all') {
+            $query->where('role_id', $request->role_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('username', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('full_name', 'like', "%$search%");
+            });
+        }
+
+        $users = $query->paginate(10);
+        $roles = Role::all();
+
+        return view('admin.users.index', compact('users', 'roles'));
     }
+
     public function show($id)
     {
         $user = User::find($id);
