@@ -155,6 +155,13 @@
     </li>
 
     <li class="menu-item">
+      <a href="{{ route('admin.notifications.index') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-bell"></i>
+        <div>Thông báo</div>
+      </a>
+    </li>
+
+    <li class="menu-item">
       <a href="app-chat.html" class="menu-link">
         <i class="menu-icon tf-icons bx bx-chat"></i>
         <div>Chat</div>
