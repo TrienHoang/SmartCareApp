@@ -119,6 +119,7 @@
                                                         {{ $item->medicine_id == $med->id ? 'selected' : '' }}>
                                                         {{ $med->name }} ({{ $med->unit }}) -
                                                         {{ $med->formatted_price }} – Còn: {{ $med->stock }}
+                                                        {{ $med->stock < 10 ? '⚠️ Cảnh báo: gần hết' : '' }}
                                                     </option>
                                                 @endforeach
                                             </select>

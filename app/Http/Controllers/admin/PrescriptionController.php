@@ -14,6 +14,7 @@ use App\Models\PrescriptionItem;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PrescriptionController extends Controller
 {
@@ -92,26 +93,36 @@ class PrescriptionController extends Controller
             return redirect()->back()->withInput()->withErrors($errors);
         }
 
-        $prescription = Prescription::create([
-            'medical_record_id' => $request->medical_record_id,
-            'prescribed_at' => $prescribedAt,
-            'notes' => $request->notes,
-        ]);
+        DB::beginTransaction();
 
-        foreach ($request->medicines as $item) {
-            PrescriptionItem::create([
-                'prescription_id' => $prescription->id,
-                'medicine_id' => $item['medicine_id'],
-                'quantity' => $item['quantity'],
-                'usage_instructions' => $item['usage_instructions'] ?? null,
+        try {
+            $prescription = Prescription::create([
+                'medical_record_id' => $request->medical_record_id,
+                'prescribed_at' => $prescribedAt,
+                'notes' => $request->notes,
             ]);
 
-            $medicine = Medicine::find($item['medicine_id']);
-            $medicine->decrement('stock', $item['quantity']);
-        }
+            foreach ($request->medicines as $item) {
+                PrescriptionItem::create([
+                    'prescription_id' => $prescription->id,
+                    'medicine_id' => $item['medicine_id'],
+                    'quantity' => $item['quantity'],
+                    'usage_instructions' => $item['usage_instructions'] ?? null,
+                ]);
 
-        return redirect()->route('admin.prescriptions.index')->with('success', 'Đơn thuốc đã được tạo thành công.');
+                $medicine = Medicine::find($item['medicine_id']);
+                $medicine->decrement('stock', $item['quantity']);
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.prescriptions.index')->with('success', 'Đơn thuốc đã được tạo thành công.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Đã xảy ra lỗi khi tạo đơn thuốc.');
+        }
     }
+
 
 
     public function edit($id)
@@ -141,13 +152,6 @@ class PrescriptionController extends Controller
             })->toArray(),
         ];
 
-        foreach ($prescription->items as $oldItem) {
-            $medicine = Medicine::find($oldItem->medicine_id);
-            if ($medicine) {
-                $medicine->increment('stock', $oldItem->quantity);
-            }
-        }
-
         $errors = [];
         foreach ($request->medicines as $i => $item) {
             $medicine = Medicine::find($item['medicine_id']);
@@ -162,42 +166,59 @@ class PrescriptionController extends Controller
             return redirect()->back()->withInput()->withErrors($errors);
         }
 
-        $prescription->update([
-            'medical_record_id' => $request->medical_record_id,
-            'prescribed_at' => $request->prescribed_at,
-            'notes' => $request->notes,
-        ]);
+        DB::beginTransaction();
 
-        $prescription->items()->delete();
+        try {
+            foreach ($prescription->items as $oldItem) {
+                $medicine = Medicine::find($oldItem->medicine_id);
+                if ($medicine) {
+                    $medicine->increment('stock', $oldItem->quantity);
+                }
+            }
 
-        foreach ($request->medicines as $item) {
-            PrescriptionItem::create([
-                'prescription_id' => $prescription->id,
-                'medicine_id' => $item['medicine_id'],
-                'quantity' => $item['quantity'],
-                'usage_instructions' => $item['usage_instructions'] ?? null,
+            $prescription->update([
+                'medical_record_id' => $request->medical_record_id,
+                'prescribed_at' => $request->prescribed_at,
+                'notes' => $request->notes,
             ]);
 
-            $medicine = Medicine::find($item['medicine_id']);
-            $medicine->decrement('stock', $item['quantity']);
+            $prescription->items()->delete();
+
+            foreach ($request->medicines as $item) {
+                PrescriptionItem::create([
+                    'prescription_id' => $prescription->id,
+                    'medicine_id' => $item['medicine_id'],
+                    'quantity' => $item['quantity'],
+                    'usage_instructions' => $item['usage_instructions'] ?? null,
+                ]);
+
+                $medicine = Medicine::find($item['medicine_id']);
+                $medicine->decrement('stock', $item['quantity']);
+            }
+
+            $newData = [
+                'prescribed_at' => $request->prescribed_at,
+                'notes' => $request->notes,
+                'medicines' => $request->medicines,
+            ];
+
+            PrescriptionHistory::create([
+                'prescription_id' => $prescription->id,
+                'updated_by' => auth()->id(),
+                'old_data' => $oldData,
+                'new_data' => $newData,
+                'changed_at' => now(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.prescriptions.index')->with('success', 'Đơn thuốc đã được cập nhật thành công.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Đã xảy ra lỗi khi cập nhật đơn thuốc.');
         }
-
-        $newData = [
-            'prescribed_at' => $request->prescribed_at,
-            'notes' => $request->notes,
-            'medicines' => $request->medicines,
-        ];
-
-        PrescriptionHistory::create([
-            'prescription_id' => $prescription->id,
-            'updated_by' => auth()->id(),
-            'old_data' => $oldData,
-            'new_data' => $newData,
-            'changed_at' => now(),
-        ]);
-
-        return redirect()->route('admin.prescriptions.index')->with('success', 'Đơn thuốc đã được cập nhật thành công.');
     }
+
 
     public function show($id)
     {
