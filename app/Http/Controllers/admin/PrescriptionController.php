@@ -154,4 +154,46 @@ class PrescriptionController extends Controller
 
         return $pdf->download('don-thuoc-' . $prescription->id . '.pdf');
     }
+
+    public function destroy($id)
+    {
+        $prescription = Prescription::findOrFail($id);
+        $prescription->delete();
+        return redirect()->route('admin.prescriptions.index')
+            ->with('success', 'Đơn thuốc đã được xóa mềm thành công.');
+    }
+
+    // Hiển thị danh sách đơn thuốc đã xóa
+    public function trashed(Request $request)
+    {
+        $query = Prescription::onlyTrashed()
+            ->with([
+                'medicalRecord.appointment.patient',
+                'medicalRecord.appointment.doctor.user',
+                'prescriptionItems.medicine'
+            ]);
+
+        $prescriptions = $query->orderByDesc('prescribed_at')->paginate(10);
+        return view('admin.prescriptions.trashed', compact('prescriptions'));
+    }
+
+    public function showTrashed($id)
+    {
+        $prescription = Prescription::onlyTrashed()
+            ->with(['medicalRecord.appointment.patient', 'items.medicine'])
+            ->findOrFail($id);
+
+        return view('admin.prescriptions.trashed-detail', compact('prescription'));
+    }
+
+
+    // Khôi phục đơn thuốc đã xóa
+    public function restore($id)
+    {
+        $prescription = Prescription::onlyTrashed()->findOrFail($id);
+        $prescription->restore();
+
+        return redirect()->route('admin.prescriptions.trashed')
+            ->with('success', 'Đơn thuốc đã được khôi phục.');
+    }
 }

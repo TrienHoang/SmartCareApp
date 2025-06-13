@@ -228,23 +228,22 @@ Route::group([
         'as' => 'prescriptions.',
         'middleware' => 'check_permission:view_prescriptions'
     ], function () {
+        // 🚨 Cần đặt trước
+        Route::get('/trashed', [PrescriptionController::class, 'trashed'])->name('trashed');
+        Route::get('/{id}/trashed-detail', [PrescriptionController::class, 'showTrashed'])->name('trashed-detail');
+        Route::post('/{id}/restore', [PrescriptionController::class, 'restore'])->name('restore');
+
+        // Các route còn lại đặt sau
         Route::get('/', [PrescriptionController::class, 'index'])->name('index');
-
-        Route::get('/create', [PrescriptionController::class, 'create'])
-            ->middleware('check_permission:create_prescriptions')->name('create');
-
-        Route::post('/store', [PrescriptionController::class, 'store'])
-            ->middleware('check_permission:create_prescriptions')->name('store');
-
-        Route::get('/{id}/edit', [PrescriptionController::class, 'edit'])
-            ->middleware('check_permission:edit_prescriptions')->name('edit');
-
-        Route::put('/{id}', [PrescriptionController::class, 'update'])
-            ->middleware('check_permission:edit_prescriptions')->name('update');
-
-        Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show');
+        Route::get('/create', [PrescriptionController::class, 'create'])->middleware('check_permission:create_prescriptions')->name('create');
+        Route::post('/store', [PrescriptionController::class, 'store'])->middleware('check_permission:create_prescriptions')->name('store');
+        Route::get('/{id}/edit', [PrescriptionController::class, 'edit'])->middleware('check_permission:edit_prescriptions')->name('edit');
+        Route::put('/{id}', [PrescriptionController::class, 'update'])->middleware('check_permission:edit_prescriptions')->name('update');
         Route::get('/{id}/print', [PrescriptionController::class, 'exportPdf'])->name('print');
+        Route::delete('/{id}', [PrescriptionController::class, 'destroy'])->middleware('check_permission:delete_prescriptions')->name('destroy');
+        Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show'); // ⚠ phải đặt CUỐI
     });
+
 
 
     // Nhóm quản lý bác sĩ
