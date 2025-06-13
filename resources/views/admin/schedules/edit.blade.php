@@ -18,6 +18,10 @@
                 </select>
             </div>
             <div class="mb-3">
+                <label for="day" class="form-label">Day</label>
+                <input type="date" class="form-control" id="day" name="day" value="{{ $schedule->day }}" required>
+            </div>
+            <div class="mb-3">
                 <label for="day_of_week" class="form-label">Day of Week</label>
                 <input type="text" class="form-control" id="day_of_week" name="day_of_week" value="{{ $schedule->day_of_week }}" required>
             </div>

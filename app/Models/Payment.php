@@ -9,8 +9,6 @@ class Payment extends Model
 {
     use HasFactory;
 
-    // Nếu tên bảng đúng là "payments" thì không cần khai báo
-    // protected $table = 'payments';
 
     protected $fillable = [
         'appointment_id',
@@ -25,6 +23,8 @@ class Payment extends Model
     protected $dates = [
         'paid_at',
     ];
+
+    public $timestamps = false;
 
     // Quan hệ với appointment
     public function appointment()

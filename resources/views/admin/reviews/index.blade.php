@@ -70,7 +70,7 @@
         </table>
 
         <div class="d-flex justify-content-center">
-            {{ $reviews->links() }}
+            {{ $reviews->links('pagination::bootstrap-5') }}
         </div>
     </div>
 @endsection
