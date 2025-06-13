@@ -4,6 +4,7 @@ use App\Http\Controllers\admin\RoleController;
 use App\Http\Controllers\admin\AppointmentController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DoctorController;
+use App\Http\Controllers\Admin\PaymentHistoryController;
 use App\Http\Controllers\admin\SchedulesController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\VoucherController;
@@ -283,15 +284,29 @@ Route::group([
         Route::delete('/{department}', [DepartmentController::class, 'destroy'])->middleware('check_permission:delete_departments')->name('destroy');
     });
 
-    // Quản lý lịch sử thanh toán
+
     Route::group([
-        'prefix' => 'payments',
-        'as' => 'payments.',
-        'middleware' => 'check_permission:view_payment_history'
+        'prefix' => 'payment-histories',
+        'as' => 'payment_histories.',
+        'middleware' => 'check_permission:view_payments_histories',
+
     ], function () {
-        Route::get('/', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('index');
-        Route::get('/{payment}', [\App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('show');
+        Route::get('/', [PaymentHistoryController::class, 'index'])
+            ->middleware('check_permission:view_payments_histories')
+            ->name('index');
+
+        Route::get('/search', [PaymentHistoryController::class, 'search'])
+            ->middleware('check_permission:view_payments_histories')
+            ->name('search');
+
+        Route::get('/{payment_history}', [PaymentHistoryController::class, 'show'])
+            ->middleware('check_permission:view_payments_histories')
+            ->name('show');
     });
+
+
+
+    
 });
 
 

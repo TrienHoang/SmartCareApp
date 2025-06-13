@@ -236,31 +236,17 @@
   </li>
 
   <li class="menu-item">
-    <a href="{{ route('admin.payments.index') }}" class="menu-link menu-toggle">
-      <i class="menu-icon tf-icons bx bx-wallet"></i>
-      <div data-i18n="Quản Lý Lịch xử Thanh Toán">payments</div>
+    <a href="{{ route('admin.payment_histories.index') }}" class="menu-link menu-toggle">
+<i class="menu-icon tf-icons bx bx-credit-card"></i>
+      <div data-i18n="lịch sử thanh toán">lịch sử thanh toán</div>
     </a>
     <ul class="menu-sub">
       <li class="menu-item">
-        <a href="{{ route('admin.payments.index') }}" class="menu-link">
+        <a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
           <div data-i18n="List">List</div>
         </a>
       </li>
-
-      <li class="menu-item">
-        <a href="{{ route('logout') }}" class="menu-link">
-          <div data-i18n="Đăng xuất">Đăng xuất</div>
-        </a>
-      </li>
-
     </ul>
-
-  <li class="menu-item">
-    <a href="{{ route('admin.services.index') }}" class="menu-link">
-      <i class="menu-icon tf-icons bx bx-cog"></i> {{-- icon dịch vụ --}}
-      <div data-i18n="Dịch vụ">Dịch vụ</div>
-    </a>
-  </li>
   </li>
 
 
