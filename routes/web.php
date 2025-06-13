@@ -228,23 +228,22 @@ Route::group([
         'as' => 'prescriptions.',
         'middleware' => 'check_permission:view_prescriptions'
     ], function () {
+        // 🚨 Cần đặt trước
+        Route::get('/trashed', [PrescriptionController::class, 'trashed'])->name('trashed');
+        Route::get('/{id}/trashed-detail', [PrescriptionController::class, 'showTrashed'])->name('trashed-detail');
+        Route::post('/{id}/restore', [PrescriptionController::class, 'restore'])->name('restore');
+
+        // Các route còn lại đặt sau
         Route::get('/', [PrescriptionController::class, 'index'])->name('index');
-
-        Route::get('/create', [PrescriptionController::class, 'create'])
-            ->middleware('check_permission:create_prescriptions')->name('create');
-
-        Route::post('/store', [PrescriptionController::class, 'store'])
-            ->middleware('check_permission:create_prescriptions')->name('store');
-
-        Route::get('/{id}/edit', [PrescriptionController::class, 'edit'])
-            ->middleware('check_permission:edit_prescriptions')->name('edit');
-
-        Route::put('/{id}', [PrescriptionController::class, 'update'])
-            ->middleware('check_permission:edit_prescriptions')->name('update');
-
-        Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show');
+        Route::get('/create', [PrescriptionController::class, 'create'])->middleware('check_permission:create_prescriptions')->name('create');
+        Route::post('/store', [PrescriptionController::class, 'store'])->middleware('check_permission:create_prescriptions')->name('store');
+        Route::get('/{id}/edit', [PrescriptionController::class, 'edit'])->middleware('check_permission:edit_prescriptions')->name('edit');
+        Route::put('/{id}', [PrescriptionController::class, 'update'])->middleware('check_permission:edit_prescriptions')->name('update');
         Route::get('/{id}/print', [PrescriptionController::class, 'exportPdf'])->name('print');
+        Route::delete('/{id}', [PrescriptionController::class, 'destroy'])->middleware('check_permission:delete_prescriptions')->name('destroy');
+        Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show'); // ⚠ phải đặt CUỐI
     });
+
 
 
     // Nhóm quản lý bác sĩ
@@ -305,6 +304,13 @@ Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admi
 Route::get('admin/users/edit/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
 Route::put('admin/users/edit/{id}', [UserController::class, 'update'])->name('admin.users.update');
 Route::get('admin/users/search', [UserController::class, 'search'])->name('admin.users.search');
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    Route::resource('users', UserController::class);
+
+    // ✅ Route xử lý đổi trạng thái người dùng
+    Route::patch('users/{id}/toggle-status', [UserController::class, 'toggleStatus'])
+        ->name('users.toggleStatus');
+});
 // Quản lý voucher
 Route::get('admin/vouchers', [VoucherController::class, 'index'])->name('admin.vouchers.index');
 Route::get('admin/vouchers/create', [VoucherController::class, 'create'])->name('admin.vouchers.create');

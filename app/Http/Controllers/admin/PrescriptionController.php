@@ -9,8 +9,10 @@ use App\Models\Department;
 use App\Models\MedicalRecord;
 use App\Models\Medicine;
 use App\Models\Prescription;
+use App\Models\PrescriptionHistory;
 use App\Models\PrescriptionItem;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PrescriptionController extends Controller
@@ -74,8 +76,21 @@ class PrescriptionController extends Controller
     }
     public function store(StorePrescriptionRequest $request)
     {
+        $prescribedAt = Carbon::parse($request->prescribed_at);
 
-        $prescribedAt = \Carbon\Carbon::parse($request->prescribed_at);
+        $errors = [];
+        foreach ($request->medicines as $i => $item) {
+            $medicine = Medicine::find($item['medicine_id']);
+            if (!$medicine) {
+                $errors["medicines.$i.medicine_id"] = 'Thuốc không tồn tại.';
+            } elseif ($medicine->stock < $item['quantity']) {
+                $errors["medicines.$i.quantity"] = 'Thuốc "' . $medicine->name . '" không đủ tồn kho. (Còn: ' . $medicine->stock . ')';
+            }
+        }
+
+        if (!empty($errors)) {
+            return redirect()->back()->withInput()->withErrors($errors);
+        }
 
         $prescription = Prescription::create([
             'medical_record_id' => $request->medical_record_id,
@@ -90,6 +105,9 @@ class PrescriptionController extends Controller
                 'quantity' => $item['quantity'],
                 'usage_instructions' => $item['usage_instructions'] ?? null,
             ]);
+
+            $medicine = Medicine::find($item['medicine_id']);
+            $medicine->decrement('stock', $item['quantity']);
         }
 
         return redirect()->route('admin.prescriptions.index')->with('success', 'Đơn thuốc đã được tạo thành công.');
@@ -109,7 +127,41 @@ class PrescriptionController extends Controller
 
     public function update(UpdatePrescriptionRequest $request, $id)
     {
-        $prescription = Prescription::findOrFail($id);
+        $prescription = Prescription::with('items')->findOrFail($id);
+
+        $oldData = [
+            'prescribed_at' => $prescription->prescribed_at,
+            'notes' => $prescription->notes,
+            'medicines' => $prescription->items->map(function ($item) {
+                return [
+                    'medicine_id' => $item->medicine_id,
+                    'quantity' => $item->quantity,
+                    'usage_instructions' => $item->usage_instructions,
+                ];
+            })->toArray(),
+        ];
+
+        foreach ($prescription->items as $oldItem) {
+            $medicine = Medicine::find($oldItem->medicine_id);
+            if ($medicine) {
+                $medicine->increment('stock', $oldItem->quantity);
+            }
+        }
+
+        $errors = [];
+        foreach ($request->medicines as $i => $item) {
+            $medicine = Medicine::find($item['medicine_id']);
+            if (!$medicine) {
+                $errors["medicines.$i.medicine_id"] = 'Thuốc không tồn tại.';
+            } elseif ($medicine->stock < $item['quantity']) {
+                $errors["medicines.$i.quantity"] = 'Thuốc "' . $medicine->name . '" không đủ tồn kho. (Còn: ' . $medicine->stock . ')';
+            }
+        }
+
+        if (!empty($errors)) {
+            return redirect()->back()->withInput()->withErrors($errors);
+        }
+
         $prescription->update([
             'medical_record_id' => $request->medical_record_id,
             'prescribed_at' => $request->prescribed_at,
@@ -125,18 +177,52 @@ class PrescriptionController extends Controller
                 'quantity' => $item['quantity'],
                 'usage_instructions' => $item['usage_instructions'] ?? null,
             ]);
+
+            $medicine = Medicine::find($item['medicine_id']);
+            $medicine->decrement('stock', $item['quantity']);
         }
+
+        $newData = [
+            'prescribed_at' => $request->prescribed_at,
+            'notes' => $request->notes,
+            'medicines' => $request->medicines,
+        ];
+
+        PrescriptionHistory::create([
+            'prescription_id' => $prescription->id,
+            'updated_by' => auth()->id(),
+            'old_data' => $oldData,
+            'new_data' => $newData,
+            'changed_at' => now(),
+        ]);
 
         return redirect()->route('admin.prescriptions.index')->with('success', 'Đơn thuốc đã được cập nhật thành công.');
     }
 
     public function show($id)
     {
-        $prescription = Prescription::with(['medicalRecord.appointment.patient', 'items.medicine'])
-            ->findOrFail($id);
+        $prescription = Prescription::with([
+            'medicalRecord.appointment.patient',
+            'items.medicine',
+            'histories.user'
+        ])->findOrFail($id);
+
         $prescription->items = $prescription->items->filter(function ($item) {
             return $item->medicine->created_at->gte(now()->subMonths(6));
         });
+
+        $medicineMap = Medicine::pluck('name', 'id')->toArray();
+
+        foreach ($prescription->histories as $history) {
+            $newData = $history->new_data;
+
+            foreach ($newData['medicines'] as &$med) {
+                $med['medicine_name'] = $medicineMap[$med['medicine_id']] ?? 'Không xác định';
+            }
+
+            $history->new_data = $newData;
+        }
+
 
         return view('admin.prescriptions.show', compact('prescription'));
     }
@@ -153,5 +239,47 @@ class PrescriptionController extends Controller
         $pdf = PDF::loadView('admin.prescriptions.pdf', compact('prescription'));
 
         return $pdf->download('don-thuoc-' . $prescription->id . '.pdf');
+    }
+
+    public function destroy($id)
+    {
+        $prescription = Prescription::findOrFail($id);
+        $prescription->delete();
+        return redirect()->route('admin.prescriptions.index')
+            ->with('success', 'Đơn thuốc đã được xóa mềm thành công.');
+    }
+
+    // Hiển thị danh sách đơn thuốc đã xóa
+    public function trashed(Request $request)
+    {
+        $query = Prescription::onlyTrashed()
+            ->with([
+                'medicalRecord.appointment.patient',
+                'medicalRecord.appointment.doctor.user',
+                'prescriptionItems.medicine'
+            ]);
+
+        $prescriptions = $query->orderByDesc('prescribed_at')->paginate(10);
+        return view('admin.prescriptions.trashed', compact('prescriptions'));
+    }
+
+    public function showTrashed($id)
+    {
+        $prescription = Prescription::onlyTrashed()
+            ->with(['medicalRecord.appointment.patient', 'items.medicine'])
+            ->findOrFail($id);
+
+        return view('admin.prescriptions.trashed-detail', compact('prescription'));
+    }
+
+
+    // Khôi phục đơn thuốc đã xóa
+    public function restore($id)
+    {
+        $prescription = Prescription::onlyTrashed()->findOrFail($id);
+        $prescription->restore();
+
+        return redirect()->route('admin.prescriptions.trashed')
+            ->with('success', 'Đơn thuốc đã được khôi phục.');
     }
 }
