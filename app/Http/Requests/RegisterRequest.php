@@ -23,6 +23,7 @@ class RegisterRequest extends FormRequest
     {
         return [
             'username' => 'required|unique:users,username|max:30',
+            'fullname' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email|max:100',
             'password' => 'required|min:6|max:32',
         ];
@@ -34,6 +35,10 @@ class RegisterRequest extends FormRequest
             'username.required' => 'Vui lòng nhập tên đăng nhập',
             'username.unique' => 'Tên đăng nhập đã tồn tại',
             'username.max' => 'Tên đăng nhập không được vượt quá 30 ký tự',
+
+            'fullname.required' => 'Vui lòng nhập họ tên',
+            'fullname.string' => 'Họ tên phải là chuỗi ký tự',
+            'fullname.max' => 'Họ tên không được vượt quá 100 ký tự',
 
             'email.required' => 'Vui lòng nhập email',
             'email.email' => 'Email không hợp lệ',

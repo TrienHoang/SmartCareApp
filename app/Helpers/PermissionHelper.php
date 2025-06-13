@@ -86,6 +86,10 @@ if (!function_exists('getPermissionLabel')) {
 
             // 14. Thống kê
             'view_statistics' => 'Xem thống kê',
+            // 15. Quản lý đơn xin nghỉ phép của bác sĩ
+            'view_doctor_leaves' => 'Xem đơn xin nghỉ phép của bác sĩ',
+            'edit_doctor_leaves' => 'Duyệt đơn xin nghỉ phép của bác sĩ',
+
 
             //15. loại dịch vụ
             'view_categories' => 'Xem loại dịch vụ',
@@ -108,6 +112,7 @@ if (!function_exists('getPermissionGroupLabel')) {
             'schedules' => 'Lịch làm việc',
             'appointments' => 'Lịch hẹn',
             'services' => 'Dịch vụ',
+            'categories' => 'Loại dịch vụ',
             'prescriptions' => 'Đơn thuốc',
             'coupons' => 'Mã giảm giá',
             'orders' => 'Đơn hàng & thanh toán',
@@ -117,8 +122,9 @@ if (!function_exists('getPermissionGroupLabel')) {
             'reviews' => 'Đánh giá',
             'support' => 'Hỗ trợ & Thông báo',
             'statistics' => 'Thống kê',
+            'doctor_leaves' => 'Nghỉ phép bác sĩ',
         ];
 
-        return $labels[$group] ?? ucfirst(str_replace('_', ' ', $group));
+        return $groups[$group] ?? ucfirst(str_replace('_', ' ', $group));
     }
 }

@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Payment extends Model
 {
@@ -19,22 +21,42 @@ class Payment extends Model
         'paid_at',
     ];
 
-    // Nếu muốn dùng Carbon cho paid_at
-    protected $dates = [
-        'paid_at',
+    protected $casts = [
+        'paid_at' => 'datetime',
     ];
 
     public $timestamps = false;
 
-    // Quan hệ với appointment
-    public function appointment()
+    public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class);
     }
 
-    // Quan hệ với promotion (có thể null)
-    public function promotion()
+    public function promotion(): BelongsTo
     {
         return $this->belongsTo(Promotion::class);
+    }
+
+    public function paymentHistories(): HasMany
+    {
+        return $this->hasMany(PaymentHistory::class);
+    }
+
+    // Accessor: lấy thông tin bệnh nhân thông qua cuộc hẹn
+    public function getPatientAttribute()
+    {
+        return optional($this->appointment)->patient;
+    }
+
+    // Accessor: lấy bác sĩ
+    public function getDoctorAttribute()
+    {
+        return optional($this->appointment)->doctor;
+    }
+
+    // Accessor: lấy dịch vụ
+    public function getServiceAttribute()
+    {
+        return optional($this->appointment)->service;
     }
 }

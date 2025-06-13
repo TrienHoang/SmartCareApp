@@ -33,13 +33,13 @@
                     <table class="table table-striped table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>ID</th>
-                                <th>Doctor</th>
-                                <th>Day of Week</th>
-                                <th>Start Time</th>
-                                <th>End Time</th>
-                                <th>Day</th>
-                                <th>Actions</th>
+                                <th>STT</th>
+                                <th>Bác sĩ</th>
+                                <th>Ngày</th>
+                                <th>Thứ trong tuần</th>
+                                <th>Giờ bắt đầu</th>
+                                <th>Giờ kết thúc</th>
+                                <th>Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -47,10 +47,10 @@
                                 <tr>
                                     <td>{{ $schedule->id }}</td>
                                     <td>{{ $schedule->doctor->user->full_name }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($schedule->day)->format('d/m/Y') }}</td>
                                     <td>{{ $schedule->day_of_week }}</td>
                                     <td>{{ $schedule->start_time }}</td>
-                                    <td>{{ $schedule->end_time }}</td>
-                                    <td>{{ $schedule->created_at}}</td> <!-- Định dạng ngày rõ ràng -->
+                                    <td>{{ $schedule->end_time }}</td>           
                                     <td>
                                         <div class="btn-group" role="group">
                                             <a href="{{ route('admin.schedules.show', $schedule->id) }}" class="btn btn-info btn-sm">View</a>
