@@ -5,11 +5,13 @@ function addMedicine() {
     medicineOptions.forEach(med => {
         optionsHtml += `<option value="${med.id}">
             ${med.name} (${med.unit}) - ${med.formatted_price} – Còn: ${med.stock}
+            ${med.stock < 10 ? '⚠️ Cảnh báo: gần hết' : ''}
         </option>`;
     });
 
     const item = `
-        <div class="medicine-item border rounded p-3 mb-3 shadow-sm bg-light">
+        <div class="medicine-item border rounded p-3 mb-3 shadow-sm bg-light position-relative">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-medicine-btn" aria-label="Xóa"></button>
             <div class="row g-2">
                 <div class="col-md-4">
                     <label class="form-label">Tên thuốc</label>
@@ -34,3 +36,10 @@ function addMedicine() {
     container.insertAdjacentHTML('beforeend', item);
     medicineIndex++;
 }
+
+// Gán sự kiện xoá thuốc khi click nút "X"
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('remove-medicine-btn')) {
+        e.target.closest('.medicine-item').remove();
+    }
+});

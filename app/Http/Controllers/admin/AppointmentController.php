@@ -392,4 +392,17 @@ class AppointmentController extends Controller
 
         return redirect()->back()->with('success', 'Cập nhật trạng thái thành công!');
     }
+
+    public function searchPatients(Request $request)
+    {
+        $query = $request->get('q', '');
+
+        $patients = User::where('role_id', 3)
+            ->where('full_name', 'like', "%$query%")
+            ->select('id', 'full_name')
+            ->limit(10)
+            ->get();
+
+        return response()->json($patients);
+    }
 }

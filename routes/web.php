@@ -223,6 +223,9 @@ Route::group([
 
 
         Route::get('/{id}', [AppointmentController::class, 'show'])->name('show');
+
+        Route::get('/patients/search', [AppointmentController::class, 'searchPatients'])
+            ->middleware('check_permission:view_appointments')->name('patients.search');
     });
 
 
@@ -236,6 +239,7 @@ Route::group([
         Route::get('/trashed', [PrescriptionController::class, 'trashed'])->name('trashed');
         Route::get('/{id}/trashed-detail', [PrescriptionController::class, 'showTrashed'])->name('trashed-detail');
         Route::post('/{id}/restore', [PrescriptionController::class, 'restore'])->name('restore');
+        Route::get('/medical-records/search', [PrescriptionController::class, 'searchMedicalRecords'])->name('medical-records.search');
 
         // Các route còn lại đặt sau
         Route::get('/', [PrescriptionController::class, 'index'])->name('index');
@@ -246,6 +250,7 @@ Route::group([
         Route::get('/{id}/print', [PrescriptionController::class, 'exportPdf'])->name('print');
         Route::delete('/{id}', [PrescriptionController::class, 'destroy'])->middleware('check_permission:delete_prescriptions')->name('destroy');
         Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show'); // ⚠ phải đặt CUỐI
+        Route::get('/medicines/search', [PrescriptionController::class, 'searchMedicines'])->name('medicines.search');
     });
 
 
@@ -309,10 +314,6 @@ Route::group([
             ->middleware('check_permission:view_payments_histories')
             ->name('show');
     });
-
-
-
-    
 });
 
 
@@ -463,19 +464,19 @@ Route::group([
         Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
     });
 
-    
+
     Route::resource('notifications', AdminNotificationController::class);
     Route::post('notifications/{notification}/send-now', [AdminNotificationController::class, 'sendNow'])->name('notifications.sendNow');
 
     // Route để lấy danh sách người dùng cho Select2 
     Route::get('notifications/get-users', function (Request $request) {
-        $search = $request->query('search'); 
+        $search = $request->query('search');
         $users = User::when($search, function ($query, $search) {
             return $query->where('full_name', 'like', '%' . $search . '%')
-                         ->orWhere('email', 'like', '%' . $search . '%');
+                ->orWhere('email', 'like', '%' . $search . '%');
         })
-        ->limit(20) // Giới hạn số lượng trả về
-        ->get(['id', 'full_name', 'email']);
+            ->limit(20) // Giới hạn số lượng trả về
+            ->get(['id', 'full_name', 'email']);
 
         $results = $users->map(function ($user) {
             return ['id' => $user->id, 'text' => $user->full_name . ' (' . $user->email . ')'];
@@ -493,5 +494,5 @@ Route::group([
         return response()->json(['results' => $results]);
     })->name('notifications.getRoles');
 });
-        Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('admin.payment_histories.index');
-        Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('admin.payment_histories.show');
+Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('admin.payment_histories.index');
+Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('admin.payment_histories.show');

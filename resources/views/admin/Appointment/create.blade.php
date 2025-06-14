@@ -18,13 +18,6 @@
                         <label for="patient_id" class="form-label">Bệnh nhân</label>
                         <select name="patient_id" id="patient_id"
                             class="form-select @error('patient_id') is-invalid @enderror">
-                            <option value="">Chọn bệnh nhân</option>
-                            @foreach ($patients as $patient)
-                                <option value="{{ $patient->id }}"
-                                    {{ old('patient_id') == $patient->id ? 'selected' : '' }}>
-                                    {{ $patient->full_name }}
-                                </option>
-                            @endforeach
                         </select>
                         @error('patient_id')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -105,3 +98,7 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/Appointment/create.js') }}"></script>
+@endpush
