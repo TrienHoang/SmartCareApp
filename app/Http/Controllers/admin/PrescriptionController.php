@@ -133,8 +133,14 @@ class PrescriptionController extends Controller
             ->orderBy('name')
             ->get();
 
+        // Thêm thuộc tính formatted_price cho từng thuốc
+        foreach ($medicines as $med) {
+            $med->formatted_price = number_format($med->price, 0, ',', '.') . 'đ';
+        }
+
         return view('admin.prescriptions.edit', compact('prescription', 'medicalRecords', 'medicines'));
     }
+
 
     public function update(UpdatePrescriptionRequest $request, $id)
     {
@@ -322,5 +328,42 @@ class PrescriptionController extends Controller
 
         return redirect()->route('admin.prescriptions.trashed')
             ->with('success', 'Đơn thuốc đã được khôi phục và trừ lại thuốc từ kho.');
+    }
+
+    public function searchMedicalRecords(Request $request)
+    {
+        $query = $request->get('q', '');
+
+        $records = MedicalRecord::with('appointment.patient')
+            ->whereHas('appointment.patient', function ($q) use ($query) {
+                $q->where('full_name', 'like', "%$query%")
+                    ->orWhere('phone', 'like', "%$query%");
+            })
+            ->limit(10)
+            ->get();
+
+        return response()->json($records->map(function ($record) {
+            return [
+                'id' => $record->id,
+                'text' => "#{$record->code} - {$record->appointment->patient->full_name}"
+            ];
+        }));
+    }
+
+    public function searchMedicines(Request $request)
+    {
+        $query = $request->get('q', '');
+
+        $medicines = Medicine::where('name', 'like', "%$query%")
+            ->orderBy('name')
+            ->limit(10)
+            ->get();
+
+        return response()->json($medicines->map(function ($medicine) {
+            return [
+                'id' => $medicine->id,
+                'text' => $medicine->name . ' (' . $medicine->unit . ') - Còn: ' . $medicine->stock
+            ];
+        }));
     }
 }
