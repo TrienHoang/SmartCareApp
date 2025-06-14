@@ -34,10 +34,13 @@
                                             class="form-control select2 @error('medical_record_id') is-invalid @enderror">
                                             <option value="">-- Chọn hồ sơ bệnh án --</option>
                                             @foreach ($medicalRecords as $record)
-                                                <option value="{{ $record->id }}"
-                                                    {{ old('medical_record_id') == $record->id ? 'selected' : '' }}>
-                                                    {{ $record->code }} - {{ $record->appointment->patient->full_name }}
-                                                    ({{ $record->appointment->patient->phone }})
+                                                <option value="{{ $record->id }}">
+                                                    Hồ sơ: {{ $record->code }} <br>
+                                                    Bệnh nhân: {{ $record->appointment->patient->full_name ?? 'Không có' }}
+                                                    (ID: {{ $record->appointment->patient->id ?? 'N/A' }}) <br>
+                                                    Bác sĩ:
+                                                    {{ $record->appointment->doctor->user->full_name ?? 'Không có' }} (ID:
+                                                    {{ $record->appointment->doctor->user->id ?? 'N/A' }})
                                                 </option>
                                             @endforeach
                                         </select>
