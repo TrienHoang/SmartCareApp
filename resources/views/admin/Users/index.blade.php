@@ -1,93 +1,91 @@
 @extends('admin.dashboard')
-@section('title', 'Danh sách người dùng')
+@section('title', 'Quản lý người dùng')
 
 @section('content')
-    <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="py-3 breadcrumb-wrapper mb-4">
-            <span class="text-muted fw-light">Users /</span> Tài khoản người dùng
-        </h4>
-        
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Danh sách người dùng</h5>
-                </div>
-
-                @if (session('error'))
-                    <div class="alert alert-danger m-3">
-                        {{ session('error') }}
-                    </div>
-                @endif
-
-                <div class="table-responsive text-nowrap">
-                    <table class="table">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>ID</th>
-                                <th>Tài khoản</th>
-                                <th>Họ tên</th>
-                                <th>Email</th>
-                                <th>Điện thoại</th>
-                                <th>Giới tính</th>
-                                <th>Địa chỉ</th>
-                                <th>Vai trò</th>
-                                <th>Ảnh đại diện</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table-border-bottom-0">
-                            @forelse($users as $user)
-                                <tr>
-                                    <td>{{ $user->id }}</td>
-                                    <td>{{ $user->username }}</td>
-                                    <td>{{ $user->full_name }}</td>
-                                    <td>{{ $user->email }}</td>
-                                    <td>{{ $user->phone }}</td>
-                                    <td>
-                                        <span class="badge bg-label-{{ $user->gender === 'Nam' ? 'primary' : 'warning' }}">
-                                            {{ $user->gender }}
-                                        </span>
-                                    </td>
-                                    <td>{{ $user->address }}</td>
-                                    <td>
-                                        @if ($user->role)
-                                            <span class="badge bg-label-success">{{ $user->role->name }}</span>
-                                        @else
-                                            <span class="badge bg-label-secondary">Chưa phân quyền</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if ($user->avatar)
-                                            <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar"
-                                                class="rounded-circle"
-                                                style="width: 45px; height: 45px; object-fit: cover;">
-                                        @else
-                                            <span class="text-muted">Chưa có ảnh</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-sm btn-info">
-                                            <i class="bx bx-show me-1"></i> Xem
-                                        </a>
-                                        <a href="{{ route('admin.users.edit', $user->id) }}"
-                                            class="btn btn-sm btn-warning me-1">
-                                            <i class="bx bx-edit-alt me-1"></i> Sửa
-                                        </a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="10" class="text-muted">Không có người dùng nào.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="card-footer d-flex justify-content-end">
-                    {{ $users->links('pagination::bootstrap-5') }}
-                </div>
-            </div>
-        </div>
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h4 class="mb-0">📋 Quản lý người dùng</h4>
+        <form action="{{ route('admin.users.index') }}" method="GET" class="d-flex flex-wrap align-items-center gap-2">
+            <select name="role_id" class="form-select" onchange="this.form.submit()">
+                <option value="all">-- Tất cả vai trò --</option>
+                @foreach($roles as $role)
+                    <option value="{{ $role->id }}" {{ request('role_id') == $role->id ? 'selected' : '' }}>
+                        {{ $role->name }}
+                    </option>
+                @endforeach
+            </select>
+            <input type="text" name="search" class="form-control" placeholder="Tìm kiếm..." value="{{ request('search') }}">
+            <button type="submit" class="btn btn-primary">Tìm</button>
+        </form>
     </div>
 
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @elseif(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle text-center mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Tài khoản</th>
+                            <th>Họ tên</th>
+                            <th>Giới tính</th>
+                            <th>Số điện thoại</th>
+                            <th>Vai trò</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($users as $index => $user)
+                        <tr>
+                            <td>{{ $loop->iteration + ($users->currentPage() - 1) * $users->perPage() }}</td>
+                            <td>{{ $user->username }}</td>
+                            <td>{{ $user->full_name }}</td>
+                            <td>
+                                <span class="badge bg-{{ $user->gender === 'Nam' ? 'primary' : 'warning' }}">
+                                    {{ $user->gender }}
+                                </span>
+                            </td>
+                            <td>{{ $user->phone }}</td>
+                            <td>
+                                <span class="badge bg-success">{{ $user->role->name ?? 'Chưa có' }}</span>
+                            </td>
+                            <td>
+                                <form action="{{ route('admin.users.toggleStatus', $user->id) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button class="btn btn-sm {{ $user->status === 'online' ? 'btn-success' : 'btn-secondary' }}">
+                                        {{ ucfirst($user->status) }}
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-sm btn-info" title="Xem">
+                                    <i class="bx bx-show"></i>
+                                </a>
+                                <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-sm btn-warning" title="Sửa">
+                                    <i class="bx bx-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">Không tìm thấy người dùng nào.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer text-end">
+            {{ $users->appends(request()->query())->links('pagination::bootstrap-5') }}
+        </div>
+    </div>
+</div>
 @endsection
