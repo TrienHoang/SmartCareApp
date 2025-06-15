@@ -68,7 +68,12 @@ class PrescriptionController extends Controller
 
     public function create()
     {
-        $medicalRecords = MedicalRecord::with('appointment.patient')->get();
+        $medicalRecords = MedicalRecord::with('appointment.patient')
+                ->whereDoesntHave('prescriptions')
+                ->whereHas('appointment', function ($q){
+                    $q->where('status', 'completed');
+                })
+                ->get();
         $medicines = Medicine::where('created_at', '>=', now()->subMonths(6))
             ->orderBy('name')
             ->get();
@@ -335,6 +340,10 @@ class PrescriptionController extends Controller
         $query = $request->get('q', '');
 
         $records = MedicalRecord::with('appointment.patient')
+            ->whereDoesntHave('prescriptions')
+            ->whereHas('appointment', function ($q) {
+                $q->where('status', 'completed');
+            })
             ->whereHas('appointment.patient', function ($q) use ($query) {
                 $q->where('full_name', 'like', "%$query%")
                     ->orWhere('phone', 'like', "%$query%");

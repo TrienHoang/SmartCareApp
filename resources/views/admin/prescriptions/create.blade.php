@@ -112,6 +112,7 @@
         $('#medical_record_id').select2({
             theme: 'bootstrap5',
             placeholder: 'Tìm bệnh nhân theo tên hoặc SĐT',
+            dropdownParent: $('#medical_record_id').closest('.col-md-6'),
             allowClear: true,
             ajax: {
                 url: "{{ route('admin.prescriptions.medical-records.search') }}",
@@ -122,6 +123,13 @@
                 cache: true
             },
             minimumInputLength: 2
+        });
+
+        $(document).on('select2:open', () => {
+            let select2SearchField = document.querySelector('.select2-container--open .select2-search__field');
+            if (select2SearchField) {
+        select2SearchField.focus();
+            }
         });
 
         function initMedicineSelect(element) {
