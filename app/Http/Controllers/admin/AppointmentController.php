@@ -12,6 +12,7 @@ use App\Models\AppointmentLog;
 use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\DoctorLeave;
+use App\Models\MedicalRecord;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\WorkingSchedule;
@@ -381,7 +382,6 @@ class AppointmentController extends Controller
             'cancel_reason' => $request->status === 'cancelled' ? $request->note : null
         ]);
 
-        // Log thay đổi trạng thái
         $appointment->logs()->create([
             'changed_by' => auth()->id(),
             'status_before' => $oldStatus,
@@ -390,8 +390,21 @@ class AppointmentController extends Controller
             'note' => $request->note
         ]);
 
+        if ($request->status === 'completed') {
+            $existing = MedicalRecord::where('appointment_id', $appointment->id)->first();
+
+            if (!$existing) {
+                MedicalRecord::create([
+                    'appointment_id' => $appointment->id,
+                    'code' => 'MR' . now()->format('YmdHis') . $appointment->id,
+                    'created_at' => now(),
+                ]);
+            }
+        }
+
         return redirect()->back()->with('success', 'Cập nhật trạng thái thành công!');
     }
+
 
     public function searchPatients(Request $request)
     {
