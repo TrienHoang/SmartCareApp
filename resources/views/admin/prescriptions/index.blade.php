@@ -6,8 +6,11 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Tìm kiếm và lọc đơn thuốc</h3>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">Tìm kiếm và lọc đơn thuốc</h3>
+                        <a href="{{ route('admin.prescriptions.trashed') }}" class="btn btn-outline-danger ml-2">
+                            <i class="fas fa-trash"></i> Đơn thuốc đã xóa mềm
+                        </a>
                     </div>
                     <div class="card-body">
                         <form id="search-form" method="GET">
@@ -155,6 +158,17 @@
                                                         class="btn btn-warning" title="Chỉnh sửa">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
+                                                    <form
+                                                        action="{{ route('admin.prescriptions.destroy', $prescription->id) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa mềm đơn thuốc này không?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger"
+                                                            title="Xóa đơn thuốc" style="width: 20px">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </td>
                                         </tr>

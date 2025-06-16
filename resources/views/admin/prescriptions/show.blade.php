@@ -39,7 +39,10 @@
                                     </tr>
                                     <tr>
                                         <td><strong>Ngày sinh:</strong></td>
-                                        <td>{{ $prescription->medicalRecord->appointment->patient->date_of_birth ? \Carbon\Carbon::parse($prescription->medicalRecord->appointment->patient->date_of_birth)->format('d/m/Y') : 'Không xác định' }}
+                                        <td>
+                                            {{ $prescription->medicalRecord->appointment->patient->date_of_birth
+                                                ? \Carbon\Carbon::parse($prescription->medicalRecord->appointment->patient->date_of_birth)->format('d/m/Y')
+                                                : 'Không xác định' }}
                                         </td>
                                     </tr>
                                 </table>
@@ -48,7 +51,7 @@
                                 <h5>Thông tin đơn thuốc</h5>
                                 <table class="table table-sm">
                                     <tr>
-                                        <td width="30%"><strong>Bác sĩ kê đơn:</strong></td>
+                                        <td><strong>Bác sĩ kê đơn:</strong></td>
                                         <td>{{ $prescription->medicalRecord->appointment->doctor->user->full_name }}</td>
                                     </tr>
                                     <tr>
@@ -93,13 +96,13 @@
                                     <table class="table table-bordered">
                                         <thead class="thead-light">
                                             <tr>
-                                                <th width="5%">STT</th>
-                                                <th width="25%">Tên thuốc</th>
-                                                <th width="15%">Đơn vị</th>
-                                                <th width="10%">Số lượng</th>
-                                                <th width="15%">Giá đơn vị</th>
-                                                <th width="15%">Ngày sản xuất</th>
-                                                <th width="30%">Hướng dẫn sử dụng</th>
+                                                <th>STT</th>
+                                                <th>Tên thuốc</th>
+                                                <th>Đơn vị</th>
+                                                <th>Số lượng</th>
+                                                <th>Giá đơn vị</th>
+                                                <th>Ngày sản xuất</th>
+                                                <th>Hướng dẫn sử dụng</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -123,26 +126,22 @@
                                                         @endif
                                                     </td>
                                                     <td>{{ $item->medicine->unit }}</td>
-                                                    <td>
-                                                        <span>{{ $item->quantity }}</span>
-                                                    </td>
+                                                    <td>{{ $item->quantity }}</td>
                                                     <td>{{ $item->medicine->formatted_price }}</td>
                                                     <td>{{ $item->medicine->created_at->format('d/m/Y') }}</td>
-                                                    <td>
-                                                        {{ $item->usage_instructions ?: 'Theo chỉ dẫn của bác sĩ' }}
-                                                    </td>
+                                                    <td>{{ $item->usage_instructions ?: 'Theo chỉ dẫn của bác sĩ' }}</td>
                                                 </tr>
                                             @endforeach
-
-
                                         </tbody>
                                         <tfoot>
                                             <tr class="bg-light">
                                                 <td colspan="3"><strong>Tổng cộng</strong></td>
                                                 <td><strong>{{ $prescription->total_quantity }}</strong></td>
                                                 <td colspan="3">
-                                                    <strong>{{ number_format($prescription->items->sum(function ($item) {return $item->quantity * $item->medicine->price;}),3,',','.') }}
-                                                        VNĐ</strong>
+                                                    <strong>
+                                                        {{ number_format($prescription->items->sum(fn($item) => $item->quantity * $item->medicine->price), 3, ',', '.') }}
+                                                        VNĐ
+                                                    </strong>
                                                 </td>
                                             </tr>
                                         </tfoot>
@@ -150,6 +149,49 @@
                                 </div>
                             </div>
                         </div>
+
+                        {{-- Lịch sử chỉnh sửa --}}
+                        @if ($prescription->histories->count())
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h5>Lịch sử chỉnh sửa</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Thời gian</th>
+                                                    <th>Người chỉnh sửa</th>
+                                                    <th>Ghi chú cũ</th>
+                                                    <th>Ghi chú mới</th>
+                                                    <th>Thuốc kê mới</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($prescription->histories as $history)
+                                                    <tr>
+                                                        <td>{{ $history->changed_at->format('d/m/Y H:i') }}</td>
+                                                        <td>{{ $history->user->full_name ?? 'Hệ thống' }}</td>
+                                                        <td>{{ $history->old_data['notes'] ?? 'Không có' }}</td>
+                                                        <td>{{ $history->new_data['notes'] ?? 'Không có' }}</td>
+                                                        <td>
+                                                            <ul class="mb-0">
+                                                                @foreach ($history->new_data['medicines'] as $med)
+                                                                    <li>
+                                                                        <strong>{{ $med['medicine_name'] }}</strong> – SL:
+                                                                        {{ $med['quantity'] }},
+                                                                        HD: {{ $med['usage_instructions'] ?? '-' }}
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
                         <div class="row mt-3">
                             <div class="col-12">
@@ -165,9 +207,12 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="card-footer">
                         <a href="{{ route('admin.prescriptions.print', $prescription->id) }}" class="btn btn-primary"
-                            target="_blank"><i class="fas fa-print"></i> In đơn thuốc </a>
+                            target="_blank">
+                            <i class="fas fa-print"></i> In đơn thuốc
+                        </a>
                     </div>
                 </div>
             </div>

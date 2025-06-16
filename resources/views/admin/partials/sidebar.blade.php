@@ -178,8 +178,17 @@
         </li>
 
 
-        <!-- Thanh toán -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Thanh toán</span></li>
+        <li class="menu-item">
+            <a href="{{ route('admin.payment_histories.index') }}" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-wallet"></i>
+                <div>Thanh toán</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item"><a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
+            </ul>
+        </li>
 
         <li class="menu-item">
             <a href="{{ route('admin.payments.index') }}" class="menu-link menu-toggle">
@@ -197,9 +206,9 @@
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Liên lạc</span></li>
 
         <li class="menu-item">
-            <a href="app-email.html" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-envelope"></i>
-                <div>Email</div>
+            <a href="{{ route('admin.notifications.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-bell"></i>
+                <div>Thông báo</div>
             </a>
         </li>
 
@@ -210,8 +219,12 @@
             </a>
         </li>
 
-        <!-- Tài khoản -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Tài khoản</span></li>
+        <li class="menu-item">
+            <a href="app-chat.html" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-chat"></i>
+                <div>Chat</div>
+            </a>
+        </li>
 
         <li class="menu-item">
             <a href="{{ route('logout') }}" class="menu-link">
@@ -219,6 +232,20 @@
                 <div>Đăng xuất</div>
             </a>
         </li>
+        <li class="menu-item">
+            <a href="{{ route('admin.payment_histories.index') }}" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                <div data-i18n="lịch sử thanh toán">lịch sử thanh toán</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
+                        <div data-i18n="List">List</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
 
     </ul>
+
 </aside>

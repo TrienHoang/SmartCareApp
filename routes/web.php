@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\admin\DoctorLeaveController;
+use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\admin\RoleController;
 use App\Http\Controllers\admin\AppointmentController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DoctorController;
+use App\Http\Controllers\Admin\PaymentHistoryController;
 use App\Http\Controllers\admin\SchedulesController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\VoucherController;
@@ -18,8 +20,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\ServiceCategoryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ReviewController;
-use App\Http\Controllers\Admin\FaqController;
-
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('client.home');
@@ -219,6 +222,9 @@ Route::group([
 
 
         Route::get('/{id}', [AppointmentController::class, 'show'])->name('show');
+
+        Route::get('/patients/search', [AppointmentController::class, 'searchPatients'])
+            ->middleware('check_permission:view_appointments')->name('patients.search');
     });
 
 
@@ -228,23 +234,24 @@ Route::group([
         'as' => 'prescriptions.',
         'middleware' => 'check_permission:view_prescriptions'
     ], function () {
+        // 🚨 Cần đặt trước
+        Route::get('/trashed', [PrescriptionController::class, 'trashed'])->name('trashed');
+        Route::get('/{id}/trashed-detail', [PrescriptionController::class, 'showTrashed'])->name('trashed-detail');
+        Route::post('/{id}/restore', [PrescriptionController::class, 'restore'])->name('restore');
+        Route::get('/medical-records/search', [PrescriptionController::class, 'searchMedicalRecords'])->name('medical-records.search');
+
+        // Các route còn lại đặt sau
         Route::get('/', [PrescriptionController::class, 'index'])->name('index');
-
-        Route::get('/create', [PrescriptionController::class, 'create'])
-            ->middleware('check_permission:create_prescriptions')->name('create');
-
-        Route::post('/store', [PrescriptionController::class, 'store'])
-            ->middleware('check_permission:create_prescriptions')->name('store');
-
-        Route::get('/{id}/edit', [PrescriptionController::class, 'edit'])
-            ->middleware('check_permission:edit_prescriptions')->name('edit');
-
-        Route::put('/{id}', [PrescriptionController::class, 'update'])
-            ->middleware('check_permission:edit_prescriptions')->name('update');
-
-        Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show');
+        Route::get('/create', [PrescriptionController::class, 'create'])->middleware('check_permission:create_prescriptions')->name('create');
+        Route::post('/store', [PrescriptionController::class, 'store'])->middleware('check_permission:create_prescriptions')->name('store');
+        Route::get('/{id}/edit', [PrescriptionController::class, 'edit'])->middleware('check_permission:edit_prescriptions')->name('edit');
+        Route::put('/{id}', [PrescriptionController::class, 'update'])->middleware('check_permission:edit_prescriptions')->name('update');
         Route::get('/{id}/print', [PrescriptionController::class, 'exportPdf'])->name('print');
+        Route::delete('/{id}', [PrescriptionController::class, 'destroy'])->middleware('check_permission:delete_prescriptions')->name('destroy');
+        Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show'); // ⚠ phải đặt CUỐI
+        Route::get('/medicines/search', [PrescriptionController::class, 'searchMedicines'])->name('medicines.search');
     });
+
 
 
     // Nhóm quản lý bác sĩ
@@ -287,14 +294,24 @@ Route::group([
         Route::delete('/{department}', [DepartmentController::class, 'destroy'])->middleware('check_permission:delete_departments')->name('destroy');
     });
 
-    // Quản lý lịch sử thanh toán
+
     Route::group([
-        'prefix' => 'payments',
-        'as' => 'payments.',
-        'middleware' => 'check_permission:view_payment_history'
+        'prefix' => 'payment-histories',
+        'as' => 'payment_histories.',
+        'middleware' => 'check_permission:view_payments_histories',
+
     ], function () {
-        Route::get('/', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('index');
-        Route::get('/{payment}', [\App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('show');
+        Route::get('/', [PaymentHistoryController::class, 'index'])
+            ->middleware('check_permission:view_payments_histories')
+            ->name('index');
+
+        Route::get('/search', [PaymentHistoryController::class, 'search'])
+            ->middleware('check_permission:view_payments_histories')
+            ->name('search');
+
+        Route::get('/{payment_history}', [PaymentHistoryController::class, 'show'])
+            ->middleware('check_permission:view_payments_histories')
+            ->name('show');
     });
 });
 
@@ -305,6 +322,13 @@ Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admi
 Route::get('admin/users/edit/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
 Route::put('admin/users/edit/{id}', [UserController::class, 'update'])->name('admin.users.update');
 Route::get('admin/users/search', [UserController::class, 'search'])->name('admin.users.search');
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    Route::resource('users', UserController::class);
+
+    // ✅ Route xử lý đổi trạng thái người dùng
+    Route::patch('users/{id}/toggle-status', [UserController::class, 'toggleStatus'])
+        ->name('users.toggleStatus');
+});
 // Quản lý voucher
 Route::get('admin/vouchers', [VoucherController::class, 'index'])->name('admin.vouchers.index');
 Route::get('admin/vouchers/create', [VoucherController::class, 'create'])->name('admin.vouchers.create');
@@ -438,8 +462,36 @@ Route::group([
             ->middleware('check_permission:delete_services')->name('destroy');
         Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
     });
+
+
+    Route::resource('notifications', AdminNotificationController::class);
+    Route::post('notifications/{notification}/send-now', [AdminNotificationController::class, 'sendNow'])->name('notifications.sendNow');
+
+    // Route để lấy danh sách người dùng cho Select2 
+    Route::get('notifications/get-users', function (Request $request) {
+        $search = $request->query('search');
+        $users = User::when($search, function ($query, $search) {
+            return $query->where('full_name', 'like', '%' . $search . '%')
+                ->orWhere('email', 'like', '%' . $search . '%');
+        })
+            ->limit(20) // Giới hạn số lượng trả về
+            ->get(['id', 'full_name', 'email']);
+
+        $results = $users->map(function ($user) {
+            return ['id' => $user->id, 'text' => $user->full_name . ' (' . $user->email . ')'];
+        });
+
+        return response()->json(['results' => $results]);
+    })->name('notifications.getUsers');
+
+    // Route để lấy danh sách vai trò cho Select2 
+    Route::get('notifications/get-roles', function (Request $request) {
+        $roles = Role::all(['id', 'name']);
+        $results = $roles->map(function ($role) {
+            return ['id' => $role->name, 'text' => ucfirst($role->name)];
+        });
+        return response()->json(['results' => $results]);
+    })->name('notifications.getRoles');
 });
-// Quản lý câu hỏi thường gặp
-Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
-    Route::resource('faqs', \App\Http\Controllers\Admin\FaqController::class);
-});
+Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('admin.payment_histories.index');
+Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('admin.payment_histories.show');

@@ -33,13 +33,13 @@
                     <table class="table table-striped table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>ID</th>
-                                <th>Doctor</th>
-                                <th>Day</th>
-                                <th>Day of Week</th>
-                                <th>Start Time</th>
-                                <th>End Time</th>
-                                <th>Actions</th>
+                                <th>STT</th>
+                                <th>Bác sĩ</th>
+                                <th>Ngày</th>
+                                <th>Thứ trong tuần</th>
+                                <th>Giờ bắt đầu</th>
+                                <th>Giờ kết thúc</th>
+                                <th>Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
