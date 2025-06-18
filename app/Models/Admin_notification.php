@@ -22,7 +22,7 @@ class Admin_notification extends Model
     ];
 
     protected $casts = [
-        'recipient_ids' => 'array', 
+        'recipient_ids' => 'array', // Đây là dòng quan trọng nhất
         'scheduled_at' => 'datetime',
         'sent_at' => 'datetime',
     ];
