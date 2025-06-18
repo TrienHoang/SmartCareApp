@@ -12,8 +12,8 @@
                         <h2 class="content-header-title float-left mb-0">Tạo Thông báo mới</h2>
                         <div class="breadcrumb-wrapper col-12">
                             <ol class="breadcrumb">
-                                <li class="me-1"><a href="{{ route('admin.dashboard') }}">Trang chủ  ></a></li>
-                                <li class="me-1"><a href="{{ route('admin.notifications.index') }}">Thông báo  ></a></li>
+                                <li class="me-1"><a href="{{ route('admin.dashboard') }}">Trang chủ ></a></li>
+                                <li class="me-1"><a href="{{ route('admin.notifications.index') }}">Thông báo ></a></li>
                                 <li class="breadcrumb-item active">Tạo mới</li>
                             </ol>
                         </div>
@@ -50,40 +50,51 @@
                         @csrf
                         <div class="form-group mb-3">
                             <label for="title">Tiêu đề <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="title" name="title" value="{{ old('title') }}" required>
+                            <input type="text" class="form-control" id="title" name="title"
+                                value="{{ old('title') }}" required>
                         </div>
                         <div class="form-group mb-3">
                             <label for="content">Nội dung <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="content" name="content" rows="8" required>{{ old('content') }}</textarea>
+                            <textarea class="form-control" id="content" name="content" rows="8" >{{ old('content') }}</textarea>
                             {{-- <small class="form-text text-muted">Bạn có thể sử dụng HTML cơ bản hoặc Markdown để định dạng nội dung.</small> --}}
                         </div>
                         <div class="form-group mb-3">
                             <label for="type">Loại thông báo <span class="text-danger">*</span></label>
                             <select class="form-control" id="type" name="type" required>
-                                @foreach($notificationTypes as $type)
-                                    <option value="{{ $type }}" {{ old('type') == $type ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $type)) }}</option>
+                                @foreach ($notificationTypes as $type)
+                                    <option value="{{ $type }}" {{ old('type') == $type ? 'selected' : '' }}>
+                                        {{ ucfirst(str_replace('_', ' ', $type)) }}</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div class="form-group mb-3">
                             <label for="recipient_type">Gửi đến <span class="text-danger">*</span></label>
-                            <select class="form-control" id="recipient_type" name="recipient_type" required onchange="toggleRecipientOptions()">
-                                <option value="all" {{ old('recipient_type') == 'all' ? 'selected' : '' }}>Tất cả người dùng</option>
-                                <option value="specific_users" {{ old('recipient_type') == 'specific_users' ? 'selected' : '' }}>Người dùng cụ thể</option>
-                                <option value="roles" {{ old('recipient_type') == 'roles' ? 'selected' : '' }}>Theo vai trò</option>
+                            <select class="form-control" id="recipient_type" name="recipient_type" required
+                                onchange="toggleRecipientOptions()">
+                                <option value="all" {{ old('recipient_type') == 'all' ? 'selected' : '' }}>Tất cả người
+                                    dùng</option>
+                                <option value="specific_users"
+                                    {{ old('recipient_type') == 'specific_users' ? 'selected' : '' }}>Người dùng cụ thể
+                                </option>
+                                <option value="roles" {{ old('recipient_type') == 'roles' ? 'selected' : '' }}>Theo vai
+                                    trò</option>
                                 {{-- <option value="by_condition" {{ old('recipient_type') == 'by_condition' ? 'selected' : '' }}>Theo điều kiện</option> --}}
                             </select>
                         </div>
 
                         {{-- Phần chọn người dùng cụ thể --}}
-                        <div class="form-group" id="specific_users_div" style="display: {{ old('recipient_type') == 'specific_users' ? 'block' : 'none' }};">
+                        <div class="form-group mb-3" id="specific_users_div"
+                            style="display: {{ old('recipient_type') == 'specific_users' ? 'block' : 'none' }};">
                             <label for="recipient_ids_users">Chọn người dùng</label>
-                            <select class="form-control select2" id="recipient_ids_users" name="recipient_ids[]" multiple="multiple">
+                            <select class="form-control select2" id="recipient_ids_users" name="recipient_ids[]"
+                                multiple="multiple">
                                 {{-- Options sẽ được load qua AJAX bởi Select2 --}}
-                                @if(old('recipient_type') == 'specific_users' && old('recipient_ids'))
-                                    @foreach(App\Models\User::whereIn('id', old('recipient_ids'))->get() as $user)
-                                        <option value="{{ $user->id }}" selected>{{ $user->name }} ({{ $user->email }})</option>
+                                @if (old('recipient_type') == 'specific_users' && old('recipient_ids'))
+                                    @foreach (App\Models\User::whereIn('id', old('recipient_ids'))->get() as $user)
+                                        <option value="{{ $user->id }}" selected>{{ $user->name }}
+                                            ({{ $user->email }})
+                                        </option>
                                     @endforeach
                                 @endif
                             </select>
@@ -91,50 +102,49 @@
                         </div>
 
                         {{-- Phần chọn vai trò --}}
-                        <div class="form-group" id="roles_div" style="display: {{ old('recipient_type') == 'roles' ? 'block' : 'none' }};">
+                        <div class="form-group mb-3" id="roles_div"
+                            style="display: {{ old('recipient_type') == 'roles' ? 'block' : 'none' }};">
                             <label for="recipient_ids_roles">Chọn vai trò</label>
-                            <select class="form-control select2" id="recipient_ids_roles" name="recipient_ids[]" multiple="multiple">
-                                {{-- Options sẽ được load qua AJAX bởi Select2 --}}
-                                @if(old('recipient_type') == 'roles' && old('recipient_ids'))
-                                    {{-- Nếu bạn dùng Spatie Laravel Permission, bạn sẽ load Role::whereIn --}}
-                                    @foreach(App\Models\Role::whereIn('name', old('recipient_ids'))->get() as $role)
-                                        <option value="{{ $role->name }}" selected>{{ ucfirst($role->name) }}</option>
-                                    @endforeach
-                                    {{-- Nếu bạn quản lý vai trò bằng cột 'role' đơn giản: --}}
-                                    @foreach(old('recipient_ids') as $roleName)
-                                        <option value="{{ $roleName }}" selected>{{ ucfirst($roleName) }}</option>
+                            <select class="form-control select2" id="recipient_ids_roles" name="recipient_ids[]"
+                                multiple="multiple">
+                                @if (old('recipient_type') == 'roles' && old('recipient_ids'))
+                                    @foreach (App\Models\Role::whereIn('name', old('recipient_ids'))->get() as $role)
+                                        <option value="{{ $role->id }}" selected>{{ ucfirst($role->name) }}</option>
                                     @endforeach
                                 @endif
                             </select>
                             <small class="form-text text-muted">Chọn một hoặc nhiều vai trò (Bác sĩ, Bệnh nhân).</small>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group mb-3">
                             <label for="scheduled_at">Thời gian lên lịch gửi</label>
-                            <input type="text" class="form-control pickatime-format" id="scheduled_at" name="scheduled_at" value="{{ old('scheduled_at') ? \Carbon\Carbon::parse(old('scheduled_at'))->format('Y-m-d H:i') : '' }}">
-                            <small class="form-text text-muted">Để trống để gửi ngay lập tức. Chọn ngày và giờ để lên lịch.</small>
+                            <input type="text" class="form-control pickatime-format" id="scheduled_at"
+                                name="scheduled_at"
+                                value="{{ old('scheduled_at') ? \Carbon\Carbon::parse(old('scheduled_at'))->format('Y-m-d H:i') : '' }}">
+                            <small class="form-text text-muted">Để trống để gửi ngay lập tức. Chọn ngày và giờ để lên
+                                lịch.</small>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group mb-3">
                             <div class="checkbox checkbox-primary">
-                                <input type="checkbox" id="send_now_checkbox" name="send_now_checkbox" value="1" {{ old('send_now_checkbox') ? 'checked' : '' }}>
+                                <input type="checkbox" id="send_now_checkbox" name="send_now_checkbox" value="1"
+                                    {{ old('send_now_checkbox') ? 'checked' : '' }}>
                                 <label for="send_now_checkbox">Gửi ngay sau khi tạo (Nếu không có lịch trình)</label>
                             </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary waves-effect waves-light mr-1">Tạo thông báo</button>
-                        <a href="{{ route('admin.notifications.index') }}" class="btn btn-secondary waves-effect waves-light">Hủy</a>
+                        <a href="{{ route('admin.notifications.index') }}"
+                            class="btn btn-secondary waves-effect waves-light">Hủy</a>
                     </form>
                 </div>
             </div>
         </div>
+
     </div>
 @endsection
 
 @push('scripts')
-    {{-- Scripts của Frest Admin có thể đã bao gồm jQuery, Select2, TinyMCE, Flatpickr --}}
-    {{-- Đảm bảo bạn đã load các thư viện này trong layout admin_app của mình --}}
-
     <script>
         // Hàm hiển thị/ẩn các lựa chọn người nhận
         function toggleRecipientOptions() {
@@ -166,12 +176,12 @@
                     url: '{{ route('admin.notifications.getUsers') }}', // Route API lấy người dùng
                     dataType: 'json',
                     delay: 250, // Độ trễ giữa các lần gõ phím
-                    data: function (params) {
+                    data: function(params) {
                         return {
                             search: params.term // Tham số tìm kiếm
                         };
                     },
-                    processResults: function (data) {
+                    processResults: function(data) {
                         return {
                             results: data.results // Frest cần format results: [{id: 1, text: 'abc'}]
                         };
@@ -189,20 +199,20 @@
                     url: '{{ route('admin.notifications.getRoles') }}', // Route API lấy vai trò
                     dataType: 'json',
                     delay: 250,
-                    data: function (params) {
+                    data: function(params) {
                         return {
                             search: params.term
                         };
                     },
-                    processResults: function (data) {
+                    processResults: function(data) {
                         return {
                             results: data.results
                         };
                     },
                     cache: true
                 }
-        });
-    }
+            });
+        }
 
         $(document).ready(function() {
             toggleRecipientOptions(); // Gọi khi trang tải để xử lý old input và hiển thị đúng phần
@@ -214,11 +224,10 @@
                 toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
                 height: 300,
                 menubar: 'file edit view insert format tools table help',
-                forced_root_block: false, // Không tự động chèn <p>
-                // Thêm các tùy chọn khác của Frest hoặc TinyMCE nếu cần
+                forced_root_block: false,
             });
 
-            
+
             $('.pickatime-format').flatpickr({
                 enableTime: true,
                 dateFormat: "Y-m-d H:i",
@@ -235,7 +244,7 @@
             });
             $('#send_now_checkbox').on('change', function() {
                 if ($(this).is(':checked')) { // Nếu chọn "Gửi ngay", xóa giá trị lịch trình
-                    $('#scheduled_at').val('').flatpickr().clear(); 
+                    $('#scheduled_at').val('').flatpickr().clear();
                 }
             });
         });
