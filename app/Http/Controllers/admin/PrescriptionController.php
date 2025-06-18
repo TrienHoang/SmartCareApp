@@ -68,7 +68,12 @@ class PrescriptionController extends Controller
 
     public function create()
     {
-        $medicalRecords = MedicalRecord::with('appointment.patient')->get();
+        $medicalRecords = MedicalRecord::with('appointment.patient')
+                ->whereDoesntHave('prescriptions')
+                ->whereHas('appointment', function ($q){
+                    $q->where('status', 'completed');
+                })
+                ->get();
         $medicines = Medicine::where('created_at', '>=', now()->subMonths(6))
             ->orderBy('name')
             ->get();
@@ -133,8 +138,14 @@ class PrescriptionController extends Controller
             ->orderBy('name')
             ->get();
 
+        // Thêm thuộc tính formatted_price cho từng thuốc
+        foreach ($medicines as $med) {
+            $med->formatted_price = number_format($med->price, 0, ',', '.') . 'đ';
+        }
+
         return view('admin.prescriptions.edit', compact('prescription', 'medicalRecords', 'medicines'));
     }
+
 
     public function update(UpdatePrescriptionRequest $request, $id)
     {
@@ -264,10 +275,18 @@ class PrescriptionController extends Controller
 
     public function destroy($id)
     {
-        $prescription = Prescription::findOrFail($id);
+        $prescription = Prescription::with('items')->findOrFail($id);
+
+        foreach ($prescription->items as $item) {
+            $medicine = Medicine::find($item->medicine_id);
+            if ($medicine) {
+                $medicine->increment('stock', $item->quantity);
+            }
+        }
+
         $prescription->delete();
         return redirect()->route('admin.prescriptions.index')
-            ->with('success', 'Đơn thuốc đã được xóa mềm thành công.');
+            ->with('success', 'Đơn thuốc đã được xóa mềm và hoàn lại vào thuốc kho.');
     }
 
     // Hiển thị danh sách đơn thuốc đã xóa
@@ -297,10 +316,63 @@ class PrescriptionController extends Controller
     // Khôi phục đơn thuốc đã xóa
     public function restore($id)
     {
-        $prescription = Prescription::onlyTrashed()->findOrFail($id);
+        $prescription = Prescription::onlyTrashed()->with('items')->findOrFail($id);
+
+        foreach ($prescription->items as $item) {
+            $medicine = Medicine::find($item->medicine_id);
+            if ($medicine) {
+                if ($medicine->stock < $item->quantity) {
+                    return redirect()->route('admin.prescriptions.trashed')
+                        ->with('error', 'Không thể khôi phục đơn thuốc "' . $prescription->id . '" vì thuốc "' . $medicine->name . '" không đủ tồn kho. Cần ' . $item->quantity . ', hiện tại chỉ còn ' . $medicine->stock . '.');
+                }
+                $medicine->decrement('stock', $item->quantity);
+            }
+        }
+
         $prescription->restore();
 
         return redirect()->route('admin.prescriptions.trashed')
-            ->with('success', 'Đơn thuốc đã được khôi phục.');
+            ->with('success', 'Đơn thuốc đã được khôi phục và trừ lại thuốc từ kho.');
+    }
+
+    public function searchMedicalRecords(Request $request)
+    {
+        $query = $request->get('q', '');
+
+        $records = MedicalRecord::with('appointment.patient')
+            ->whereDoesntHave('prescriptions')
+            ->whereHas('appointment', function ($q) {
+                $q->where('status', 'completed');
+            })
+            ->whereHas('appointment.patient', function ($q) use ($query) {
+                $q->where('full_name', 'like', "%$query%")
+                    ->orWhere('phone', 'like', "%$query%");
+            })
+            ->limit(10)
+            ->get();
+
+        return response()->json($records->map(function ($record) {
+            return [
+                'id' => $record->id,
+                'text' => "#{$record->code} - {$record->appointment->patient->full_name}"
+            ];
+        }));
+    }
+
+    public function searchMedicines(Request $request)
+    {
+        $query = $request->get('q', '');
+
+        $medicines = Medicine::where('name', 'like', "%$query%")
+            ->orderBy('name')
+            ->limit(10)
+            ->get();
+
+        return response()->json($medicines->map(function ($medicine) {
+            return [
+                'id' => $medicine->id,
+                'text' => $medicine->name . ' (' . $medicine->unit . ') - Còn: ' . $medicine->stock
+            ];
+        }));
     }
 }

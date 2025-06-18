@@ -224,6 +224,9 @@ Route::group([
 
 
         Route::get('/{id}', [AppointmentController::class, 'show'])->name('show');
+
+        Route::get('/patients/search', [AppointmentController::class, 'searchPatients'])
+            ->middleware('check_permission:view_appointments')->name('patients.search');
     });
 
 
@@ -237,6 +240,7 @@ Route::group([
         Route::get('/trashed', [PrescriptionController::class, 'trashed'])->name('trashed');
         Route::get('/{id}/trashed-detail', [PrescriptionController::class, 'showTrashed'])->name('trashed-detail');
         Route::post('/{id}/restore', [PrescriptionController::class, 'restore'])->name('restore');
+        Route::get('/medical-records/search', [PrescriptionController::class, 'searchMedicalRecords'])->name('medical-records.search');
 
         // Các route còn lại đặt sau
         Route::get('/', [PrescriptionController::class, 'index'])->name('index');
@@ -247,6 +251,7 @@ Route::group([
         Route::get('/{id}/print', [PrescriptionController::class, 'exportPdf'])->name('print');
         Route::delete('/{id}', [PrescriptionController::class, 'destroy'])->middleware('check_permission:delete_prescriptions')->name('destroy');
         Route::get('/{id}', [PrescriptionController::class, 'show'])->name('show'); // ⚠ phải đặt CUỐI
+        Route::get('/medicines/search', [PrescriptionController::class, 'searchMedicines'])->name('medicines.search');
     });
 
 
@@ -459,6 +464,7 @@ Route::group([
             ->middleware('check_permission:delete_services')->name('destroy');
         Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
     });
+
 
 
     Route::resource('notifications', AdminNotificationController::class);
