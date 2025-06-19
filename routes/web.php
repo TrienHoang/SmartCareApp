@@ -289,7 +289,7 @@ Route::group([
 
 
     Route::group([
-        'prefix' => 'payment-histories',
+        'prefix' => 'payment_histories',
         'as' => 'payment_histories.',
         'middleware' => 'check_permission:view_payments_histories',
 
@@ -305,11 +305,11 @@ Route::group([
         Route::get('/{payment_history}', [PaymentHistoryController::class, 'show'])
             ->middleware('check_permission:view_payments_histories')
             ->name('show');
+
+        Route::get('/{payment_history}/export-pdf', [PaymentHistoryController::class, 'exportDetailPdf'])
+            ->middleware('check_permission:view_payments_histories')
+            ->name('exportDetailPdf');
     });
-
-
-
-    
 });
 
 
@@ -460,5 +460,3 @@ Route::group([
         Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
     });
 });
-        Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('admin.payment_histories.index');
-        Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('admin.payment_histories.show');
