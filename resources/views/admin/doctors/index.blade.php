@@ -19,12 +19,12 @@
             @forelse($doctors as $doctor)
                 <tr>
                     <td>{{ $doctor->id }}</td>
-                    <td>{{ $doctor->user->name ?? 'Không có' }}</td>
+                    <td>{{ $doctor->user->full_name ?? 'Không có' }}</td>
                     <td>{{ $doctor->specialization }}</td>
                     <td>{{ $doctor->department->name ?? 'Chưa có' }}</td>
                     <td>
                         <a href="{{ route('admin.doctors.edit', $doctor->id) }}" class="btn btn-primary btn-sm">Sửa</a>
-                        
+
                         <form action="{{ route('admin.doctors.destroy', $doctor->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Bạn có chắc muốn xóa bác sĩ này không?');">
                             @csrf
                             @method('DELETE')

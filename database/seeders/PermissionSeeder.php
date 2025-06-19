@@ -79,9 +79,16 @@ class PermissionSeeder extends Seeder
             ['name' => 'delete_files', 'description' => 'Xoá file', 'group' => 'Files'],
             ['name' => 'view_medical_documents', 'description' => 'Xem tài liệu y tế', 'group' => 'Files'],
 
+            // Categories
+            ['name' => 'view_categories', 'description' => 'Xem danh sách danh mục', 'group' => 'Categories'],
+            ['name' => 'create_categories', 'description' => 'Tạo danh mục mới', 'group' => 'Categories'],
+            ['name' => 'edit_categories', 'description' => 'Chỉnh sửa danh mục', 'group' => 'Categories'],
+            ['name' => 'delete_categories', 'description' => 'Xoá danh mục', 'group' => 'Categories'],
+
             // Reviews
             ['name' => 'view_reviews', 'description' => 'Xem đánh giá', 'group' => 'Reviews'],
             ['name' => 'delete_reviews', 'description' => 'Xoá đánh giá', 'group' => 'Reviews'],
+            ['name' => 'edit_reviews', 'description' => 'Chỉnh sửa đánh giá', 'group' => 'Reviews'],
 
             // Notifications & Content
             ['name' => 'manage_support_content', 'description' => 'Quản lý nội dung hỗ trợ', 'group' => 'Content'],
@@ -89,6 +96,7 @@ class PermissionSeeder extends Seeder
 
             // Statistics
             ['name' => 'view_statistics', 'description' => 'Xem thống kê', 'group' => 'Statistics'],
+
         ];
 
         DB::table('permissions')->insert($permissions);

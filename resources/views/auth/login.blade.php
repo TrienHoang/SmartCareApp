@@ -59,6 +59,10 @@
             <h2 class="title">SmartCare | Đăng ký</h2>
 
             <div class="input-field">
+                <i class="fas fa-id-card"></i>
+                <input type="text" name="fullname" placeholder="Họ và tên">
+            </div>
+            <div class="input-field">
                 <i class="fas fa-user-md"></i>
                 <input type="text" name="username" placeholder="Tên đăng nhập">
             </div>

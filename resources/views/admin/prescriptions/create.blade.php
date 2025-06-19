@@ -1,114 +1,230 @@
 @extends('admin.dashboard')
-@section('title', 'Thêm Đơn thuốc')
+@section('title', 'Tạo đơn thuốc mới')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="card shadow-sm">
-        <div class="card-header">
-            <h5 class="mb-0">Thêm Toa Thuốc</h5>
-        </div>
-
-        <div class="card-body">
-            <form action="{{ route('admin.prescriptions.store') }}" method="POST">
-                @csrf
-
-                <div class="row mb-3">
-                    <label for="medical_record_id" class="col-sm-2 col-form-label fw-bold">Hồ sơ bệnh án:</label>
-                    <div class="col-sm-10">
-                        <select name="medical_record_id" id="medical_record_id" class="form-select" required>
-                            <option value="">-- Chọn hồ sơ --</option>
-                            @foreach ($medicalRecords as $record)
-                                <option value="{{ $record->id }}">
-                                    {{ $record->id }} - {{ $record->appointment->patient->full_name ?? 'Bệnh nhân' }}
-                                </option>
-                            @endforeach
-                        </select>
+    <div class="container-fluid py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow rounded-4">
+                    <div
+                        class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-top">
+                        <h4 class="mb-0 fw-bold"><i class="fas fa-file-medical me-2"></i> Tạo đơn thuốc mới</h4>
+                        <a href="{{ route('admin.prescriptions.index') }}" class="btn btn-outline-light">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại
+                        </a>
                     </div>
-                </div>
 
-                <div class="row mb-3">
-                    <label for="prescribed_at" class="col-sm-2 col-form-label fw-bold">Ngày kê toa:</label>
-                    <div class="col-sm-10">
-                        <input type="datetime-local" name="prescribed_at" class="form-control" required>
-                    </div>
-                </div>
+                    <form action="{{ route('admin.prescriptions.store') }}" method="POST">
+                        @csrf
+                        <div class="card-body">
+                            @if ($errors->any())
+                                <div class="alert alert-danger rounded-3">
+                                    <ul class="mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
 
-                <div class="row mb-4">
-                    <label for="notes" class="col-sm-2 col-form-label fw-bold">Ghi chú:</label>
-                    <div class="col-sm-10">
-                        <textarea name="notes" class="form-control" rows="3" placeholder="Nhập ghi chú nếu có..."></textarea>
-                    </div>
-                </div>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label for="medical_record_display" class="form-label fw-semibold">Hồ sơ bệnh án <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" id="medical_record_display"
+                                        class="form-control @error('medical_record_id') is-invalid @enderror"
+                                        placeholder="Tìm bệnh nhân theo tên hoặc SĐT..."
+                                        value="{{ old('medical_record_display') }}">
+                                    <input type="hidden" name="medical_record_id" id="medical_record_id"
+                                        value="{{ old('medical_record_id') }}">
+                                    @error('medical_record_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
 
-                <hr>
-                <h5 class="fw-bold mb-3">Danh sách thuốc được kê</h5>
-                <div id="medicine-list">
-                    <div class="medicine-item border rounded p-3 mb-3">
-                        <div class="row">
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label">Tên thuốc:</label>
-                                <select name="medicines[0][medicine_id]" class="form-select" required>
-                                    <option value="">-- Chọn thuốc --</option>
-                                    @foreach ($medicines as $med)
-                                        <option value="{{ $med->id }}">{{ $med->name }} ({{ $med->unit }})</option>
-                                    @endforeach
-                                </select>
+
+                                <div class="col-md-6">
+                                    <label for="prescribed_at" class="form-label fw-semibold">Ngày kê đơn <span
+                                            class="text-danger">*</span></label>
+                                    <input type="datetime-local" name="prescribed_at" id="prescribed_at"
+                                        class="form-control @error('prescribed_at') is-invalid @enderror"
+                                        value="{{ old('prescribed_at', now()->format('Y-m-d\TH:i')) }}">
+                                    @error('prescribed_at')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="notes" class="form-label fw-semibold">Ghi chú</label>
+                                    <textarea name="notes" id="notes" rows="3" class="form-control @error('notes') is-invalid @enderror"
+                                        placeholder="Ghi chú về đơn thuốc...">{{ old('notes') }}</textarea>
+                                    @error('notes')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
-                            <div class="col-md-2 mb-2">
-                                <label class="form-label">Số lượng:</label>
-                                <input type="number" name="medicines[0][quantity]" class="form-control" min="1" required>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label">Hướng dẫn sử dụng:</label>
-                                <textarea name="medicines[0][usage_instructions]" class="form-control" rows="1" placeholder="VD: Uống sau ăn..."></textarea>
-                            </div>
+
+                            <hr class="my-4">
+                            <h5 class="fw-bold"><i class="fas fa-capsules text-danger me-1"></i>Danh sách thuốc</h5>
+                            <p class="text-muted small" id="no-medicine-msg">Chưa có thuốc nào được thêm.</p>
+
+                            <div id="medicines-container" class="mt-2"></div>
+
+                            <button type="button" id="add-medicine" class="btn btn-outline-success mt-2">
+                                <i class="fas fa-plus me-1"></i> Thêm thuốc
+                            </button>
                         </div>
-                    </div>
-                </div>
 
-                <div class="mb-4">
-                    <button type="button" onclick="addMedicine()" class="btn btn-outline-secondary btn-sm">
-                        <i class="bx bx-plus-medical"></i> Thêm thuốc
-                    </button>
+                        <div class="card-footer bg-light d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Tạo đơn thuốc
+                            </button>
+                            <a href="{{ route('admin.prescriptions.index') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Hủy
+                            </a>
+                        </div>
+                    </form>
                 </div>
-
-                <div class="d-flex justify-content-between mt-4">
-                    <a href="{{ route('admin.prescriptions.index') }}" class="btn btn-secondary me-2">
-                        <i class="bx bx-arrow-back"></i> Quay lại
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bx bx-save"></i> Lưu Toa Thuốc
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-{{-- Template thuốc ẩn --}}
-<template id="medicine-template">
-    <div class="medicine-item border rounded p-3 mb-3">
-        <div class="row">
-            <div class="col-md-4 mb-2">
-                <label class="form-label">Tên thuốc:</label>
-                <select name="medicines[__index__][medicine_id]" class="form-select" required>
-                    <option value="">-- Chọn thuốc --</option>
-                    @foreach ($medicines as $med)
-                        <option value="{{ $med->id }}">{{ $med->name }} ({{ $med->unit }})</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2 mb-2">
-                <label class="form-label">Số lượng:</label>
-                <input type="number" name="medicines[__index__][quantity]" class="form-control" min="1" required>
-            </div>
-            <div class="col-md-6 mb-2">
-                <label class="form-label">Hướng dẫn sử dụng:</label>
-                <textarea name="medicines[__index__][usage_instructions]" class="form-control" rows="1" placeholder="VD: Uống 2 lần mỗi ngày..."></textarea>
             </div>
         </div>
     </div>
-</template>
 
-<script src="{{ asset('js/Prescription/create.js') }}"></script>
+    {{-- Template thuốc --}}
+    <div id="medicine-template" class="d-none">
+        <div class="medicine-item border rounded p-3 mb-3 bg-light" data-index="__INDEX__">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Thuốc <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control medicine-autocomplete" placeholder="Tìm thuốc...">
+                    <input type="hidden" name="medicines[__INDEX__][medicine_id]" class="medicine-hidden-id">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Số lượng</label>
+                    <input type="number" min="1" name="medicines[__INDEX__][quantity]" class="form-control">
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label fw-semibold">Hướng dẫn sử dụng</label>
+                    <input type="text" name="medicines[__INDEX__][usage_instructions]" class="form-control"
+                        placeholder="VD: Uống 2 viên sau ăn, ngày 3 lần">
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-outline-danger w-100 remove-medicine">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let medicineIndex = 0;
+
+            // --- Autocomplete hồ sơ bệnh án ---
+            const $recordInput = $('#medical_record_display');
+            const $recordId = $('#medical_record_id');
+
+            $recordInput.autocomplete({
+                source: function(request, response) {
+                    $.ajax({
+                        url: "{{ route('admin.prescriptions.medical-records.search') }}",
+                        dataType: 'json',
+                        data: {
+                            q: request.term
+                        },
+                        success: function(data) {
+                            response(data.map(item => ({
+                                label: item.text,
+                                value: item.id
+                            })));
+                        }
+                    });
+                },
+                minLength: 2,
+                delay: 300,
+                select: function(event, ui) {
+                    $recordInput.val(ui.item.label);
+                    $recordId.val(ui.item.value);
+                    return false;
+                }
+            });
+
+            if ($recordId.val()) {
+                $.ajax({
+                    url: "{{ route('admin.prescriptions.medical-records.search') }}",
+                    data: {
+                        q: ''
+                    },
+                    success: function(data) {
+                        const match = data.find(item => item.id == $recordId.val());
+                        if (match) {
+                            $recordInput.val(match.text);
+                        }
+                    }
+                });
+            }
+
+            // --- Autocomplete thuốc ---
+            function initMedicineAutocomplete(container) {
+                const $input = $(container).find('.medicine-autocomplete');
+                const $hidden = $(container).find('.medicine-hidden-id');
+
+                $input.autocomplete({
+                    source: function(request, response) {
+                        $.ajax({
+                            url: "{{ route('admin.prescriptions.medicines.search') }}",
+                            dataType: 'json',
+                            data: {
+                                q: request.term
+                            },
+                            success: function(data) {
+                                response(data.map(item => ({
+                                    label: item.text,
+                                    value: item.id
+                                })));
+                            }
+                        });
+                    },
+                    minLength: 1,
+                    delay: 250,
+                    select: function(event, ui) {
+                        $input.val(ui.item.label);
+                        $hidden.val(ui.item.value);
+                        return false;
+                    }
+                });
+            }
+
+            function updateRemoveButtons() {
+                const items = document.querySelectorAll('.medicine-item');
+                document.getElementById('no-medicine-msg').style.display = items.length === 0 ? 'block' : 'none';
+                items.forEach(item => {
+                    item.querySelector('.remove-medicine').disabled = items.length === 1;
+                });
+            }
+
+            function addMedicineItem() {
+                const html = document.getElementById('medicine-template').innerHTML.replace(/__INDEX__/g,
+                    medicineIndex);
+                const div = document.createElement('div');
+                div.innerHTML = html;
+                const newItem = div.firstElementChild;
+                document.getElementById('medicines-container').appendChild(newItem);
+                initMedicineAutocomplete(newItem);
+                updateRemoveButtons();
+                medicineIndex++;
+            }
+
+            document.getElementById('add-medicine').addEventListener('click', addMedicineItem);
+
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.remove-medicine')) {
+                    e.target.closest('.medicine-item').remove();
+                    updateRemoveButtons();
+                }
+            });
+
+            updateRemoveButtons();
+        });
+    </script>
+
 @endsection
