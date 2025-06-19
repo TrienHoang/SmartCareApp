@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\ServiceCategoryController;
 use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\OrderController;
 
 Route::get('/', function () {
     return view('client.home');
@@ -320,3 +321,15 @@ Route::get('admin/services/edit/{id}', [ServiceController::class, 'edit'])->name
 Route::put('admin/services/edit/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
 Route::delete('admin/services/destroy/{id}', [ServiceController::class, 'destroy'])->name('admin.services.destroy');
 Route::get('admin/services/show/{id}', [ServiceController::class, 'show'])->name('admin.services.show');
+
+
+
+// Quản lý đơn hàng
+Route::prefix('admin')->middleware('auth')->group(function () {
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/update-status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::get('/orders/{order}/export-pdf', [OrderController::class, 'exportPdf'])->name('orders.exportPdf');
+});
+
+

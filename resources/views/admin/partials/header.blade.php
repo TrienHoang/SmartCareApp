@@ -31,6 +31,9 @@
 <link rel="stylesheet" href="{{ asset('admin/assets/vendor/libs/typeahead-js/typeahead.css') }}" />
 <link rel="stylesheet" href="{{ asset('admin/assets/vendor/libs/apex-charts/apex-charts.css') }}" />
 
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+
 <!-- Helpers & Config -->
 <script src="{{ asset('admin/assets/vendor/js/helpers.js') }}"></script>
 <script src="{{ asset('admin/assets/js/config.js') }}"></script>

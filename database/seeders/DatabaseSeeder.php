@@ -40,7 +40,8 @@ class DatabaseSeeder extends Seeder
             UploadHistorySeeder::class,
             BlogSeeder::class,
             NotificationSeeder::class,
-            FaqSeeder::class
+            FaqSeeder::class,
+            OrderSeeder::class
         ]);
     }
     
