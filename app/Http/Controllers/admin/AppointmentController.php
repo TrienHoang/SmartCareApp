@@ -218,6 +218,7 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
 
+        // Không được cập nhật lịch đã hoàn thành hoặc đã hủy
         if (in_array($appointment->status, ['completed', 'cancelled'])) {
             return redirect()->back()->withErrors([
                 'status' => 'Không thể cập nhật lịch hẹn đã hoàn thành hoặc đã hủy.'
@@ -228,6 +229,27 @@ class AppointmentController extends Controller
         $dayOfWeek = $appointmentDate->format('l');
         $timeOnly = $appointmentDate->format('H:i');
         $day = $appointmentDate->format('Y-m-d');
+
+        // Nếu không phải cập nhật sang completed mà thời gian hẹn là quá khứ thì không cho phép
+        if (
+            $request->status !== 'completed' &&
+            $appointmentDate->isPast()
+        ) {
+            return back()->withErrors([
+                'appointment_time' => 'Không thể đặt hoặc cập nhật lịch hẹn về thời gian trong quá khứ.'
+            ])->withInput();
+        }
+
+        // Nếu chuyển sang completed thì thời gian hẹn phải không ở tương lai
+        if (
+            $appointment->status !== 'completed' &&
+            $request->status === 'completed' &&
+            $appointmentDate->isFuture()
+        ) {
+            return back()->withErrors([
+                'appointment_time' => 'Không thể hoàn thành lịch hẹn khi thời gian hẹn vẫn còn ở tương lai.'
+            ])->withInput();
+        }
 
         // Kiểm tra trùng lịch
         $conflict = AppointmentHelper::isConflict(
@@ -249,6 +271,7 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
+        // Kiểm tra lịch làm việc
         $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
             ->whereDate('day', $day)
             ->first();
@@ -279,26 +302,23 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
+        // Kiểm tra bác sĩ có nghỉ phép không
         $onLeave = DoctorLeave::where('doctor_id', $request->doctor_id)
             ->where('start_date', '<=', $appointmentDate)
             ->where('end_date', '>=', $appointmentDate)
             ->where('approved', true)
             ->exists();
+
         if ($onLeave) {
             return back()->withErrors([
                 'appointment_time' => 'Bác sĩ đang trong thời gian nghỉ phép vào ngày bạn chọn. Vui lòng chọn ngày khác.'
             ])->withInput();
         }
 
-        if ($request->status === 'completed') {
-            $today = Carbon::today();
-            if ($appointmentDate->gt($today)) {
-                return back()->with('error', 'Chỉ có thể hoàn thành lịch hẹn trong ngày hôm nay hoặc trước đó.');
-            }
-        }
-
+        // Tính thời gian kết thúc (30 phút mặc định)
         $endTime = $appointmentDate->copy()->addMinutes(30);
 
+        // Chuẩn bị dữ liệu cập nhật
         $requestData = $request->only([
             'doctor_id',
             'service_id',
@@ -308,12 +328,13 @@ class AppointmentController extends Controller
         ]);
         $requestData['end_time'] = $endTime;
 
+        // Ghi nhận thay đổi
         $changes = [];
 
         if ($appointment->appointment_time != $request->appointment_time) {
             $changes[] = 'Thay đổi thời gian khám từ ' .
                 optional($appointment->appointment_time)->format('d/m/Y H:i') . ' sang ' .
-                Carbon::parse($request->appointment_time)->format('d/m/Y H:i');
+                $appointmentDate->format('d/m/Y H:i');
         }
 
         if ($appointment->doctor_id != $request->doctor_id) {
@@ -328,8 +349,10 @@ class AppointmentController extends Controller
             $changes[] = 'Thay đổi dịch vụ từ ' . $oldService . ' sang ' . $newService;
         }
 
+        // Thực hiện cập nhật
         $appointment->update($requestData);
 
+        // Ghi log nếu có thay đổi
         if (!empty($changes)) {
             AppointmentLog::create([
                 'appointment_id' => $appointment->id,
@@ -368,20 +391,24 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
         $oldStatus = $appointment->status;
+        $appointmentDate = Carbon::parse($appointment->appointment_time);
 
-        if ($request->status === 'completed') {
-            $appointmentDate = Carbon::parse($appointment->appointment_time)->startOfDay();
-            $today = Carbon::today();
-
-            if ($appointmentDate->gt($today)) {
-                return redirect()->back()->with('error', 'Chỉ có thể hoàn thành lịch hẹn trong ngày hôm nay hoặc ngày trước đó.');
-            }
+        // Kiểm tra nếu cập nhật sang 'completed' thì không được để thời gian hẹn ở tương lai
+        if (
+            $request->status === 'completed' &&
+            $appointmentDate->isFuture()
+        ) {
+            return redirect()->back()->withErrors([
+                'status' => 'Không thể hoàn thành lịch hẹn khi thời gian hẹn vẫn còn ở tương lai.'
+            ]);
         }
+        // Cập nhật trạng thái và lý do hủy nếu có
         $appointment->update([
             'status' => $request->status,
             'cancel_reason' => $request->status === 'cancelled' ? $request->note : null
         ]);
 
+        // Ghi log thay đổi trạng thái
         $appointment->logs()->create([
             'changed_by' => auth()->id(),
             'status_before' => $oldStatus,
@@ -390,14 +417,14 @@ class AppointmentController extends Controller
             'note' => $request->note
         ]);
 
+        // Tự động tạo hồ sơ bệnh án nếu hoàn thành mà chưa có
         if ($request->status === 'completed') {
-            $existing = MedicalRecord::where('appointment_id', $appointment->id)->first();
+            $existing = MedicalRecord::where('appointment_id', $appointment->id)->exists();
 
             if (!$existing) {
                 MedicalRecord::create([
                     'appointment_id' => $appointment->id,
                     'code' => 'MR' . now()->format('YmdHis') . $appointment->id,
-                    'created_at' => now(),
                 ]);
             }
         }
