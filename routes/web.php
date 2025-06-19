@@ -20,6 +20,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\ServiceCategoryController;
 use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Models\Admin_notification;
 use App\Models\Role;
@@ -324,6 +325,37 @@ Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admi
 Route::get('admin/users/edit/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
 Route::put('admin/users/edit/{id}', [UserController::class, 'update'])->name('admin.users.update');
 Route::get('admin/users/search', [UserController::class, 'search'])->name('admin.users.search');
+Route::patch('admin/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('admin.users.toggleStatus');
+
+// quản lý danh mục dịch vụ
+Route::get('admin/categories', [ServiceCategoryController::class, 'index'])->name('admin.categories.index');
+Route::get('admin/categories/create', [ServiceCategoryController::class, 'create'])->name('admin.categories.create');
+Route::post('admin/categories/store', [ServiceCategoryController::class, 'store'])->name('admin.categories.store');
+Route::get('admin/categories/edit/{id}', [ServiceCategoryController::class, 'edit'])->name('admin.categories.edit');
+Route::put('admin/categories/edit/{id}', [ServiceCategoryController::class, 'update'])->name('admin.categories.update');
+Route::delete('admin/categories/destroy/{id}', [ServiceCategoryController::class, 'destroy'])->name('admin.categories.destroy');
+Route::get('admin/categories/show/{id}', [ServiceCategoryController::class, 'show'])->name('admin.categories.show');
+
+// quản lý dịch vụ
+Route::get('admin/services', [ServiceController::class, 'index'])->name('admin.services.index');
+Route::get('admin/services/create', [ServiceController::class, 'create'])->name('admin.services.create');
+Route::post('admin/services/store', [ServiceController::class, 'store'])->name('admin.services.store');
+Route::get('admin/services/edit/{id}', [ServiceController::class, 'edit'])->name('admin.services.edit');
+Route::put('admin/services/edit/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
+Route::delete('admin/services/destroy/{id}', [ServiceController::class, 'destroy'])->name('admin.services.destroy');
+Route::get('admin/services/show/{id}', [ServiceController::class, 'show'])->name('admin.services.show');
+
+
+
+// Quản lý đơn hàng
+Route::prefix('admin')->middleware('auth')->group(function () {
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/update-status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::get('/orders/{order}/export-pdf', [OrderController::class, 'exportPdf'])->name('orders.exportPdf');
+});
+
+
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class);
 

@@ -39,6 +39,9 @@ class DatabaseSeeder extends Seeder
             FileUploadSeeder::class,
             UploadHistorySeeder::class,
             BlogSeeder::class,
+            NotificationSeeder::class,
+            FaqSeeder::class,
+            OrderSeeder::class
             // NotificationSeeder::class,
             FaqSeeder::class
         ]);
