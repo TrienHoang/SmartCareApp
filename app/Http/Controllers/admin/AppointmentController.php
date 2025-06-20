@@ -232,7 +232,7 @@ class AppointmentController extends Controller
 
         // Nếu không phải cập nhật sang completed mà thời gian hẹn là quá khứ thì không cho phép
         if (
-            $request->status !== 'completed' &&
+            !in_array($request->status, ['completed', 'cancelled']) &&
             $appointmentDate->isPast()
         ) {
             return back()->withErrors([

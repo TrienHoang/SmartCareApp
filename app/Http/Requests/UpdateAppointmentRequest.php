@@ -20,8 +20,10 @@ class UpdateAppointmentRequest extends FormRequest
             'status' => ['nullable', 'in:pending,confirmed,completed,cancelled'],
         ];
 
-        // Nếu status KHÔNG phải là 'completed', yêu cầu thời gian phải sau hiện tại
-        if ($this->input('status') !== 'completed') {
+        $status = $this->input('status') ?? null;
+
+        // Nếu không phải completed hoặc cancelled → bắt after:now
+        if (!in_array($status, ['completed', 'cancelled'])) {
             $rules['appointment_time'][] = 'after:now';
         }
 
