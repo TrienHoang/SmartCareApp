@@ -11,17 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('facebook_id')->nullable()->change();
-        });
+       Schema::table('appointments', function (Blueprint $table) {
+    $table->dateTime('check_in_time')->nullable()->after('appointment_time')->comment('Thời gian bệnh nhân đến khám');
+});
     }
 
     /**
      * Reverse the migrations.
      */
-     public function down(): void {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('facebook_id')->nullable(false)->change();
+    public function down(): void
+    {
+        Schema::table('appointments', function (Blueprint $table) {
+            //
         });
     }
 };

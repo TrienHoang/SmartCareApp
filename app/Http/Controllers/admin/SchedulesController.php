@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Doctor;
@@ -11,13 +11,23 @@ class SchedulesController extends Controller
 {
     public function index()
     {
-        $schedules = WorkingSchedule::orderBy("id", "desc")->paginate(10);
-        // If you want to filter by doctor_id, you can uncomment the following lines
-        $doctors = Doctor::all();
+        $query = WorkingSchedule::with('doctor.user')->orderBy('id', 'desc'); // Eager load tránh N+1
 
-        // if (request()->has('day_of_week')) {
-        //     $schedules->where('day_of_week', request()->get('day_of_week'));
-        // }
+        // Tìm kiếm theo tên bác sĩ
+        if (request()->filled('keyword')) {
+            $keyword = request()->get('keyword');
+            $query->whereHas('doctor.user', function ($q) use ($keyword) {
+                $q->where('full_name', 'like', '%' . $keyword . '%');
+            });
+        }
+
+        // Lọc theo thứ trong tuần (nếu có)
+        if (request()->filled('day_of_week')) {
+            $query->where('day_of_week', request()->get('day_of_week'));
+        }
+
+        $schedules = $query->paginate(10)->withQueryString();
+        $doctors = Doctor::all(); // dùng để hiển thị thêm nếu cần
         return view("admin.schedules.index", compact("schedules", "doctors"));
     }
     public function create()
@@ -29,6 +39,7 @@ class SchedulesController extends Controller
     {
         $request->validate([
             "doctor_id" => "required|exists:doctors,id",
+            'day' => 'required|date',
             'day_of_week' => 'required|string|max:255',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
@@ -49,6 +60,7 @@ class SchedulesController extends Controller
     {
         $request->validate([
             "doctor_id" => "required|exists:doctors,id",
+            'day' => 'required|date',
             'day_of_week' => 'required|string|max:255',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',

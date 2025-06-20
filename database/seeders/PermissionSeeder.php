@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Permission;
 use Illuminate\Support\Facades\DB;
 
 class PermissionSeeder extends Seeder
@@ -11,74 +10,100 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            ['name' => 'view_users', 'description' => 'Xem danh sách người dùng'],
-            ['name' => 'create_users', 'description' => 'Tạo người dùng mới'],
-            ['name' => 'edit_users', 'description' => 'Chỉnh sửa người dùng'],
-            ['name' => 'delete_users', 'description' => 'Xoá người dùng'],
-            ['name' => 'assign_roles', 'description' => 'Phân quyền tài khoản'],
+            // Users
+            ['name' => 'view_users', 'description' => 'Xem danh sách người dùng', 'group' => 'Users'],
+            ['name' => 'create_users', 'description' => 'Tạo người dùng mới', 'group' => 'Users'],
+            ['name' => 'edit_users', 'description' => 'Chỉnh sửa người dùng', 'group' => 'Users'],
+            ['name' => 'delete_users', 'description' => 'Xoá người dùng', 'group' => 'Users'],
+            ['name' => 'assign_roles', 'description' => 'Phân quyền tài khoản', 'group' => 'Users'],
 
-            ['name' => 'view_doctors', 'description' => 'Xem danh sách bác sĩ'],
-            ['name' => 'create_doctors', 'description' => 'Thêm bác sĩ mới'],
-            ['name' => 'edit_doctors', 'description' => 'Chỉnh sửa thông tin bác sĩ'],
-            ['name' => 'delete_doctors', 'description' => 'Xoá bác sĩ'],
+            // Doctors
+            ['name' => 'view_doctors', 'description' => 'Xem danh sách bác sĩ', 'group' => 'Doctors'],
+            ['name' => 'create_doctors', 'description' => 'Thêm bác sĩ mới', 'group' => 'Doctors'],
+            ['name' => 'edit_doctors', 'description' => 'Chỉnh sửa thông tin bác sĩ', 'group' => 'Doctors'],
+            ['name' => 'delete_doctors', 'description' => 'Xoá bác sĩ', 'group' => 'Doctors'],
 
-            ['name' => 'view_departments', 'description' => 'Xem danh sách phòng ban'],
-            ['name' => 'create_departments', 'description' => 'Thêm phòng ban mới'],
-            ['name' => 'edit_departments', 'description' => 'Chỉnh sửa phòng ban'],
-            ['name' => 'delete_departments', 'description' => 'Xoá phòng ban'],
+            // Departments
+            ['name' => 'view_departments', 'description' => 'Xem danh sách phòng ban', 'group' => 'Departments'],
+            ['name' => 'create_departments', 'description' => 'Thêm phòng ban mới', 'group' => 'Departments'],
+            ['name' => 'edit_departments', 'description' => 'Chỉnh sửa phòng ban', 'group' => 'Departments'],
+            ['name' => 'delete_departments', 'description' => 'Xoá phòng ban', 'group' => 'Departments'],
 
-            ['name' => 'view_schedules', 'description' => 'Xem lịch làm việc của bác sĩ'],
-            ['name' => 'create_schedules', 'description' => 'Tạo lịch làm việc'],
-            ['name' => 'edit_schedules', 'description' => 'Chỉnh sửa lịch làm việc'],
-            ['name' => 'delete_schedules', 'description' => 'Xoá lịch làm việc'],
+            // Schedules
+            ['name' => 'view_schedules', 'description' => 'Xem lịch làm việc của bác sĩ', 'group' => 'Schedules'],
+            ['name' => 'create_schedules', 'description' => 'Tạo lịch làm việc', 'group' => 'Schedules'],
+            ['name' => 'edit_schedules', 'description' => 'Chỉnh sửa lịch làm việc', 'group' => 'Schedules'],
+            ['name' => 'delete_schedules', 'description' => 'Xoá lịch làm việc', 'group' => 'Schedules'],
 
-            ['name' => 'view_appointments', 'description' => 'Xem lịch hẹn'],
-            ['name' => 'create_appointments', 'description' => 'Đặt lịch hẹn'],
-            ['name' => 'edit_appointments', 'description' => 'Chỉnh sửa lịch hẹn'],
-            ['name' => 'delete_appointments', 'description' => 'Xoá lịch hẹn'],
-            ['name' => 'approve_appointments', 'description' => 'Duyệt lịch hẹn'],
-            ['name' => 'cancel_appointments', 'description' => 'Huỷ lịch hẹn'],
+            // Appointments
+            ['name' => 'view_appointments', 'description' => 'Xem lịch hẹn', 'group' => 'Appointments'],
+            ['name' => 'create_appointments', 'description' => 'Đặt lịch hẹn', 'group' => 'Appointments'],
+            ['name' => 'edit_appointments', 'description' => 'Chỉnh sửa lịch hẹn', 'group' => 'Appointments'],
+            ['name' => 'delete_appointments', 'description' => 'Xoá lịch hẹn', 'group' => 'Appointments'],
+            ['name' => 'approve_appointments', 'description' => 'Duyệt lịch hẹn', 'group' => 'Appointments'],
+            ['name' => 'cancel_appointments', 'description' => 'Huỷ lịch hẹn', 'group' => 'Appointments'],
 
-            ['name' => 'view_services', 'description' => 'Xem danh sách dịch vụ'],
-            ['name' => 'create_services', 'description' => 'Thêm dịch vụ'],
-            ['name' => 'edit_services', 'description' => 'Chỉnh sửa dịch vụ'],
-            ['name' => 'delete_services', 'description' => 'Xoá dịch vụ'],
+            // Services
+            ['name' => 'view_services', 'description' => 'Xem danh sách dịch vụ', 'group' => 'Services'],
+            ['name' => 'create_services', 'description' => 'Thêm dịch vụ', 'group' => 'Services'],
+            ['name' => 'edit_services', 'description' => 'Chỉnh sửa dịch vụ', 'group' => 'Services'],
+            ['name' => 'delete_services', 'description' => 'Xoá dịch vụ', 'group' => 'Services'],
 
-            ['name' => 'view_prescriptions', 'description' => 'Xem đơn thuốc'],
-            ['name' => 'create_prescriptions', 'description' => 'Tạo đơn thuốc'],
-            ['name' => 'edit_prescriptions', 'description' => 'Chỉnh sửa đơn thuốc'],
-            ['name' => 'delete_prescriptions', 'description' => 'Xoá đơn thuốc'],
+            // Prescriptions
+            ['name' => 'view_prescriptions', 'description' => 'Xem đơn thuốc', 'group' => 'Prescriptions'],
+            ['name' => 'create_prescriptions', 'description' => 'Tạo đơn thuốc', 'group' => 'Prescriptions'],
+            ['name' => 'edit_prescriptions', 'description' => 'Chỉnh sửa đơn thuốc', 'group' => 'Prescriptions'],
+            ['name' => 'delete_prescriptions', 'description' => 'Xoá đơn thuốc', 'group' => 'Prescriptions'],
 
-            ['name' => 'view_coupons', 'description' => 'Xem mã giảm giá'],
-            ['name' => 'create_coupons', 'description' => 'Tạo mã giảm giá'],
-            ['name' => 'edit_coupons', 'description' => 'Chỉnh sửa mã giảm giá'],
-            ['name' => 'delete_coupons', 'description' => 'Xoá mã giảm giá'],
+            // Coupons
+            ['name' => 'view_coupons', 'description' => 'Xem mã giảm giá', 'group' => 'Coupons'],
+            ['name' => 'create_coupons', 'description' => 'Tạo mã giảm giá', 'group' => 'Coupons'],
+            ['name' => 'edit_coupons', 'description' => 'Chỉnh sửa mã giảm giá', 'group' => 'Coupons'],
+            ['name' => 'delete_coupons', 'description' => 'Xoá mã giảm giá', 'group' => 'Coupons'],
 
-            ['name' => 'view_orders', 'description' => 'Xem đơn hàng'],
-            ['name' => 'manage_payments', 'description' => 'Xử lý thanh toán'],
-            ['name' => 'view_payment_history', 'description' => 'Xem lịch sử thanh toán'],
+            // Orders & Payments
+            ['name' => 'view_orders', 'description' => 'Xem đơn hàng', 'group' => 'Orders'],
+            ['name' => 'manage_payments', 'description' => 'Xử lý thanh toán', 'group' => 'Payments'],
+            ['name' => 'view_payment_history', 'description' => 'Xem lịch sử thanh toán', 'group' => 'Payments'],
 
-            ['name' => 'view_medical_records', 'description' => 'Xem hồ sơ bệnh án'],
-            ['name' => 'create_medical_records', 'description' => 'Tạo hồ sơ bệnh án'],
-            ['name' => 'edit_medical_records', 'description' => 'Chỉnh sửa hồ sơ bệnh án'],
-            ['name' => 'delete_medical_records', 'description' => 'Xoá hồ sơ bệnh án'],
-            ['name' => 'view_treatment_plans', 'description' => 'Xem kế hoạch điều trị'],
-            ['name' => 'update_treatment_plans', 'description' => 'Cập nhật kế hoạch điều trị'],
+            // Medical Records
+            ['name' => 'view_medical_records', 'description' => 'Xem hồ sơ bệnh án', 'group' => 'Medical Records'],
+            ['name' => 'create_medical_records', 'description' => 'Tạo hồ sơ bệnh án', 'group' => 'Medical Records'],
+            ['name' => 'edit_medical_records', 'description' => 'Chỉnh sửa hồ sơ bệnh án', 'group' => 'Medical Records'],
+            ['name' => 'delete_medical_records', 'description' => 'Xoá hồ sơ bệnh án', 'group' => 'Medical Records'],
+            ['name' => 'view_treatment_plans', 'description' => 'Xem kế hoạch điều trị', 'group' => 'Medical Records'],
+            ['name' => 'update_treatment_plans', 'description' => 'Cập nhật kế hoạch điều trị', 'group' => 'Medical Records'],
 
-            ['name' => 'upload_files', 'description' => 'Tải file lên'],
-            ['name' => 'delete_files', 'description' => 'Xoá file'],
-            ['name' => 'view_medical_documents', 'description' => 'Xem tài liệu y tế'],
+            // Files
+            ['name' => 'upload_files', 'description' => 'Tải file lên', 'group' => 'Files'],
+            ['name' => 'delete_files', 'description' => 'Xoá file', 'group' => 'Files'],
+            ['name' => 'view_medical_documents', 'description' => 'Xem tài liệu y tế', 'group' => 'Files'],
 
-            ['name' => 'view_reviews', 'description' => 'Xem đánh giá'],
-            ['name' => 'delete_reviews', 'description' => 'Xoá đánh giá'],
+            // Categories
+            ['name' => 'view_categories', 'description' => 'Xem danh sách danh mục', 'group' => 'Categories'],
+            ['name' => 'create_categories', 'description' => 'Tạo danh mục mới', 'group' => 'Categories'],
+            ['name' => 'edit_categories', 'description' => 'Chỉnh sửa danh mục', 'group' => 'Categories'],
+            ['name' => 'delete_categories', 'description' => 'Xoá danh mục', 'group' => 'Categories'],
 
-            ['name' => 'manage_support_content', 'description' => 'Quản lý nội dung hỗ trợ'],
-            ['name' => 'send_notifications', 'description' => 'Gửi thông báo'],
+            // Reviews
+            ['name' => 'view_reviews', 'description' => 'Xem đánh giá', 'group' => 'Reviews'],
+            ['name' => 'delete_reviews', 'description' => 'Xoá đánh giá', 'group' => 'Reviews'],
+            ['name' => 'edit_reviews', 'description' => 'Chỉnh sửa đánh giá', 'group' => 'Reviews'],
 
-            ['name' => 'view_statistics', 'description' => 'Xem thống kê'],
+            // Notifications & Content
+            ['name' => 'manage_support_content', 'description' => 'Quản lý nội dung hỗ trợ', 'group' => 'Content'],
+            ['name' => 'send_notifications', 'description' => 'Gửi thông báo', 'group' => 'Content'],
+
+            // Statistics
+            ['name' => 'view_statistics', 'description' => 'Xem thống kê', 'group' => 'Statistics'],
+            // FAQ Management
+            ['name' => 'view_faqs', 'description' => 'Xem câu hỏi thường gặp', 'group' => 'FAQ'],
+            ['name' => 'create_faqs', 'description' => 'Thêm câu hỏi thường gặp', 'group' => 'FAQ'],
+            ['name' => 'edit_faqs', 'description' => 'Sửa câu hỏi thường gặp', 'group' => 'FAQ'],
+            ['name' => 'delete_faqs', 'description' => 'Xoá câu hỏi thường gặp', 'group' => 'FAQ'],
+
         ];
 
         DB::table('permissions')->insert($permissions);
     }
 }
-

@@ -26,28 +26,40 @@
                             <span class="text-danger small">{{ $message }}</span>
                         @enderror
                     </div>
-                    <div class="mb-2">
-                        <button type="button" class="btn btn-sm btn-primary me-2 mb-3" onclick="toggleAllPermissions(true)">Chọn tất cả</button>
-                        <button type="button" class="btn btn-sm btn-secondary mb-3" onclick="toggleAllPermissions(false)">Bỏ chọn tất cả</button>
-                    </div>
 
                     <div class="mb-3">
                         <label class="form-label">Phân quyền</label>
+                        <div class="mb-2">
+                            <button type="button" class="btn btn-sm btn-primary me-2 mb-3" onclick="toggleAllPermissions(true)">Chọn tất cả</button>
+                            <button type="button" class="btn btn-sm btn-secondary mb-3" onclick="toggleAllPermissions(false)">Bỏ chọn tất cả</button>
+                        </div>
                         <div class="row">
-                            @foreach ($permissions as $permission)
-                            <div class="col-md-4">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox"
-                                           name="permissions[]"
-                                           value="{{ $permission->id }}"
-                                           id="perm_{{ $permission->id }}"
-                                           {{ in_array($permission->id, $rolePermissions) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="perm_{{ $permission->id }}">
-                                        {{ getPermissionLabel($permission->name) }}
-                                    </label>
-                                </div>
-                            </div>
-                        @endforeach
+                            @if (!empty($permissions))
+                                @foreach ($permissions as $group => $perms)
+                                    <div class="mb-3">
+                                        <h6 class="text-primary">{{ __(getPermissionGroupLabel($group)) }}</h6>
+                                        <div class="row">
+                                            @foreach ($perms as $permission)
+                                                <div class="col-md-4">
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input permission-checkbox" type="checkbox"
+                                                               name="permissions[]"
+                                                               value="{{ $permission['id'] }}"
+                                                               id="perm_{{ $permission['id'] }}"
+                                                               {{ in_array($permission['id'], $rolePermissions) ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="perm_{{ $permission['id'] }}">
+                                                            {{ getPermissionLabel($permission['name']) }}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        <hr>
+                                    </div>
+                                @endforeach
+                            @else
+                                <p class="text-muted">Không có quyền nào được tìm thấy.</p>
+                            @endif
                         </div>
                         @error('permissions')
                             <span class="text-danger small">{{ $message }}</span>
@@ -62,15 +74,15 @@
             </div>
         </div>
     </div>
+
     @push('scripts')
-    <script>
-        function toggleAllPermissions(select) {
-            const checkboxes = document.querySelectorAll('.form-check-input');
-            // console.log(checkboxes);
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = select;
-            });
-        }
-    </script>
-@endpush
+        <script>
+            function toggleAllPermissions(select) {
+                const checkboxes = document.querySelectorAll('.permission-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = select;
+                });
+            }
+        </script>
+    @endpush
 @endsection

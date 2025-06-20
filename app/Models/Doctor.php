@@ -14,17 +14,40 @@ class Doctor extends Model
         'room_id',
         'department_id',
         'specialization',
-        'biography'
+        'biography',
     ];
 
+    /**
+     * Quan hệ: Doctor thuộc về một User
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Quan hệ: Doctor thuộc về một Room
+     */
     public function room()
     {
         return $this->belongsTo(Room::class);
     }
-    public $timestamps = true;
+
+    /**
+     * Quan hệ: Doctor thuộc về một Department
+     */
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+     public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }
+

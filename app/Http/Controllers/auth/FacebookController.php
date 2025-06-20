@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\auth;
+namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -30,7 +30,7 @@ class FacebookController extends Controller
 
             if ($findUserByFacebookId) {
                 Auth::login($findUserByFacebookId);
-                return redirect('/dashboard');
+                return redirect('/');
             }
 
             $existingUser = User::where('email', $facebookUser->getEmail())->first();
@@ -48,7 +48,7 @@ class FacebookController extends Controller
             ]);
 
             Auth::login($newUser);
-            return redirect('/dashboard');
+            return redirect('/');
         } catch (Exception $e) {
             return redirect('/login')->withErrors(['facebook' => 'Đăng nhập thất bại: ' . $e->getMessage()]);
         }
