@@ -55,7 +55,7 @@
                         </div>
                         <div class="form-group mb-3">
                             <label for="content">Nội dung <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="content" name="content" rows="8" >{{ old('content') }}</textarea>
+                            <textarea class="form-control" id="content" name="content" rows="8">{{ old('content') }}</textarea>
                             {{-- <small class="form-text text-muted">Bạn có thể sử dụng HTML cơ bản hoặc Markdown để định dạng nội dung.</small> --}}
                         </div>
                         <div class="form-group mb-3">
@@ -121,6 +121,9 @@
                             <input type="text" class="form-control pickatime-format" id="scheduled_at"
                                 name="scheduled_at"
                                 value="{{ old('scheduled_at') ? \Carbon\Carbon::parse(old('scheduled_at'))->format('Y-m-d H:i') : '' }}">
+                            @error('scheduled_at')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
                             <small class="form-text text-muted">Để trống để gửi ngay lập tức. Chọn ngày và giờ để lên
                                 lịch.</small>
                         </div>
@@ -154,13 +157,11 @@
 
             if (recipientType === 'specific_users') {
                 document.getElementById('specific_users_div').style.display = 'block';
-                // Khởi tạo Select2 nếu chưa được khởi tạo
                 if (!$('#recipient_ids_users').data('select2')) {
                     setupSelect2Users();
                 }
             } else if (recipientType === 'roles') {
                 document.getElementById('roles_div').style.display = 'block';
-                // Khởi tạo Select2 nếu chưa được khởi tạo
                 if (!$('#recipient_ids_roles').data('select2')) {
                     setupSelect2Roles();
                 }
@@ -171,20 +172,16 @@
         function setupSelect2Users() {
             $('#recipient_ids_users').select2({
                 placeholder: 'Tìm kiếm người dùng...',
-                minimumInputLength: 2, // Bắt đầu tìm kiếm sau 2 ký tự
+                minimumInputLength: 2,
                 ajax: {
-                    url: '{{ route('admin.notifications.getUsers') }}', // Route API lấy người dùng
+                    url: '{{ route('admin.notifications.getUsers') }}',
                     dataType: 'json',
-                    delay: 250, // Độ trễ giữa các lần gõ phím
+                    delay: 250,
                     data: function(params) {
-                        return {
-                            search: params.term // Tham số tìm kiếm
-                        };
+                        return { search: params.term };
                     },
                     processResults: function(data) {
-                        return {
-                            results: data.results // Frest cần format results: [{id: 1, text: 'abc'}]
-                        };
+                        return { results: data.results };
                     },
                     cache: true
                 }
@@ -196,18 +193,14 @@
             $('#recipient_ids_roles').select2({
                 placeholder: 'Chọn vai trò...',
                 ajax: {
-                    url: '{{ route('admin.notifications.getRoles') }}', // Route API lấy vai trò
+                    url: '{{ route('admin.notifications.getRoles') }}',
                     dataType: 'json',
                     delay: 250,
                     data: function(params) {
-                        return {
-                            search: params.term
-                        };
+                        return { search: params.term };
                     },
                     processResults: function(data) {
-                        return {
-                            results: data.results
-                        };
+                        return { results: data.results };
                     },
                     cache: true
                 }
@@ -215,7 +208,7 @@
         }
 
         $(document).ready(function() {
-            toggleRecipientOptions(); // Gọi khi trang tải để xử lý old input và hiển thị đúng phần
+            toggleRecipientOptions();
 
             // Khởi tạo TinyMCE cho trường content
             tinymce.init({
@@ -227,24 +220,44 @@
                 forced_root_block: false,
             });
 
-
+            // Khởi tạo Flatpickr với giới hạn thời gian từ hiện tại
             $('.pickatime-format').flatpickr({
                 enableTime: true,
-                dateFormat: "Y-m-d H:i",
+                dateFormat: 'Y-m-d H:i',
                 altInput: true,
-                altFormat: "d/m/Y H:i",
-                time_24hr: true
+                altFormat: 'd/m/Y H:i',
+                time_24hr: true,
+                minDate: 'today', // Giới hạn chọn từ thời điểm hiện tại
+                minuteIncrement: 1, // Bước nhảy phút
+                defaultDate: '{{ old('scheduled_at') ? \Carbon\Carbon::parse(old('scheduled_at'))->format('Y-m-d H:i') : '' }}'
             });
 
             // Xử lý logic checkbox "Gửi ngay"
             $('#scheduled_at').on('change', function() {
-                if ($(this).val()) { // Nếu có giá trị ngày giờ, bỏ chọn "Gửi ngay"
+                if ($(this).val()) {
                     $('#send_now_checkbox').prop('checked', false);
                 }
             });
+
             $('#send_now_checkbox').on('change', function() {
-                if ($(this).is(':checked')) { // Nếu chọn "Gửi ngay", xóa giá trị lịch trình
+                if ($(this).is(':checked')) {
                     $('#scheduled_at').val('').flatpickr().clear();
+                }
+            });
+
+            // Validation phía client trước khi submit
+            $('form').on('submit', function(e) {
+                const scheduledAt = $('#scheduled_at').val();
+                const sendNow = $('#send_now_checkbox').is(':checked');
+                
+                if (scheduledAt && !sendNow) {
+                    const selectedTime = new Date(scheduledAt);
+                    const now = new Date();
+                    if (selectedTime < now) {
+                        e.preventDefault();
+                        alert('Thời gian lên lịch phải từ hiện tại trở đi.');
+                        $('#scheduled_at').focus();
+                    }
                 }
             });
         });

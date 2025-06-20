@@ -357,15 +357,15 @@ Route::get('admin/schedules/show/{id}', [SchedulesController::class, 'show'])->n
 Route::group([
     'prefix' => 'admin/doctor_leaves',
     'as' => 'admin.doctor_leaves.',
-    'middleware' => 'check_permission:view_doctor_leaves'
+    'middleware' => 'check_permission:view_reviews'
 ], function () {
     Route::get('/', [DoctorLeaveController::class, 'index'])->name('index');
 
     Route::get('/edit/{id}', [DoctorLeaveController::class, 'edit'])
-        ->middleware('check_permission:edit_doctor_leaves')->name('edit');
+        ->middleware('check_permission:view_reviews')->name('edit');
 
     Route::put('/update/{id}', [DoctorLeaveController::class, 'update'])
-        ->middleware('check_permission:edit_doctor_leaves')->name('update');
+        ->middleware('check_permission:view_reviews')->name('update');
 });
 
 // Quản lý danh mục dịch vụ

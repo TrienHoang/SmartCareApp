@@ -165,6 +165,9 @@
                             <input type="text" class="form-control pickatime-format" id="scheduled_at"
                                 name="scheduled_at"
                                 value="{{ old('scheduled_at', $notification->scheduled_at ? $notification->scheduled_at->format('Y-m-d H:i') : '') }}">
+                            @error('scheduled_at')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
                         </div>
 
                         <button type="submit" class="btn btn-primary waves-effect waves-light mr-1">Cập nhật thông
@@ -243,7 +246,8 @@
                         // Lọc bỏ các vai trò đã chọn khỏi kết quả tìm kiếm
                         var selectedValues = $('#recipient_ids_roles').val() || [];
                         var filteredResults = data.results.filter(function(role) {
-                            return selectedValues.indexOf(role.id) === -1; // Giả sử AJAX trả về {id: 'role_name', text: 'Role Name'}
+                            return selectedValues.indexOf(role.id) === -
+                            1; // Giả sử AJAX trả về {id: 'role_name', text: 'Role Name'}
                         });
                         return {
                             results: filteredResults
@@ -259,7 +263,7 @@
             // và Select2 được khởi tạo đúng cách. Tuy nhiên, nếu vẫn gặp lỗi,
             // bạn có thể thử thiết lập lại:
             if (initialSelectedRoles.length > 0) {
-                 $('#recipient_ids_roles').val(initialSelectedRoles).trigger('change');
+                $('#recipient_ids_roles').val(initialSelectedRoles).trigger('change');
             }
         }
 
@@ -285,10 +289,29 @@
             // Khởi tạo Flatpickr
             $('.pickatime-format').flatpickr({
                 enableTime: true,
-                dateFormat: "Y-m-d H:i",
+                dateFormat: 'Y-m-d H:i',
                 altInput: true,
-                altFormat: "d/m/Y H:i",
-                time_24hr: true
+                altFormat: 'd/m/Y H:i',
+                time_24hr: true,
+                minDate: 'today', // Giới hạn chọn từ thời điểm hiện tại
+                minuteIncrement: 1, // Bước nhảy phút
+                defaultDate: '{{ old('scheduled_at') ? \Carbon\Carbon::parse(old('scheduled_at'))->format('Y-m-d H:i') : '' }}'
+            });
+
+            // Validation phía client trước khi submit
+            $('form').on('submit', function(e) {
+                const scheduledAt = $('#scheduled_at').val();
+                const sendNow = $('#send_now_checkbox').is(':checked');
+
+                if (scheduledAt && !sendNow) {
+                    const selectedTime = new Date(scheduledAt);
+                    const now = new Date();
+                    if (selectedTime < now) {
+                        e.preventDefault();
+                        alert('Thời gian lên lịch phải từ hiện tại trở đi.');
+                        $('#scheduled_at').focus();
+                    }
+                }
             });
         });
     </script>
