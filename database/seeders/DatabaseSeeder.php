@@ -41,9 +41,9 @@ class DatabaseSeeder extends Seeder
             BlogSeeder::class,
             NotificationSeeder::class,
             FaqSeeder::class,
-            OrderSeeder::class
+            OrderSeeder::class,
             // NotificationSeeder::class,
-            FaqSeeder::class
+            FaqSeeder::class,
         ]);
         $this->call(ReviewSeeder::class);
     }
