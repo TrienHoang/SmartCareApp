@@ -2,9 +2,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const container = document.querySelector(".container");
     const formType = container.dataset.formType;
 
+    // ⚠️ Kích hoạt chế độ đăng ký TRƯỚC khi query phần tử successMessage
     if (formType === 'register') {
         container.classList.add("sign-up-mode");
     }
+
+    // ⚠️ Lúc này .text-success mới có trong DOM
+    const successMessage = document.querySelector('.text-success');
 
     const sign_in_btn = document.querySelector("#sign-in-btn");
     const sign_up_btn = document.querySelector("#sign-up-btn");
@@ -30,4 +34,11 @@ document.addEventListener("DOMContentLoaded", function () {
     sign_in_btn2.addEventListener("click", () => {
         container.classList.remove("sign-up-mode");
     });
+
+    // Tự động xóa thông báo thành công sau 5 giây
+    if (successMessage) {
+        setTimeout(() => {
+            successMessage.style.display = 'none';
+        }, 5000);
+    }
 });

@@ -58,7 +58,7 @@ class AuthController extends Controller
             'avatar' => '',
         ]);
 
-        return redirect()->route('login')->with('success', 'Đăng ký thành công. Vui lòng đăng nhập!');
+        return back()->with('success', 'Đăng ký thành công. Vui lòng đăng nhập!')->withInput(['form_type' => 'register']);
     }
 
     public function logout()
