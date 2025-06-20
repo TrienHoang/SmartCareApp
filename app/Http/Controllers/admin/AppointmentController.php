@@ -439,9 +439,13 @@ class AppointmentController extends Controller
 
         $patients = User::where('role_id', 3)
             ->when($query, function ($q) use ($query) {
-                $q->where('full_name', 'like', "%$query%");
+                $q->where(function ($sub) use ($query) {
+                    $sub->where('full_name', 'like', "%$query%")
+                        ->orWhere('phone', 'like', "%$query%")
+                        ->orWhere('email', 'like', "%$query%");
+                });
             })
-            ->select('id', 'full_name')
+            ->select('id', 'full_name', 'phone', 'email')
             ->limit(10)
             ->get();
 
