@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('password')->comment('Mật khẩu đã mã hóa');
             $table->string('full_name', 100)->nullable()->comment('Họ tên đầy đủ');
             $table->string('email')->unique();
+            $table->string('facebook_id')->nullable()->unique();
+            $table->string('google_id')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->string('phone', 20)->nullable()->comment('Số điện thoại');
@@ -26,10 +28,11 @@ return new class extends Migration
             $table->string('address')->nullable()->comment('Địa chỉ');
             $table->foreignId('role_id')->nullable()->constrained('roles')->nullOnDelete()->comment('Vai trò (liên kết bảng roles)');
             $table->string('avatar')->nullable()->comment('Đường dẫn ảnh đại diện');
+            $table->enum('status', ['online', 'offline'])->default('offline')->comment('Trạng thái hoạt động');
             $table->timestamps();
         });
 
-    
+
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
