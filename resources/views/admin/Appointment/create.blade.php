@@ -15,17 +15,11 @@
                 <form action="{{ route('admin.appointments.store') }}" method="POST">
                     @csrf
                     <div class="mb-3">
-                        <label for="patient_id" class="form-label">Bệnh nhân</label>
-                        <select name="patient_id" id="patient_id"
-                            class="form-select @error('patient_id') is-invalid @enderror">
-                            <option value="">Chọn bệnh nhân</option>
-                            @foreach ($patients as $patient)
-                                <option value="{{ $patient->id }}"
-                                    {{ old('patient_id') == $patient->id ? 'selected' : '' }}>
-                                    {{ $patient->full_name }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <label for="patient_name" class="form-label">Bệnh nhân</label>
+                        <input type="text" id="patient_name"
+                            class="form-control @error('patient_id') is-invalid @enderror"
+                            placeholder="Tìm bệnh nhân theo tên..." autocomplete="off" value="{{ old('patient_name') }}">
+                        <input type="hidden" name="patient_id" id="patient_id_hidden" value="{{ old('patient_id') }}">
                         @error('patient_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -105,3 +99,7 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/Appointment/create.js') }}"></script>
+@endpush

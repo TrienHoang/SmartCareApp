@@ -1,19 +1,38 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::paginate(10);
-        return view('admin.users.index', compact('users'));
+        $query = User::query();
+
+        if ($request->filled('role_id') && $request->role_id !== 'all') {
+            $query->where('role_id', $request->role_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('username', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('full_name', 'like', "%$search%");
+            });
+        }
+
+        $users = $query->paginate(10);
+        $roles = Role::all();
+
+        return view('admin.users.index', compact('users', 'roles'));
     }
+
     public function show($id)
     {
         $user = User::find($id);
@@ -22,10 +41,10 @@ class UserController extends Controller
         }
         return view('admin.users.show', compact('user'));
     }
+
     public function edit($id)
     {
-        // Không cho phép người dùng chỉnh sửa quyền của chính mình
-        if (auth()->id() == $id) {
+        if (Auth::check() && Auth::id() == $id) {
             return redirect()->route('admin.users.index')->with('error', 'Bạn không thể sửa quyền của chính mình.');
         }
 
@@ -37,8 +56,7 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Không cho phép người dùng chỉnh sửa quyền của chính mình
-        if (auth()->id() == $id) {
+        if (Auth::check() && Auth::id() == $id) {
             return redirect()->route('admin.users.index')->with('error', 'Bạn không thể sửa quyền của chính mình.');
         }
 
@@ -52,12 +70,16 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success', 'Cập nhật quyền thành công.');
     }
+
     public function search()
     {
         $search = request()->input('search');
-        $users = User::where('username', 'like', '%' . $search . '%')
-            ->orWhere('email', 'like', '%' . $search . '%')
-            ->paginate(10);
+
+        $users = User::where(function ($query) use ($search) {
+            $query->where('username', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
+        })->paginate(10);
+
         return view('admin.users.search', compact('users'));
     }
     public function toggleStatus($id)

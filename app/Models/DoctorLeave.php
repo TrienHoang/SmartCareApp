@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class DoctorLeave extends Model
 {
     use HasFactory;
+    public $timestamps = false;
 
     protected $fillable = [
         'doctor_id',
@@ -17,10 +18,12 @@ class DoctorLeave extends Model
         'created_at',
         'approved'
     ];
-
-    public $timestamps = false;
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);
+    }
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
     }
 }

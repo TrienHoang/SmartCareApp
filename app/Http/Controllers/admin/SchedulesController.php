@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Doctor;
@@ -39,6 +39,7 @@ class SchedulesController extends Controller
     {
         $request->validate([
             "doctor_id" => "required|exists:doctors,id",
+            'day' => 'required|date',
             'day_of_week' => 'required|string|max:255',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
@@ -59,6 +60,7 @@ class SchedulesController extends Controller
     {
         $request->validate([
             "doctor_id" => "required|exists:doctors,id",
+            'day' => 'required|date',
             'day_of_week' => 'required|string|max:255',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',

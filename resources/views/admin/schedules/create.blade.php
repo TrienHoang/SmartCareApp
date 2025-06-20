@@ -14,7 +14,10 @@
                     @endforeach
                 </select>
             </div>
-
+            <div class="mb-3">
+                <label for="day" class="form-label">Day</label>
+                <input type="date" class="form-control" id="day" name="day" required>
+            </div>
             <div class="mb-3">
                 <label for="day_of_week" class="form-label">Day of Week</label>
                 <select class="form-select" id="day_of_week" name="day_of_week" required>
@@ -32,10 +35,12 @@
                 <label for="start_time" class="form-label">Start Time</label>
                 <input type="time" class="form-control" id="start_time" name="start_time" required>
             </div>
+
             <div class="mb-3">
                 <label for="end_time" class="form-label">End Time</label>
                 <input type="time" class="form-control" id="end_time" name="end_time" required>
             </div>
+
             <button type="submit" class="btn btn-primary">Create Schedule</button>
             <a href="{{ route('admin.schedules.index') }}" class="btn btn-secondary">Back to Schedules</a>
         </form>

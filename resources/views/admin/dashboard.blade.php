@@ -82,8 +82,12 @@
   </div>
 
   @include('admin.partials.scripts')
-
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
   @stack('scripts')
+
+  @yield('scripts')
+
 
 </body>
 </html>

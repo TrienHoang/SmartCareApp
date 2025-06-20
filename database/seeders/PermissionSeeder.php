@@ -96,6 +96,11 @@ class PermissionSeeder extends Seeder
 
             // Statistics
             ['name' => 'view_statistics', 'description' => 'Xem thống kê', 'group' => 'Statistics'],
+            // FAQ Management
+            ['name' => 'view_faqs', 'description' => 'Xem câu hỏi thường gặp', 'group' => 'FAQ'],
+            ['name' => 'create_faqs', 'description' => 'Thêm câu hỏi thường gặp', 'group' => 'FAQ'],
+            ['name' => 'edit_faqs', 'description' => 'Sửa câu hỏi thường gặp', 'group' => 'FAQ'],
+            ['name' => 'delete_faqs', 'description' => 'Xoá câu hỏi thường gặp', 'group' => 'FAQ'],
 
         ];
 
