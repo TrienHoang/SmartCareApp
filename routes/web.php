@@ -20,10 +20,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\ServiceCategoryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\FaqController;
 use App\Models\Admin_notification;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+
 
 Route::get('/', function () {
     return view('client.home');
@@ -299,19 +301,17 @@ Route::group([
     Route::group([
         'prefix' => 'payment-histories',
         'as' => 'payment_histories.',
-        'middleware' => 'check_permission:view_payments_histories',
-
+        'middleware' => 'check_permission:view_users'
     ], function () {
         Route::get('/', [PaymentHistoryController::class, 'index'])
-            ->middleware('check_permission:view_payments_histories')
+
             ->name('index');
 
         Route::get('/search', [PaymentHistoryController::class, 'search'])
-            ->middleware('check_permission:view_payments_histories')
             ->name('search');
 
+
         Route::get('/{payment_history}', [PaymentHistoryController::class, 'show'])
-            ->middleware('check_permission:view_payments_histories')
             ->name('show');
     });
 });
@@ -464,7 +464,24 @@ Route::group([
         Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
     });
 
-
+    // Quản lý câu hỏi thường gặp
+    Route::group([
+        'prefix' => 'faqs',
+        'as' => 'faqs.',
+        'middleware' => ['auth', 'checkAdmin']
+    ], function () {
+        Route::get('/', [FaqController::class, 'index'])->name('index');
+        Route::get('/create', [FaqController::class, 'create'])
+            ->middleware('check_permission:create_faqs')->name('create');
+        Route::post('/store', [FaqController::class, 'store'])
+            ->middleware('check_permission:create_faqs')->name('store');
+        Route::get('/edit/{id}', [FaqController::class, 'edit'])
+            ->middleware('check_permission:edit_faqs')->name('edit');
+        Route::put('/update/{id}', [FaqController::class, 'update'])
+            ->middleware('check_permission:edit_faqs')->name('update');
+        Route::delete('/destroy/{id}', [FaqController::class, 'destroy'])
+            ->middleware('check_permission:delete_faqs')->name('destroy');
+    });
 
     Route::resource('notifications', AdminNotificationController::class);
     Route::post('notifications/{notification}/send-now', [AdminNotificationController::class, 'sendNow'])->name('notifications.sendNow');
@@ -472,7 +489,6 @@ Route::group([
     Route::get('notifications/ajax/get-users', [AdminNotificationController::class, 'getUsers'])->name('notifications.getUsers');
     // Route để lấy danh sách vai trò 
     Route::get('notifications/ajax/get-roles', [AdminNotificationController::class, 'getRoles'])->name('notifications.getRoles');
-
-    Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('payment_histories.index');
-    Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('payment_histories.show');
 });
+Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('admin.payments.index');
+Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('payment_histories.show');
