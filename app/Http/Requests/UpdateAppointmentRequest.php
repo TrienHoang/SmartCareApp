@@ -15,11 +15,21 @@ class UpdateAppointmentRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
-            'appointment_time' => 'required|date|after:now',
+        $rules = [
+            'appointment_time' => ['required', 'date'],
             'status' => ['nullable', 'in:pending,confirmed,completed,cancelled'],
         ];
+
+        $status = $this->input('status') ?? null;
+
+        // Nếu không phải completed hoặc cancelled → bắt after:now
+        if (!in_array($status, ['completed', 'cancelled'])) {
+            $rules['appointment_time'][] = 'after:now';
+        }
+
+        return $rules;
     }
+
     public function messages()
     {
         return [

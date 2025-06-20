@@ -37,5 +37,8 @@
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
   @stack('scripts')
 
+  @yield('scripts')
+
+
 </body>
 </html>

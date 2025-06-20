@@ -96,6 +96,11 @@ if (!function_exists('getPermissionLabel')) {
             'create_categories' => 'Thêm loại dịch vụ',
             'edit_categories' => 'Sửa loại dịch vụ',
             'delete_categories' => 'Xóa loại dịch vụ',
+            //16. Quản lý FAQ
+            'view_faqs' => 'Xem câu hỏi thường gặp',
+            'create_faqs' => 'Thêm câu hỏi thường gặp',
+            'edit_faqs' => 'Sửa câu hỏi thường gặp',
+            'delete_faqs' => 'Xóa câu hỏi thường gặp',
         ];
 
         return $labels[$permission] ?? $permission;

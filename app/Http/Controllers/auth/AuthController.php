@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\auth;
+namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -58,7 +58,7 @@ class AuthController extends Controller
             'avatar' => '',
         ]);
 
-        return redirect()->route('login')->with('success', 'Đăng ký thành công. Vui lòng đăng nhập!');
+        return back()->with('success', 'Đăng ký thành công. Vui lòng đăng nhập!')->withInput(['form_type' => 'register']);
     }
 
     public function logout()
