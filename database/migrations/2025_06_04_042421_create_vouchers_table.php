@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('id');
             $table->string('code')->unique();
             $table->decimal('discount', 15, 2);
-            $table->integer('quantity');
+            $table->bigInteger('quantity');
             $table->decimal('min_price', 15, 2);
             $table->text('description')->nullable();
             $table->timestamps();

@@ -5,7 +5,7 @@
         <!-- Header Section -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="h3 mb-0">Schedules</h1>
-            <a href="{{ route('admin.schedules.create') }}" class="btn btn-primary">Create New Schedule</a>
+            <a href="{{ route('admin.schedules.create') }}" class="btn btn-primary">Tạo mới lịch làm việc bác sĩ</a>
         </div>
 
         <!-- Search Form -->
@@ -13,10 +13,10 @@
             <div class="card-body">
                 <form action="{{ route('admin.schedules.index') }}" method="get" class="row g-2 align-items-end">
                     <div class="col-auto">
-                        <input type="text" name="keyword" class="form-control" placeholder="Enter keyword..." value="{{ $keyword ?? '' }}" required>
+                        <input type="text" name="keyword" class="form-control" placeholder="Nhập từ khóa..." value="{{ $keyword ?? '' }}" required>
                     </div>
                     <div class="col-auto">
-                        <button type="submit" class="btn btn-sm btn-primary">Search</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Tìm kiếm</button>
                     </div>
                 </form>
             </div>
@@ -50,16 +50,16 @@
                                     <td>{{ \Carbon\Carbon::parse($schedule->day)->format('d/m/Y') }}</td>
                                     <td>{{ $schedule->day_of_week }}</td>
                                     <td>{{ $schedule->start_time }}</td>
-                                    <td>{{ $schedule->end_time }}</td>           
+                                    <td>{{ $schedule->end_time }}</td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="{{ route('admin.schedules.show', $schedule->id) }}" class="btn btn-info btn-sm">View</a>
-                                            <a href="{{ route('admin.schedules.edit', $schedule->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                            <a href="{{ route('admin.schedules.show', $schedule->id) }}" class="btn btn-info btn-sm">Chi tiết</a>
+                                            <a href="{{ route('admin.schedules.edit', $schedule->id) }}" class="btn btn-warning btn-sm">Sửa</a>
                                             <form action="{{ route('admin.schedules.destroy', $schedule->id) }}" method="POST" style="display:inline;"
                                                   onsubmit="return confirm('Are you sure you want to delete this schedule?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
                                             </form>
                                         </div>
                                     </td>

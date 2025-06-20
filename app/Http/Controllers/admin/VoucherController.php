@@ -9,11 +9,30 @@ use App\Models\Voucher;
 class VoucherController extends Controller
 {
     // Hiển thị danh sách voucher
-    public function index()
+    public function index(Request $request)
     {
-        $vouchers = Voucher::orderBy('created_at', 'desc')->paginate(10);
+        $query = Voucher::query();
+
+        // Tìm theo mã voucher (code)
+        if ($request->filled('code')) {
+            $query->where('code', 'like', '%' . $request->code . '%');
+        }
+
+        // Lọc theo giảm giá
+        if ($request->filled('discount')) {
+            $query->where('discount', $request->discount);
+        }
+
+        // Lọc theo số lượng
+        if ($request->filled('quantity')) {
+            $query->where('quantity', '>=', $request->quantity);
+        }
+
+        $vouchers = $query->orderBy('created_at', 'desc')->paginate(10)->appends($request->query());
+
         return view('admin.vouchers.index', compact('vouchers'));
     }
+
     public function show($id)
     {
         $voucher = Voucher::findOrFail($id);
