@@ -22,6 +22,7 @@ use App\Http\Controllers\admin\ServiceCategoryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\admin\FaqController;
 use App\Models\Admin_notification;
 use App\Models\Role;
 use App\Models\User;
@@ -229,8 +230,6 @@ Route::group([
         Route::get('/patients/search', [AppointmentController::class, 'searchPatients'])
             ->middleware('check_permission:view_appointments')->name('patients.search');
     });
-
-
     // quản lý đơn thuốc
     Route::group([
         'prefix' => 'prescriptions',
@@ -393,15 +392,15 @@ Route::get('admin/schedules/show/{id}', [SchedulesController::class, 'show'])->n
 Route::group([
     'prefix' => 'admin/doctor_leaves',
     'as' => 'admin.doctor_leaves.',
-    'middleware' => 'check_permission:view_doctor_leaves'
+    'middleware' => 'check_permission:view_reviews'
 ], function () {
     Route::get('/', [DoctorLeaveController::class, 'index'])->name('index');
 
     Route::get('/edit/{id}', [DoctorLeaveController::class, 'edit'])
-        ->middleware('check_permission:edit_doctor_leaves')->name('edit');
+        ->middleware('check_permission:view_reviews')->name('edit');
 
     Route::put('/update/{id}', [DoctorLeaveController::class, 'update'])
-        ->middleware('check_permission:edit_doctor_leaves')->name('update');
+        ->middleware('check_permission:view_reviews')->name('update');
 });
 
 // Quản lý danh mục dịch vụ
@@ -499,6 +498,24 @@ Route::group([
         Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])
             ->middleware('check_permission:delete_services')->name('destroy');
         Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
+    });
+    // Quản lý câu hỏi thường gặp
+    Route::group([
+        'prefix' => 'faqs',
+        'as' => 'faqs.',
+        'middleware' => ['auth', 'checkAdmin']
+    ], function () {
+        Route::get('/', [FaqController::class, 'index'])->name('index');
+        Route::get('/create', [FaqController::class, 'create'])
+            ->middleware('check_permission:create_faqs')->name('create');
+        Route::post('/store', [FaqController::class, 'store'])
+            ->middleware('check_permission:create_faqs')->name('store');
+        Route::get('/edit/{id}', [FaqController::class, 'edit'])
+            ->middleware('check_permission:edit_faqs')->name('edit');
+        Route::put('/update/{id}', [FaqController::class, 'update'])
+            ->middleware('check_permission:edit_faqs')->name('update');
+        Route::delete('/destroy/{id}', [FaqController::class, 'destroy'])
+            ->middleware('check_permission:delete_faqs')->name('destroy');
     });
 
 
