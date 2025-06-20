@@ -1,7 +1,7 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
 
     <div class="app-brand demo ">
-        <a href="index.html" class="app-brand-link">
+        <a href="{{ route('admin.dashboard.index') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
                 <!-- SVG logo giữ nguyên -->
                 <!-- ... (giữ nguyên phần SVG) ... -->
@@ -14,6 +14,14 @@
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
+        <!-- thống kê -->
+        <li class="menu-item">
+            <a href="{{ route('admin.dashboard.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-bar-chart-alt"></i>
+                <div data-i18n="Dashboard">Thống kê</div>
+            </a>
+        </li>
+
         <!-- Email -->
         <li class="menu-item">
             <a href="app-email.html" class="menu-link">

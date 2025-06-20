@@ -26,4 +26,8 @@ class Service extends Model
     {
         return $this->belongsTo(ServiceCategory::class, 'service_cate_id');
     }
+    public function appointments()
+{
+    return $this->hasMany(\App\Models\Appointment::class);
+}
 }

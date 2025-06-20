@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\admin\RoleController;
 use App\Http\Controllers\admin\AppointmentController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\admin\SchedulesController;
@@ -59,6 +60,13 @@ Route::group([
     Route::get('/dashboard', function () {
         return view(view: 'admin.dashboard');
     })->name('dashboard');
+
+    //thống kê
+      Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('index');
+        Route::get('/export', [DashboardController::class, 'export'])->name('export');
+    });
+
 
     // Nhóm users
     Route::group([

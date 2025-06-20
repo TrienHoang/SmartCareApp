@@ -5,6 +5,56 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     @include('admin.partials.header')
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden; /* ❗Không để body scroll */
+    }
+
+    .layout-wrapper {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .layout-container {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .layout-menu.menu-vertical {
+        height: 100vh;
+        flex-shrink: 0;
+        overflow-y: auto;
+    }
+
+    .layout-page {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        overflow: hidden;
+    }
+
+    .content-wrapper {
+        flex-grow: 1;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .container-xxl.container-p-y {
+        flex-grow: 1;
+        overflow-y: auto; /* ✅ Content scroll riêng */
+        padding: 1.5rem;
+    }
+
+    .content-footer.footer {
+        flex-shrink: 0;
+    }
+</style>
+
 </head>
 <body>
   <!-- Google Tag Manager noscript -->
