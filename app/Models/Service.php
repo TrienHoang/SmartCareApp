@@ -28,4 +28,12 @@ class Service extends Model
     {
         return $this->belongsTo(ServiceCategory::class, 'service_cate_id');
     }
+
+    public function orders()
+    {
+        return $this->belongsToMany(Order::class, 'order_service')
+                    ->withPivot('quantity', 'price')
+                    ->withTimestamps();
+    }
+
 }

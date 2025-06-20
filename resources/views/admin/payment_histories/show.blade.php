@@ -3,104 +3,75 @@
 @section('title', 'Chi tiết lịch sử thanh toán')
 
 @section('content')
-    <h1 class="mb-4">Chi tiết thanh toán #{{ $history->id }}</h1>
+<div class="container-xl mt-4">
+    <h2 class="text-center text-primary fw-bold mb-4">Chi tiết thanh toán #{{ $history->id }}</h2>
 
-    <table class="table table-bordered">
-        {{-- THÔNG TIN HÓA ĐƠN --}}
-        <tr>
-            <th>Mã hóa đơn</th>
-            <td>{{ $history->payment_id }}</td>
-        </tr>
-        <tr>
-            <th>Trạng thái thanh toán</th>
-            <td>{{ ucfirst($history->payment->status ?? 'Chưa xác định') }}</td>
-        </tr>
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <!-- Thông tin hóa đơn -->
+            <h5 class="text-success border-bottom pb-2 mb-3">🧾 Thông tin hóa đơn</h5>
+            <div class="row mb-2">
+                <div class="col-md-6"><strong>Mã hóa đơn:</strong> {{ $history->payment_id }}</div>
+                <div class="col-md-6"><strong>Trạng thái thanh toán:</strong> {{ ucfirst($history->payment->status ?? 'Chưa xác định') }}</div>
+            </div>
 
-        {{-- BỆNH NHÂN --}}
-        <tr class="table-primary">
-            <th colspan="2">Thông tin bệnh nhân</th>
-        </tr>
-        <tr>
-            <th>Họ tên</th>
-            <td>{{ optional($history->payment->patient)->full_name ?? '---' }}</td>
-        </tr>
-        <tr>
-            <th>Email</th>
-            <td>{{ optional($history->payment->patient)->email ?? '---' }}</td>
-        </tr>
-        <tr>
-            <th>Số điện thoại</th>
-            <td>{{ optional($history->payment->patient)->phone ?? '---' }}</td>
-        </tr>
-        <tr>
-            <th>Ngày sinh</th>
-            <td>{{ optional(optional($history->payment->appointment->patient)->date_of_birth)->format('d/m/Y') ?? '---' }}
-            </td>
-        </tr>
+            <!-- Bệnh nhân -->
+            <h5 class="text-primary border-bottom pb-2 mt-4 mb-3">🧍‍♂️ Thông tin bệnh nhân</h5>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Họ tên:</strong> {{ optional($history->payment->patient)->full_name ?? '---' }}</div>
+                <div class="col-md-4"><strong>Email:</strong> {{ optional($history->payment->patient)->email ?? '---' }}</div>
+                <div class="col-md-4"><strong>SĐT:</strong> {{ optional($history->payment->patient)->phone ?? '---' }}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4">
+                    <strong>Ngày sinh:</strong>
+                    {{ optional(optional($history->payment->appointment->patient)->date_of_birth)->format('d/m/Y') ?? '---' }}
+                </div>
+            </div>
 
-        {{-- DỊCH VỤ --}}
-        <tr class="table-success">
-            <th colspan="2">Dịch vụ</th>
-        </tr>
-        <tr>
-            <th>Tên dịch vụ</th>
-            <td>{{ optional($history->payment->service)->name ?? '---' }}</td>
-        </tr>
-        <tr>
-            <th>Mô tả</th>
-            <td>{{ optional($history->payment->service)->description ?? '---' }}</td>
-        </tr>
+            <!-- Dịch vụ -->
+            <h5 class="text-success border-bottom pb-2 mt-4 mb-3">🛎️ Dịch vụ</h5>
+            <div class="row mb-2">
+                <div class="col-md-6"><strong>Tên dịch vụ:</strong> {{ optional($history->payment->service)->name ?? '---' }}</div>
+                <div class="col-md-6"><strong>Mô tả:</strong> {{ optional($history->payment->service)->description ?? '---' }}</div>
+            </div>
 
-        {{-- BÁC SĨ --}}
-        <tr class="table-info">
-            <th colspan="2">Thông tin bác sĩ</th>
-        </tr>
-        <tr>
-            <th>Họ tên</th>
-            <td>{{ optional($history->payment->doctor->user)->full_name ?? '---' }}</td>
-        </tr>
-        <tr>
-            <th>Chuyên môn</th>
-            <td>{{ optional($history->payment->doctor)->specialization ?? '---' }}</td>
-        </tr>
-        <tr>
-            <th>Phòng ban</th>
-            <td>{{ optional($history->payment->doctor->department)->name ?? '---' }}</td>
-        </tr>
+            <!-- Bác sĩ -->
+            <h5 class="text-info border-bottom pb-2 mt-4 mb-3">👨‍⚕️ Thông tin bác sĩ</h5>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Họ tên:</strong> {{ optional($history->payment->doctor->user)->full_name ?? '---' }}</div>
+                <div class="col-md-4"><strong>Chuyên môn:</strong> {{ optional($history->payment->doctor)->specialization ?? '---' }}</div>
+                <div class="col-md-4"><strong>Phòng ban:</strong> {{ optional($history->payment->doctor->department)->name ?? '---' }}</div>
+            </div>
 
-        {{-- THANH TOÁN --}}
-        <tr class="table-warning">
-            <th colspan="2">Thông tin thanh toán</th>
-        </tr>
-        <tr>
-            <th>Số tiền</th>
-            <td>{{ number_format($history->amount, 0, ',', '.') }} ₫</td>
-        </tr>
-        <tr>
-            <th>Phương thức</th>
-            <td>{{ $history->payment_method ?? '---' }}</td>
-        </tr>
-        <tr>
-            <th>Ngày thanh toán</th>
-            <td>
-                {{ $history->payment_date ? \Carbon\Carbon::parse($history->payment_date)->format('d/m/Y H:i') : 'Chưa thanh toán' }}
-            </td>
-        </tr>
+            <!-- Thanh toán -->
+            <h5 class="text-warning border-bottom pb-2 mt-4 mb-3">💰 Thông tin thanh toán</h5>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Số tiền:</strong> <span class="text-success fw-bold">{{ number_format($history->amount, 0, ',', '.') }} ₫</span></div>
+                <div class="col-md-4"><strong>Phương thức:</strong> {{ $history->payment_method ?? '---' }}</div>
+                <div class="col-md-4">
+                    <strong>Ngày thanh toán:</strong>
+                    {{ $history->payment_date ? \Carbon\Carbon::parse($history->payment_date)->format('d/m/Y H:i') : 'Chưa thanh toán' }}
+                </div>
+            </div>
 
-        {{-- KHUYẾN MÃI --}}
-        <tr class="table-secondary">
-            <th colspan="2">Khuyến mãi (nếu có)</th>
-        </tr>
-        <tr>
-            <th>Tên chương trình</th>
-            <td>{{ optional($history->payment->promotion)->title ?? 'Không áp dụng' }}</td>
-        </tr>
-        <tr>
-            <th>Giảm giá (%)</th>
-            <td>{{ optional($history->payment->promotion)->discount_percentage ?? 0 }}%</td>
-        </tr>
+            <!-- Khuyến mãi -->
+            <h5 class="text-secondary border-bottom pb-2 mt-4 mb-3">🎁 Khuyến mãi (nếu có)</h5>
+            <div class="row mb-2">
+                <div class="col-md-6"><strong>Tên chương trình:</strong> {{ optional($history->payment->promotion)->title ?? 'Không áp dụng' }}</div>
+                <div class="col-md-6"><strong>Giảm giá:</strong> {{ optional($history->payment->promotion)->discount_percentage ?? 0 }}%</div>
+            </div>
+        </div>
+    </div>
 
-    </table>
-
-    <a href="{{ route('admin.payment_histories.index') }}" class="btn btn-secondary">← Quay lại danh sách</a>
+    <!-- Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="{{ route('admin.payment_histories.index') }}" class="btn btn-secondary">
+            ← Quay lại danh sách
+        </a>
+        <a href="{{ route('admin.payment_histories.exportDetailPdf', $history->id) }}" class="btn btn-danger">
+            <i class="bi bi-file-earmark-pdf"></i> Xuất PDF
+        </a>
+    </div>
+</div>
 @endsection
