@@ -16,9 +16,8 @@ class RolePermissionSeeder extends Seeder
 
 
         if ($role) {
-            $permissionIds = range(1, 57); // tạo mảng từ 1 đến 52
+            $permissionIds = range(1, 61); // tạo mảng từ 1 đến 52
             $role->permissions()->sync($permissionIds);
         }
     }
 }
-

@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Foundation\Inspiring;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Console\Scheduling\Schedule;
 
 app()->booted(function () {
@@ -13,4 +15,12 @@ app()->booted(function () {
 
     // Chạy snapshot mỗi năm (1/1 lúc 01:30)
     $schedule->command('snapshot:statistics yearly')->yearlyOn(1, 1, '01:30');
+
+    // ✅ Di chuyển lệnh này vào đây
+    $schedule->command('notifications:send-scheduled')->everyMinute();
 });
+
+// Lệnh CLI
+Artisan::command('inspire', function () {
+    $this->comment(Inspiring::quote());
+})->purpose('Display an inspiring quote');
