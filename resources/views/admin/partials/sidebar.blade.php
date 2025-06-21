@@ -1,5 +1,4 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-
   <div class="app-brand demo">
     <a href="index.html" class="app-brand-link">
       <span class="app-brand-logo demo">
@@ -12,7 +11,6 @@
   <div class="menu-inner-shadow"></div>
 
   <ul class="menu-inner py-1">
-
     <!-- Quản lý hệ thống -->
     <li class="menu-header small text-uppercase"><span class="menu-header-text">Quản lý hệ thống</span></li>
 
@@ -40,7 +38,7 @@
       </ul>
     </li>
 
-    <!-- Quản lý bác sĩ & phòng ban -->
+    <!-- Bác sĩ & phòng ban -->
     <li class="menu-header small text-uppercase"><span class="menu-header-text">Bác sĩ & phòng ban</span></li>
 
     <li class="menu-item">
@@ -71,7 +69,7 @@
       </ul>
     </li>
 
-    <!-- Quản lý lịch -->
+    <!-- Lịch hẹn & làm việc -->
     <li class="menu-header small text-uppercase"><span class="menu-header-text">Lịch hẹn & làm việc</span></li>
 
     <li class="menu-item">
@@ -135,8 +133,8 @@
 
     <li class="menu-item">
       <a href="{{ route('admin.payment_histories.index') }}" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bx-wallet"></i>
-        <div>Thanh toán</div>
+        <i class="menu-icon tf-icons bx bx-credit-card"></i>
+        <div>Lịch sử thanh toán</div>
       </a>
       <ul class="menu-sub">
         <li class="menu-item"><a href="{{ route('admin.payment_histories.index') }}" class="menu-link"><div>Danh sách</div></a></li>
@@ -176,20 +174,5 @@
         <div>Đăng xuất</div>
       </a>
     </li>
-  <li class="menu-item">
-    <a href="{{ route('admin.payment_histories.index') }}" class="menu-link menu-toggle">
-<i class="menu-icon tf-icons bx bx-credit-card"></i>
-      <div data-i18n="lịch sử thanh toán">lịch sử thanh toán</div>
-    </a>
-    <ul class="menu-sub">
-      <li class="menu-item">
-        <a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
-          <div data-i18n="List">List</div>
-        </a>
-      </li>
-    </ul>
-  </li>
-
   </ul>
-
 </aside>
