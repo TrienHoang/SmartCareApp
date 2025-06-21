@@ -31,17 +31,29 @@ class OrderController extends Controller
     {
         $request->validate(['status' => 'required|in:pending,paid,completed,cancelled']);
 
-        if ($order->status === 'completed' && $request->status === 'cancelled') {
-            return back()->with('error', 'Không thể huỷ đơn đã hoàn tất.');
+        $current = $order->status;
+        $target = $request->status;
+
+        $allowedTransitions = [
+            'pending' => ['paid', 'cancelled'],
+            'paid' => ['completed', 'cancelled'],
+            'completed' => [],
+            'cancelled' => [],
+        ];
+
+        if (!in_array($target, $allowedTransitions[$current])) {
+            return back()->with('error', 'Chuyển trạng thái không hợp lệ!');
         }
 
         $order->update([
-            'status' => $request->status,
+            'status' => $target,
             'updated_at' => now(),
         ]);
 
         return back()->with('success', 'Cập nhật trạng thái thành công.');
     }
+
+
 
 
     public function exportPdf(Order $order)
