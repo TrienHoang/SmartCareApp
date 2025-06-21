@@ -11,12 +11,13 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        $role = Role::find(1); // lấy role_id = 1
+        // $role = Role::find(1); // lấy role_id = 1
+        $role = Role::where('name', 'admin')->first();
+
 
         if ($role) {
-            $permissionIds = range(1, 57); // tạo mảng từ 1 đến 52
+            $permissionIds = range(1, 61); // tạo mảng từ 1 đến 52
             $role->permissions()->sync($permissionIds);
         }
     }
 }
-

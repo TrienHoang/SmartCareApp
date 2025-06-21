@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Helpers\AppointmentHelper;
 use App\Http\Controllers\Controller;
@@ -13,6 +13,10 @@ use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\DoctorLeave;
 use App\Models\MedicalRecord;
+use App\Models\Order;
+use App\Models\OrderService;
+use App\Models\Payment;
+use App\Models\PaymentHistory;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\WorkingSchedule;
@@ -54,13 +58,31 @@ class AppointmentController extends Controller
         }
 
         // Lọc theo ngày
-        if ($request->filled('date_from')) {
-            $query->whereDate('appointment_time', '>=', $request->date_from);
+        $from_input = $request->date_from;
+        $to_input = $request->date_to;
+
+        if ($request->filled('date_from') || $request->filled('date_to')) {
+            $from = $request->filled('date_from') ? Carbon::parse($request->date_from)->startOfDay() : null;
+            $to = $request->filled('date_to') ? Carbon::parse($request->date_to)->endOfDay() : null;
+
+            if ($from && $to && $from->gt($to)) {
+                // Ghi nhận rằng ngày đã bị hoán đổi
+                session()->flash('date_swapped', true);
+
+                // Hoán đổi
+                [$from, $to] = [$to, $from];
+                [$from_input, $to_input] = [$to_input, $from_input];
+            }
+
+            if ($from && $to) {
+                $query->whereBetween('appointment_time', [$from, $to]);
+            } elseif ($from) {
+                $query->where('appointment_time', '>=', $from);
+            } elseif ($to) {
+                $query->where('appointment_time', '<=', $to);
+            }
         }
 
-        if ($request->filled('date_to')) {
-            $query->whereDate('appointment_time', '<=', $request->date_to);
-        }
 
         // Tìm kiếm theo tên bệnh nhân
         if ($request->filled('search')) {
@@ -98,7 +120,9 @@ class AppointmentController extends Controller
             'doctors',
             'departments',
             'services',
-            'stats'
+            'stats',
+            'from_input',
+            'to_input',
         ));
     }
 
@@ -198,7 +222,37 @@ class AppointmentController extends Controller
 
         $requestData['end_time'] = $endTime;
 
-        Appointment::create($requestData);
+        $appointment = Appointment::create($requestData);
+
+        // Tính giá
+        $service = Service::findOrFail($request->service_id);
+        $price = $service->price;
+
+        // Tạo đơn hàng
+        $order = Order::create([
+            'user_id' => $request->patient_id,
+            'appointment_id' => $appointment->id,
+            'total_amount' => $price,
+            'status' => 'pending',
+            'ordered_at' => now(),
+        ]);
+
+        // Gắn dịch vụ vào order_service
+        OrderService::create([
+            'order_id' => $order->id,
+            'service_id' => $service->id,
+            'quantity' => 1,
+            'price' => $price,
+        ]);
+
+        // Tạo payment
+        Payment::create([
+            'appointment_id' => $appointment->id,
+            'amount' => $price,
+            'status' => 'unpaid',
+        ]);
+
+        // Appointment::create($requestData);
 
         return redirect()->route('admin.appointments.index')->with('success', 'Tạo lịch hẹn thành công');
     }
@@ -216,8 +270,10 @@ class AppointmentController extends Controller
 
     public function update(UpdateAppointmentRequest $request, $id)
     {
+        // dd($request->all());
         $appointment = Appointment::findOrFail($id);
 
+        // Không được cập nhật lịch đã hoàn thành hoặc đã hủy
         if (in_array($appointment->status, ['completed', 'cancelled'])) {
             return redirect()->back()->withErrors([
                 'status' => 'Không thể cập nhật lịch hẹn đã hoàn thành hoặc đã hủy.'
@@ -228,6 +284,27 @@ class AppointmentController extends Controller
         $dayOfWeek = $appointmentDate->format('l');
         $timeOnly = $appointmentDate->format('H:i');
         $day = $appointmentDate->format('Y-m-d');
+
+        // Nếu không phải cập nhật sang completed mà thời gian hẹn là quá khứ thì không cho phép
+        if (
+            !in_array($request->status, ['confirmed', 'completed', 'cancelled']) &&
+            $appointmentDate->isPast()
+        ) {
+            return back()->withErrors([
+                'appointment_time' => 'Không thể đặt hoặc cập nhật lịch hẹn về thời gian trong quá khứ.'
+            ])->withInput();
+        }
+
+        // Nếu chuyển sang completed thì thời gian hẹn phải không ở tương lai
+        if (
+            $appointment->status !== 'completed' &&
+            $request->status === 'completed' &&
+            $appointmentDate->isFuture()
+        ) {
+            return back()->withErrors([
+                'appointment_time' => 'Không thể hoàn thành lịch hẹn khi thời gian hẹn vẫn còn ở tương lai.'
+            ])->withInput();
+        }
 
         // Kiểm tra trùng lịch
         $conflict = AppointmentHelper::isConflict(
@@ -249,6 +326,7 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
+        // Kiểm tra lịch làm việc
         $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
             ->whereDate('day', $day)
             ->first();
@@ -279,26 +357,23 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
+        // Kiểm tra bác sĩ có nghỉ phép không
         $onLeave = DoctorLeave::where('doctor_id', $request->doctor_id)
             ->where('start_date', '<=', $appointmentDate)
             ->where('end_date', '>=', $appointmentDate)
             ->where('approved', true)
             ->exists();
+
         if ($onLeave) {
             return back()->withErrors([
                 'appointment_time' => 'Bác sĩ đang trong thời gian nghỉ phép vào ngày bạn chọn. Vui lòng chọn ngày khác.'
             ])->withInput();
         }
 
-        if ($request->status === 'completed') {
-            $today = Carbon::today();
-            if ($appointmentDate->gt($today)) {
-                return back()->with('error', 'Chỉ có thể hoàn thành lịch hẹn trong ngày hôm nay hoặc trước đó.');
-            }
-        }
-
+        // Tính thời gian kết thúc (30 phút mặc định)
         $endTime = $appointmentDate->copy()->addMinutes(30);
 
+        // Chuẩn bị dữ liệu cập nhật
         $requestData = $request->only([
             'doctor_id',
             'service_id',
@@ -308,12 +383,13 @@ class AppointmentController extends Controller
         ]);
         $requestData['end_time'] = $endTime;
 
+        // Ghi nhận thay đổi
         $changes = [];
 
         if ($appointment->appointment_time != $request->appointment_time) {
             $changes[] = 'Thay đổi thời gian khám từ ' .
                 optional($appointment->appointment_time)->format('d/m/Y H:i') . ' sang ' .
-                Carbon::parse($request->appointment_time)->format('d/m/Y H:i');
+                $appointmentDate->format('d/m/Y H:i');
         }
 
         if ($appointment->doctor_id != $request->doctor_id) {
@@ -328,8 +404,10 @@ class AppointmentController extends Controller
             $changes[] = 'Thay đổi dịch vụ từ ' . $oldService . ' sang ' . $newService;
         }
 
+        // Thực hiện cập nhật
         $appointment->update($requestData);
 
+        // Ghi log nếu có thay đổi
         if (!empty($changes)) {
             AppointmentLog::create([
                 'appointment_id' => $appointment->id,
@@ -368,20 +446,24 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
         $oldStatus = $appointment->status;
+        $appointmentDate = Carbon::parse($appointment->appointment_time);
 
-        if ($request->status === 'completed') {
-            $appointmentDate = Carbon::parse($appointment->appointment_time)->startOfDay();
-            $today = Carbon::today();
-
-            if ($appointmentDate->gt($today)) {
-                return redirect()->back()->with('error', 'Chỉ có thể hoàn thành lịch hẹn trong ngày hôm nay hoặc ngày trước đó.');
-            }
+        // Kiểm tra nếu cập nhật sang 'completed' thì không được để thời gian hẹn ở tương lai
+        if (
+            $request->status === 'completed' &&
+            $appointmentDate->isFuture()
+        ) {
+            return redirect()->back()->withErrors([
+                'status' => 'Không thể hoàn thành lịch hẹn khi thời gian hẹn vẫn còn ở tương lai.'
+            ]);
         }
+        // Cập nhật trạng thái và lý do hủy nếu có
         $appointment->update([
             'status' => $request->status,
             'cancel_reason' => $request->status === 'cancelled' ? $request->note : null
         ]);
 
+        // Ghi log thay đổi trạng thái
         $appointment->logs()->create([
             'changed_by' => auth()->id(),
             'status_before' => $oldStatus,
@@ -390,14 +472,14 @@ class AppointmentController extends Controller
             'note' => $request->note
         ]);
 
+        // Tự động tạo hồ sơ bệnh án nếu hoàn thành mà chưa có
         if ($request->status === 'completed') {
-            $existing = MedicalRecord::where('appointment_id', $appointment->id)->first();
+            $existing = MedicalRecord::where('appointment_id', $appointment->id)->exists();
 
             if (!$existing) {
                 MedicalRecord::create([
                     'appointment_id' => $appointment->id,
                     'code' => 'MR' . now()->format('YmdHis') . $appointment->id,
-                    'created_at' => now(),
                 ]);
             }
         }
@@ -412,12 +494,48 @@ class AppointmentController extends Controller
 
         $patients = User::where('role_id', 3)
             ->when($query, function ($q) use ($query) {
-                $q->where('full_name', 'like', "%$query%");
+                $q->where(function ($sub) use ($query) {
+                    $sub->where('full_name', 'like', "%$query%")
+                        ->orWhere('phone', 'like', "%$query%")
+                        ->orWhere('email', 'like', "%$query%");
+                });
             })
-            ->select('id', 'full_name')
+            ->select('id', 'full_name', 'phone', 'email')
             ->limit(10)
             ->get();
 
         return response()->json($patients);
+    }
+
+    public function pay($id)
+    {
+        $appointment = Appointment::with(['payment', 'order'])->findOrFail($id);
+        $payment = $appointment->payment;
+
+        if (!$payment || $payment->status === 'paid') {
+            return back()->with('error', 'Lịch hẹn đã được thanh toán hoặc không tồn tại thanh toán.');
+        }
+
+        // 1. Cập nhật thanh toán
+        $payment->update([
+            'status' => 'paid',
+            'payment_method' => 'cash',
+            'paid_at' => now(),
+        ]);
+
+        // 2. Lưu lịch sử
+        PaymentHistory::create([
+            'payment_id'     => $payment->id,
+            'amount'         => $payment->amount,
+            'payment_method' => 'cash',
+            'payment_date'   => now(),
+        ]);
+
+        // 3. Cập nhật đơn hàng nếu tồn tại
+        if ($appointment->order) {
+            $appointment->order->update(['status' => 'paid']);
+        }
+
+        return back()->with('success', 'Thanh toán thành công!');
     }
 }

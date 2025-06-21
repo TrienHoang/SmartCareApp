@@ -1,90 +1,146 @@
 @extends('admin.dashboard')
-@section('title', 'Danh sách ngày nghỉ của bác sĩ')
+@section('title', 'Quản lý ngày nghỉ bác sĩ')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    {{-- Breadcrumb --}}
-    <div class="mb-4">
-        <h4 class="fw-bold">
-            <span class="text-muted fw-light">Quản lý bác sĩ /</span> Ngày nghỉ
-        </h4>
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+
+    <!-- Tiêu đề + Tìm kiếm -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+            <h4 class="mb-3 mb-md-0 d-flex align-items-center">
+                <i data-feather="calendar" class="me-2 text-primary"></i> Danh sách ngày nghỉ bác sĩ
+            </h4>
+            <form action="{{ route('admin.doctor_leaves.index') }}" method="GET" class="d-flex" style="max-width: 350px;">
+                <input type="text" name="keyword" class="form-control me-2" placeholder="Tìm bác sĩ..." value="{{ request('keyword') }}">
+                <button class="btn btn-outline-primary"><i data-feather="search"></i></button>
+            </form>
+        </div>
     </div>
 
-    {{-- Card chứa danh sách --}}
+    <!-- Flash messages (fallback) -->
+    @foreach (['success', 'error', 'info'] as $msg)
+        @if (session($msg))
+            <div class="alert alert-{{ $msg == 'error' ? 'danger' : $msg }} alert-dismissible fade show" role="alert">
+                {{ session($msg) }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+    @endforeach
+
+    <!-- Danh sách ngày nghỉ -->
     <div class="card shadow-sm">
-        <div class="card-body">
-
-            {{-- Tiêu đề và tìm kiếm --}}
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
-                <h5 class="card-title mb-2 mb-md-0">Danh sách ngày nghỉ của bác sĩ</h5>
-                <form action="{{ route('admin.doctor_leaves.index') }}" method="GET" class="d-flex w-100 w-md-auto" style="max-width: 300px;">
-                    <input type="text" name="keyword" class="form-control me-2" placeholder="Tìm bác sĩ..."
-                        value="{{ request('keyword') }}">
-                    <button class="btn btn-outline-primary" type="submit">Tìm</button>
-                </form>
-            </div>
-
-            {{-- Thông báo flash --}}
-            @foreach (['success', 'error', 'info'] as $msg)
-                @if (session($msg))
-                    <div class="alert alert-{{ $msg == 'error' ? 'danger' : $msg }} alert-dismissible fade show" role="alert">
-                        {{ session($msg) }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-            @endforeach
-
-            {{-- Bảng danh sách --}}
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Tên bác sĩ</th>
-                            <th class="text-center">Bắt đầu</th>
-                            <th class="text-center">Kết thúc</th>
-                            <th class="text-center d-none d-lg-table-cell">Ngày tạo</th>
-                            <th class="d-none d-lg-table-cell">Lý do</th>
-                            <th class="text-center">Trạng thái</th>
-                            <th class="text-center">Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($doctorLeaves as $leave)
+        <div class="card-body p-0">
+            @if($doctorLeaves->isEmpty())
+                <div class="text-center text-muted py-5">
+                    <i data-feather="info" class="mb-2"></i>
+                    <p class="mb-0">Không có dữ liệu ngày nghỉ nào.</p>
+                </div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-center">
                             <tr>
-                                <td>{{ $leave->doctor->user->full_name ?? 'Không rõ' }}</td>
-                                <td class="text-center">{{ \Carbon\Carbon::parse($leave->start_date)->format('d/m/Y') }}</td>
-                                <td class="text-center">{{ \Carbon\Carbon::parse($leave->end_date)->format('d/m/Y') }}</td>
-                                <td class="text-center d-none d-lg-table-cell">
-                                    {{ \Carbon\Carbon::parse($leave->created_at)->format('H:i d/m/Y') }}
-                                </td>
-                                <td class="d-none d-lg-table-cell text-truncate" style="max-width: 250px;">
-                                    {{ $leave->reason ?? 'Không có lý do' }}
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge rounded-pill {{ $leave->approved ? 'bg-success' : 'bg-warning text-dark' }}">
-                                        {{ $leave->approved ? 'Đã duyệt' : 'Chưa duyệt' }}
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <a href="{{ route('admin.doctor_leaves.edit', $leave->id) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="bx bx-edit-alt"></i> Sửa
-                                    </a>
-                                </td>
+                                <th>Bác sĩ</th>
+                                <th>Bắt đầu</th>
+                                <th>Kết thúc</th>
+                                <th class="d-none d-lg-table-cell">Ngày tạo</th>
+                                <th class="d-none d-lg-table-cell">Lý do</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="text-center text-muted py-4">Không có dữ liệu ngày nghỉ nào.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            @foreach($doctorLeaves as $leave)
+                                <tr>
+                                    <td>{{ $leave->doctor->user->full_name ?? 'Không rõ' }}</td>
+                                    <td class="text-center">{{ \Carbon\Carbon::parse($leave->start_date)->format('d/m/Y') }}</td>
+                                    <td class="text-center">{{ \Carbon\Carbon::parse($leave->end_date)->format('d/m/Y') }}</td>
+                                    <td class="d-none d-lg-table-cell text-center">{{ \Carbon\Carbon::parse($leave->created_at)->format('H:i d/m/Y') }}</td>
+                                    <td class="d-none d-lg-table-cell text-truncate" style="max-width: 250px;">
+                                        {{ $leave->reason ?? 'Không có lý do' }}
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge rounded-pill {{ $leave->approved ? 'bg-success' : 'bg-warning text-dark' }}">
+                                            {{ $leave->approved ? 'Đã duyệt' : 'Chưa duyệt' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                <a href="{{ route('admin.doctor_leaves.edit', $leave->id) }}" class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                                    <i class="bx bx-edit"></i>
+                                </a>
+                            </td>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
-            {{-- Phân trang --}}
-            <div class="mt-4 d-flex justify-content-center">
-                {{ $doctorLeaves->withQueryString()->links() }}
-            </div>
+                <!-- Pagination -->
+                <div class="px-3 py-3 border-top d-flex justify-content-center">
+                    {{ $doctorLeaves->withQueryString()->links('pagination::bootstrap-5') }}
+                </div>
+            @endif
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        feather.replace();
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (el) {
+            new bootstrap.Tooltip(el);
+        });
+
+        // Hiển thị Toast nếu có session thông báo
+        @if(session('success'))
+            showToast('success', '{{ session('success') }}');
+        @elseif(session('error'))
+            showToast('error', '{{ session('error') }}');
+        @elseif(session('info'))
+            showToast('info', '{{ session('info') }}');
+        @endif
+    });
+
+    // Hàm hiển thị Toast
+    function showToast(type, message) {
+        const iconMap = {
+            success: 'check-circle',
+            error: 'x-circle',
+            info: 'info'
+        };
+        const bgMap = {
+            success: 'bg-success',
+            error: 'bg-danger',
+            info: 'bg-info'
+        };
+
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white ${bgMap[type]} border-0 show`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i data-feather="${iconMap[type]}" class="me-2"></i>${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+
+        const container = document.createElement('div');
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.appendChild(toast);
+        document.body.appendChild(container);
+
+        feather.replace();
+
+        new bootstrap.Toast(toast, { delay: 4000 }).show();
+    }
+</script>
 @endsection

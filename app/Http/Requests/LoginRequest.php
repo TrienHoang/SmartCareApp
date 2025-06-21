@@ -47,11 +47,16 @@ class LoginRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
+            // Nếu CÓ bất kỳ lỗi nào => không làm gì cả
+            if ($validator->errors()->any()) {
+                return;
+            }
+
             $credentials = $this->only('username', 'password');
 
-            // Nếu validation cơ bản qua, thì check thử login
+            // Nếu đăng nhập sai → thêm lỗi vào 'auth'
             if (!Auth::attempt($credentials)) {
-                $validator->errors()->add('username', 'Sai tên đăng nhập hoặc mật khẩu');
+                $validator->errors()->add('auth', 'Sai tên đăng nhập hoặc mật khẩu');
             }
         });
     }
