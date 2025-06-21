@@ -10,11 +10,11 @@ class NotificationFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::inRandomOrder()->first()?->id ?? 1,
-            'title' => fake()->sentence(),
-            'message' => fake()->paragraph(),
-            'is_read' => fake()->boolean(),
-            'created_at' => now()
+            // 'user_id' => User::inRandomOrder()->first()?->id ?? 1,
+            // 'title' => fake()->sentence(),
+            // 'message' => fake()->paragraph(),
+            // 'is_read' => fake()->boolean(),
+            // 'created_at' => now()
         ];
     }
 }
