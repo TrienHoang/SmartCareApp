@@ -409,7 +409,7 @@
             const pass = document.getElementById('password');
             const error = document.getElementById('password-error');
 
-            if (pass.value.length < 66) {
+            if (pass.value.length < 6) {
                 pass.classList.add('input-error');
                 error.textContent = 'Mật khẩu phải có ít nhất 6 ký tự.';
                 error.style.display = 'block';

@@ -5,6 +5,11 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\FileUploadSeeder;
+use Database\Seeders\StatisticSeeder;
+use Database\Seeders\ReviewSeeder;
+
+
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,38 +18,48 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
+$this->call([
             RoleSeeder::class,
             PermissionSeeder::class,
             RolePermissionSeeder::class,
+
             UserSeeder::class,
             DepartmentSeeder::class,
             RoomSeeder::class,
+
             DoctorSeeder::class,
             WorkingScheduleSeeder::class,
             DoctorLeaveSeeder::class,
+
             ServiceCategorySeeder::class,
             ServiceSeeder::class,
-            AppointmentSeeder::class,
+
+            AppointmentSeeder::class,           // 👈 phải chạy trước log/statistics
             AppointmentLogSeeder::class,
+            StatisticSeeder::class,
+
             PromotionSeeder::class,
             PaymentSeeder::class,
             PaymentHistorySeeder::class,
+
             MedicineSeeder::class,
             MedicalRecordSeeder::class,
             PrescriptionSeeder::class,
             PrescriptionItemSeeder::class,
             TreatmentPlanSeeder::class,
             TreatmentHistorySeeder::class,
+
             FileUploadSeeder::class,
             UploadHistorySeeder::class,
+
             BlogSeeder::class,
             NotificationSeeder::class,
             FaqSeeder::class,
             OrderSeeder::class,
             // NotificationSeeder::class,
-            FaqSeeder::class,
+              FaqSeeder::class,
+            ReviewSeeder::class,
         ]);
-        $this->call(ReviewSeeder::class);
+        
     }
 }
