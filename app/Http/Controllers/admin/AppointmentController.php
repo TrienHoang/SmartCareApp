@@ -13,6 +13,10 @@ use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\DoctorLeave;
 use App\Models\MedicalRecord;
+use App\Models\Order;
+use App\Models\OrderService;
+use App\Models\Payment;
+use App\Models\PaymentHistory;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\WorkingSchedule;
@@ -218,7 +222,37 @@ class AppointmentController extends Controller
 
         $requestData['end_time'] = $endTime;
 
-        Appointment::create($requestData);
+        $appointment = Appointment::create($requestData);
+
+        // Tính giá
+        $service = Service::findOrFail($request->service_id);
+        $price = $service->price;
+
+        // Tạo đơn hàng
+        $order = Order::create([
+            'user_id' => $request->patient_id,
+            'appointment_id' => $appointment->id,
+            'total_amount' => $price,
+            'status' => 'pending',
+            'ordered_at' => now(),
+        ]);
+
+        // Gắn dịch vụ vào order_service
+        OrderService::create([
+            'order_id' => $order->id,
+            'service_id' => $service->id,
+            'quantity' => 1,
+            'price' => $price,
+        ]);
+
+        // Tạo payment
+        Payment::create([
+            'appointment_id' => $appointment->id,
+            'amount' => $price,
+            'status' => 'unpaid',
+        ]);
+
+        // Appointment::create($requestData);
 
         return redirect()->route('admin.appointments.index')->with('success', 'Tạo lịch hẹn thành công');
     }
@@ -471,5 +505,37 @@ class AppointmentController extends Controller
             ->get();
 
         return response()->json($patients);
+    }
+
+    public function pay($id)
+    {
+        $appointment = Appointment::with(['payment', 'order'])->findOrFail($id);
+        $payment = $appointment->payment;
+
+        if (!$payment || $payment->status === 'paid') {
+            return back()->with('error', 'Lịch hẹn đã được thanh toán hoặc không tồn tại thanh toán.');
+        }
+
+        // 1. Cập nhật thanh toán
+        $payment->update([
+            'status' => 'paid',
+            'payment_method' => 'cash',
+            'paid_at' => now(),
+        ]);
+
+        // 2. Lưu lịch sử
+        PaymentHistory::create([
+            'payment_id'     => $payment->id,
+            'amount'         => $payment->amount,
+            'payment_method' => 'cash',
+            'payment_date'   => now(),
+        ]);
+
+        // 3. Cập nhật đơn hàng nếu tồn tại
+        if ($appointment->order) {
+            $appointment->order->update(['status' => 'paid']);
+        }
+
+        return back()->with('success', 'Thanh toán thành công!');
     }
 }

@@ -185,6 +185,7 @@
                                 </a>
                             </th>
                             <th>Trạng thái</th>
+                            <th>Thanh toán</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
@@ -265,6 +266,13 @@
                                     </span>
                                 </td>
                                 <td>
+                                    @if ($appointment->payment && $appointment->payment->status === 'paid')
+                                        <span class="badge bg-success">Đã thanh toán</span>
+                                    @else
+                                        <span class="badge bg-danger">Chưa thanh toán</span>
+                                    @endif
+                                </td>
+                                <td>
                                     <div class="table-actions">
                                         <a href="{{ route('admin.appointments.show', $appointment->id) }}"
                                             class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
@@ -277,6 +285,15 @@
                                                 <i class="bx bx-edit"></i>
                                             </a>
                                         @endif
+                                        @if ($appointment->payment && $appointment->payment->status !== 'paid')
+                                            <form action="{{ route('admin.appointments.pay', $appointment->id) }}"
+                                                method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-success">Thanh
+                                                    toán</button>
+                                            </form>
+                                        @endif
+
                                         @if ($appointment->status === 'confirmed')
                                             <button class="btn btn-sm btn-outline-success"
                                                 onclick="updateStatus({{ $appointment->id }}, 'completed')"
