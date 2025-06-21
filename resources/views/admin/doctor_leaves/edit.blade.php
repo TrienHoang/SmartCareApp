@@ -42,7 +42,7 @@
 
                             <div class="mb-4">
                                 <label for="approved" class="form-label fw-semibold">Trạng thái duyệt:</label>
-                                <select id="approved" name="approved" class="form-select" required>
+                                <select id="approved" name="approved" class="form-select" >
                                     <option value="0" {{ $leave->approved == 0 ? 'selected' : '' }}>Chưa duyệt</option>
                                     <option value="1" {{ $leave->approved == 1 ? 'selected' : '' }}>Đã duyệt</option>
                                 </select>

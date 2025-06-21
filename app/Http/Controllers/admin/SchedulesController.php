@@ -43,7 +43,19 @@ class SchedulesController extends Controller
             'day_of_week' => 'required|string|max:255',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
+        ], [
+            'doctor_id.required' => 'Vui lòng chọn bác sĩ.',
+            'doctor_id.exists' => 'Bác sĩ không tồn tại.',
+            'day.required' => 'Vui lòng chọn ngày làm việc.',
+            'day.date' => 'Ngày không hợp lệ.',
+            'day_of_week.required' => 'Vui lòng chọn thứ.',
+            'start_time.required' => 'Vui lòng nhập giờ bắt đầu.',
+            'start_time.date_format' => 'Định dạng giờ bắt đầu không hợp lệ (HH:mm).',
+            'end_time.required' => 'Vui lòng nhập giờ kết thúc.',
+            'end_time.date_format' => 'Định dạng giờ kết thúc không hợp lệ (HH:mm).',
+            'end_time.after' => 'Giờ kết thúc phải sau giờ bắt đầu.',
         ]);
+
 
         WorkingSchedule::create($request->all());
         return redirect()->route('admin.schedules.index')->with('success', 'Schedule created successfully.');
@@ -64,6 +76,17 @@ class SchedulesController extends Controller
             'day_of_week' => 'required|string|max:255',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
+        ], [
+            'doctor_id.required' => 'Vui lòng chọn bác sĩ.',
+            'doctor_id.exists' => 'Bác sĩ không tồn tại.',
+            'day.required' => 'Vui lòng chọn ngày làm việc.',
+            'day.date' => 'Ngày không hợp lệ.',
+            'day_of_week.required' => 'Vui lòng chọn thứ.',
+            'start_time.required' => 'Vui lòng nhập giờ bắt đầu.',
+            'start_time.date_format' => 'Định dạng giờ bắt đầu không hợp lệ (HH:mm).',
+            'end_time.required' => 'Vui lòng nhập giờ kết thúc.',
+            'end_time.date_format' => 'Định dạng giờ kết thúc không hợp lệ (HH:mm).',
+            'end_time.after' => 'Giờ kết thúc phải sau giờ bắt đầu.',
         ]);
 
         $schedule = WorkingSchedule::findOrFail($id);

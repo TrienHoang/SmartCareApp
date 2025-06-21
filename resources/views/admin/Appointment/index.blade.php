@@ -99,12 +99,14 @@
 
                 <div class="col-md-2">
                     <label class="form-label">Từ ngày</label>
-                    <input type="date" class="form-control" name="date_from" value="{{ request('date_from') }}">
+                    <input type="date" class="form-control" name="date_from"
+                        value="{{ old('date_from', $from_input ?? request('date_from')) }}">
                 </div>
 
                 <div class="col-md-2">
                     <label class="form-label">Đến ngày</label>
-                    <input type="date" class="form-control" name="date_to" value="{{ request('date_to') }}">
+                    <input type="date" class="form-control" name="date_to"
+                        value="{{ old('date_to', $to_input ?? request('date_to')) }}">
                 </div>
 
                 <div class="col-md-12">
@@ -129,6 +131,12 @@
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="bx bx-error-circle"></i> {{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @if (session('date_swapped'))
+            <div class="alert alert-warning mt-2">
+                Ngày bắt đầu lớn hơn ngày kết thúc. Hệ thống đã tự động hoán đổi giúp bạn.
             </div>
         @endif
 
@@ -177,6 +185,7 @@
                                 </a>
                             </th>
                             <th>Trạng thái</th>
+                            <th>Thanh toán</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
@@ -216,8 +225,9 @@
                                     <div class="d-flex flex-column">
                                         <span>{{ $appointment->formatted_time }}</span>
                                         @php
-                                            $endTime = \Carbon\Carbon::parse($appointment->appointment_time)
-                                                ->addMinutes($appointment->service->duration ?? 30);
+                                            $endTime = \Carbon\Carbon::parse(
+                                                $appointment->appointment_time,
+                                            )->addMinutes($appointment->service->duration ?? 30);
                                         @endphp
                                         <small class="text-muted">
                                             {{ $endTime->format('H:i') }} (Dự kiến)
@@ -256,6 +266,13 @@
                                     </span>
                                 </td>
                                 <td>
+                                    @if ($appointment->payment && $appointment->payment->status === 'paid')
+                                        <span class="badge bg-success">Đã thanh toán</span>
+                                    @else
+                                        <span class="badge bg-danger">Chưa thanh toán</span>
+                                    @endif
+                                </td>
+                                <td>
                                     <div class="table-actions">
                                         <a href="{{ route('admin.appointments.show', $appointment->id) }}"
                                             class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
@@ -268,6 +285,15 @@
                                                 <i class="bx bx-edit"></i>
                                             </a>
                                         @endif
+                                        @if ($appointment->payment && $appointment->payment->status !== 'paid')
+                                            <form action="{{ route('admin.appointments.pay', $appointment->id) }}"
+                                                method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-success">Thanh
+                                                    toán</button>
+                                            </form>
+                                        @endif
+
                                         @if ($appointment->status === 'confirmed')
                                             <button class="btn btn-sm btn-outline-success"
                                                 onclick="updateStatus({{ $appointment->id }}, 'completed')"

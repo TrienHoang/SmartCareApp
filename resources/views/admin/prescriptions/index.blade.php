@@ -33,14 +33,14 @@
                                     <div class="form-group">
                                         <label>Từ ngày</label>
                                         <input type="date" name="date_from" class="form-control"
-                                            value="{{ request('date_from') }}">
+                                            value="{{ old('date_from', $from_input ?? request('date_from')) }}">
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label>Đến ngày</label>
                                         <input type="date" name="date_to" class="form-control"
-                                            value="{{ request('date_to') }}">
+                                            value="{{ old('date_to', $to_input ?? request('date_to')) }}">
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -116,6 +116,14 @@
                             </div>
                         @endif
 
+                        @if (session('date_swapped'))
+                            <div class="col-12">
+                                <div class="alert alert-warning mt-2">
+                                    Ngày bắt đầu lớn hơn ngày kết thúc. Hệ thống đã tự động hoán đổi giúp bạn.
+                                </div>
+                            </div>
+                        @endif
+
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped">
                                 <thead>
@@ -132,7 +140,8 @@
                                 <tbody>
                                     @forelse($prescriptions as $prescription)
                                         <tr>
-                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ ($prescriptions->currentPage() - 1) * $prescriptions->perPage() + $loop->iteration }}
+                                            </td>
                                             <td>
                                                 <strong>{{ $prescription->medicalRecord->appointment->patient->full_name }}</strong><br>
                                                 <small
@@ -164,8 +173,8 @@
                                                         onsubmit="return confirm('Bạn có chắc chắn muốn xóa mềm đơn thuốc này không?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger"
-                                                            title="Xóa đơn thuốc" style="width: 20px">
+                                                        <button type="submit" class="btn btn-danger" title="Xóa đơn thuốc"
+                                                            style="width: 20px">
                                                             <i class="fas fa-trash-alt"></i>
                                                         </button>
                                                     </form>

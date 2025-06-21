@@ -60,6 +60,20 @@ class VoucherController extends Controller
             'quantity' => 'required|integer|min:1',
             'min_price' => 'required|numeric|min:0',
             'description' => 'nullable|string'
+        ], [
+            'code.required' => 'Mã voucher là bắt buộc.',
+            'code.unique' => 'Mã voucher đã tồn tại.',
+            'discount.required' => 'Giảm giá là bắt buộc.',
+            'discount.numeric' => 'Giảm giá phải là số.',
+            'discount.min' => 'Giảm giá không được nhỏ hơn 0.',
+            'discount.max' => 'Giảm giá không được lớn hơn 100.',
+            'quantity.required' => 'Số lượng là bắt buộc.',
+            'quantity.integer' => 'Số lượng phải là số nguyên.',
+            'quantity.min' => 'Số lượng phải lớn hơn hoặc bằng 1.',
+            'min_price.required' => 'Giá tối thiểu là bắt buộc.',
+            'min_price.numeric' => 'Giá tối thiểu phải là số.',
+            'min_price.min' => 'Giá tối thiểu không được nhỏ hơn 0.',
+            'description.string' => 'Mô tả phải là chuỗi ký tự.'
         ]);
 
         Voucher::create($request->all());
@@ -86,6 +100,20 @@ class VoucherController extends Controller
             'quantity' => 'required|integer|min:1',
             'min_price' => 'required|numeric|min:0',
             'description' => 'nullable|string'
+        ], [
+            'code.required' => 'Mã voucher là bắt buộc.',
+            'code.unique' => 'Mã voucher đã tồn tại.',
+            'discount.required' => 'Giảm giá là bắt buộc.',
+            'discount.numeric' => 'Giảm giá phải là số.',
+            'discount.min' => 'Giảm giá không được nhỏ hơn 0.',
+            'discount.max' => 'Giảm giá không được lớn hơn 100.',
+            'quantity.required' => 'Số lượng là bắt buộc.',
+            'quantity.integer' => 'Số lượng phải là số nguyên.',
+            'quantity.min' => 'Số lượng phải lớn hơn hoặc bằng 1.',
+            'min_price.required' => 'Giá tối thiểu là bắt buộc.',
+            'min_price.numeric' => 'Giá tối thiểu phải là số.',
+            'min_price.min' => 'Giá tối thiểu không được nhỏ hơn 0.',
+            'description.string' => 'Mô tả phải là chuỗi ký tự.'
         ]);
 
         $voucher->update($request->all());

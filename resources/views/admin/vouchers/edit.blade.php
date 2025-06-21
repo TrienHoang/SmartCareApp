@@ -10,7 +10,7 @@
 
         <div class="mb-3">
             <label>Mã Voucher</label>
-            <input type="text" name="code" class="form-control @error('code') is-invalid @enderror" value="{{ old('code', $voucher->code) }}" required>
+            <input type="text" name="code" class="form-control @error('code') is-invalid @enderror" value="{{ old('code', $voucher->code) }}" >
             @error('code')
                 <small class="text-danger">{{ $message }}</small>
             @enderror
@@ -18,7 +18,7 @@
 
         <div class="mb-3">
             <label>Giảm giá (%)</label>
-            <input type="number" name="discount" class="form-control @error('discount') is-invalid @enderror" value="{{ old('discount', $voucher->discount) }}" min="0" required>
+            <input type="number" name="discount" class="form-control @error('discount') is-invalid @enderror" value="{{ old('discount', $voucher->discount) }}" min="0" >
             @error('discount')
                 <small class="text-danger">{{ $message }}</small>
             @enderror
@@ -26,7 +26,7 @@
 
         <div class="mb-3">
             <label>Số lượng</label>
-            <input type="number" name="quantity" class="form-control @error('quantity') is-invalid @enderror" value="{{ old('quantity', $voucher->quantity) }}" min="1" required>
+            <input type="number" name="quantity" class="form-control @error('quantity') is-invalid @enderror" value="{{ old('quantity', $voucher->quantity) }}" min="1" >
             @error('quantity')
                 <small class="text-danger">{{ $message }}</small>
             @enderror
@@ -34,7 +34,7 @@
 
         <div class="mb-3">
             <label>Giá tối thiểu (áp dụng)</label>
-            <input type="number" name="min_price" class="form-control @error('min_price') is-invalid @enderror" value="{{ old('min_price', $voucher->min_price) }}" min="0" required>
+            <input type="number" name="min_price" class="form-control @error('min_price') is-invalid @enderror" value="{{ old('min_price', $voucher->min_price) }}" min="0" >
             @error('min_price')
                 <small class="text-danger">{{ $message }}</small>
             @enderror

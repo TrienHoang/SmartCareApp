@@ -74,7 +74,7 @@
                                             @foreach ($medicines as $med)
                                                 <option value="{{ $med->id }}"
                                                     {{ $item['medicine_id'] == $med->id ? 'selected' : '' }}>
-                                                    {{ $med->name }} ({{ $med->unit }}) - {{ $med->formatted_price }} – Còn: {{ $med->stock }}
+                                                    {{ $med->name }} ({{ $med->unit }}) - {{ $med->formatted_price }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -110,8 +110,7 @@
                                             @foreach ($medicines as $med)
                                                 <option value="{{ $med->id }}"
                                                     {{ $item->medicine_id == $med->id ? 'selected' : '' }}>
-                                                    {{ $med->name }} ({{ $med->unit }}) - {{ $med->formatted_price }} – Còn: {{ $med->stock }}
-                                                    {{ $med->stock < 10 ? '⚠️ Cảnh báo: gần hết' : '' }}
+                                                    {{ $med->name }} ({{ $med->unit }}) - {{ $med->formatted_price }}
                                                 </option>
                                             @endforeach
                                         </select>

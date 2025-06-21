@@ -237,6 +237,9 @@ Route::group([
 
         Route::get('/patients/search', [AppointmentController::class, 'searchPatients'])
             ->middleware('check_permission:view_appointments')->name('patients.search');
+
+        Route::post('/{id}/pay', [AppointmentController::class, 'pay'])
+            ->middleware('check_permission:edit_appointments')->name('pay');
     });
     // quản lý đơn thuốc
     Route::group([
