@@ -3,77 +3,89 @@
 @section('title', 'Chi tiết người dùng')
 
 @section('content')
-<div class="container py-4">
-    <div class="card shadow">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5>Chi tiết người dùng</h5>
-            <a href="{{ route('admin.users.index') }}" class="btn btn-sm btn-secondary">Quay lại danh sách</a>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <!-- Avatar -->
-                <div class="col-md-3 text-center">
-                    @if($user->avatar)
-                        <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-                    @else
-                        <div class="text-muted">Chưa có ảnh</div>
-                    @endif
+<div class="container py-5 animate__animated animate__fadeIn">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bx bx-user me-2"></i> Thông tin người dùng</h5>
+                    <a href="{{ route('admin.users.index') }}" class="btn btn-light btn-sm">
+                        <i class="bx bx-arrow-back"></i> Quay lại
+                    </a>
                 </div>
 
-                <!-- Thông tin -->
-                <div class="col-md-9">
-                    <table class="table table-bordered">
-                        <tr>
-                            <th>ID</th>
-                            <td>{{ $user->id }}</td>
-                        </tr>
-                        <tr>
-                            <th>Username</th>
-                            <td>{{ $user->username }}</td>
-                        </tr>
-                        <tr>
-                            <th>Họ tên</th>
-                            <td>{{ $user->full_name }}</td>
-                        </tr>
-                        <tr>
-                            <th>Email</th>
-                            <td>{{ $user->email }}</td>
-                        </tr>
-                        <tr>
-                            <th>Điện thoại</th>
-                            <td>{{ $user->phone }}</td>
-                        </tr>
-                        <tr>
-                            <th>Giới tính</th>
-                            <td>
-                                @if($user->gender === 'male') Nam
-                                @elseif($user->gender === 'female') Nữ
-                                @else Khác
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Ngày sinh</th>
-                            <td>{{ \Carbon\Carbon::parse($user->date_of_birth)->format('d/m/Y') }}</td>
-                        </tr>
-                        <tr>
-                            <th>Địa chỉ</th>
-                            <td>{{ $user->address }}</td>
-                        </tr>
-                        <tr>
-                            <th>Vai trò</th>
-                            <td>{{ $user->role->name ?? 'Chưa phân quyền' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Ngày tạo</th>
-                            <td>{{ $user->created_at->format('d/m/Y H:i') }}</td>
-                        </tr>
-                        <tr>
-                            <th>Cập nhật</th>
-                            <td>{{ $user->updated_at->format('d/m/Y H:i') }}</td>
-                        </tr>
-                    </table>
-                </div>
+                <div class="card-body px-4 py-5">
+                    <div class="row g-4">
+                        <!-- Avatar và Tên -->
+                        <div class="col-md-4 d-flex flex-column align-items-center">
+                            @if($user->avatar)
+                                <img src="{{ asset('storage/' . $user->avatar) }}"
+                                     class="rounded-circle border border-3 border-primary shadow-sm mb-3"
+                                     style="width: 160px; height: 160px; object-fit: cover;" alt="Avatar">
+                            @else
+                                <div class="rounded-circle bg-light border d-flex justify-content-center align-items-center mb-3"
+                                     style="width: 160px; height: 160px;">
+                                    <i class="bx bx-user text-muted fs-1"></i>
+                                </div>
+                                <p class="text-muted">Chưa có ảnh</p>
+                            @endif
+
+                            <h5 class="fw-bold text-center mt-2 mb-1">{{ $user->full_name }}</h5>
+                            <span class="text-muted text-center">{{ $user->role->name ?? 'Chưa phân quyền' }}</span>
+                        </div>
+
+                        <!-- Thông tin -->
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Tên đăng nhập</label>
+                                    <div class="form-control-plaintext">{{ $user->username }}</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Email</label>
+                                    <div class="form-control-plaintext">{{ $user->email }}</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Số điện thoại</label>
+                                    <div class="form-control-plaintext">{{ $user->phone }}</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Giới tính</label>
+                                    <div class="form-control-plaintext">
+                                        @switch($user->gender)
+                                            @case('male') Nam @break
+                                            @case('female') Nữ @break
+                                            @default Khác
+                                        @endswitch
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Ngày sinh</label>
+                                    <div class="form-control-plaintext">{{ \Carbon\Carbon::parse($user->date_of_birth)->format('d/m/Y') }}</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Địa chỉ</label>
+                                    <div class="form-control-plaintext">{{ $user->address }}</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Ngày tạo</label>
+                                    <div class="form-control-plaintext">{{ $user->created_at->format('d/m/Y H:i') }}</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Cập nhật lần cuối</label>
+                                    <div class="form-control-plaintext">{{ $user->updated_at->format('d/m/Y H:i') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- end card-body -->
             </div>
         </div>
     </div>

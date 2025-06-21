@@ -59,8 +59,8 @@
             @enderror
         </div>
 
-        <button type="submit" class="btn btn-primary">Create Schedule</button>
-        <a href="{{ route('admin.schedules.index') }}" class="btn btn-secondary">Back to Schedules</a>
+        <button type="submit" class="btn btn-primary">Tạo mới lịch làm việc</button>
+        <a href="{{ route('admin.schedules.index') }}" class="btn btn-secondary">Quay lại danh sách</a>
     </form>
 </div>
 @endsection
