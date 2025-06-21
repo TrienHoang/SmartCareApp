@@ -16,6 +16,7 @@ class RoleSeeder extends Seeder
             ['name' => 'nurse', 'description' => 'Healthcare provider with patient care access'],
             ['name' => 'Receptionist', 'description' => 'Front desk staff with appointment scheduling access'],
             ['name' => 'Pharmacist', 'description' => 'Responsible for medication dispensing and management'],
+            ['name' => 'patient', 'description' => 'Registered patient'],
         ]);
         // Role::factory()->count(5)->create();
     }

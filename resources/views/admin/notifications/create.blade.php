@@ -12,7 +12,7 @@
                         <h2 class="content-header-title float-left mb-0">Tạo Thông báo mới</h2>
                         <div class="breadcrumb-wrapper col-12">
                             <ol class="breadcrumb">
-                                <li class="me-1"><a href="{{ route('admin.dashboard') }}">Trang chủ ></a></li>
+                                <li class="me-1"><a href="{{ route('admin.dashboard.index') }}">Trang chủ ></a></li>
                                 <li class="me-1"><a href="{{ route('admin.notifications.index') }}">Thông báo ></a></li>
                                 <li class="breadcrumb-item active">Tạo mới</li>
                             </ol>
