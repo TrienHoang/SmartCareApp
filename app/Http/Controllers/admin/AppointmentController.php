@@ -54,13 +54,31 @@ class AppointmentController extends Controller
         }
 
         // Lọc theo ngày
-        if ($request->filled('date_from')) {
-            $query->whereDate('appointment_time', '>=', $request->date_from);
+        $from_input = $request->date_from;
+        $to_input = $request->date_to;
+
+        if ($request->filled('date_from') || $request->filled('date_to')) {
+            $from = $request->filled('date_from') ? Carbon::parse($request->date_from)->startOfDay() : null;
+            $to = $request->filled('date_to') ? Carbon::parse($request->date_to)->endOfDay() : null;
+
+            if ($from && $to && $from->gt($to)) {
+                // Ghi nhận rằng ngày đã bị hoán đổi
+                session()->flash('date_swapped', true);
+
+                // Hoán đổi
+                [$from, $to] = [$to, $from];
+                [$from_input, $to_input] = [$to_input, $from_input];
+            }
+
+            if ($from && $to) {
+                $query->whereBetween('appointment_time', [$from, $to]);
+            } elseif ($from) {
+                $query->where('appointment_time', '>=', $from);
+            } elseif ($to) {
+                $query->where('appointment_time', '<=', $to);
+            }
         }
 
-        if ($request->filled('date_to')) {
-            $query->whereDate('appointment_time', '<=', $request->date_to);
-        }
 
         // Tìm kiếm theo tên bệnh nhân
         if ($request->filled('search')) {
@@ -98,7 +116,9 @@ class AppointmentController extends Controller
             'doctors',
             'departments',
             'services',
-            'stats'
+            'stats',
+            'from_input',
+            'to_input',
         ));
     }
 
@@ -216,6 +236,7 @@ class AppointmentController extends Controller
 
     public function update(UpdateAppointmentRequest $request, $id)
     {
+        // dd($request->all());
         $appointment = Appointment::findOrFail($id);
 
         // Không được cập nhật lịch đã hoàn thành hoặc đã hủy
@@ -232,7 +253,7 @@ class AppointmentController extends Controller
 
         // Nếu không phải cập nhật sang completed mà thời gian hẹn là quá khứ thì không cho phép
         if (
-            !in_array($request->status, ['completed', 'cancelled']) &&
+            !in_array($request->status, ['confirmed', 'completed', 'cancelled']) &&
             $appointmentDate->isPast()
         ) {
             return back()->withErrors([

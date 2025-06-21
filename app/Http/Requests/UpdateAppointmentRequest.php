@@ -23,7 +23,7 @@ class UpdateAppointmentRequest extends FormRequest
         $status = $this->input('status') ?? null;
 
         // Nếu không phải completed hoặc cancelled → bắt after:now
-        if (!in_array($status, ['completed', 'cancelled'])) {
+        if (!in_array($status, ['confirmed', 'completed', 'cancelled'])) {
             $rules['appointment_time'][] = 'after:now';
         }
 

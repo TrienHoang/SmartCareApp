@@ -99,12 +99,14 @@
 
                 <div class="col-md-2">
                     <label class="form-label">Từ ngày</label>
-                    <input type="date" class="form-control" name="date_from" value="{{ request('date_from') }}">
+                    <input type="date" class="form-control" name="date_from"
+                        value="{{ old('date_from', $from_input ?? request('date_from')) }}">
                 </div>
 
                 <div class="col-md-2">
                     <label class="form-label">Đến ngày</label>
-                    <input type="date" class="form-control" name="date_to" value="{{ request('date_to') }}">
+                    <input type="date" class="form-control" name="date_to"
+                        value="{{ old('date_to', $to_input ?? request('date_to')) }}">
                 </div>
 
                 <div class="col-md-12">
@@ -129,6 +131,12 @@
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="bx bx-error-circle"></i> {{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @if (session('date_swapped'))
+            <div class="alert alert-warning mt-2">
+                Ngày bắt đầu lớn hơn ngày kết thúc. Hệ thống đã tự động hoán đổi giúp bạn.
             </div>
         @endif
 
@@ -216,8 +224,9 @@
                                     <div class="d-flex flex-column">
                                         <span>{{ $appointment->formatted_time }}</span>
                                         @php
-                                            $endTime = \Carbon\Carbon::parse($appointment->appointment_time)
-                                                ->addMinutes($appointment->service->duration ?? 30);
+                                            $endTime = \Carbon\Carbon::parse(
+                                                $appointment->appointment_time,
+                                            )->addMinutes($appointment->service->duration ?? 30);
                                         @endphp
                                         <small class="text-muted">
                                             {{ $endTime->format('H:i') }} (Dự kiến)
