@@ -4,8 +4,7 @@ function addMedicine() {
     let optionsHtml = '<option value="">-- Chọn thuốc --</option>';
     medicineOptions.forEach(med => {
         optionsHtml += `<option value="${med.id}">
-            ${med.name} (${med.unit}) - ${med.formatted_price} – Còn: ${med.stock}
-            ${med.stock < 10 ? '⚠️ Cảnh báo: gần hết' : ''}
+            ${med.name} (${med.unit}) - ${med.formatted_price}
         </option>`;
     });
 

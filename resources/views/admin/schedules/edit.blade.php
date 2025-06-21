@@ -24,7 +24,7 @@
 
         <div class="mb-3">
             <label for="day" class="form-label">Day</label>
-            <input type="date" class="form-control" id="day" name="day" value="{{ old('day', $schedule->day) }}">
+            <input type="date" class="form-control" id="day" name="day" value="{{ old('day', $schedule->day) }}" >
             @error('day')
                 <small class="text-danger">{{ $message }}</small>
             @enderror

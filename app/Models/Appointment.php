@@ -135,4 +135,7 @@ class Appointment extends Model
         return $query->whereMonth('appointment_time', Carbon::now()->month)
                     ->whereYear('appointment_time', Carbon::now()->year);
     }
+    public function order(){
+        return $this->hasOne(Order::class, 'appointment_id');
+    }
 }
