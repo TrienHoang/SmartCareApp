@@ -29,6 +29,19 @@ class User extends Authenticatable
 
     public $timestamps = true;
 
+    protected $casts = [
+        'date_of_birth' => 'date', // ✅ Giúp dùng format() trong view
+        'email_verified_at' => 'datetime',
+    ];
+
+    /**
+     * Ẩn các cột khi trả về JSON
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
     public function role()
     {
         return $this->belongsTo(Role::class);
