@@ -4,7 +4,7 @@
             <span class="app-brand-logo demo">
                 <!-- SVG logo giữ nguyên -->
             </span>
-            <span class="app-brand-text demo menu-text fw-bold ms-2">SmartCare</span>
+            <span class="app-brand-text demo menu-text fw-bold mt-3 ms-2">SmartCare</span>
         </a>
     </div>
 

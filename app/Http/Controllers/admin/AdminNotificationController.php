@@ -3,19 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Admin_notification; //
+use App\Models\Admin_notification; 
 use App\Models\Role;
-use App\Models\User; // Import Model User để lấy danh sách người nhận
-use App\Notifications\AdminPanelNotification; // Import Laravel Notification class
+use App\Models\User; 
+use App\Notifications\AdminPanelNotification; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log; // Dùng để ghi log lỗi
+use Illuminate\Support\Facades\Log; 
 
 
 class AdminNotificationController extends Controller
 {
     /**
-     * Display a listing of the resource.
      * Hiển thị danh sách các thông báo.
      */
     public function index(Request $request)
@@ -82,13 +81,13 @@ class AdminNotificationController extends Controller
             'type' => 'required|string|in:system,appointment_related,promotion,reminder,other',
             'recipient_type' => 'required|string|in:all,specific_users,roles',
             'recipient_ids' => 'nullable|array',
-            'scheduled_at' => 'nullable|date',
+            'recipient_ids.*' => 'integer',
+            'scheduled_at' => 'nullable|date|after_or_equal:now',
             'send_now_checkbox' => 'nullable|boolean',
         ]);
 
         try {
-            DB::beginTransaction(); // Bắt đầu transaction
-
+            DB::beginTransaction(); 
             $status = 'draft';
             $sentAt = null;
 
@@ -181,7 +180,8 @@ class AdminNotificationController extends Controller
             'type' => 'required|string|in:system,appointment_related,promotion,reminder,other',
             'recipient_type' => 'required|string|in:all,specific_users,roles',
             'recipient_ids' => 'nullable|array',
-            'scheduled_at' => 'nullable|date',
+            'recipient_ids.*' => 'integer',
+            'scheduled_at' => 'nullable|date|after_or_equal:now',
         ]);
 
         try {
@@ -270,10 +270,8 @@ class AdminNotificationController extends Controller
         } elseif ($adminNotification->recipient_type === 'specific_users' && !empty($recipientIds)) {
             $usersToNotify = User::whereIn('id', $recipientIds)->get();
         } elseif ($adminNotification->recipient_type === 'roles' && !empty($recipientIds)) {
-            // Giả sử bạn dùng Spatie Laravel Permission
-            $usersToNotify = User::role($recipientIds)->get(); // Cần cài Spatie
-            // Hoặc nếu dùng cột 'role' trong users:
-            // $usersToNotify = User::whereIn('role_id', $recipientIds)->get();
+            //dùng cột 'role' trong users:
+            $usersToNotify = User::whereIn('role_id', $recipientIds)->get();
         }
 
         if ($usersToNotify->isEmpty()) {
