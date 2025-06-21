@@ -21,7 +21,9 @@
             </button>
         </div>
     </form>
-
+    <a href="{{ route('admin.vouchers.create') }}" class="btn btn-success mb-4">
+        <i class="bx bx-plus"></i> Thêm mới
+    </a>
     <!-- Bảng danh sách voucher -->
     <div class="table-responsive">
         <table class="table table-bordered table-hover">
@@ -61,7 +63,7 @@
 
     <!-- Phân trang -->
     <div class="mt-3">
-        {{ $vouchers->links() }}
+        {{ $vouchers->links('pagination::bootstrap-5') }}
     </div>
 </div>
 @endsection
