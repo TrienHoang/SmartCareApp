@@ -10,14 +10,43 @@
             <h4 class="mb-3 mb-md-0 d-flex align-items-center">
                 <i data-feather="calendar" class="me-2 text-primary"></i> Danh sách ngày nghỉ bác sĩ
             </h4>
-            <form action="{{ route('admin.doctor_leaves.index') }}" method="GET" class="d-flex" style="max-width: 350px;">
-                <input type="text" name="keyword" class="form-control me-2" placeholder="Tìm bác sĩ..." value="{{ request('keyword') }}">
-                <button class="btn btn-outline-primary"><i data-feather="search"></i></button>
-            </form>
+<form action="{{ route('admin.doctor_leaves.index') }}" method="GET" class="d-flex flex-wrap gap-2 align-items-end" style="max-width: 900px;">
+    <div>
+        <label for="keyword" class="form-label mb-0 small">Tên bác sĩ</label>
+        <input type="text" name="keyword" class="form-control" placeholder="Tìm bác sĩ..." value="{{ request('keyword') }}">
+    </div>
+
+    <div>
+        <label for="start_date" class="form-label mb-0 small">Từ ngày</label>
+        <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
+    </div>
+
+    <div>
+        <label for="end_date" class="form-label mb-0 small">Đến ngày</label>
+        <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
+    </div>
+
+    <div>
+        <label for="approved" class="form-label mb-0 small">Trạng thái</label>
+        <select name="approved" class="form-select">
+            <option value="">-- Tất cả --</option>
+            <option value="1" {{ request('approved') === '1' ? 'selected' : '' }}>Đã duyệt</option>
+            <option value="0" {{ request('approved') === '0' ? 'selected' : '' }}>Chưa duyệt</option>
+        </select>
+    </div>
+
+    <div>
+        <label class="form-label mb-0 invisible">Lọc</label>
+        <button class="btn btn-outline-primary d-flex align-items-center">
+            <i data-feather="search" class="me-1"></i> Lọc
+        </button>
+    </div>
+</form>
+
         </div>
     </div>
 
-    <!-- Flash messages (fallback) -->
+    <!-- Flash messages -->
     @foreach (['success', 'error', 'info'] as $msg)
         @if (session($msg))
             <div class="alert alert-{{ $msg == 'error' ? 'danger' : $msg }} alert-dismissible fade show" role="alert">
@@ -65,10 +94,9 @@
                                         </span>
                                     </td>
                                     <td>
-                                <a href="{{ route('admin.doctor_leaves.edit', $leave->id) }}" class="btn btn-sm btn-warning" title="Chỉnh sửa">
-                                    <i class="bx bx-edit"></i>
-                                </a>
-                            </td>
+                                        <a href="{{ route('admin.doctor_leaves.edit', $leave->id) }}" class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                                            <i class="bx bx-edit"></i>
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -96,7 +124,6 @@
             new bootstrap.Tooltip(el);
         });
 
-        // Hiển thị Toast nếu có session thông báo
         @if(session('success'))
             showToast('success', '{{ session('success') }}');
         @elseif(session('error'))
@@ -106,7 +133,6 @@
         @endif
     });
 
-    // Hàm hiển thị Toast
     function showToast(type, message) {
         const iconMap = {
             success: 'check-circle',
@@ -139,7 +165,6 @@
         document.body.appendChild(container);
 
         feather.replace();
-
         new bootstrap.Toast(toast, { delay: 4000 }).show();
     }
 </script>
