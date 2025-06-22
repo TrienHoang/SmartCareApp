@@ -51,7 +51,7 @@ class Appointment extends Model
     // Relationship với Payment
     public function payment()
     {
-        return $this->hasOne(Payment::class, 'appointment_id');
+        return $this->hasOne(Payment::class, 'appointment_id')->latestOfMany();
     }
 
     // Relationship với Medical Record
