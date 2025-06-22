@@ -82,12 +82,13 @@ class AppointmentController extends Controller
             $to = $request->filled('date_to') ? Carbon::parse($request->date_to)->endOfDay() : null;
 
             if ($from && $to && $from->gt($to)) {
-                // Ghi nhận rằng ngày đã bị hoán đổi
-                session()->flash('date_swapped', true);
-
-                // Hoán đổi
                 [$from, $to] = [$to, $from];
                 [$from_input, $to_input] = [$to_input, $from_input];
+
+                return redirect()->route('admin.appointments.index', [
+                    'date_from' => $from_input,
+                    'date_to' => $to_input,
+                ])->with('date_swapped', true);
             }
 
             if ($from && $to) {

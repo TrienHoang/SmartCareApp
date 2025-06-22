@@ -16,7 +16,7 @@
         <li class="menu-item">
             <a href="{{ route('admin.dashboard.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-bar-chart-alt"></i>
-                <div data-i18n="Dashboard">Thống kê</div>
+                <div data-i18n="Thống kê">Thống kê</div>
             </a>
         </li>
 
@@ -241,15 +241,6 @@
             </a>
         </li>
 
-        <!-- Tài khoản -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Tài khoản</span></li>
-
-        <li class="menu-item">
-            <a href="{{ route('logout') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-log-out"></i>
-                <div>Đăng xuất</div>
-            </a>
-        </li>
     </ul>
     <li class="menu-item">
       <a href="{{ route('logout') }}" class="menu-link">

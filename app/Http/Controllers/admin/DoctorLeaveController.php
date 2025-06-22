@@ -14,16 +14,35 @@ class DoctorLeaveController extends Controller
     {
         $query = DoctorLeave::with(['doctor.user'])->orderBy('id', 'desc');
 
-        if ($request->has('keyword') && $request->keyword != '') {
+        // Lọc theo tên bác sĩ
+        if ($request->filled('keyword')) {
             $keyword = $request->keyword;
             $query->whereHas('doctor.user', function ($q) use ($keyword) {
                 $q->where('full_name', 'like', '%' . $keyword . '%');
             });
         }
 
+        // Lọc theo ngày bắt đầu nghỉ
+        if ($request->filled('start_date')) {
+            $query->whereDate('start_date', '>=', $request->start_date);
+        }
+
+        // Lọc theo ngày kết thúc nghỉ
+        if ($request->filled('end_date')) {
+            $query->whereDate('end_date', '<=', $request->end_date);
+        }
+
+        // Lọc theo trạng thái duyệt
+        if ($request->filled('approved') && in_array($request->approved, ['0', '1'])) {
+            $query->where('approved', $request->approved);
+        }
+
         $doctorLeaves = $query->paginate(10)->withQueryString();
         return view('admin.doctor_leaves.index', compact('doctorLeaves'));
     }
+
+
+
     public function edit($id)
     {
         // Kiểm tra quyền truy cập
