@@ -9,27 +9,47 @@ use Illuminate\Http\Request;
 
 class SchedulesController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $query = WorkingSchedule::with('doctor.user')->orderBy('id', 'desc'); // Eager load tránh N+1
+        $query = WorkingSchedule::with('doctor.user');
 
         // Tìm kiếm theo tên bác sĩ
-        if (request()->filled('keyword')) {
-            $keyword = request()->get('keyword');
+        if ($request->filled('keyword')) {
+            $keyword = $request->get('keyword');
             $query->whereHas('doctor.user', function ($q) use ($keyword) {
                 $q->where('full_name', 'like', '%' . $keyword . '%');
             });
         }
 
-        // Lọc theo thứ trong tuần (nếu có)
-        if (request()->filled('day_of_week')) {
-            $query->where('day_of_week', request()->get('day_of_week'));
+        // Lọc theo thứ trong tuần (nếu cần)
+        if ($request->filled('day_of_week')) {
+            $query->where('day_of_week', $request->get('day_of_week'));
+        }
+
+        // Sắp xếp
+        $sortField = $request->get('field', 'id');
+        $sortDirection = $request->get('sort', 'asc');
+
+        if ($sortField === 'doctor_name') {
+            $query->join('doctors', 'working_schedules.doctor_id', '=', 'doctors.id')
+                ->join('users', 'doctors.user_id', '=', 'users.id')
+                ->orderBy('users.full_name', $sortDirection)
+                ->select('working_schedules.*');
+        } else {
+            $allowedSorts = ['id', 'day', 'day_of_week', 'start_time', 'end_time'];
+            if (in_array($sortField, $allowedSorts)) {
+                $query->orderBy($sortField, $sortDirection);
+            }
         }
 
         $schedules = $query->paginate(10)->withQueryString();
-        $doctors = Doctor::all(); // dùng để hiển thị thêm nếu cần
-        return view("admin.schedules.index", compact("schedules", "doctors"));
+        $doctors = Doctor::all();
+        $keyword = $request->keyword;
+
+        return view('admin.schedules.index', compact('schedules', 'doctors', 'keyword'));
     }
+
+
     public function create()
     {
         $doctors = Doctor::all();
