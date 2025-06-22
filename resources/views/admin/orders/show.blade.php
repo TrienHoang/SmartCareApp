@@ -4,11 +4,21 @@
 <div class="container">
     <div class="card shadow mb-4">
         <div class="card-header bg-primary text-white">
-            <h4 class="mb-0" style="color: rgb(75, 75, 75); font-weight: bold;">Chi tiết đơn hàng #{{ $order->id }}</h4>
-            
+            <h4 class="mb-0" style="color: rgb(75, 75, 75); font-weight: bold;">
+                Chi tiết đơn hàng #{{ $order->id }}
+            </h4>
         </div>
         <div class="card-body">
 
+            {{-- Thông báo --}}
+            @if (session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+            @if (session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
+
+            {{-- Thông tin đơn hàng --}}
             <table class="table table-bordered mb-4">
                 <tbody>
                     <tr>
@@ -17,7 +27,17 @@
                     </tr>
                     <tr>
                         <th>Trạng thái</th>
-                        <td>{{ ucfirst($order->status) }}</td>
+                        <td>
+                            @php
+                                $statusLabels = [
+                                    'pending' => 'Chờ xác nhận',
+                                    'paid' => 'Đã thanh toán',
+                                    'completed' => 'Hoàn tất',
+                                    'cancelled' => 'Đã hủy',
+                                ];
+                            @endphp
+                            {{ $statusLabels[$order->status] ?? $order->status }}
+                        </td>
                     </tr>
                     <tr>
                         <th>Thời gian đặt</th>
@@ -30,6 +50,7 @@
                 </tbody>
             </table>
 
+            {{-- Dịch vụ đã chọn --}}
             <h5>Dịch vụ đã chọn:</h5>
             <table class="table table-striped table-hover">
                 <thead class="table-light">
@@ -50,28 +71,44 @@
                 </tbody>
             </table>
 
+            {{-- Cập nhật trạng thái --}}
+            @php
+                $statusTransitions = [
+                    'pending' => ['paid', 'cancelled'],
+                    'paid' => ['completed', 'cancelled'],
+                    'completed' => [],
+                    'cancelled' => [],
+                ];
+                $nextStatuses = $statusTransitions[$order->status] ?? [];
+            @endphp
+
             <form method="POST" action="{{ route('orders.updateStatus', $order) }}" class="mt-4">
                 @csrf
-                <div class="mb-3">
-                    <label for="status" class="form-label">Cập nhật trạng thái:</label>
-                    <select name="status" id="status" class="form-select">
-                        @foreach(['pending', 'paid', 'completed', 'cancelled'] as $status)
-                            <option value="{{ $status }}" @selected($order->status === $status)>
-                                {{ ucfirst($status) }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <button class="btn btn-success">Cập nhật trạng thái</button>
+
+                @if (empty($nextStatuses))
+                    <div class="alert alert-info">
+                        Đơn hàng đã {{ $order->status === 'completed' ? 'hoàn tất' : 'bị hủy' }}. Không thể thay đổi trạng thái.
+                    </div>
+                @else
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Cập nhật trạng thái:</label>
+                        <select name="status" id="status" class="form-select">
+                            @foreach ($nextStatuses as $status)
+                                <option value="{{ $status }}">
+                                    {{ $statusLabels[$status] }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button class="btn btn-success">Cập nhật trạng thái</button>
+                @endif
+
                 <a href="{{ route('orders.exportPdf', $order) }}" class="btn btn-secondary ms-2">
                     <i class="bx bxs-file-pdf"></i> Xuất PDF
                 </a>
-
-
                 <a href="{{ route('orders.index') }}" class="btn btn-secondary ms-2">
                     <i class="bx bx-arrow-back"></i> Quay lại danh sách
                 </a>
-
             </form>
 
         </div>

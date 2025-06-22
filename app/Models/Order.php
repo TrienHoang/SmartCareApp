@@ -25,10 +25,4 @@ class Order extends Model
                     ->withTimestamps();
     }
 
-    // public function statusLogs()
-    // {
-    //     return $this->hasMany(OrderStatusLog::class);
-    // }
-
-
 }

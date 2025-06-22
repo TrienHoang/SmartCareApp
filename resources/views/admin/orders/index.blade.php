@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="card shadow mb-4">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0" style="color: rgb(62, 61, 61); font-weght:bold;"><i class="bx bx-receipt" ></i> Danh sách đơn hàng</h4>
+            <h4 class="mb-0" style="color: rgb(62, 61, 61); font-weight: bold;"><i class="bx bx-receipt"></i> Danh sách đơn hàng</h4>
         </div>
         <div class="card-body">
 
@@ -22,7 +22,15 @@
                     <label for="status" class="form-label">Trạng thái</label>
                     <select name="status" id="status" class="form-select">
                         <option value="">-- Tất cả --</option>
-                        @foreach(['pending' => 'Chờ xác nhận', 'paid' => 'Đã thanh toán', 'completed' => 'Hoàn tất', 'cancelled' => 'Đã hủy'] as $key => $label)
+                        @php
+                            $statusLabels = [
+                                'pending' => 'Chờ xác nhận',
+                                'paid' => 'Đã thanh toán',
+                                'completed' => 'Hoàn tất',
+                                'cancelled' => 'Đã hủy',
+                            ];
+                        @endphp
+                        @foreach($statusLabels as $key => $label)
                             <option value="{{ $key }}" @selected(request('status') === $key)>{{ $label }}</option>
                         @endforeach
                     </select>
@@ -59,7 +67,7 @@
                                         ];
                                     @endphp
                                     <span class="badge bg-{{ $badgeColors[$order->status] ?? 'secondary' }}">
-                                        {{ ucfirst($order->status) }}
+                                        {{ $statusLabels[$order->status] ?? ucfirst($order->status) }}
                                     </span>
                                 </td>
                                 <td>{{ $order->ordered_at }}</td>
