@@ -3,36 +3,13 @@
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 </head>
 
 <div class="container" data-form-type="{{ session('form_type') ?? old('form_type') }}">
     <div class="singin-singup">
         <form action="{{ route('postLogin') }}" method="POST" class="sign-in-form">
             @csrf
-
-            @if (session('message'))
-                <p class="text-danger">{{ session('message') }}</p>
-            @elseif ((session('form_type') ?? old('form_type')) === 'login')
-                {{-- Lỗi Google login (tài khoản đã tồn tại) --}}
-                @error('google')
-                    <p class="text-danger">{{ $message }}</p>
-                @enderror
-
-                {{-- Lỗi từng trường --}}
-                @error('username')
-                    <p class="text-danger">{{ $message }}</p>
-                @enderror
-                @error('password')
-                    <p class="text-danger">{{ $message }}</p>
-                @enderror
-
-                {{-- Lỗi xác thực nếu không có lỗi trường cụ thể --}}
-                @if (!$errors->has('username') && !$errors->has('password'))
-                    @error('auth')
-                        <p class="text-danger">{{ $message }}</p>
-                    @enderror
-                @endif
-            @endif
 
             <input type="hidden" name="form_type" value="login">
 
@@ -63,16 +40,6 @@
 
         <form action="{{ route('postRegister') }}" method="POST" class="sign-up-form">
             @csrf
-
-            @if (session('success'))
-                <p class="text-success">{{ session('success') }}</p>
-            @elseif ((session('form_type') ?? old('form_type')) === 'register' && $errors->any())
-                <ul class="text-danger">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            @endif
 
             <input type="hidden" name="form_type" value="register">
             <h2 class="title">SmartCare | Đăng ký</h2>
@@ -123,5 +90,22 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        @if (session('success'))
+            toastr.success("{{ session('success') }}");
+        @endif
+
+        @if (session('error'))
+            toastr.error("{{ session('error') }}");
+        @endif
+
+        @if ($errors->any())
+            @foreach ($errors->all() as $error)
+                toastr.error("{{ $error }}");
+            @endforeach
+        @endif
+    </script>
     <script src="{{ asset('js/login.js') }}"></script>
 </div>

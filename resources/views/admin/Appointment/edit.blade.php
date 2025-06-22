@@ -12,7 +12,7 @@
                 <h5>Chỉnh sửa lịch hẹn</h5>
             </div>
             @if (session('error'))
-                <div class="alert alert-danger">{{ session('error') }}</div>
+                toastr.error("{{ session('error') }}", "Lỗi");
             @endif
             <div class="card-body">
                 <form action="{{ route('admin.appointments.update', $appointment->id) }}" method="POST">

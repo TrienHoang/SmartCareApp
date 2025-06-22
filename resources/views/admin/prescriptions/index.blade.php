@@ -109,20 +109,16 @@
                         @endcan
                     </div>
                     <div class="card-body">
-                        @if (session('success'))
-                            <div class="alert alert-success alert-dismissible">
-                                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                                {{ session('success') }}
-                            </div>
-                        @endif
+                        <script>
+                            @if (session('success'))
+                                toastr.success("{{ session('success') }}", "Thành công");
+                            @endif
 
-                        @if (session('date_swapped'))
-                            <div class="col-12">
-                                <div class="alert alert-warning mt-2">
-                                    Ngày bắt đầu lớn hơn ngày kết thúc. Hệ thống đã tự động hoán đổi giúp bạn.
-                                </div>
-                            </div>
-                        @endif
+                            @if (session('error'))
+                                toastr.error("{{ session('error') }}", "Lỗi");
+                            @endif
+                        </script>
+
 
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped">

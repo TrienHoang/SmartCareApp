@@ -131,25 +131,16 @@
             </form>
         </div>
 
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bx bx-check-circle"></i> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
+        <script>
+            @if (session('success'))
+                toastr.success("{{ session('success') }}", "Thành công");
+            @endif
 
-        @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bx bx-error-circle"></i> {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
+            @if (session('error'))
+                toastr.error("{{ session('error') }}", "Lỗi");
+            @endif
 
-        @if (session('date_swapped'))
-            <div class="alert alert-warning mt-2">
-                Ngày bắt đầu lớn hơn ngày kết thúc. Hệ thống đã tự động hoán đổi giúp bạn.
-            </div>
-        @endif
+        </script>
 
         <!-- Bảng danh sách -->
         <div class="card">
@@ -159,8 +150,7 @@
                     Danh sách lịch hẹn ({{ $appointments->total() }} bản ghi)
                 </h5>
                 <div class="d-flex gap-2">
-                    <select class="form-select form-select-sm" onchange="changePagination(this.value)"
-                        style="width: auto;">
+                    <select class="form-select form-select-sm" onchange="changePagination(this.value)" style="width: auto;">
                         <option value="15" {{ request('per_page') == 15 ? 'selected' : '' }}>15/trang</option>
                         <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25/trang</option>
                         <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50/trang</option>
