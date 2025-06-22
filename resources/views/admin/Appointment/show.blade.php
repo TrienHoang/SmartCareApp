@@ -81,6 +81,22 @@
                     </td>
                 </tr>
                 <tr>
+                    <th>Thanh toán</th>
+                    <td>
+                        @if ($appointment->payment && $appointment->payment->status === 'paid')
+                            <span class="badge bg-success">
+                                Đã thanh toán toán lúc {{ $appointment->payment->paid_at->format('d/m/Y H:i') }}
+                            </span>
+                        @else
+                            <span class="badge bg-danger">Chưa thanh toán</span>
+                        @endif
+                    </td>
+                </tr>
+                <tr>
+                    <th>Tổng tiền</th>
+                    <td>{{ number_format($appointment->payment->amount ?? 0, 0, ',', '.') }}đ</td>
+                </tr>
+                <tr>
                     <th>Ghi chú</th>
                     <td>{{ $appointment->reason ?? 'Không có ghi chú' }}</td>
                 </tr>

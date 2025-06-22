@@ -80,7 +80,7 @@ public function index(Request $request)
             'payment.promotion',
         ])->findOrFail($id);
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.payment_history_detail', compact('history'));
+        $pdf = \Barryvdh\DomPDF\Facade\pdf::loadView('pdf.payment_history_detail', compact('history'));
 
         return $pdf->download("payment_history_detail_{$history->id}.pdf");
     }

@@ -51,7 +51,7 @@ class Appointment extends Model
     // Relationship với Payment
     public function payment()
     {
-        return $this->hasOne(Payment::class, 'appointment_id');
+        return $this->hasOne(Payment::class, 'appointment_id')->latestOfMany();
     }
 
     // Relationship với Medical Record
@@ -134,5 +134,8 @@ class Appointment extends Model
     {
         return $query->whereMonth('appointment_time', Carbon::now()->month)
                     ->whereYear('appointment_time', Carbon::now()->year);
+    }
+    public function order(){
+        return $this->hasOne(Order::class, 'appointment_id');
     }
 }

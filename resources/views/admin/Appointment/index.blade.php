@@ -98,13 +98,26 @@
                 </div>
 
                 <div class="col-md-2">
+                    <label class="form-label">Thanh toán</label>
+                    <select class="form-control" name="payment_status">
+                        <option value="">Tất cả</option>
+                        <option value="completed" {{ request('payment_status') == 'completed' ? 'selected' : '' }}>Hoàn tất
+                        </option>
+                        <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Chưa thanh
+                            toán</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
                     <label class="form-label">Từ ngày</label>
-                    <input type="date" class="form-control" name="date_from" value="{{ request('date_from') }}">
+                    <input type="date" class="form-control" name="date_from"
+                        value="{{ old('date_from', $from_input ?? request('date_from')) }}">
                 </div>
 
                 <div class="col-md-2">
                     <label class="form-label">Đến ngày</label>
-                    <input type="date" class="form-control" name="date_to" value="{{ request('date_to') }}">
+                    <input type="date" class="form-control" name="date_to"
+                        value="{{ old('date_to', $to_input ?? request('date_to')) }}">
                 </div>
 
                 <div class="col-md-12">
@@ -132,6 +145,12 @@
             </div>
         @endif
 
+        @if (session('date_swapped'))
+            <div class="alert alert-warning mt-2">
+                Ngày bắt đầu lớn hơn ngày kết thúc. Hệ thống đã tự động hoán đổi giúp bạn.
+            </div>
+        @endif
+
         <!-- Bảng danh sách -->
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -140,7 +159,8 @@
                     Danh sách lịch hẹn ({{ $appointments->total() }} bản ghi)
                 </h5>
                 <div class="d-flex gap-2">
-                    <select class="form-select form-select-sm" onchange="changePagination(this.value)" style="width: auto;">
+                    <select class="form-select form-select-sm" onchange="changePagination(this.value)"
+                        style="width: auto;">
                         <option value="15" {{ request('per_page') == 15 ? 'selected' : '' }}>15/trang</option>
                         <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25/trang</option>
                         <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50/trang</option>
@@ -177,6 +197,7 @@
                                 </a>
                             </th>
                             <th>Trạng thái</th>
+                            <th>Thanh toán</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
@@ -216,8 +237,9 @@
                                     <div class="d-flex flex-column">
                                         <span>{{ $appointment->formatted_time }}</span>
                                         @php
-                                            $endTime = \Carbon\Carbon::parse($appointment->appointment_time)
-                                                ->addMinutes($appointment->service->duration ?? 30);
+                                            $endTime = \Carbon\Carbon::parse(
+                                                $appointment->appointment_time,
+                                            )->addMinutes($appointment->service->duration ?? 30);
                                         @endphp
                                         <small class="text-muted">
                                             {{ $endTime->format('H:i') }} (Dự kiến)
@@ -256,6 +278,15 @@
                                     </span>
                                 </td>
                                 <td>
+                                    @if (
+                                        ($appointment->payment && $appointment->payment->status === 'paid') ||
+                                            ($appointment->order && $appointment->order->status === 'completed'))
+                                        <span class="badge bg-success">Hoàn tất</span>
+                                    @else
+                                        <span class="badge bg-danger">Chưa thanh toán</span>
+                                    @endif
+                                </td>
+                                <td>
                                     <div class="table-actions">
                                         <a href="{{ route('admin.appointments.show', $appointment->id) }}"
                                             class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
@@ -268,6 +299,18 @@
                                                 <i class="bx bx-edit"></i>
                                             </a>
                                         @endif
+                                        @if (
+                                            $appointment->status !== 'completed' &&
+                                                !($appointment->order && $appointment->order->status === 'completed') &&
+                                                $appointment->payment &&
+                                                $appointment->payment->status !== 'paid')
+                                            <form action="{{ route('admin.appointments.pay', $appointment->id) }}"
+                                                method="POST" class="d-inline">
+                                                @csrf
+                                                <button class="btn btn-sm btn-outline-success">Thanh toán</button>
+                                            </form>
+                                        @endif
+
                                         @if ($appointment->status === 'confirmed')
                                             <button class="btn btn-sm btn-outline-success"
                                                 onclick="updateStatus({{ $appointment->id }}, 'completed')"
@@ -275,6 +318,15 @@
                                                 <i class="bx bx-check-double"></i>
                                             </button>
                                         @endif
+
+                                        @if (optional($appointment->payment)->status !== 'paid')
+                                            <form action="{{ route('admin.appointments.pay', $appointment->id) }}"
+                                                method="POST" class="d-inline">
+                                                @csrf
+                                                <button class="btn btn-sm btn-outline-success">Thanh toán</button>
+                                            </form>
+                                        @endif
+
 
                                         @if (in_array($appointment->status, ['pending', 'confirmed']))
                                             <button class="btn btn-sm btn-outline-danger"
