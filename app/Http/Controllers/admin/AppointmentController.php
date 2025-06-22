@@ -22,6 +22,7 @@ use App\Models\User;
 use App\Models\WorkingSchedule;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
@@ -33,6 +34,8 @@ class AppointmentController extends Controller
             'doctor.department:id,name',
             'doctor.room:id,name',
             'service:id,name,price',
+            'payment' => fn($q) => $q->orderBy('paid_at', 'desc'),
+            'order:id,appointment_id,status',
         ]);
 
         // Lọc theo trạng thái
@@ -56,6 +59,19 @@ class AppointmentController extends Controller
         if ($request->filled('service_id')) {
             $query->where('service_id', $request->service_id);
         }
+
+        // Lọc theo trạng thái thanh toán (order)
+        // Lọc theo trạng thái thanh toán
+        if ($request->filled('payment_status')) {
+            if ($request->payment_status === 'completed') {
+                // Chỉ lấy lịch hẹn có ÍT NHẤT 1 payment = paid
+                $query->whereHas('payment', fn($q) => $q->where('status', 'paid'));
+            } elseif ($request->payment_status === 'unpaid') {
+                // Lấy lịch hẹn KHÔNG có bất kỳ payment = paid
+                $query->whereDoesntHave('payment', fn($q) => $q->where('status', 'paid'));
+            }
+        }
+
 
         // Lọc theo ngày
         $from_input = $request->date_from;
@@ -246,7 +262,7 @@ class AppointmentController extends Controller
         ]);
 
         // Tạo payment
-        Payment::create([
+        Payment::updateOrCreate([
             'appointment_id' => $appointment->id,
             'amount' => $price,
             'status' => 'unpaid',
@@ -270,12 +286,11 @@ class AppointmentController extends Controller
 
     public function update(UpdateAppointmentRequest $request, $id)
     {
-        // dd($request->all());
         $appointment = Appointment::findOrFail($id);
 
-        // Không được cập nhật lịch đã hoàn thành hoặc đã hủy
+        // Không cho cập nhật nếu đã hoàn thành hoặc đã hủy
         if (in_array($appointment->status, ['completed', 'cancelled'])) {
-            return redirect()->back()->withErrors([
+            return back()->withErrors([
                 'status' => 'Không thể cập nhật lịch hẹn đã hoàn thành hoặc đã hủy.'
             ]);
         }
@@ -285,17 +300,7 @@ class AppointmentController extends Controller
         $timeOnly = $appointmentDate->format('H:i');
         $day = $appointmentDate->format('Y-m-d');
 
-        // Nếu không phải cập nhật sang completed mà thời gian hẹn là quá khứ thì không cho phép
-        if (
-            !in_array($request->status, ['confirmed', 'completed', 'cancelled']) &&
-            $appointmentDate->isPast()
-        ) {
-            return back()->withErrors([
-                'appointment_time' => 'Không thể đặt hoặc cập nhật lịch hẹn về thời gian trong quá khứ.'
-            ])->withInput();
-        }
-
-        // Nếu chuyển sang completed thì thời gian hẹn phải không ở tương lai
+        // Nếu chuyển sang completed mà thời gian vẫn ở tương lai → lỗi
         if (
             $appointment->status !== 'completed' &&
             $request->status === 'completed' &&
@@ -316,13 +321,13 @@ class AppointmentController extends Controller
 
         if ($conflict['doctor_conflict']) {
             return back()->withErrors([
-                'appointment_time' => 'Bác sĩ đã có lịch hẹn vào thời gian bạn chọn. Vui lòng chọn thời gian khác.'
+                'appointment_time' => 'Bác sĩ đã có lịch hẹn vào thời gian này. Vui lòng chọn thời gian khác.'
             ])->withInput();
         }
 
         if ($conflict['room_conflict']) {
             return back()->withErrors([
-                'appointment_time' => 'Phòng khám đã có lịch hẹn vào thời gian bạn chọn. Vui lòng chọn thời gian khác.'
+                'appointment_time' => 'Phòng khám đã có lịch hẹn vào thời gian này. Vui lòng chọn thời gian khác.'
             ])->withInput();
         }
 
@@ -343,21 +348,19 @@ class AppointmentController extends Controller
                 ->map(fn($day) => __('days.' . strtolower($day)))
                 ->toArray();
 
-            $daysText = implode(', ', $workingDays);
-
             return back()->withErrors([
-                'appointment_time' => 'Bác sĩ không làm việc vào ngày này. Các ngày làm việc là: ' . $daysText . '.'
+                'appointment_time' => 'Bác sĩ không làm việc ngày này. Các ngày làm việc: ' . implode(', ', $workingDays) . '.'
             ])->withInput();
         }
 
+        // Kiểm tra giờ hợp lệ
         if ($timeOnly < $working->start_time || $timeOnly >= $working->end_time) {
             return back()->withErrors([
-                'appointment_time' => 'Giờ hẹn không nằm trong khung giờ làm việc của bác sĩ. '
-                    . 'Khung giờ làm việc là từ ' . $working->start_time . ' đến ' . $working->end_time . '.'
+                'appointment_time' => 'Giờ hẹn không nằm trong giờ làm việc: ' . $working->start_time . ' - ' . $working->end_time
             ])->withInput();
         }
 
-        // Kiểm tra bác sĩ có nghỉ phép không
+        // Kiểm tra nghỉ phép
         $onLeave = DoctorLeave::where('doctor_id', $request->doctor_id)
             ->where('start_date', '<=', $appointmentDate)
             ->where('end_date', '>=', $appointmentDate)
@@ -366,60 +369,81 @@ class AppointmentController extends Controller
 
         if ($onLeave) {
             return back()->withErrors([
-                'appointment_time' => 'Bác sĩ đang trong thời gian nghỉ phép vào ngày bạn chọn. Vui lòng chọn ngày khác.'
+                'appointment_time' => 'Bác sĩ nghỉ phép ngày này. Vui lòng chọn ngày khác.'
             ])->withInput();
         }
 
-        // Tính thời gian kết thúc (30 phút mặc định)
-        $endTime = $appointmentDate->copy()->addMinutes(30);
+        // Lưu thông tin cũ
+        $oldStatus    = $appointment->status;
+        $oldTime      = $appointment->appointment_time;
+        $oldDoctorId  = $appointment->doctor_id;
+        $oldServiceId = $appointment->service_id;
+
+        $newDoctor = Doctor::with('user')->find($request->doctor_id);
+        $newService = Service::find($request->service_id);
+
+        // Tính thời gian kết thúc
+        $endTime = Carbon::parse($request->appointment_time)
+            ->copy()
+            ->addMinutes($newService->duration ?? 30);
 
         // Chuẩn bị dữ liệu cập nhật
-        $requestData = $request->only([
-            'doctor_id',
-            'service_id',
-            'appointment_time',
-            'status',
-            'reason'
-        ]);
-        $requestData['end_time'] = $endTime;
+        $updateData = [
+            'doctor_id'        => $request->doctor_id,
+            'service_id'       => $request->service_id,
+            'appointment_time' => $request->appointment_time,
+            'end_time'         => $endTime,
+            'status'           => $request->status,
+            'reason'           => $request->reason,
+        ];
 
-        // Ghi nhận thay đổi
+        // Ghi log thay đổi
         $changes = [];
 
-        if ($appointment->appointment_time != $request->appointment_time) {
-            $changes[] = 'Thay đổi thời gian khám từ ' .
-                optional($appointment->appointment_time)->format('d/m/Y H:i') . ' sang ' .
-                $appointmentDate->format('d/m/Y H:i');
+        if ($oldTime != $request->appointment_time) {
+            $changes[] = 'Thời gian: ' . optional($oldTime)->format('d/m/Y H:i') .
+                ' → ' . Carbon::parse($request->appointment_time)->format('d/m/Y H:i');
         }
 
-        if ($appointment->doctor_id != $request->doctor_id) {
-            $oldDoctor = $appointment->doctor->user->full_name ?? 'Chưa xác định';
-            $newDoctor = Doctor::with('user')->find($request->doctor_id)->user->full_name ?? 'Chưa xác định';
-            $changes[] = 'Thay đổi bác sĩ từ ' . $oldDoctor . ' sang ' . $newDoctor;
+        if ($oldDoctorId != $request->doctor_id) {
+            $oldDoctor = optional($appointment->doctor->user)->full_name ?? 'Không xác định';
+            $newDoctorName = optional($newDoctor->user)->full_name ?? 'Không xác định';
+            $changes[] = 'Bác sĩ: ' . $oldDoctor . ' → ' . $newDoctorName;
         }
 
-        if ($appointment->service_id != $request->service_id) {
-            $oldService = $appointment->service->name ?? 'Không xác định';
-            $newService = Service::find($request->service_id)->name ?? 'Không xác định';
-            $changes[] = 'Thay đổi dịch vụ từ ' . $oldService . ' sang ' . $newService;
+        if ($oldServiceId != $request->service_id) {
+            $oldServiceName = optional($appointment->service)->name ?? 'Không xác định';
+            $newServiceName = optional($newService)->name ?? 'Không xác định';
+            $changes[] = 'Dịch vụ: ' . $oldServiceName . ' → ' . $newServiceName;
         }
 
-        // Thực hiện cập nhật
-        $appointment->update($requestData);
-
-        // Ghi log nếu có thay đổi
-        if (!empty($changes)) {
-            AppointmentLog::create([
-                'appointment_id' => $appointment->id,
-                'changed_by' => auth()->id(),
-                'status_before' => $appointment->status,
-                'status_after' => $request->status,
-                'change_time' => now(),
-                'note' => implode("\n", $changes),
-            ]);
+        if ($oldStatus != $request->status) {
+            $changes[] = 'Trạng thái: ' . $oldStatus . ' → ' . $request->status;
         }
 
-        return redirect()->route('admin.appointments.index')->with('success', 'Cập nhật lịch hẹn thành công');
+        DB::beginTransaction();
+
+        try {
+            $appointment->update($updateData);
+
+            if (!empty($changes)) {
+                AppointmentLog::create([
+                    'appointment_id' => $appointment->id,
+                    'changed_by'     => auth()->id(),
+                    'status_before'  => $oldStatus,
+                    'status_after'   => $request->status,
+                    'change_time'    => now(),
+                    'note'           => implode("\n", $changes),
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('admin.appointments.index')
+                ->with('success', 'Cập nhật lịch hẹn thành công!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Đã xảy ra lỗi khi cập nhật lịch hẹn.']);
+        }
     }
 
 
@@ -511,19 +535,24 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::with(['payment', 'order'])->findOrFail($id);
         $payment = $appointment->payment;
-
-        if (!$payment || $payment->status === 'paid') {
-            return back()->with('error', 'Lịch hẹn đã được thanh toán hoặc không tồn tại thanh toán.');
+        if (!$payment) {
+            $payment = Payment::create([
+                'appointment_id' => $appointment->id,
+                'amount'         => $appointment->service->price,
+                'status'         => 'unpaid',
+            ]);
         }
 
-        // 1. Cập nhật thanh toán
+        if ($payment->status === 'paid') {
+            return back()->with('error', 'Lịch hẹn đã được thanh toán.');
+        }
+
         $payment->update([
-            'status' => 'paid',
+            'status'         => 'paid',
             'payment_method' => 'cash',
-            'paid_at' => now(),
+            'paid_at'        => now(),
         ]);
 
-        // 2. Lưu lịch sử
         PaymentHistory::create([
             'payment_id'     => $payment->id,
             'amount'         => $payment->amount,
@@ -531,9 +560,8 @@ class AppointmentController extends Controller
             'payment_date'   => now(),
         ]);
 
-        // 3. Cập nhật đơn hàng nếu tồn tại
-        if ($appointment->order) {
-            $appointment->order->update(['status' => 'paid']);
+        if ($appointment->order && $appointment->order->status !== 'completed') {
+            $appointment->order->update(['status' => 'completed']);
         }
 
         return back()->with('success', 'Thanh toán thành công!');

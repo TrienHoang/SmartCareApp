@@ -100,7 +100,7 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label fw-semibold">Số lượng</label>
-                    <input type="number" min="1" name="medicines[__INDEX__][quantity]" class="form-control">
+                    <input type="number" name="medicines[__INDEX__][quantity]" class="form-control">
                 </div>
                 <div class="col-md-5">
                     <label class="form-label fw-semibold">Hướng dẫn sử dụng</label>

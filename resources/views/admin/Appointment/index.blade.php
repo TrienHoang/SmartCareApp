@@ -98,6 +98,17 @@
                 </div>
 
                 <div class="col-md-2">
+                    <label class="form-label">Thanh toán</label>
+                    <select class="form-control" name="payment_status">
+                        <option value="">Tất cả</option>
+                        <option value="completed" {{ request('payment_status') == 'completed' ? 'selected' : '' }}>Hoàn tất
+                        </option>
+                        <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Chưa thanh
+                            toán</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
                     <label class="form-label">Từ ngày</label>
                     <input type="date" class="form-control" name="date_from"
                         value="{{ old('date_from', $from_input ?? request('date_from')) }}">
@@ -148,7 +159,8 @@
                     Danh sách lịch hẹn ({{ $appointments->total() }} bản ghi)
                 </h5>
                 <div class="d-flex gap-2">
-                    <select class="form-select form-select-sm" onchange="changePagination(this.value)" style="width: auto;">
+                    <select class="form-select form-select-sm" onchange="changePagination(this.value)"
+                        style="width: auto;">
                         <option value="15" {{ request('per_page') == 15 ? 'selected' : '' }}>15/trang</option>
                         <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25/trang</option>
                         <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50/trang</option>
@@ -266,8 +278,10 @@
                                     </span>
                                 </td>
                                 <td>
-                                    @if ($appointment->payment && $appointment->payment->status === 'paid')
-                                        <span class="badge bg-success">Đã thanh toán</span>
+                                    @if (
+                                        ($appointment->payment && $appointment->payment->status === 'paid') ||
+                                            ($appointment->order && $appointment->order->status === 'completed'))
+                                        <span class="badge bg-success">Hoàn tất</span>
                                     @else
                                         <span class="badge bg-danger">Chưa thanh toán</span>
                                     @endif
@@ -285,12 +299,15 @@
                                                 <i class="bx bx-edit"></i>
                                             </a>
                                         @endif
-                                        @if ($appointment->payment && $appointment->payment->status !== 'paid')
+                                        @if (
+                                            $appointment->status !== 'completed' &&
+                                                !($appointment->order && $appointment->order->status === 'completed') &&
+                                                $appointment->payment &&
+                                                $appointment->payment->status !== 'paid')
                                             <form action="{{ route('admin.appointments.pay', $appointment->id) }}"
                                                 method="POST" class="d-inline">
                                                 @csrf
-                                                <button type="submit" class="btn btn-sm btn-outline-success">Thanh
-                                                    toán</button>
+                                                <button class="btn btn-sm btn-outline-success">Thanh toán</button>
                                             </form>
                                         @endif
 
@@ -301,6 +318,15 @@
                                                 <i class="bx bx-check-double"></i>
                                             </button>
                                         @endif
+
+                                        @if (optional($appointment->payment)->status !== 'paid')
+                                            <form action="{{ route('admin.appointments.pay', $appointment->id) }}"
+                                                method="POST" class="d-inline">
+                                                @csrf
+                                                <button class="btn btn-sm btn-outline-success">Thanh toán</button>
+                                            </form>
+                                        @endif
+
 
                                         @if (in_array($appointment->status, ['pending', 'confirmed']))
                                             <button class="btn btn-sm btn-outline-danger"
