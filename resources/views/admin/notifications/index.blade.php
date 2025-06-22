@@ -51,7 +51,7 @@
                 <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
                     <div class="d-flex align-items-center">
                         <i class="bx bx-check-circle mr-2"></i>
-                        <strong>Thành công!</strong> {{ session('success') }}
+                        <strong>Thành công! </strong> {{ session('success') }}
                     </div>
                 </div>
             @endif
@@ -60,7 +60,7 @@
                 <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
                     <div class="d-flex align-items-center">
                         <i class="bx bx-x-circle mr-2"></i>
-                        <strong>Lỗi!</strong> {{ session('error') }}
+                        <strong>Lỗi! </strong> {{ session('error') }}
                     </div>
                 </div>
             @endif
@@ -77,7 +77,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 class="text-white mb-0">{{ $notifications->where('status', 'sent')->count() }}</h4>
+                                    <h4 class="text-white mb-0">{{$statusCounts['sent'] }}</h4>
                                     <small class="text-white">Đã gửi</small>
                                 </div>
                             </div>
@@ -94,7 +94,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 class="text-white mb-0">{{ $notifications->where('status', 'scheduled')->count() }}</h4>
+                                    <h4 class="text-white mb-0">{{ $statusCounts['scheduled'] }}</h4>
                                     <small class="text-white">Đã lên lịch</small>
                                 </div>
                             </div>
@@ -111,7 +111,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 class="text-white mb-0">{{ $notifications->where('status', 'sending')->count() }}</h4>
+                                    <h4 class="text-white mb-0">{{ $statusCounts['sending']}}</h4>
                                     <small class="text-white">Đang gửi</small>
                                 </div>
                             </div>
@@ -128,7 +128,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 class="text-white mb-0">{{ $notifications->where('status', 'failed')->count() }}</h4>
+                                    <h4 class="text-white mb-0">{{ $statusCounts['failed'] }}</h4>
                                     <small class="text-white">Thất bại</small>
                                 </div>
                             </div>
