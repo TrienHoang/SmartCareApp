@@ -174,7 +174,6 @@
                                 </a>
                             </th>
                             <th>Bác sĩ</th>
-                            <th>Dịch vụ</th>
                             <th>Phòng/Khoa</th>
                             <th>
                                 <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'appointment_time', 'sort_order' => request('sort_order') == 'asc' ? 'desc' : 'asc']) }}"
@@ -205,15 +204,6 @@
                                     <div class="d-flex flex-column">
                                         <span>{{ $appointment->doctor->user->full_name ?? 'N/A' }}</span>
                                         <small class="text-muted">{{ $appointment->doctor->specialization ?? '' }}</small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex flex-column">
-                                        <span>{{ $appointment->service->name ?? 'N/A' }}</span>
-                                        @if ($appointment->service->price)
-                                            <small
-                                                class="text-success fw-bold">{{ number_format($appointment->service->price, 0, ',', '.') }}đ</small>
-                                        @endif
                                     </div>
                                 </td>
                                 <td>
