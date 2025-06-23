@@ -21,9 +21,18 @@ class SchedulesController extends Controller
             });
         }
 
-        // Lọc theo thứ trong tuần (nếu cần)
+        // Lọc theo thứ
         if ($request->filled('day_of_week')) {
             $query->where('day_of_week', $request->get('day_of_week'));
+        }
+
+        // ✅ Lọc theo ngày bắt đầu và kết thúc
+        if ($request->filled('start_date')) {
+            $query->whereDate('day', '>=', $request->get('start_date'));
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('day', '<=', $request->get('end_date'));
         }
 
         // Sắp xếp
