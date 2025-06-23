@@ -26,13 +26,14 @@
                     <input type="text" name="keyword" class="form-control form-control-sm" placeholder="Tìm theo tên..." value="{{ request('keyword') }}">
                 </div>
                 <div>
-                    <label class="form-label small mb-0">Từ giờ</label>
-                    <input type="time" name="start_date" class="form-control form-control-sm" value="{{ request('start_date') }}">
-                </div>
-                <div>
-                    <label class="form-label small mb-0">Đến giờ</label>
-                    <input type="time" name="end_date" class="form-control form-control-sm" value="{{ request('end_date') }}">
-                </div>
+        <label class="form-label small mb-0">Từ giờ</label>
+            <input type="time" name="start_time" class="form-control form-control-sm" value="{{ request('start_time') }}">
+        </div>
+        <div>
+            <label class="form-label small mb-0">Đến giờ</label>
+            <input type="time" name="end_time" class="form-control form-control-sm" value="{{ request('end_time') }}">
+        </div>
+
                 <div>
                     <label class="form-label small mb-0">Thứ</label>
                     <select name="day_of_week" class="form-select form-select-sm">

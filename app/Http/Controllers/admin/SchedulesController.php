@@ -26,7 +26,7 @@ class SchedulesController extends Controller
             $query->where('day_of_week', $request->get('day_of_week'));
         }
 
-        // ✅ Lọc theo ngày bắt đầu và kết thúc
+        // ✅ Lọc theo ngày bắt đầu và kết thúc (đã sửa type thành 'date')
         if ($request->filled('start_date')) {
             $query->whereDate('day', '>=', $request->get('start_date'));
         }
