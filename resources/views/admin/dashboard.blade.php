@@ -1,7 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
 
+
 <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
@@ -10,7 +16,11 @@
     @include('admin.partials.header')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
+        html,
+        body {
         html,
         body {
             height: 100%;
@@ -60,7 +70,51 @@
         .content-footer.footer {
             flex-shrink: 0;
         }
+
+        .layout-wrapper {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .layout-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .layout-menu.menu-vertical {
+            height: 100vh;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .layout-page {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .content-wrapper {
+            flex-grow: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container-xxl.container-p-y {
+            flex-grow: 1;
+            overflow-y: auto;
+            /* ✅ Content scroll riêng */
+            padding: 1.5rem;
+        }
+
+        .content-footer.footer {
+            flex-shrink: 0;
+        }
     </style>
+
 
 </head>
 <body>
@@ -94,11 +148,13 @@
                 @endforeach
             @endif
             @if (session('date_swapped'))
-                toastr.warning("Ngày bắt đầu lớn hơn ngày kết thúc. Hệ thống đã tự động hoán đổi giúp bạn.", "Cảnh báo");
+                toastr.warning("Ngày bắt đầu lớn hơn ngày kết thúc. Hệ thống đã tự động hoán đổi giúp bạn.",
+                    "Cảnh báo");
             @endif
         });
     </script>
     @stack('scripts')
     @yield('scripts')
 </body>
+
 </html>
