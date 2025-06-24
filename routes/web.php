@@ -311,7 +311,7 @@ Route::group([
         Route::group([
             'prefix' => 'payment_histories',
             'as' => 'payment_histories.',
-            'middleware' => 'check_permission:view_payments_histories',
+            'middleware' => 'check_permission:view_users',
 
         ], function () {
             Route::get('/', [PaymentHistoryController::class, 'index'])
@@ -538,6 +538,6 @@ Route::group([
         // Route để lấy danh sách vai trò
         Route::get('notifications/ajax/get-roles', [AdminNotificationController::class, 'getRoles'])->name('notifications.getRoles');
 
-        Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('payment_histories.index');
-        Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('payment_histories.show');
+        // Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('payment_histories.index');
+        // Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('payment_histories.show');
     });

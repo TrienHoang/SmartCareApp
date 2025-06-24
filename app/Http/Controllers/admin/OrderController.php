@@ -11,6 +11,9 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
+        if ($request->start_date && $request->end_date && $request->end_date < $request->start_date) {
+        return back()->withInput()->with('error', 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.');
+    }
         $orders = Order::with('user')
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->start_date, fn($q) => $q->whereDate('ordered_at', '>=', $request->start_date))
