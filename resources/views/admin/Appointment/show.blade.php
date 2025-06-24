@@ -15,6 +15,10 @@
                     <td>{{ $appointment->patient->full_name ?? 'N/A' }}</td>
                 </tr>
                 <tr>
+                    <th>Số điện thoại</th>
+                    <td>{{ $appointment->patient->phone ?? 'N/A' }}</td>
+                </tr>
+                <tr>
                     <th>Bác sĩ</th>
                     <td>{{ $appointment->doctor->user->full_name ?? 'N/A' }}</td>
                 </tr>
