@@ -452,13 +452,25 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
 
+        if (
+            ($appointment->payment && $appointment->payment->status === 'paid') ||
+            ($appointment->order && $appointment->order->status === 'completed')
+        ) {
+            return redirect()->route('admin.appointments.index')->withErrors([
+                'status' => 'Lịch hẹn đã được thanh toán và không thể hủy.',
+            ]);
+        }
+
+        // Nếu hợp lệ thì hủy
         if (in_array($appointment->status, ['pending', 'confirmed'])) {
             $appointment->status = 'cancelled';
             $appointment->save();
             return redirect()->route('admin.appointments.index')->with('success', 'Hủy lịch hẹn thành công');
         }
 
-        return redirect()->route('admin.appointments.index')->withErrors(['status' => 'Không thể hủy lịch hẹn đã hoàn thành hoặc đã hủy.']);
+        return redirect()->route('admin.appointments.index')->withErrors([
+            'status' => 'Không thể hủy lịch hẹn đã hoàn thành hoặc đã hủy.',
+        ]);
     }
     public function show($id)
     {
@@ -535,6 +547,10 @@ class AppointmentController extends Controller
     public function pay($id)
     {
         $appointment = Appointment::with(['payment', 'order'])->findOrFail($id);
+
+        if ($appointment->status === 'cancelled') {
+            return back()->with('error', 'Không thể thanh toán cho lịch hẹn đã bị hủy.');
+        }
         $payment = $appointment->payment;
         if (!$payment) {
             $payment = Payment::create([

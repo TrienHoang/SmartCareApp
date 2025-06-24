@@ -311,23 +311,23 @@
         Route::group([
             'prefix' => 'payment_histories',
             'as' => 'payment_histories.',
-            'middleware' => 'check_permission:view_payments_histories',
+            'middleware' => 'check_permission:view_payment_history',
 
         ], function () {
             Route::get('/', [PaymentHistoryController::class, 'index'])
-                ->middleware('check_permission:view_payments_histories')
+                ->middleware('check_permission:view_payment_history')
                 ->name('index');
 
             Route::get('/search', [PaymentHistoryController::class, 'search'])
-                ->middleware('check_permission:view_payments_histories')
+                ->middleware('check_permission:view_payment_history')
                 ->name('search');
 
             Route::get('/{payment_history}', [PaymentHistoryController::class, 'show'])
-                ->middleware('check_permission:view_payments_histories')
+                ->middleware('check_permission:view_payment_history')
                 ->name('show');
 
             Route::get('/{payment_history}/export-pdf', [PaymentHistoryController::class, 'exportDetailPdf'])
-                ->middleware('check_permission:view_payments_histories')
+                ->middleware('check_permission:view_payment_history')
                 ->name('exportDetailPdf');
         });
     });
