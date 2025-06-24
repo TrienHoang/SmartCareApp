@@ -139,7 +139,6 @@
             @if (session('error'))
                 toastr.error("{{ session('error') }}", "Lỗi");
             @endif
-
         </script>
 
         <!-- Bảng danh sách -->
@@ -310,7 +309,7 @@
 
                                         @if (in_array($appointment->status, ['pending', 'confirmed']))
                                             <button class="btn btn-sm btn-outline-danger"
-                                                onclick="cancelAppointment({{ $appointment->id }})" title="Hủy lịch hẹn">
+                                                onclick="showCancelModal({{ $appointment->id }})" title="Hủy lịch hẹn">
                                                 <i class="bx bx-x-circle"></i>
                                             </button>
                                         @endif
@@ -382,6 +381,28 @@
         </div>
     </div>
 
+    {{-- Modal hủy lịch hẹn --}}
+    <div class="modal fade" id="cancelModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="cancelForm" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">Xác nhận hủy lịch hẹn</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn <strong>hủy lịch hẹn</strong> này không?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không</button>
+                        <button type="submit" class="btn btn-danger">Xác nhận hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script src="{{ asset('js/Appointment/index.js') }}"></script>
 
