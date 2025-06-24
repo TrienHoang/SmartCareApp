@@ -3,16 +3,7 @@
 @section('content')
     <h2>Thêm phòng ban</h2>
 
-    {{-- Thông báo lỗi --}}
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+
 
     {{-- Thông báo thành công --}}
     @if (session('success'))

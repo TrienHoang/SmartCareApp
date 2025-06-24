@@ -11,30 +11,7 @@
                         </h3>
                     </div>
                     <div class="card-body">
-                        @if ($errors->any())
-                            <div class="alert alert-danger alert-dismissible fade show shadow-sm border-left border-danger"
-                                role="alert">
-                                <strong><i class="fas fa-exclamation-triangle"></i> Có lỗi xảy ra:</strong>
-                                <ul class="mb-0 mt-2 pl-3">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Đóng">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        @endif
 
-                        @if (session('success'))
-                            <div class="alert alert-success alert-dismissible fade show shadow-sm border-left border-success"
-                                role="alert">
-                                <i class="fas fa-check-circle"></i> {{ session('success') }}
-                                <button type="button" class="close" data-dismiss="alert">
-                                    <span>&times;</span>
-                                </button>
-                            </div>
-                        @endif
 
                         <form action="{{ route('admin.doctors.store') }}" method="POST" id="doctorForm">
                             @csrf

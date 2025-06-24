@@ -8,7 +8,6 @@
         @method('PUT')
 
         {{-- Không sửa tên người dùng ở đây --}}
-        {{-- Nếu muốn hiển thị tên người dùng chỉ để tham khảo --}}
         <div class="mb-3">
             <label>Người dùng:</label>
             <input type="text" class="form-control"
@@ -35,6 +34,22 @@
                 @endforeach
             </select>
             @error('department_id')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
+        </div>
+
+        {{-- Thêm phần chọn phòng khám --}}
+        <div class="mb-3">
+            <label>Phòng khám:</label>
+            <select name="room_id" class="form-control">
+                <option value="">Chọn phòng khám</option>
+                @foreach($rooms as $room)
+                    <option value="{{ $room->id }}" {{ (old('room_id', $doctor->room_id) == $room->id) ? 'selected' : '' }}>
+                        {{ $room->name ?? 'Phòng ' . $room->room_number }}
+                    </option>
+                @endforeach
+            </select>
+            @error('room_id')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
