@@ -307,7 +307,7 @@
             Route::delete('/{department}', [DepartmentController::class, 'destroy'])->middleware('check_permission:delete_departments')->name('destroy');
         });
 
-
+        // lịch sử thanh toán
         Route::group([
             'prefix' => 'payment_histories',
             'as' => 'payment_histories.',

@@ -1,112 +1,123 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <title>Chi tiết thanh toán</title>
-    <style>
-        body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 13px;
-            color: #000;
-            margin: 40px;
-        }
+  <meta charset="UTF-8">
+  <title>Hóa đơn thanh toán</title>
+  <style>
+    body {
+      font-family: DejaVu Sans, sans-serif;
+      font-size: 12px;
+      margin: 30px 50px;
+      color: #000;
+    }
 
-        h2 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 22px;
-        }
+    h2 {
+      text-align: center;
+      color: #28a745;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 25px;
-        }
+    p.desc {
+      text-align: center;
+      font-size: 13px;
+      margin-bottom: 20px;
+      color: #333;
+    }
 
-        th, td {
-            border: 1px solid #000;
-            padding: 8px 10px;
-            text-align: left;
-        }
+    .sec-title {
+      font-size: 13px;
+      font-weight: bold;
+      margin-top: 18px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid #ccc;
+    }
 
-        th {
-            background-color: #f2f2f2;
-        }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+    }
 
-        .section-title {
-            background-color: #dbeafe;
-            font-weight: bold;
-            font-size: 14px;
-            text-align: center;
-            color: #1e3a8a;
-        }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 5px 8px;
+      text-align: left;
+    }
 
-        .highlight {
-            font-weight: bold;
-            color: #1c1c1c;
-        }
+    th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
 
-        .text-right {
-            text-align: right;
-        }
+    .badge {
+      background: #28a745;
+      color: white;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 11px;
+    }
 
-        .text-center {
-            text-align: center;
-        }
-
-        .no-border th, .no-border td {
-            border: none;
-            padding-top: 0;
-            padding-bottom: 0;
-        }
-    </style>
+    .footer {
+      text-align: center;
+      font-style: italic;
+      color: #555;
+      margin-top: 25px;
+      border-top: 1px dashed #bbb;
+      padding-top: 10px;
+    }
+  </style>
 </head>
 <body>
-    <h2>Chi tiết thanh toán #{{ $history->id }}</h2>
 
-    <table>
-        <tr><th colspan="2" class="section-title">Thông tin hóa đơn</th></tr>
-        <tr><th>Mã hóa đơn</th><td>{{ $history->payment_id }}</td></tr>
-        <tr><th>Trạng thái</th><td>{{ ucfirst($history->payment->status ?? 'Chưa xác định') }}</td></tr>
-    </table>
+  <h2>🎉 Thanh toán thành công!</h2>
+  <p class="desc">Cảm ơn bạn đã tin tưởng sử dụng dịch vụ. Dưới đây là thông tin hóa đơn của bạn.</p>
 
-    <table>
-        <tr><th colspan="2" class="section-title">Thông tin bệnh nhân</th></tr>
-        <tr><th>Họ tên</th><td>{{ optional($history->payment->patient)->full_name ?? '---' }}</td></tr>
-        <tr><th>Email</th><td>{{ optional($history->payment->patient)->email ?? '---' }}</td></tr>
-        <tr><th>SĐT</th><td>{{ optional($history->payment->patient)->phone ?? '---' }}</td></tr>
-        <tr><th>Ngày sinh</th><td>{{ optional(optional($history->payment->appointment->patient)->date_of_birth)->format('d/m/Y') ?? '---' }}</td></tr>
-    </table>
+  <div class="sec-title">Thông tin hóa đơn</div>
+  <table>
+    <tr><th>Mã</th><td>{{ $history->payment_id }}</td></tr>
+    <tr><th>Trạng thái</th><td><span class="badge">{{ ucfirst($history->payment->status ?? 'Không rõ') }}</span></td></tr>
+    <tr><th>Ngày</th><td>{{ $history->payment_date ? \Carbon\Carbon::parse($history->payment_date)->format('d/m/Y H:i') : '---' }}</td></tr>
+    <tr><th>Phương thức</th><td>{{ $history->payment_method ?? '---' }}</td></tr>
+    <tr><th>Số tiền</th><td><strong>{{ number_format($history->amount, 0, ',', '.') }} ₫</strong></td></tr>
+  </table>
 
-    <table>
-        <tr><th colspan="2" class="section-title">Thông tin dịch vụ</th></tr>
-        <tr><th>Tên dịch vụ</th><td>{{ optional($history->payment->service)->name ?? '---' }}</td></tr>
-        <tr><th>Mô tả</th><td>{{ optional($history->payment->service)->description ?? '---' }}</td></tr>
-    </table>
+  <div class="sec-title">Bệnh nhân</div>
+  <table>
+    <tr><th>Họ tên</th><td>{{ optional($history->payment->appointment->patient)->full_name ?? '---' }}</td></tr>
+    <tr><th>Liên hệ</th>
+      <td>
+        {{ optional($history->payment->appointment->patient)->phone ?? '---' }} / 
+        {{ optional($history->payment->appointment->patient)->email ?? '---' }}
+      </td>
+    </tr>
+    <tr><th>Ngày sinh</th><td>{{ optional($history->payment->appointment->patient->date_of_birth)->format('d/m/Y') ?? '---' }}</td></tr>
+    <tr><th>Địa chỉ</th><td>{{ optional($history->payment->appointment->patient)->address ?? '---' }}</td></tr>
+  </table>
 
-    <table>
-        <tr><th colspan="2" class="section-title">Thông tin bác sĩ</th></tr>
-        <tr><th>Họ tên</th><td>{{ optional($history->payment->doctor->user)->full_name ?? '---' }}</td></tr>
-        <tr><th>Chuyên môn</th><td>{{ optional($history->payment->doctor)->specialization ?? '---' }}</td></tr>
-        <tr><th>Phòng ban</th><td>{{ optional($history->payment->doctor->department)->name ?? '---' }}</td></tr>
-    </table>
+  <div class="sec-title">Dịch vụ</div>
+  <table>
+    <tr><th>Tên</th><td>{{ optional($history->payment->appointment->service)->name ?? '---' }}</td></tr>
+    <tr><th>Mô tả</th><td>{{ optional($history->payment->appointment->service)->description ?? '---' }}</td></tr>
+  </table>
 
-    <table>
-        <tr><th colspan="2" class="section-title">Chi tiết thanh toán</th></tr>
-        <tr><th>Số tiền</th><td class="highlight">{{ number_format($history->amount, 0, ',', '.') }} ₫</td></tr>
-        <tr><th>Phương thức</th><td>{{ $history->payment_method ?? '---' }}</td></tr>
-        <tr><th>Ngày thanh toán</th>
-            <td>
-                {{ $history->payment_date ? \Carbon\Carbon::parse($history->payment_date)->format('d/m/Y H:i') : 'Chưa thanh toán' }}
-            </td>
-        </tr>
-    </table>
+  <div class="sec-title">Bác sĩ</div>
+  <table>
+    <tr><th>Họ tên</th><td>{{ optional($history->payment->appointment->doctor->user)->full_name ?? '---' }}</td></tr>
+    <tr><th>Chuyên môn</th><td>{{ optional($history->payment->appointment->doctor)->specialization ?? '---' }}</td></tr>
+    <tr><th>Phòng ban</th><td>{{ optional($history->payment->appointment->doctor->department)->name ?? '---' }}</td></tr>
+  </table>
 
-    <table>
-        <tr><th colspan="2" class="section-title">Khuyến mãi (nếu có)</th></tr>
-        <tr><th>Tên chương trình</th><td>{{ optional($history->payment->promotion)->title ?? 'Không áp dụng' }}</td></tr>
-        <tr><th>Giảm giá (%)</th><td>{{ optional($history->payment->promotion)->discount_percentage ?? 0 }}%</td></tr>
-    </table>
+  <div class="sec-title">Ưu đãi</div>
+  <table>
+    <tr><th>Chương trình</th><td>{{ optional($history->payment->promotion)->title ?? 'Không có' }}</td></tr>
+    <tr><th>Giảm giá</th><td>{{ optional($history->payment->promotion)->discount_percentage ?? 0 }}%</td></tr>
+  </table>
+
+  <div class="footer">
+    🌟 Chúc quý khách mạnh khỏe, hạnh phúc.<br>
+    ❤️ Cảm ơn bạn đã đồng hành cùng chúng tôi!
+  </div>
+
 </body>
 </html>

@@ -1,15 +1,38 @@
 @extends('admin.dashboard')
 
 @section('content')
-<h2>Thêm phòng ban</h2>
-<form action="{{ route('admin.departments.store') }}" method="POST">
-    @csrf
-    <label>Tên phòng ban:</label>
-    <input type="text" name="name" class="form-control" required>
+    <h2>Thêm phòng ban</h2>
 
-    <label>Mô tả:</label>
-    <textarea name="description" class="form-control"></textarea>
 
-    <button type="submit" class="btn btn-success mt-3">Thêm</button>
-</form>
+
+    {{-- Thông báo thành công --}}
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Đóng">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
+    <form action="{{ route('admin.departments.store') }}" method="POST">
+        @csrf
+
+        <div class="mb-3">
+            <label for="name">Tên phòng ban:</label>
+            <input type="text" name="name" id="name"
+                   class="form-control @error('name') is-invalid @enderror"
+                   value="{{ old('name') }}" >
+            @error('name')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label for="description">Mô tả:</label>
+            <textarea name="description" id="description" class="form-control">{{ old('description') }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-success">Thêm</button>
+    </form>
 @endsection
