@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Department;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\ServiceCategory;
 
@@ -11,6 +12,7 @@ class ServiceFactory extends Factory
     {
         return [
             'service_cate_id' => ServiceCategory::inRandomOrder()->first()?->id ?? 1,
+            'department_id' => Department::inRandomOrder()->first()?->id ?? 1,
             'name' => $this->faker->randomElement([
                 'Khám tổng quát',
                 'Xét nghiệm máu',

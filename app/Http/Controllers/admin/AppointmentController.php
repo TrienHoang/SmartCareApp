@@ -159,6 +159,23 @@ class AppointmentController extends Controller
         $timeOnly = $appointmentDate->format('H:i');
         $day = $appointmentDate->format('Y-m-d');
 
+        $doctor   = Doctor::with('department')->findOrFail($request->doctor_id);
+        $service  = Service::with('department')->findOrFail($request->service_id);
+
+        if ((int) $doctor->department_id !== (int) $service->department_id) {
+            $recommendedList = Service::where('department_id', $doctor->department_id)
+                ->limit(5)
+                ->pluck('name')
+                ->implode(', ');
+
+            return back()->withErrors([
+                'service_id' => 'Dịch vụ bạn chọn thuộc chuyên khoa: ' . ($service->department->name ?? 'Không xác định') .
+                    ', nhưng bác sĩ được chỉ định hiện thuộc chuyên khoa: ' . ($doctor->department->name ?? 'Không xác định') . '.' .
+                    ' Bạn có thể chọn một trong các dịch vụ phù hợp: ' . $recommendedList . '.'
+            ])->withInput();
+        }
+
+
         // Kiểm tra xem bác sĩ có lịch hẹn trùng không
         $conflict = AppointmentHelper::isConflict(
             $request->doctor_id,
@@ -309,6 +326,22 @@ class AppointmentController extends Controller
         ) {
             return back()->withErrors([
                 'appointment_time' => 'Không thể hoàn thành lịch hẹn khi thời gian hẹn vẫn còn ở tương lai.'
+            ])->withInput();
+        }
+
+        $doctor = Doctor::with('department')->findOrFail($request->doctor_id);
+        $service = Service::with('department')->findOrFail($request->service_id);
+
+        if ((int) $doctor->department_id !== (int) $service->department_id) {
+            $recommendedList = Service::where('department_id', $doctor->department_id)
+                ->limit(5)
+                ->pluck('name')
+                ->implode(', ');
+
+            return back()->withErrors([
+                'service_id' => 'Dịch vụ bạn chọn thuộc chuyên khoa: ' . ($service->department->name ?? 'Không xác định') .
+                    ', nhưng bác sĩ được chỉ định hiện thuộc chuyên khoa: ' . ($doctor->department->name ?? 'Không xác định') . '.' .
+                    ' Bạn có thể chọn một trong các dịch vụ phù hợp: ' . $recommendedList . '.'
             ])->withInput();
         }
 

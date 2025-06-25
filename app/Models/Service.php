@@ -40,4 +40,7 @@ class Service extends Model
                     ->withTimestamps();
     }
 
+    public function department(){
+        return $this->belongsTo(Department::class);
+    }
 }
