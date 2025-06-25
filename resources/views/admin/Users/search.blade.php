@@ -4,11 +4,13 @@
 <div class="container-fluid py-4">
     <div class="card shadow-sm">
 
+        {{-- Thông báo lỗi (đã tương thích Bootstrap 5) --}}
         @if(session('error'))
             <div class="alert alert-danger m-3">
                 {{ session('error') }}
             </div>
         @endif
+
         <div class="table-responsive px-3">
             <table class="table table-bordered table-hover text-center align-middle">
                 <thead class="table-dark">
