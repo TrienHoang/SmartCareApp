@@ -30,6 +30,7 @@
                                 </option>
                             @endforeach
                         </select>
+                        <input type="hidden" name="patient_id" value="{{ $appointment->patient_id }}">
                         @error('patient_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -60,7 +61,7 @@
                             @foreach ($services as $service)
                                 <option value="{{ $service->id }}"
                                     {{ $appointment->service_id == $service->id ? 'selected' : '' }}>
-                                    {{ $service->name }}
+                                    {{ $service->name }} ({{ $service->department->name ?? 'Không rõ khoa' }})
                                 </option>
                             @endforeach
                         </select>
