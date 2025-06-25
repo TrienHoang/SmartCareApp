@@ -245,6 +245,19 @@ class AppointmentController extends Controller
         $appointmentTime = Carbon::parse($request->appointment_time);
         $endTime = $appointmentTime->copy()->addMinutes(30);
 
+        $patientConflict = Appointment::where('patient_id', $request->patient_id)
+            ->where(function ($q) use ($appointmentTime, $endTime) {
+                $q->where('appointment_time', '<', $endTime)
+                    ->where('end_time', '>', $appointmentTime);
+            })
+            ->exists();
+
+        if ($patientConflict) {
+            return back()->withErrors([
+                'appointment_time' => 'Bệnh nhân đã có lịch hẹn khác bị trùng thời gian này!'
+            ])->withInput();
+        }
+
         $requestData = $request->only([
             'patient_id',
             'doctor_id',
@@ -416,11 +429,26 @@ class AppointmentController extends Controller
         $newDoctor = Doctor::with('user')->find($request->doctor_id);
         $newService = Service::find($request->service_id);
 
-        // Tính thời gian kết thúc
-        $endTime = Carbon::parse($request->appointment_time)
-            ->copy()
-            ->addMinutes($newService->duration ?? 30);
+        $patientId = $request->has('patient_id') ? $request->patient_id : $appointment->patient_id;
 
+        $appointmentTime = Carbon::parse($request->appointment_time);
+        $endTime = $appointmentTime->copy()->addMinutes($newService->duration ?? 30);
+
+        $overlappedAppointments = Appointment::where('patient_id', $patientId)
+            ->where('id', '!=', $appointment->id)
+            ->where(function ($q) use ($appointmentTime, $endTime) {
+                $q->where('appointment_time', '<', $endTime)
+                    ->where('end_time', '>', $appointmentTime);
+            })
+            ->get();
+
+        if ($overlappedAppointments->count() > 0) {
+            // DEBUG, để xem trong thực tế nó có chạy vào đây không!
+            // dd($overlappedAppointments);
+            return back()->withErrors([
+                'appointment_time' => 'Bệnh nhân đã có lịch hẹn khác bị trùng thời gian này!'
+            ])->withInput();
+        }
         // Chuẩn bị dữ liệu cập nhật
         $updateData = [
             'doctor_id'        => $request->doctor_id,
