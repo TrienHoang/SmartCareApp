@@ -30,6 +30,7 @@
                                 </option>
                             @endforeach
                         </select>
+                        <input type="hidden" name="patient_id" value="{{ $appointment->patient_id }}">
                         @error('patient_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

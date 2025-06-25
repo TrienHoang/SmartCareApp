@@ -215,13 +215,8 @@
                                 <td>
                                     <div class="d-flex flex-column">
                                         <span>{{ $appointment->formatted_time }}</span>
-                                        @php
-                                            $endTime = \Carbon\Carbon::parse(
-                                                $appointment->appointment_time,
-                                            )->addMinutes($appointment->service->duration ?? 30);
-                                        @endphp
                                         <small class="text-muted">
-                                            {{ $endTime->format('H:i') }} (Dự kiến)
+                                            {{ \Carbon\Carbon::parse($appointment->end_time)->format('H:i') }} (Dự kiến)
                                         </small>
                                     </div>
                                 </td>

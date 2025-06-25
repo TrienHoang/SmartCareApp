@@ -243,7 +243,8 @@ class AppointmentController extends Controller
 
         // thời gian kết thúc dự kiến
         $appointmentTime = Carbon::parse($request->appointment_time);
-        $endTime = $appointmentTime->copy()->addMinutes(30);
+        $duration = $service->duration;
+        $endTime = $appointmentTime->copy()->addMinutes($duration);
 
         $patientConflict = Appointment::where('patient_id', $request->patient_id)
             ->where(function ($q) use ($appointmentTime, $endTime) {
@@ -432,7 +433,8 @@ class AppointmentController extends Controller
         $patientId = $request->has('patient_id') ? $request->patient_id : $appointment->patient_id;
 
         $appointmentTime = Carbon::parse($request->appointment_time);
-        $endTime = $appointmentTime->copy()->addMinutes($newService->duration ?? 30);
+        $duration = $newService->duration;
+        $endTime = $appointmentTime->copy()->addMinutes($duration);
 
         $overlappedAppointments = Appointment::where('patient_id', $patientId)
             ->where('id', '!=', $appointment->id)

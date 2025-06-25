@@ -25,7 +25,7 @@ class ServiceFactory extends Factory
             ]),
             'description' => $this->faker->sentence(),
             'price' => $this->faker->randomFloat(2, 100000, 1000000), // giá từ 100k - 1 triệu
-            'duration' => $this->faker->numberBetween(15, 90), // phút
+            'duration' => $this->faker->numberBetween(10, 30), // phút
             'status' => $this->faker->randomElement(['active', 'inactive']),
             'created_at' => now(),
             'updated_at' => now(),
