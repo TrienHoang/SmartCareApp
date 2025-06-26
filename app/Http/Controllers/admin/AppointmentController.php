@@ -159,6 +159,23 @@ class AppointmentController extends Controller
         $timeOnly = $appointmentDate->format('H:i');
         $day = $appointmentDate->format('Y-m-d');
 
+        $doctor   = Doctor::with('department')->findOrFail($request->doctor_id);
+        $service  = Service::with('department')->findOrFail($request->service_id);
+
+        if ((int) $doctor->department_id !== (int) $service->department_id) {
+            $recommendedList = Service::where('department_id', $doctor->department_id)
+                ->limit(5)
+                ->pluck('name')
+                ->implode(', ');
+
+            return back()->withErrors([
+                'service_id' => 'Dịch vụ bạn chọn thuộc chuyên khoa: ' . ($service->department->name ?? 'Không xác định') .
+                    ', nhưng bác sĩ được chỉ định hiện thuộc chuyên khoa: ' . ($doctor->department->name ?? 'Không xác định') . '.' .
+                    ' Bạn có thể chọn một trong các dịch vụ phù hợp: ' . $recommendedList . '.'
+            ])->withInput();
+        }
+
+
         // Kiểm tra xem bác sĩ có lịch hẹn trùng không
         $conflict = AppointmentHelper::isConflict(
             $request->doctor_id,
@@ -226,7 +243,21 @@ class AppointmentController extends Controller
 
         // thời gian kết thúc dự kiến
         $appointmentTime = Carbon::parse($request->appointment_time);
-        $endTime = $appointmentTime->copy()->addMinutes(30);
+        $duration = $service->duration;
+        $endTime = $appointmentTime->copy()->addMinutes($duration);
+
+        $patientConflict = Appointment::where('patient_id', $request->patient_id)
+            ->where(function ($q) use ($appointmentTime, $endTime) {
+                $q->where('appointment_time', '<', $endTime)
+                    ->where('end_time', '>', $appointmentTime);
+            })
+            ->exists();
+
+        if ($patientConflict) {
+            return back()->withErrors([
+                'appointment_time' => 'Bệnh nhân đã có lịch hẹn khác bị trùng thời gian này!'
+            ])->withInput();
+        }
 
         $requestData = $request->only([
             'patient_id',
@@ -312,6 +343,22 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
+        $doctor = Doctor::with('department')->findOrFail($request->doctor_id);
+        $service = Service::with('department')->findOrFail($request->service_id);
+
+        if ((int) $doctor->department_id !== (int) $service->department_id) {
+            $recommendedList = Service::where('department_id', $doctor->department_id)
+                ->limit(5)
+                ->pluck('name')
+                ->implode(', ');
+
+            return back()->withErrors([
+                'service_id' => 'Dịch vụ bạn chọn thuộc chuyên khoa: ' . ($service->department->name ?? 'Không xác định') .
+                    ', nhưng bác sĩ được chỉ định hiện thuộc chuyên khoa: ' . ($doctor->department->name ?? 'Không xác định') . '.' .
+                    ' Bạn có thể chọn một trong các dịch vụ phù hợp: ' . $recommendedList . '.'
+            ])->withInput();
+        }
+
         // Kiểm tra trùng lịch
         $conflict = AppointmentHelper::isConflict(
             $request->doctor_id,
@@ -383,11 +430,27 @@ class AppointmentController extends Controller
         $newDoctor = Doctor::with('user')->find($request->doctor_id);
         $newService = Service::find($request->service_id);
 
-        // Tính thời gian kết thúc
-        $endTime = Carbon::parse($request->appointment_time)
-            ->copy()
-            ->addMinutes($newService->duration ?? 30);
+        $patientId = $request->has('patient_id') ? $request->patient_id : $appointment->patient_id;
 
+        $appointmentTime = Carbon::parse($request->appointment_time);
+        $duration = $newService->duration;
+        $endTime = $appointmentTime->copy()->addMinutes($duration);
+
+        $overlappedAppointments = Appointment::where('patient_id', $patientId)
+            ->where('id', '!=', $appointment->id)
+            ->where(function ($q) use ($appointmentTime, $endTime) {
+                $q->where('appointment_time', '<', $endTime)
+                    ->where('end_time', '>', $appointmentTime);
+            })
+            ->get();
+
+        if ($overlappedAppointments->count() > 0) {
+            // DEBUG, để xem trong thực tế nó có chạy vào đây không!
+            // dd($overlappedAppointments);
+            return back()->withErrors([
+                'appointment_time' => 'Bệnh nhân đã có lịch hẹn khác bị trùng thời gian này!'
+            ])->withInput();
+        }
         // Chuẩn bị dữ liệu cập nhật
         $updateData = [
             'doctor_id'        => $request->doctor_id,

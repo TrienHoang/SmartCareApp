@@ -14,6 +14,8 @@
             <div class="card-body">
                 <form action="{{ route('admin.appointments.store') }}" method="POST">
                     @csrf
+
+                    <!-- Patient Name Input -->
                     <div class="mb-3">
                         <label for="patient_name" class="form-label">Bệnh nhân</label>
                         <input type="text" id="patient_name"
@@ -25,6 +27,7 @@
                         @enderror
                     </div>
 
+                    <!-- Doctor Selection -->
                     <div class="mb-3">
                         <label for="doctor_id" class="form-label">Bác sĩ</label>
                         <select name="doctor_id" id="doctor_id"
@@ -41,6 +44,7 @@
                         @enderror
                     </div>
 
+                    <!-- Service Selection -->
                     <div class="mb-3">
                         <label for="service_id" class="form-label">Dịch vụ</label>
                         <select name="service_id" id="service_id"
@@ -49,7 +53,7 @@
                             @foreach ($services as $service)
                                 <option value="{{ $service->id }}"
                                     {{ old('service_id') == $service->id ? 'selected' : '' }}>
-                                    {{ $service->name }}
+                                    {{ $service->name }} ({{ $service->department->name ?? 'Không rõ khoa' }})
                                 </option>
                             @endforeach
                         </select>
@@ -58,6 +62,7 @@
                         @enderror
                     </div>
 
+                    <!-- Appointment Time Input -->
                     <div class="mb-3">
                         <label for="appointment_time" class="form-label">Thời gian hẹn</label>
                         <input type="datetime-local" name="appointment_time" id="appointment_time"
@@ -68,14 +73,13 @@
                         @enderror
                     </div>
 
+                    <!-- Status Selection -->
                     <div class="mb-3">
                         <label for="status" class="form-label">Trạng thái</label>
                         <select name="status" id="status" class="form-select @error('status') is-invalid @enderror">
                             <option value="">Chọn trạng thái</option>
-                            <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Chờ xác nhận
-                            </option>
-                            <option value="confirmed" {{ old('status') == 'confirmed' ? 'selected' : '' }}>Đã xác nhận
-                            </option>
+                            <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Chờ xác nhận</option>
+                            <option value="confirmed" {{ old('status') == 'confirmed' ? 'selected' : '' }}>Đã xác nhận</option>
                             <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
                         </select>
                         @error('status')
@@ -83,6 +87,7 @@
                         @enderror
                     </div>
 
+                    <!-- Reason Input -->
                     <div class="mb-3">
                         <label for="reason" class="form-label">Lý do khám (nếu có)</label>
                         <input type="text" name="reason" id="reason" value="{{ old('reason') }}"
@@ -92,8 +97,11 @@
                         @enderror
                     </div>
 
-                    <button type="submit" class="btn btn-primary">Tạo lịch hẹn</button>
-                    <a href="{{ route('admin.appointments.index') }}" class="btn btn-secondary">Hủy</a>
+                    <!-- Submit and Cancel Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">Tạo lịch hẹn</button>
+                        <a href="{{ route('admin.appointments.index') }}" class="btn btn-secondary">Hủy</a>
+                    </div>
                 </form>
             </div>
         </div>

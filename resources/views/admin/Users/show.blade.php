@@ -7,7 +7,8 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+                {{-- Đã thay đổi bg-gradient-primary thành bg-primary để tương thích Bootstrap 5 --}}
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bx bx-user me-2"></i> Thông tin người dùng</h5>
                     <a href="{{ route('admin.users.index') }}" class="btn btn-light btn-sm">
                         <i class="bx bx-arrow-back"></i> Quay lại
@@ -16,7 +17,6 @@
 
                 <div class="card-body px-4 py-5">
                     <div class="row g-4">
-                        <!-- Avatar và Tên -->
                         <div class="col-md-4 d-flex flex-column align-items-center">
                             @if($user->avatar)
                                 <img src="{{ asset('storage/' . $user->avatar) }}"
@@ -34,7 +34,6 @@
                             <span class="text-muted text-center">{{ $user->role->name ?? 'Chưa phân quyền' }}</span>
                         </div>
 
-                        <!-- Thông tin -->
                         <div class="col-md-8">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -85,9 +84,8 @@
                             </div>
                         </div>
                     </div>
-                </div> <!-- end card-body -->
+                </div>
             </div>
         </div>
     </div>
-</div>
 @endsection

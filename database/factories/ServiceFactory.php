@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Department;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\ServiceCategory;
 
@@ -11,6 +12,7 @@ class ServiceFactory extends Factory
     {
         return [
             'service_cate_id' => ServiceCategory::inRandomOrder()->first()?->id ?? 1,
+            'department_id' => Department::inRandomOrder()->first()?->id ?? 1,
             'name' => $this->faker->randomElement([
                 'Khám tổng quát',
                 'Xét nghiệm máu',
@@ -23,7 +25,7 @@ class ServiceFactory extends Factory
             ]),
             'description' => $this->faker->sentence(),
             'price' => $this->faker->randomFloat(2, 100000, 1000000), // giá từ 100k - 1 triệu
-            'duration' => $this->faker->numberBetween(15, 90), // phút
+            'duration' => $this->faker->numberBetween(10, 30), // phút
             'status' => $this->faker->randomElement(['active', 'inactive']),
             'created_at' => now(),
             'updated_at' => now(),

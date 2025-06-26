@@ -11,38 +11,42 @@
             <div class="card-header">
                 <h5>Chỉnh sửa lịch hẹn</h5>
             </div>
+
             @if (session('error'))
-                toastr.error("{{ session('error') }}", "Lỗi");
+                <script>
+                    toastr.error("{{ session('error') }}", "Lỗi");
+                </script>
             @endif
+
             <div class="card-body">
                 <form action="{{ route('admin.appointments.update', $appointment->id) }}" method="POST">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="status" value="{{ $appointment->status }}">
+
+                    <!-- Patient Selection -->
                     <div class="mb-3">
                         <label for="patient_id" class="form-label">Bệnh nhân</label>
-                        <select name="patient_id" id="patient_id"
-                            class="form-select @error('patient_id') is-invalid @enderror" disabled>
+                        <select name="patient_id" id="patient_id" class="form-select @error('patient_id') is-invalid @enderror" disabled>
                             @foreach ($patients as $patient)
-                                <option value="{{ $patient->id }}"
-                                    {{ $appointment->patient_id == $patient->id ? 'selected' : '' }}>
+                                <option value="{{ $patient->id }}" {{ $appointment->patient_id == $patient->id ? 'selected' : '' }}>
                                     {{ $patient->full_name }}
                                 </option>
                             @endforeach
                         </select>
+                        <input type="hidden" name="patient_id" value="{{ $appointment->patient_id }}">
                         @error('patient_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
+                    <!-- Doctor Selection -->
                     <div class="mb-3">
                         <label for="doctor_id" class="form-label">Bác sĩ</label>
-                        <select name="doctor_id" id="doctor_id"
-                            class="form-select @error('doctor_id') is-invalid @enderror">
+                        <select name="doctor_id" id="doctor_id" class="form-select @error('doctor_id') is-invalid @enderror">
                             <option value="">Chọn bác sĩ</option>
                             @foreach ($doctors as $doctor)
-                                <option value="{{ $doctor->id }}"
-                                    {{ $appointment->doctor_id == $doctor->id ? 'selected' : '' }}>
+                                <option value="{{ $doctor->id }}" {{ $appointment->doctor_id == $doctor->id ? 'selected' : '' }}>
                                     {{ $doctor->user->full_name }}
                                 </option>
                             @endforeach
@@ -52,15 +56,14 @@
                         @enderror
                     </div>
 
+                    <!-- Service Selection -->
                     <div class="mb-3">
                         <label for="service_id" class="form-label">Dịch vụ</label>
-                        <select name="service_id" id="service_id"
-                            class="form-select @error('service_id') is-invalid @enderror">
+                        <select name="service_id" id="service_id" class="form-select @error('service_id') is-invalid @enderror">
                             <option value="">Chọn dịch vụ</option>
                             @foreach ($services as $service)
-                                <option value="{{ $service->id }}"
-                                    {{ $appointment->service_id == $service->id ? 'selected' : '' }}>
-                                    {{ $service->name }}
+                                <option value="{{ $service->id }}" {{ $appointment->service_id == $service->id ? 'selected' : '' }}>
+                                    {{ $service->name }} ({{ $service->department->name ?? 'Không rõ khoa' }})
                                 </option>
                             @endforeach
                         </select>
@@ -69,6 +72,7 @@
                         @enderror
                     </div>
 
+                    <!-- Appointment Time Input -->
                     <div class="mb-3">
                         <label for="appointment_time" class="form-label">Thời gian hẹn</label>
                         <input type="datetime-local" name="appointment_time" id="appointment_time"
@@ -79,52 +83,35 @@
                         @enderror
                     </div>
 
+                    <!-- Status Selection -->
                     <div class="mb-3">
                         <label for="status" class="form-label">Trạng thái</label>
-                        @php
-                            $currentStatus = $appointment->status;
-                        @endphp
                         <select name="status" id="status" class="form-select @error('status') is-invalid @enderror">
-
-                            <option value="pending" {{ $currentStatus === 'pending' ? 'selected' : '' }} disabled>
-                                Chờ xác nhận
-                            </option>
-
-                            <option value="confirmed" {{ $currentStatus === 'confirmed' ? 'selected' : '' }}
-                                {{ !in_array($currentStatus, ['pending']) ? 'disabled' : '' }}>
-                                Đã xác nhận
-                            </option>
-
-                            <option value="completed" {{ $currentStatus === 'completed' ? 'selected' : '' }}
-                                {{ $currentStatus !== 'confirmed' ? 'disabled' : '' }}>
-                                Hoàn thành
-                            </option>
-
-                            <option value="cancelled" {{ $currentStatus === 'cancelled' ? 'selected' : '' }}
-                                {{ !in_array($currentStatus, ['pending', 'confirmed']) ? 'disabled' : '' }}>
-                                Đã hủy
-                            </option>
-
+                            <option value="pending" {{ $appointment->status === 'pending' ? 'selected' : '' }} disabled>Chờ xác nhận</option>
+                            <option value="confirmed" {{ $appointment->status === 'confirmed' ? 'selected' : '' }} {{ !in_array($appointment->status, ['pending']) ? 'disabled' : '' }}>Đã xác nhận</option>
+                            <option value="completed" {{ $appointment->status === 'completed' ? 'selected' : '' }} {{ $appointment->status !== 'confirmed' ? 'disabled' : '' }}>Hoàn thành</option>
+                            <option value="cancelled" {{ $appointment->status === 'cancelled' ? 'selected' : '' }} {{ !in_array($appointment->status, ['pending', 'confirmed']) ? 'disabled' : '' }}>Đã hủy</option>
                         </select>
                         @error('status')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
-
-
+                    <!-- Reason Input -->
                     <div class="mb-3">
                         <label for="reason" class="form-label">Lý do khám (nếu có)</label>
-                        <input type="text" name="reason" id="reason"
-                            value="{{ old('reason', $appointment->reason) }}"
+                        <input type="text" name="reason" id="reason" value="{{ old('reason', $appointment->reason) }}"
                             class="form-control @error('reason') is-invalid @enderror">
                         @error('reason')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    <button type="submit" class="btn btn-primary">Cập nhật</button>
-                    <a href="{{ route('admin.appointments.index') }}" class="btn btn-secondary">Hủy</a>
+                    <!-- Submit and Cancel Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        <a href="{{ route('admin.appointments.index') }}" class="btn btn-secondary">Hủy</a>
+                    </div>
                 </form>
             </div>
         </div>

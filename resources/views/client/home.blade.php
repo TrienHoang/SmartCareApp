@@ -3,5 +3,5 @@
     Đây là trang chủ
 </h1>
 
-<a href="{{ route('login') }}">Đăng nhập</a> 
+<a href="{{ route('login') }}">Đăng nhập</a>
 </center>
