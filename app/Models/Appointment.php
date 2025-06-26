@@ -51,7 +51,7 @@ class Appointment extends Model
     // Relationship với Payment
     public function payment()
     {
-        return $this->hasOne(Payment::class, 'appointment_id');
+        return $this->hasOne(Payment::class, 'appointment_id')->latestOfMany();
     }
 
     // Relationship với Medical Record
@@ -75,8 +75,8 @@ class Appointment extends Model
     // Accessor cho formatted time
     public function getFormattedTimeAttribute()
     {
-        return $this->appointment_time ? 
-            Carbon::parse($this->appointment_time)->format('d/m/Y H:i') : 
+        return $this->appointment_time ?
+            Carbon::parse($this->appointment_time)->format('d/m/Y H:i') :
             'N/A';
     }
 
@@ -133,9 +133,10 @@ class Appointment extends Model
     public function scopeThisMonth($query)
     {
         return $query->whereMonth('appointment_time', Carbon::now()->month)
-                    ->whereYear('appointment_time', Carbon::now()->year);
+            ->whereYear('appointment_time', Carbon::now()->year);
     }
-    public function order(){
+    public function order()
+    {
         return $this->hasOne(Order::class, 'appointment_id');
     }
 }

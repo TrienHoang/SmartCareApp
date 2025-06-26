@@ -52,3 +52,10 @@ function changePagination(perPage) {
     url.searchParams.set('per_page', perPage);
     window.location.href = url.toString();
 }
+
+function showCancelModal(appointmentId) {
+    const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+    const form = document.getElementById('cancelForm');
+    form.action = `/admin/appointments/${appointmentId}/cancel`;
+    modal.show();
+}

@@ -12,13 +12,13 @@
                 <h5>Chỉnh sửa lịch hẹn</h5>
             </div>
             @if (session('error'))
-                <div class="alert alert-danger">{{ session('error') }}</div>
+                toastr.error("{{ session('error') }}", "Lỗi");
             @endif
             <div class="card-body">
                 <form action="{{ route('admin.appointments.update', $appointment->id) }}" method="POST">
                     @csrf
                     @method('PUT')
-
+                    <input type="hidden" name="status" value="{{ $appointment->status }}">
                     <div class="mb-3">
                         <label for="patient_id" class="form-label">Bệnh nhân</label>
                         <select name="patient_id" id="patient_id"

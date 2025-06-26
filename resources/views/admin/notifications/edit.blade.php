@@ -68,8 +68,6 @@
                                             <li>{{ $error }}</li>
                                         @endforeach
                                     </ul>
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
                                 </div>
                             @endif
 
@@ -79,8 +77,6 @@
                                         <i class="bx bx-error-circle me-2" style="font-size: 18px;"></i>
                                         {{ session('error') }}
                                     </div>
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
                                 </div>
                             @endif
 

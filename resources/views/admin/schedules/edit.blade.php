@@ -37,13 +37,13 @@
             <label class="form-label">Thứ</label>
             <select class="form-select" id="thu_hien_thi" disabled>
                 <option value="">-- Các ngày trong tuần --</option>
-                <option value="Monday">Thứ Hai</option>
-                <option value="Tuesday">Thứ Ba</option>
-                <option value="Wednesday">Thứ Tư</option>
-                <option value="Thursday">Thứ Năm</option>
-                <option value="Friday">Thứ Sáu</option>
-                <option value="Saturday">Thứ Bảy</option>
-                <option value="Sunday">Chủ Nhật</option>
+                <option value="Thứ hai">Thứ Hai</option>
+                <option value="Thứ ba">Thứ Ba</option>
+                <option value="Thứ tư">Thứ Tư</option>
+                <option value="Thứ năm">Thứ Năm</option>
+                <option value="Thứ sáu">Thứ Sáu</option>
+                <option value="Thứ bảy">Thứ Bảy</option>
+                <option value="Chủ nhật">Chủ Nhật</option>
             </select>
             <input type="hidden" name="day_of_week" id="thu_gui" value="{{ old('day_of_week', $schedule->day_of_week) }}">
             @error('day_of_week')
@@ -87,13 +87,13 @@
         const inputGioKetThuc = document.getElementById('gio_ket_thuc');
 
         const banDoThu = {
-            0: 'Sunday',
-            1: 'Monday',
-            2: 'Tuesday',
-            3: 'Wednesday',
-            4: 'Thursday',
-            5: 'Friday',
-            6: 'Saturday'
+            0: 'Thứ hai',
+            1: 'Thứ ba',
+            2: 'Thứ tư',
+            3: 'Thứ năm',
+            4: 'Thứ sáu',
+            5: 'Thứ bảy',
+            6: 'Chủ nhật'
         };
 
         function capNhatThuTuNgay(dateStr) {

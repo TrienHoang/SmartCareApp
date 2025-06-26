@@ -65,9 +65,6 @@
                         <i class="feather icon-x-circle mr-2"></i>
                         {{ session('error') }}
                     </div>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
                 </div>
             @endif
 

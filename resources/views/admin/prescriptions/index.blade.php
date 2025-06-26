@@ -109,20 +109,16 @@
                         @endcan
                     </div>
                     <div class="card-body">
-                        @if (session('success'))
-                            <div class="alert alert-success alert-dismissible">
-                                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                                {{ session('success') }}
-                            </div>
-                        @endif
+                        <script>
+                            @if (session('success'))
+                                toastr.success("{{ session('success') }}", "Thành công");
+                            @endif
 
-                        @if (session('date_swapped'))
-                            <div class="col-12">
-                                <div class="alert alert-warning mt-2">
-                                    Ngày bắt đầu lớn hơn ngày kết thúc. Hệ thống đã tự động hoán đổi giúp bạn.
-                                </div>
-                            </div>
-                        @endif
+                            @if (session('error'))
+                                toastr.error("{{ session('error') }}", "Lỗi");
+                            @endif
+                        </script>
+
 
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped">
@@ -158,26 +154,21 @@
                                             <td>{{ $prescription->prescriptionItems->count() }} loại</td>
                                             <td>{{ $prescription->prescriptionItems->sum('quantity') }}</td>
                                             <td>
-                                                <div class="btn-group btn-group-sm">
+                                                <div class="d-flex gap-1">
                                                     <a href="{{ route('admin.prescriptions.show', $prescription->id) }}"
-                                                        class="btn btn-info" title="Xem chi tiết">
+                                                        class="btn btn-sm btn-info" title="Xem chi tiết">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     <a href="{{ route('admin.prescriptions.edit', $prescription->id) }}"
-                                                        class="btn btn-warning" title="Chỉnh sửa">
+                                                        class="btn btn-sm btn-warning" title="Chỉnh sửa">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <form
-                                                        action="{{ route('admin.prescriptions.destroy', $prescription->id) }}"
-                                                        method="POST"
-                                                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa mềm đơn thuốc này không?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger" title="Xóa đơn thuốc"
-                                                            style="width: 20px">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" class="btn btn-sm btn-danger"
+                                                        data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                        data-id="{{ $prescription->id }}"
+                                                        data-name="Đơn thuốc #{{ $prescription->id }}">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -198,4 +189,77 @@
             </div>
         </div>
     </div>
+    <!-- Modal xác nhận xóa -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+                <div class="modal-body">
+                    <i class="bx bx-error-circle fs-1 text-warning mb-2"></i>
+                    <h4 class="modal-title mb-2">Xác nhận xóa mềm</h4>
+                    <p id="deleteModalMessage">
+                        Bạn có chắc chắn muốn xóa mục này? Dữ liệu sẽ được lưu trong thùng rác và có thể khôi phục sau.
+                    </p>
+                    <div class="d-flex justify-content-center gap-2 mt-3">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Xóa</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
+
+
+@push('scripts')
+    <script>
+        let deleteId = null;
+
+        const deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function(event) {
+            const triggerButton = event.relatedTarget;
+            deleteId = triggerButton.getAttribute('data-id');
+            const name = triggerButton.getAttribute('data-name');
+
+            document.getElementById('deleteModalMessage').textContent =
+                `Bạn có chắc chắn muốn xóa ${name}? Dữ liệu sẽ được lưu trong thùng rác và có thể khôi phục sau.`;
+        });
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            if (deleteId) {
+                const deleteUrl = `{{ route('admin.prescriptions.destroy', ':id') }}`.replace(':id', deleteId);
+
+                fetch(deleteUrl, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.message) {
+                            // Lưu thông báo vào localStorage để hiển thị sau reload
+                            localStorage.setItem('flashSuccess', data.message);
+
+                            const modalInstance = bootstrap.Modal.getInstance(deleteModal);
+                            modalInstance.hide();
+
+                            // Tải lại trang
+                            window.location.href = "{{ route('admin.prescriptions.index') }}";
+                        }
+                    })
+                    .catch(() => {});
+            }
+        });
+
+        // Khi load lại trang, kiểm tra nếu có thông báo thành công thì hiển thị
+        window.addEventListener('DOMContentLoaded', function() {
+            const successMessage = localStorage.getItem('flashSuccess');
+            if (successMessage) {
+                toastr.success(successMessage, 'Thành công');
+                localStorage.removeItem('flashSuccess');
+            }
+        });
+    </script>
+@endpush

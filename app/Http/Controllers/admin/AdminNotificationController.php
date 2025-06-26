@@ -19,23 +19,32 @@ class AdminNotificationController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Admin_notification::orderBy('created_at', 'desc');
+        // Khởi tạo query cơ bản
+        $query = Admin_notification::query()->orderBy('created_at', 'desc');
 
-        // Lọc và tìm kiếm
+        // Lọc theo từ khóa tìm kiếm
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where('title', 'like', '%' . $search . '%')
-                ->orWhere('content', 'like', '%' . $search . '%');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('content', 'like', '%' . $search . '%');
+            });
         }
+
+        // Lọc theo trạng thái
         if ($request->filled('status')) {
             $query->where('status', $request->input('status'));
         }
+
+        // Lọc theo loại
         if ($request->filled('type')) {
             $query->where('type', $request->input('type'));
         }
 
+        // Phân trang kết quả
         $notifications = $query->paginate(10);
 
+        // Xử lý dữ liệu hiển thị recipients
         foreach ($notifications as $notification) {
             $recipientIds = json_decode($notification->recipient_ids, true) ?? [];
 
@@ -50,11 +59,24 @@ class AdminNotificationController extends Controller
             }
         }
 
-        // Định nghĩa các loại và trạng thái để hiển thị trong bộ lọc
+        // Thống kê số lượng thông báo theo trạng thái
+        $statusCounts = [
+            'sent' => Admin_notification::where('status', 'sent')->count(),
+            'scheduled' => Admin_notification::where('status', 'scheduled')->count(),
+            'sending' => Admin_notification::where('status', 'sending')->count(),
+            'failed' => Admin_notification::where('status', 'failed')->count(),
+        ];
+
+        // Định nghĩa các loại và trạng thái cho bộ lọc
         $notificationTypes = ['system', 'appointment_related', 'promotion', 'reminder', 'other'];
         $notificationStatuses = ['draft', 'scheduled', 'sending', 'sent', 'failed'];
 
-        return view('admin.notifications.index', compact('notifications', 'notificationTypes', 'notificationStatuses'));
+        return view('admin.notifications.index', compact(
+            'notifications',
+            'notificationTypes',
+            'notificationStatuses',
+            'statusCounts'
+        ));
     }
 
     /**
@@ -73,8 +95,6 @@ class AdminNotificationController extends Controller
     public function store(Request $request)
     {
 
-        // dd($request->all()); 
-
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
@@ -84,6 +104,29 @@ class AdminNotificationController extends Controller
             'recipient_ids.*' => 'integer',
             'scheduled_at' => 'nullable|date|after_or_equal:now',
             'send_now_checkbox' => 'nullable|boolean',
+        ], [
+            'title.required' => 'Tiêu đề là bắt buộc.',
+            'title.string' => 'Tiêu đề phải là chuỗi ký tự.',
+            'title.max' => 'Tiêu đề không được vượt quá 255 ký tự.',
+        
+            'content.required' => 'Nội dung là bắt buộc.',
+            'content.string' => 'Nội dung phải là chuỗi ký tự.',
+        
+            'type.required' => 'Loại thông báo là bắt buộc.',
+            'type.string' => 'Loại thông báo phải là chuỗi.',
+            'type.in' => 'Loại thông báo không hợp lệ.',
+        
+            'recipient_type.required' => 'Loại người nhận là bắt buộc.',
+            'recipient_type.string' => 'Loại người nhận phải là chuỗi.',
+            'recipient_type.in' => 'Loại người nhận không hợp lệ.',
+        
+            'recipient_ids.array' => 'Danh sách người nhận phải là một mảng.',
+            'recipient_ids.*.integer' => 'Mỗi ID người nhận phải là một số nguyên.',
+        
+            'scheduled_at.date' => 'Thời gian gửi phải là định dạng ngày hợp lệ.',
+            'scheduled_at.after_or_equal' => 'Thời gian gửi phải lớn hơn hoặc bằng thời gian hiện tại.',
+        
+            'send_now_checkbox.boolean' => 'Giá trị gửi ngay phải là true hoặc false.',
         ]);
 
         try {
@@ -182,6 +225,27 @@ class AdminNotificationController extends Controller
             'recipient_ids' => 'nullable|array',
             'recipient_ids.*' => 'integer',
             'scheduled_at' => 'nullable|date|after_or_equal:now',
+        ], [
+            'title.required' => 'Tiêu đề là bắt buộc.',
+            'title.string' => 'Tiêu đề phải là chuỗi.',
+            'title.max' => 'Tiêu đề không được vượt quá 255 ký tự.',
+        
+            'content.required' => 'Nội dung là bắt buộc.',
+            'content.string' => 'Nội dung phải là chuỗi.',
+        
+            'type.required' => 'Loại thông báo là bắt buộc.',
+            'type.string' => 'Loại thông báo phải là chuỗi.',
+            'type.in' => 'Loại thông báo không hợp lệ.',
+        
+            'recipient_type.required' => 'Loại người nhận là bắt buộc.',
+            'recipient_type.string' => 'Loại người nhận phải là chuỗi.',
+            'recipient_type.in' => 'Loại người nhận không hợp lệ.',
+        
+            'recipient_ids.array' => 'Danh sách người nhận phải là một mảng.',
+            'recipient_ids.*.integer' => 'ID người nhận phải là số nguyên.',
+        
+            'scheduled_at.date' => 'Thời gian gửi phải là một ngày hợp lệ.',
+            'scheduled_at.after_or_equal' => 'Thời gian gửi phải từ hiện tại trở đi.',
         ]);
 
         try {

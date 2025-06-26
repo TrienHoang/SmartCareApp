@@ -98,6 +98,17 @@
                 </div>
 
                 <div class="col-md-2">
+                    <label class="form-label">Thanh toán</label>
+                    <select class="form-control" name="payment_status">
+                        <option value="">Tất cả</option>
+                        <option value="completed" {{ request('payment_status') == 'completed' ? 'selected' : '' }}>Hoàn tất
+                        </option>
+                        <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Chưa thanh
+                            toán</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
                     <label class="form-label">Từ ngày</label>
                     <input type="date" class="form-control" name="date_from"
                         value="{{ old('date_from', $from_input ?? request('date_from')) }}">
@@ -120,25 +131,15 @@
             </form>
         </div>
 
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bx bx-check-circle"></i> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
+        <script>
+            @if (session('success'))
+                toastr.success("{{ session('success') }}", "Thành công");
+            @endif
 
-        @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bx bx-error-circle"></i> {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
-        @if (session('date_swapped'))
-            <div class="alert alert-warning mt-2">
-                Ngày bắt đầu lớn hơn ngày kết thúc. Hệ thống đã tự động hoán đổi giúp bạn.
-            </div>
-        @endif
+            @if (session('error'))
+                toastr.error("{{ session('error') }}", "Lỗi");
+            @endif
+        </script>
 
         <!-- Bảng danh sách -->
         <div class="card">
@@ -172,7 +173,6 @@
                                 </a>
                             </th>
                             <th>Bác sĩ</th>
-                            <th>Dịch vụ</th>
                             <th>Phòng/Khoa</th>
                             <th>
                                 <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'appointment_time', 'sort_order' => request('sort_order') == 'asc' ? 'desc' : 'asc']) }}"
@@ -203,15 +203,6 @@
                                     <div class="d-flex flex-column">
                                         <span>{{ $appointment->doctor->user->full_name ?? 'N/A' }}</span>
                                         <small class="text-muted">{{ $appointment->doctor->specialization ?? '' }}</small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex flex-column">
-                                        <span>{{ $appointment->service->name ?? 'N/A' }}</span>
-                                        @if ($appointment->service->price)
-                                            <small
-                                                class="text-success fw-bold">{{ number_format($appointment->service->price, 0, ',', '.') }}đ</small>
-                                        @endif
                                     </div>
                                 </td>
                                 <td>
@@ -266,8 +257,10 @@
                                     </span>
                                 </td>
                                 <td>
-                                    @if ($appointment->payment && $appointment->payment->status === 'paid')
-                                        <span class="badge bg-success">Đã thanh toán</span>
+                                    @if (
+                                        ($appointment->payment && $appointment->payment->status === 'paid') ||
+                                            ($appointment->order && $appointment->order->status === 'completed'))
+                                        <span class="badge bg-success">Hoàn tất</span>
                                     @else
                                         <span class="badge bg-danger">Chưa thanh toán</span>
                                     @endif
@@ -285,12 +278,15 @@
                                                 <i class="bx bx-edit"></i>
                                             </a>
                                         @endif
-                                        @if ($appointment->payment && $appointment->payment->status !== 'paid')
+                                        @if (
+                                            $appointment->status !== 'completed' &&
+                                                !($appointment->order && $appointment->order->status === 'completed') &&
+                                                $appointment->payment &&
+                                                $appointment->payment->status !== 'paid')
                                             <form action="{{ route('admin.appointments.pay', $appointment->id) }}"
                                                 method="POST" class="d-inline">
                                                 @csrf
-                                                <button type="submit" class="btn btn-sm btn-outline-success">Thanh
-                                                    toán</button>
+                                                <button class="btn btn-sm btn-outline-success">Thanh toán</button>
                                             </form>
                                         @endif
 
@@ -302,9 +298,18 @@
                                             </button>
                                         @endif
 
+                                        @if (optional($appointment->payment)->status !== 'paid')
+                                            <form action="{{ route('admin.appointments.pay', $appointment->id) }}"
+                                                method="POST" class="d-inline">
+                                                @csrf
+                                                <button class="btn btn-sm btn-outline-success">Thanh toán</button>
+                                            </form>
+                                        @endif
+
+
                                         @if (in_array($appointment->status, ['pending', 'confirmed']))
                                             <button class="btn btn-sm btn-outline-danger"
-                                                onclick="cancelAppointment({{ $appointment->id }})" title="Hủy lịch hẹn">
+                                                onclick="showCancelModal({{ $appointment->id }})" title="Hủy lịch hẹn">
                                                 <i class="bx bx-x-circle"></i>
                                             </button>
                                         @endif
@@ -376,6 +381,28 @@
         </div>
     </div>
 
+    {{-- Modal hủy lịch hẹn --}}
+    <div class="modal fade" id="cancelModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="cancelForm" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">Xác nhận hủy lịch hẹn</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn <strong>hủy lịch hẹn</strong> này không?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không</button>
+                        <button type="submit" class="btn btn-danger">Xác nhận hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script src="{{ asset('js/Appointment/index.js') }}"></script>
 
