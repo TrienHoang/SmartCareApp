@@ -541,3 +541,9 @@
         // Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('payment_histories.index');
         // Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('payment_histories.show');
     });
+
+
+    // phân quyền bác sĩ
+    Route::get('/doctor/dashboard', function () {
+        return view('doctor.dashboard');
+    })->name('dashboard');
