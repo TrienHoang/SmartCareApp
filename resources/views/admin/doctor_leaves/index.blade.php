@@ -11,7 +11,7 @@
                 <div class="col-12">
                     <div class="d-flex align-items-center mb-3">
                         <div class="icon-circle bg-primary me-3 ">
-                            <i class="bx bx-calendar-alt text-white "></i> {{-- Icon for Doctor Leaves --}}
+                            <i class="bx bx-calendar-alt text-white "></i>
                         </div>
                         <div>
                             <h2 class="content-header-title mb-0 text-primary fw-bold">Quản lý Ngày nghỉ Bác sĩ</h2>
@@ -33,8 +33,79 @@
         </div>
     </div>
 
-    {{-- Notification Messages (handled by admin.dashboard with Toastr, so these can be removed or simplified) --}}
-    {{-- Kept for explicit session flash messages if Toastr is not globally integrated for all types --}}
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 col-12">
+            <div class="card gradient-card bg-gradient-success">
+                <div class="card-body text-white">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar bg-rgba-white mr-2">
+                            <div class="avatar-content">
+                                <i class="bx bx-user font-medium-5"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-white mb-0">{{ $stats['total_doctors'] ?? $doctorLeaves->pluck('doctor_id')->unique()->count() }}</h4>
+                            <small class="text-white">Tổng bác sĩ nghỉ</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-12">
+            <div class="card gradient-card bg-gradient-info">
+                <div class="card-body text-white">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar bg-rgba-white mr-2">
+                            <div class="avatar-content">
+                                <i class="bx bx-calendar-check font-medium-5"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-white mb-0">{{ $stats['total_leaves'] ?? $doctorLeaves->total() }}</h4>
+                            <small class="text-white">Tổng ngày nghỉ</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-12">
+            <div class="card gradient-card bg-gradient-warning">
+                <div class="card-body text-white">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar bg-rgba-white mr-2">
+                            <div class="avatar-content">
+                                <i class="bx bx-time font-medium-5"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-white mb-0">{{ $stats['pending'] ?? $doctorLeaves->where('approved', false)->count() }}</h4>
+                            <small class="text-white">Chưa duyệt</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-12">
+            <div class="card gradient-card bg-gradient-danger">
+                <div class="card-body text-white">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar bg-rgba-white mr-2">
+                            <div class="avatar-content">
+                                <i class="bx bx-check-circle font-medium-5"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-white mb-0">{{ $stats['approved'] ?? $doctorLeaves->where('approved', true)->count() }}</h4>
+                            <small class="text-white">Đã duyệt</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Notification Messages --}}
     @foreach (['success', 'error', 'info'] as $msg)
         @if (session($msg))
             <div class="alert alert-{{ $msg == 'error' ? 'danger' : $msg }} alert-dismissible fade show" role="alert">
@@ -52,17 +123,14 @@
                     <label for="keyword" class="form-label fw-semibold mb-0 small">Tên bác sĩ</label>
                     <input type="text" name="keyword" id="keyword" class="form-control" placeholder="Tìm bác sĩ..." value="{{ request('keyword') }}">
                 </div>
-
                 <div class="col-md-6 col-lg-3">
                     <label for="start_date" class="form-label fw-semibold mb-0 small">Từ ngày</label>
                     <input type="date" name="start_date" id="start_date" class="form-control" value="{{ request('start_date') }}">
                 </div>
-
                 <div class="col-md-6 col-lg-3">
                     <label for="end_date" class="form-label fw-semibold mb-0 small">Đến ngày</label>
                     <input type="date" name="end_date" id="end_date" class="form-control" value="{{ request('end_date') }}">
                 </div>
-
                 <div class="col-md-6 col-lg-3">
                     <label for="approved" class="form-label fw-semibold mb-0 small">Trạng thái</label>
                     <select name="approved" id="approved" class="form-select">
@@ -71,8 +139,7 @@
                         <option value="0" {{ request('approved') === '0' ? 'selected' : '' }}>Chưa duyệt</option>
                     </select>
                 </div>
-
-                <div class="col-12 d-flex justify-content-end gap-2"> {{-- Adjusted to span full width and justify to end --}}
+                <div class="col-12 d-flex justify-content-end gap-2">
                     <button type="submit" class="btn btn-primary d-flex align-items-center">
                         <i class="bx bx-search me-1"></i> Lọc
                     </button>
@@ -92,7 +159,7 @@
         <div class="card-body p-0">
             @if($doctorLeaves->isEmpty())
                 <div class="text-center text-muted py-5 empty-state">
-                    <i class="bx bx-info-circle mb-2" style="font-size: 3rem;"></i> {{-- Boxicon for info --}}
+                    <i class="bx bx-info-circle mb-2" style="font-size: 3rem;"></i>
                     <p class="mb-0">Không có dữ liệu ngày nghỉ nào.</p>
                 </div>
             @else
@@ -116,7 +183,7 @@
                                     <td class="text-center">{{ \Carbon\Carbon::parse($leave->start_date)->format('d/m/Y') }}</td>
                                     <td class="text-center">{{ \Carbon\Carbon::parse($leave->end_date)->format('d/m/Y') }}</td>
                                     <td class="d-none d-lg-table-cell text-center">{{ \Carbon\Carbon::parse($leave->created_at)->format('H:i d/m/Y') }}</td>
-                                    <td class="d-none d-lg-table-cell text-truncate" style="max-width: 200px;"> {{-- Adjusted max-width slightly --}}
+                                    <td class="d-none d-lg-table-cell text-truncate" style="max-width: 200px;">
                                         {{ $leave->reason ?? 'Không có lý do' }}
                                     </td>
                                     <td class="text-center">
@@ -125,12 +192,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <div class="d-flex justify-content-center gap-1"> {{-- Use flex for buttons --}}
-                                            @if(!$leave->approved)
-                                                <button type="button" class="btn btn-sm btn-primary" onclick="approveLeave({{ $leave->id }})" data-bs-toggle="tooltip" title="Duyệt">
-                                                    <i class="bx bx-check"></i>
-                                                </button>
-                                            @endif
+                                        <div class="d-flex justify-content-center gap-1">
                                             <a href="{{ route('admin.doctor_leaves.edit', $leave->id) }}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" title="Chỉnh sửa">
                                                 <i class="bx bx-edit"></i>
                                             </a>
@@ -144,9 +206,7 @@
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Pagination -->
-                <div class="card-footer px-3 py-3 border-top d-flex justify-content-end"> {{-- Use card-footer for consistent padding --}}
+                <div class="card-footer px-3 py-3 border-top d-flex justify-content-end">
                     {{ $doctorLeaves->withQueryString()->links('pagination::bootstrap-5') }}
                 </div>
             @endif
@@ -155,7 +215,41 @@
 </div>
 @endsection
 
-@push('scripts') {{-- Changed to push to align with master layout --}}
+@push('styles')
+<style>
+    .gradient-card {
+        border: none;
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+    }
+    .gradient-card:hover {
+        transform: translateY(-2px);
+    }
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #00cec9 0%, #55a3ff 100%);
+    }
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+    }
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+    }
+    .bg-gradient-danger {
+        background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+    }
+    .avatar {
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .bg-rgba-white {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+</style>
+@endpush
+
+@push('scripts')
 <script>
     // Function to approve leave (using SweetAlert2 for confirmation)
     function approveLeave(id) {
