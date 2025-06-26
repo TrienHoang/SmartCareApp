@@ -84,6 +84,20 @@
                                         class="stretched-link">Tài&nbsp;khoản</a>
                                 </div>
                             </div>
+                            <div class="row row-bordered overflow-visible g-0">
+                                <div class="dropdown-shortcuts-item col">
+                                    <a class="dropdown-item" href="{{ route('doctor.dashboard') }}">
+                                        <i class="bx bx-transfer me-2"></i>
+                                        <span class="align-middle">Chuyển sang Bác sĩ</span>
+                                    </a>
+                                </div>
+                                {{-- <div class="dropdown-shortcuts-item col">
+                                    <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i
+                                            class="bx bx-group fs-4"></i></span>
+                                    <a href="{{ route('admin.users.index') }}"
+                                        class="stretched-link">Người&nbsp;dùng</a>
+                                </div> --}}
+                            </div>
                         </div>
                     </div>
                 </li>

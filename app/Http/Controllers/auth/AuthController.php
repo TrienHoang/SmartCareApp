@@ -33,6 +33,8 @@ class AuthController extends Controller
 
             if (Auth::user()->role_id == 1) {
                 return redirect()->route('admin.dashboard.index')->with('success', 'Chào mừng quản trị viên!');
+            }elseif(Auth::user()->role_id == 2) {
+                return redirect()->route('doctor.dashboard')->with('success', 'Chào mừng bác sĩ!');
             } else {
                 return redirect()->route('home')->with('success', 'Đăng nhập thành công!');
             }
