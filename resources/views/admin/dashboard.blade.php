@@ -18,119 +18,119 @@
     @include('admin.partials.header')
 
     <style>
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            overflow: hidden; /* Prevent body scroll, let specific divs handle it */
-        }
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
 
-        .layout-wrapper {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+    .layout-wrapper {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
 
-        .layout-container {
-            display: flex;
-            flex: 1; /* Allow container to take available height */
-            overflow: hidden; /* Hide scrollbars, child elements handle scrolling */
-        }
+    .layout-container {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+    }
 
+    .layout-menu.menu-vertical {
+        height: auto;
+        flex-shrink: 0;
+        overflow-y: auto;
+        width: 260px;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+        border-right: 1px solid #e9ecef;
+    }
+
+    .layout-menu.menu-vertical.hide-menu {
+        margin-left: -260px;
+    }
+
+    .layout-page {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        overflow: hidden;
+    }
+
+    .content-wrapper {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .container-xxl.container-p-y {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 1.5rem;
+    }
+
+    .content-footer.footer {
+        flex-shrink: 0;
+        padding: 1rem 1.5rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+    }
+
+    @media (max-width: 991.98px) {
         .layout-menu.menu-vertical {
-            height: 100vh; /* Sidebar takes full viewport height */
-            flex-shrink: 0;
-            overflow-y: auto; /* Enable scrolling for sidebar content */
-            width: 260px; /* Default sidebar width */
-            transition: all 0.3s ease; /* Smooth transition for sidebar toggle */
-            background-color: #f8f9fa; /* Example background */
-            border-right: 1px solid #e9ecef;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1050;
+            transform: translateX(-100%);
+            width: 260px;
+            height: 100vh;
+            background-color: #f8f9fa;
         }
 
-        .layout-menu.menu-vertical.hide-menu {
-            margin-left: -260px; /* Hide sidebar off-screen */
+        .layout-menu.menu-vertical.show-menu {
+            transform: translateX(0%);
         }
 
         .layout-page {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1; /* Allow page content to take remaining width */
-            overflow: hidden; /* Hide scrollbars, child elements handle scrolling */
+            margin-left: 0 !important;
+            width: 100%;
         }
 
-        .content-wrapper {
-            flex-grow: 1;
-            overflow: hidden; /* Hide scrollbars, let container-p-y handle */
-            display: flex;
-            flex-direction: column;
+        .layout-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            display: none;
         }
 
-        .container-xxl.container-p-y {
-            flex-grow: 1;
-            overflow-y: auto; /* Specific content area scrolls */
-            padding: 1.5rem;
+        .layout-overlay.show {
+            display: block;
         }
 
-        .content-footer.footer {
-            flex-shrink: 0;
-            padding: 1rem 1.5rem;
-            background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef;
+        .navbar .navbar-toggler {
+            display: block;
+        }
+    }
+
+    @media (min-width: 992px) {
+        .layout-menu.menu-vertical {
+            transform: translateX(0%);
         }
 
-        /* Responsive Adjustments */
-        @media (max-width: 991.98px) { /* Medium devices (tablets, 768px and up) */
-            .layout-menu.menu-vertical {
-                position: fixed; /* Make sidebar fixed to allow toggle */
-                top: 0;
-                left: 0;
-                z-index: 1050; /* Ensure it's above other content */
-                transform: translateX(-100%); /* Start hidden */
-                width: 260px;
-                height: 100vh;
-                background-color: #f8f9fa;
-            }
-
-            .layout-menu.menu-vertical.show-menu {
-                transform: translateX(0%); /* Show sidebar */
-            }
-
-            .layout-page {
-                margin-left: 0 !important; /* Reset margin on smaller screens */
-                width: 100%; /* Take full width */
-            }
-
-            .layout-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 1040;
-                display: none; /* Hidden by default */
-            }
-            .layout-overlay.show {
-                display: block; /* Show when sidebar is open */
-            }
-
-            .navbar .navbar-toggler {
-                display: block; /* Show hamburger icon */
-            }
+        .navbar .navbar-toggler {
+            display: none;
         }
 
-        @media (min-width: 992px) { /* Large devices (desktops, 992px and up) */
-            .layout-menu.menu-vertical {
-                transform: translateX(0%); /* Ensure sidebar is visible */
-            }
-            .navbar .navbar-toggler {
-                display: none; /* Hide hamburger icon on desktop */
-            }
-            .layout-overlay {
-                display: none !important; /* Ensure overlay is hidden */
-            }
+        .layout-overlay {
+            display: none !important;
         }
-    </style>
+    }
+</style>
+
 </head>
 <body>
     <div class="layout-wrapper layout-content-navbar">

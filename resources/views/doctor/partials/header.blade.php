@@ -4,7 +4,7 @@
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <meta name="description" content="Start your development with a Dashboard for Bootstrap 5" />
     <meta name="keywords" content="dashboard, bootstrap 5 dashboard, bootstrap 5 design, bootstrap 5">
-    <title>@yield('title', 'Admin Panel')</title>
+    <title>@yield('title', 'Doctor Panel')</title>
 
     <!-- Canonical SEO -->
     <link rel="canonical" href="https://1.envato.market/frest_admin" />

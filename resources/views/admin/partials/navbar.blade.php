@@ -86,7 +86,7 @@
                             </div>
                             <div class="row row-bordered overflow-visible g-0">
                                 <div class="dropdown-shortcuts-item col">
-                                    <a class="dropdown-item" href="#">
+                                    <a class="dropdown-item" href="{{ route('doctor.dashboard') }}">
                                         <i class="bx bx-transfer me-2"></i>
                                         <span class="align-middle">Chuyển sang Bác sĩ</span>
                                     </a>

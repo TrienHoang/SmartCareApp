@@ -25,7 +25,7 @@
 
         {{-- Nếu là Admin --}}
         @if ($user->role->name === 'admin')
-            @include('partials.sidebar-admin') {{-- Bạn có thể tách phần menu admin ra file riêng --}}
+            @include('admin.partials.sidebar') {{-- Bạn có thể tách phần menu admin ra file riêng --}}
         @endif
 
         {{-- Nếu là Doctor --}}

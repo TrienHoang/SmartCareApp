@@ -544,6 +544,11 @@
 
 
     // phân quyền bác sĩ
-    Route::get('/doctor/dashboard', function () {
-        return view('doctor.dashboard');
-    })->name('dashboard');
+    // Route::get('/doctor/dashboard', function () {
+    //     return view('doctor.dashboard');
+    // })->name('doctor.dashboard');
+
+    Route::prefix('doctor')->name('doctor.')->middleware('auth')->group(function () {
+        Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
+        // Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
+    });
