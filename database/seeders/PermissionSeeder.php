@@ -96,11 +96,42 @@ class PermissionSeeder extends Seeder
 
             // Statistics
             ['name' => 'view_statistics', 'description' => 'Xem thống kê', 'group' => 'Statistics'],
+
             // FAQ Management
             ['name' => 'view_faqs', 'description' => 'Xem câu hỏi thường gặp', 'group' => 'FAQ'],
             ['name' => 'create_faqs', 'description' => 'Thêm câu hỏi thường gặp', 'group' => 'FAQ'],
             ['name' => 'edit_faqs', 'description' => 'Sửa câu hỏi thường gặp', 'group' => 'FAQ'],
             ['name' => 'delete_faqs', 'description' => 'Xoá câu hỏi thường gặp', 'group' => 'FAQ'],
+
+            // Room Management
+            ['name' => 'view_rooms', 'description' => 'Xem danh sách phòng khám', 'group' => 'Rooms'],
+            ['name' => 'create_rooms', 'description' => 'Thêm phòng khám mới', 'group' => 'Rooms'],
+            ['name' => 'edit_rooms', 'description' => 'Chỉnh sửa phòng khám', 'group' => 'Rooms'],
+            ['name' => 'delete_rooms', 'description' => 'Xoá phòng khám', 'group' => 'Rooms'],
+
+            // Doctor Leaves
+            ['name' => 'view_doctor_leaves', 'description' => 'Xem danh sách nghỉ phép', 'group' => 'Doctor Leaves'],
+            ['name' => 'create_doctor_leaves', 'description' => 'Thêm lịch nghỉ phép', 'group' => 'Doctor Leaves'],
+            ['name' => 'edit_doctor_leaves', 'description' => 'Sửa lịch nghỉ phép', 'group' => 'Doctor Leaves'],
+            ['name' => 'delete_doctor_leaves', 'description' => 'Xoá nghỉ phép', 'group' => 'Doctor Leaves'],
+
+            // Blogs
+            ['name' => 'view_blogs', 'description' => 'Xem bài viết', 'group' => 'Blogs'],
+            ['name' => 'create_blogs', 'description' => 'Thêm bài viết', 'group' => 'Blogs'],
+            ['name' => 'edit_blogs', 'description' => 'Sửa bài viết', 'group' => 'Blogs'],
+            ['name' => 'delete_blogs', 'description' => 'Xoá bài viết', 'group' => 'Blogs'],
+
+            // Vouchers
+            ['name' => 'view_vouchers', 'description' => 'Xem danh sách voucher', 'group' => 'Vouchers'],
+            ['name' => 'create_vouchers', 'description' => 'Thêm voucher mới', 'group' => 'Vouchers'],
+            ['name' => 'edit_vouchers', 'description' => 'Chỉnh sửa voucher', 'group' => 'Vouchers'],
+            ['name' => 'delete_vouchers', 'description' => 'Xoá voucher', 'group' => 'Vouchers'],
+
+            // Upload Histories
+            ['name' => 'view_upload_histories', 'description' => 'Xem lịch sử upload', 'group' => 'Files'],
+
+            // Prescription Histories
+            ['name' => 'view_prescription_histories', 'description' => 'Xem lịch sử chỉnh sửa đơn thuốc', 'group' => 'Prescriptions'],
 
         ];
 
