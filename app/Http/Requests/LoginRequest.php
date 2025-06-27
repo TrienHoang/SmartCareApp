@@ -22,7 +22,7 @@ class LoginRequest extends FormRequest
             'password' => [
                 'required',
                 'string',
-                'min:8',
+                'min:6',
                 'max:32',
             ],
         ];
@@ -39,7 +39,7 @@ class LoginRequest extends FormRequest
 
             'password.required' => 'Vui lòng nhập mật khẩu',
             'password.string' => 'Mật khẩu phải là chuỗi ký tự',
-            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự',
+            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
             'password.max' => 'Mật khẩu không được vượt quá 32 ký tự',
         ];
     }

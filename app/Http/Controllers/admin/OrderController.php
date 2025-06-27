@@ -11,6 +11,9 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
+        if ($request->start_date && $request->end_date && $request->end_date < $request->start_date) {
+        return back()->withInput()->with('error', 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.');
+    }
         $orders = Order::with('user')
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->start_date, fn($q) => $q->whereDate('ordered_at', '>=', $request->start_date))
@@ -31,17 +34,29 @@ class OrderController extends Controller
     {
         $request->validate(['status' => 'required|in:pending,paid,completed,cancelled']);
 
-        if ($order->status === 'completed' && $request->status === 'cancelled') {
-            return back()->with('error', 'Không thể huỷ đơn đã hoàn tất.');
+        $current = $order->status;
+        $target = $request->status;
+
+        $allowedTransitions = [
+            'pending' => ['paid', 'cancelled'],
+            'paid' => ['completed', 'cancelled'],
+            'completed' => [],
+            'cancelled' => [],
+        ];
+
+        if (!in_array($target, $allowedTransitions[$current])) {
+            return back()->with('error', 'Chuyển trạng thái không hợp lệ!');
         }
 
         $order->update([
-            'status' => $request->status,
+            'status' => $target,
             'updated_at' => now(),
         ]);
 
         return back()->with('success', 'Cập nhật trạng thái thành công.');
     }
+
+
 
 
     public function exportPdf(Order $order)

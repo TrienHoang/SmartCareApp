@@ -4,8 +4,7 @@ function addMedicine() {
     let optionsHtml = '<option value="">-- Chọn thuốc --</option>';
     medicineOptions.forEach(med => {
         optionsHtml += `<option value="${med.id}">
-            ${med.name} (${med.unit}) - ${med.formatted_price} – Còn: ${med.stock}
-            ${med.stock < 10 ? '⚠️ Cảnh báo: gần hết' : ''}
+            ${med.name} (${med.unit}) - ${med.formatted_price}
         </option>`;
     });
 
@@ -15,14 +14,14 @@ function addMedicine() {
             <div class="row g-2">
                 <div class="col-md-4">
                     <label class="form-label">Tên thuốc</label>
-                    <select name="medicines[${medicineIndex}][medicine_id]" class="form-select" required>
+                    <select name="medicines[${medicineIndex}][medicine_id]" class="form-select">
                         ${optionsHtml}
                     </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Số lượng</label>
                     <input type="number" name="medicines[${medicineIndex}][quantity]"
-                        class="form-control" min="1" value="1" required>
+                        class="form-control" value="1">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Hướng dẫn sử dụng</label>

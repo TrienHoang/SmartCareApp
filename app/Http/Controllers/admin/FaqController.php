@@ -35,21 +35,37 @@ class FaqController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'question' => 'required|unique:faqs,question',
-            'answer' => 'required',
-            'service_category_id' => 'required|exists:service_categories,id',
+            'question' => 'sometimes|string|max:255',
+            'answer' => 'nullable|string',
+            'service_category_id' => 'nullable|exists:service_categories,id',
+        ], [
+            'question.sometimes' => 'Câu hỏi không bắt buộc, nhưng nếu có thì phải hợp lệ.',
+            'question.string' => 'Câu hỏi phải là chuỗi ký tự.',
+            'question.max' => 'Câu hỏi không được vượt quá 255 ký tự.',
+
+            'answer.string' => 'Câu trả lời phải là chuỗi ký tự.',
+
+            'service_category_id.exists' => 'Danh mục được chọn không hợp lệ.',
         ]);
 
         Faq::create([
             'question' => $request->question,
             'answer' => $request->answer,
             'service_category_id' => $request->service_category_id,
-            'display_order' => $request->display_order ?? 0,
             'is_active' => $request->has('is_active'),
         ]);
 
-        return redirect()->route('admin.faqs.index')->with('success', 'Đã thêm câu hỏi thành công.');
+        return redirect()->route('admin.faqs.index')->with('success', 'Thêm câu hỏi thành công');
     }
+    public function show(Faq $faq)
+    {
+        $categoryName = DB::table('service_categories')
+            ->where('id', $faq->service_category_id)
+            ->value('name');
+
+        return view('admin.faqs.show', compact('faq', 'categoryName'));
+    }
+
 
     public function edit(Faq $faq)
     {
@@ -60,10 +76,20 @@ class FaqController extends Controller
     public function update(Request $request, Faq $faq)
     {
         $request->validate([
-            'question' => 'required|unique:faqs,question,' . $faq->id,
-            'answer' => 'required',
-            'service_category_id' => 'required|exists:service_categories,id',
+            'question' => 'sometimes|string|max:255',
+            'answer' => 'nullable|string',
+            'service_category_id' => 'nullable|exists:service_categories,id',
+        ], [
+            'question.sometimes' => 'Câu hỏi không bắt buộc, nhưng nếu có thì phải hợp lệ.',
+            'question.string' => 'Câu hỏi phải là chuỗi ký tự.',
+            'question.max' => 'Câu hỏi không được vượt quá 255 ký tự.',
+
+            'answer.string' => 'Câu trả lời phải là chuỗi ký tự.',
+
+            'service_category_id.exists' => 'Danh mục được chọn không hợp lệ.',
         ]);
+
+
 
         $faq->update([
             'question' => $request->question,
@@ -80,5 +106,13 @@ class FaqController extends Controller
     {
         $faq->delete();
         return redirect()->route('admin.faqs.index')->with('success', 'Đã xoá câu hỏi.');
+    }
+    public function toggleStatus($id)
+    {
+        $faq = Faq::findOrFail($id);
+        $faq->is_active = !$faq->is_active;
+        $faq->save();
+
+        return redirect()->back()->with('success', 'Trạng thái câu hỏi đã được cập nhật.');
     }
 }
