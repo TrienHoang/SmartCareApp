@@ -1,5 +1,6 @@
 @extends('admin.dashboard')
 @section('title', 'Chi tiết Lịch hẹn khám')
+
 @section('content')
     <div class="container">
         <h1>Chi tiết Lịch hẹn khám #{{ $appointment->id }}</h1>
@@ -13,6 +14,10 @@
                 <tr>
                     <th>Bệnh nhân</th>
                     <td>{{ $appointment->patient->full_name ?? 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <th>Số điện thoại</th>
+                    <td>{{ $appointment->patient->phone ?? 'N/A' }}</td>
                 </tr>
                 <tr>
                     <th>Bác sĩ</th>
@@ -41,38 +46,21 @@
                 @if ($shouldShowEndTime)
                     <tr>
                         <th>Thời gian kết thúc Dự kiến</th>
-                        <td> {{ $appointment->end_time ? \Carbon\Carbon::parse($appointment->end_time)->format('d/m/Y H:i') : '—' }}</td>
+                        <td>{{ \Carbon\Carbon::parse($appointment->end_time)->format('H:i') }}</td>
                     </tr>
                 @endif
-
 
                 <tr>
                     <th>Trạng thái</th>
                     <td>
                         @php
                             $statusConfig = [
-                                'pending' => [
-                                    'color' => 'warning',
-                                    'text' => 'Chờ xác nhận',
-                                    'icon' => 'bx-time',
-                                ],
-                                'confirmed' => [
-                                    'color' => 'info',
-                                    'text' => 'Đã xác nhận',
-                                    'icon' => 'bx-check',
-                                ],
-                                'completed' => [
-                                    'color' => 'success',
-                                    'text' => 'Hoàn thành',
-                                    'icon' => 'bx-check-double',
-                                ],
+                                'pending' => ['color' => 'warning', 'text' => 'Chờ xác nhận', 'icon' => 'bx-time'],
+                                'confirmed' => ['color' => 'info', 'text' => 'Đã xác nhận', 'icon' => 'bx-check'],
+                                'completed' => ['color' => 'success', 'text' => 'Hoàn thành', 'icon' => 'bx-check-double'],
                                 'cancelled' => ['color' => 'danger', 'text' => 'Đã hủy', 'icon' => 'bx-x'],
                             ];
-                            $config = $statusConfig[$appointment->status] ?? [
-                                'color' => 'secondary',
-                                'text' => $appointment->status,
-                                'icon' => 'bx-help',
-                            ];
+                            $config = $statusConfig[$appointment->status] ?? ['color' => 'secondary', 'text' => $appointment->status, 'icon' => 'bx-help'];
                         @endphp
 
                         <span class="badge bg-{{ $config['color'] }} status-badge">
@@ -85,7 +73,7 @@
                     <td>
                         @if ($appointment->payment && $appointment->payment->status === 'paid')
                             <span class="badge bg-success">
-                                Đã thanh toán toán lúc {{ $appointment->payment->paid_at->format('d/m/Y H:i') }}
+                                Đã thanh toán lúc {{ $appointment->payment->paid_at->format('d/m/Y H:i') }}
                             </span>
                         @else
                             <span class="badge bg-danger">Chưa thanh toán</span>
@@ -102,13 +90,12 @@
                 </tr>
                 <tr>
                     <th>Lí do hủy</th>
-                    <th>{{ $appointment->cancel_reason ?? 'Không' }}</th>
+                    <td>{{ $appointment->cancel_reason ?? 'Không' }}</td>
                 </tr>
                 <tr>
-                    <th>Note sau khi hoàn thành</th>
+                    <th>Ghi chú sau khi hoàn thành</th>
                     <td>
-                        {{ optional($appointment->logs->where('status_after', 'completed')->sortByDesc('change_time')->first())->note ??
-                            'Không có ghi chú' }}
+                        {{ optional($appointment->logs->where('status_after', 'completed')->sortByDesc('change_time')->first())->note ?? 'Không có ghi chú' }}
                     </td>
                 </tr>
                 <tr>

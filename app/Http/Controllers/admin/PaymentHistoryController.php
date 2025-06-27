@@ -42,6 +42,13 @@ class PaymentHistoryController extends Controller
             });
         }
 
+        // Lọc theo tên bác sĩ
+        if ($request->filled('full_name')) {
+            $query->whereHas('payment.appointment.doctor.user', function ($q) use ($request) {
+                $q->where('full_name', 'like', '%' . $request->doctor_name . '%');
+            });
+        }
+
         if ($request->filled('date_from') && $request->filled('date_to')) {
             $query->whereBetween('payment_date', [$request->date_from, $request->date_to]);
         } elseif ($request->filled('date_from')) {
@@ -49,10 +56,26 @@ class PaymentHistoryController extends Controller
         } elseif ($request->filled('date_to')) {
             $query->whereDate('payment_date', '<=', $request->date_to);
         }
+        
 
         $histories = $query->paginate(10)->withQueryString();
 
-        return view('admin.payment_histories.index', compact('histories', 'services', 'doctors'));
+        // Thống kê trạng thái
+        $statQuery = clone $query;
+        $all = $statQuery->get();
+
+        $stat = [
+            'paid_count'    => $all->filter(fn($h) => $h->payment && $h->payment->status === 'paid')->count(),
+            'paid_amount'   => $all->filter(fn($h) => $h->payment && $h->payment->status === 'paid')->sum('amount'),
+            'pending_count' => $all->filter(fn($h) => $h->payment && $h->payment->status === 'pending')->count(),
+            'pending_amount'=> $all->filter(fn($h) => $h->payment && $h->payment->status === 'pending')->sum('amount'),
+            'failed_count'  => $all->filter(fn($h) => $h->payment && $h->payment->status === 'failed')->count(),
+            'failed_amount' => $all->filter(fn($h) => $h->payment && $h->payment->status === 'failed')->sum('amount'),
+            'total_amount'  => $all->sum('amount'),
+        ];
+
+
+        return view('admin.payment_histories.index', compact('histories', 'services', 'doctors', 'stat'));
     }
 
 

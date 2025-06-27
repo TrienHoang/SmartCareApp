@@ -2,20 +2,25 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
+use Illuminate\Notifications\DatabaseNotification; 
+use App\Models\User;
 
 class NotificationFactory extends Factory
 {
+    /** The model that this factory is for. */
+    protected $model = DatabaseNotification::class;
+
     public function definition(): array
     {
         return [
-            // 'user_id' => User::inRandomOrder()->first()?->id ?? 1,
-            // 'title' => fake()->sentence(),
-            // 'message' => fake()->paragraph(),
-            // 'is_read' => fake()->boolean(),
-            // 'created_at' => now()
+            'id'              => Str::uuid()->toString(),
+            'type'            => 'App\\Notifications\\GenericNotification',
+            'notifiable_type' => User::class,
+            'notifiable_id'   => User::inRandomOrder()->value('id') ?? 1,
+            'data'            => ['message' => $this->faker->sentence()],
+            'read_at'         => null,
         ];
     }
 }
-

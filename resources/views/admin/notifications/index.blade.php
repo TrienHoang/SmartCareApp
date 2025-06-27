@@ -23,11 +23,11 @@
                                 <ol class="breadcrumb bg-transparent p-0">
                                     <li class="">
                                         <a href="{{ route('admin.dashboard.index') }}" class="text-decoration-none">
-                                           </i>Trang chủ >
+                                            </i>Trang chủ >
                                         </a>
                                     </li>
                                     <li class="breadcrumb-item active text-primary font-weight-semibold">
-                                       </i>Thông báo
+                                        </i>Thông báo
                                     </li>
                                 </ol>
                             </nav>
@@ -37,9 +37,9 @@
             </div>
             <div class="content-header-right col-md-4 col-12 text-md-right">
                 <div class="form-group breadcrum-right">
-                    <a href="{{ route('admin.notifications.create') }}" 
-                       class="btn btn-gradient-primary btn-lg waves-effect waves-light shadow-lg  text-white">
-                       Tạo thông báo mới
+                    <a href="{{ route('admin.notifications.create') }}"
+                        class="btn btn-gradient-primary btn-lg waves-effect waves-light shadow-lg  text-white">
+                        Tạo thông báo mới
                     </a>
                 </div>
             </div>
@@ -77,7 +77,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 class="text-white mb-0">{{$statusCounts['sent'] }}</h4>
+                                    <h4 class="text-white mb-0">{{ $statusCounts['sent'] }}</h4>
                                     <small class="text-white">Đã gửi</small>
                                 </div>
                             </div>
@@ -111,7 +111,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 class="text-white mb-0">{{ $statusCounts['sending']}}</h4>
+                                    <h4 class="text-white mb-0">{{ $statusCounts['sending'] }}</h4>
                                     <small class="text-white">Đang gửi</small>
                                 </div>
                             </div>
@@ -162,7 +162,7 @@
                                     </label>
                                     <div class="input-group">
                                         <input type="text" name="search" class="form-control border-left-0"
-                                               placeholder="Tiêu đề, nội dung..." value="{{ request('search') }}">
+                                            placeholder="Tiêu đề, nội dung..." value="{{ request('search') }}">
                                     </div>
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
@@ -172,7 +172,8 @@
                                     <select name="type" class="form-control custom-select">
                                         <option value="">Tất cả loại</option>
                                         @foreach ($notificationTypes as $type)
-                                            <option value="{{ $type }}" {{ request('type') == $type ? 'selected' : '' }}>
+                                            <option value="{{ $type }}"
+                                                {{ request('type') == $type ? 'selected' : '' }}>
                                                 {{ ucfirst(str_replace('_', ' ', $type)) }}
                                             </option>
                                         @endforeach
@@ -185,7 +186,8 @@
                                     <select name="status" class="form-control custom-select">
                                         <option value="">Tất cả trạng thái</option>
                                         @foreach ($notificationStatuses as $status)
-                                            <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
+                                            <option value="{{ $status }}"
+                                                {{ request('status') == $status ? 'selected' : '' }}>
                                                 {{ ucfirst($status) }}
                                             </option>
                                         @endforeach
@@ -196,14 +198,15 @@
                                         <button type="submit" class="btn btn-primary">
                                             <i class="bx bx-filter mr-1"></i>Lọc
                                         </button>
-                                        <a href="{{ route('admin.notifications.index') }}" class="btn btn-outline-secondary">
+                                        <a href="{{ route('admin.notifications.index') }}"
+                                            class="btn btn-outline-secondary">
                                             <i class="bx bx-refresh-cw mr-1"></i>Reset
                                         </a>
                                         {{-- <button type="button" class="btn btn-outline-info dropdown-toggle dropdown-toggle-split" 
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             <i class="bx bx-more-vertical"></i>
                                         </button>
-                                        <div class="dropdown-menu">
+<div class="dropdown-menu">
                                             <a class="dropdown-item" href="#" onclick="exportData('excel')">
                                                 <i class="bx bx-download mr-2"></i>Xuất Excel
                                             </a>
@@ -254,16 +257,20 @@
                                     <tr class="notification-row" data-id="{{ $notification->id }}">
                                         <td>
                                             <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input notification-checkbox" 
-                                                       id="notification-{{ $notification->id }}" value="{{ $notification->id }}">
-                                                <label class="custom-control-label" for="notification-{{ $notification->id }}"></label>
+                                                <input type="checkbox" class="custom-control-input notification-checkbox"
+                                                    id="notification-{{ $notification->id }}"
+                                                    value="{{ $notification->id }}">
+                                                <label class="custom-control-label"
+                                                    for="notification-{{ $notification->id }}"></label>
                                             </div>
                                         </td>
                                         <td class="font-weight-bold text-primary">#{{ $notification->id }}</td>
                                         <td>
                                             <div class="notification-title">
-                                                <h6 class="mb-0 font-weight-semibold">{{ Str::limit($notification->title, 40) }}</h6>
-                                                <small class="text-muted">{{ Str::limit(strip_tags($notification->content), 60) }}</small>
+                                                <h6 class="mb-0 font-weight-semibold">
+                                                    {{ Str::limit($notification->title, 40) }}</h6>
+                                                <small
+                                                    class="text-muted">{{ Str::limit(strip_tags($notification->content), 60) }}</small>
                                             </div>
                                         </td>
                                         <td>
@@ -279,11 +286,14 @@
                                                     </span>
                                                 @elseif ($notification->recipient_type == 'specific_users')
                                                     <span class="badge badge-warning">
-                                                        <i class="bx bx-user mr-1"></i>{{ count($notification->display_recipients ?? []) }} người dùng
+                                                        <i
+                                                            class="bx bx-user mr-1"></i>{{ count($notification->display_recipients ?? []) }}
+                                                        người dùng
                                                     </span>
                                                 @elseif ($notification->recipient_type == 'roles')
                                                     <span class="badge badge-info">
-                                                        <i class="bx bx-shield mr-1"></i>{{ implode(', ', array_map('ucfirst', $notification->display_recipients ?? [])) }}
+                                                        <i
+                                                            class="bx bx-shield mr-1"></i>{{ implode(', ', array_map('ucfirst', $notification->display_recipients ?? [])) }}
                                                     </span>
                                                 @else
                                                     <span class="badge badge-secondary">N/A</span>
@@ -297,9 +307,10 @@
                                                     'scheduled' => ['class' => 'info', 'icon' => 'calendar-check'],
                                                     'sending' => ['class' => 'warning', 'icon' => 'loader'],
                                                     'failed' => ['class' => 'danger', 'icon' => 'x-circle'],
-                                                    'draft' => ['class' => 'secondary', 'icon' => 'edit-3']
+                                                    'draft' => ['class' => 'secondary', 'icon' => 'edit-3'],
                                                 ];
-                                                $config = $statusConfig[$notification->status] ?? $statusConfig['draft'];
+                                                $config =
+                                                    $statusConfig[$notification->status] ?? $statusConfig['draft'];
                                             @endphp
                                             <span class="badge badge-{{ $config['class'] }} badge-pill">
                                                 <i class="bx bx-{{ $config['icon'] }} mr-1"></i>
@@ -313,7 +324,8 @@
                                                         <i class="bx bx-send mr-1"></i>
                                                         <div>
                                                             <small class="font-weight-semibold">Đã gửi</small><br>
-                                                            <small class="text-muted">{{ $notification->sent_at->format('d/m/Y H:i') }}</small>
+                                                            <small
+                                                                class="text-muted">{{ $notification->sent_at->format('d/m/Y H:i') }}</small>
                                                         </div>
                                                     </div>
                                                 @elseif ($notification->scheduled_at)
@@ -321,7 +333,8 @@
                                                         <i class="bx bx-calendar mr-1"></i>
                                                         <div>
                                                             <small class="font-weight-semibold">Lên lịch</small><br>
-                                                            <small class="text-muted">{{ $notification->scheduled_at->format('d/m/Y H:i') }}</small>
+                                                            <small
+                                                                class="text-muted">{{ $notification->scheduled_at->format('d/m/Y H:i') }}</small>
                                                         </div>
                                                     </div>
                                                 @else
@@ -330,31 +343,33 @@
                                                         <small>Chưa gửi</small>
                                                     </div>
                                                 @endif
-                                            </td>
+                                        </td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
                                                 <a href="{{ route('admin.notifications.show', $notification) }}"
-                                                   class="btn btn-outline-info" data-toggle="tooltip" title="Xem chi tiết">
-                                                   <i class='bx bx-show-alt'></i> 
+                                                    class="btn btn-outline-info" data-toggle="tooltip"
+                                                    title="Xem chi tiết">
+                                                    <i class='bx bx-show-alt'></i>
                                                 </a>
-                                                
+
                                                 @if ($notification->status != 'sent' && $notification->status != 'sending')
                                                     <a href="{{ route('admin.notifications.edit', $notification) }}"
-                                                       class="btn btn-outline-warning" data-toggle="tooltip" title="Chỉnh sửa">
+                                                        class="btn btn-outline-warning" data-toggle="tooltip"
+                                                        title="Chỉnh sửa">
                                                         <i class="bx bx-edit"></i>
                                                     </a>
                                                     @if ($notification->status != 'scheduled')
-                                                        <button type="button" class="btn btn-outline-primary" 
-                                                                data-toggle="tooltip" title="Gửi ngay"
-                                                                onclick="sendNotification({{ $notification->id }})">
+                                                        <button type="button" class="btn btn-outline-primary"
+                                                            data-toggle="tooltip" title="Gửi ngay"
+                                                            onclick="sendNotification({{ $notification->id }})">
                                                             <i class="bx bx-send"></i>
                                                         </button>
                                                     @endif
                                                 @endif
-                                                <button type="button" class="btn btn-outline-danger" 
-                                                        data-toggle="tooltip" title="Xóa"
-                                                        onclick="deleteNotification({{ $notification->id }})">
-                                                        <i class="bx bx-trash"></i>
+                                                <button type="button" class="btn btn-outline-danger"
+                                                    data-toggle="tooltip" title="Xóa"
+                                                    onclick="deleteNotification({{ $notification->id }})">
+                                                    <i class="bx bx-trash"></i>
                                                 </button>
                                             </div>
                                         </td>
@@ -365,8 +380,10 @@
                                             <div class="empty-state">
                                                 <i class="bx bx-bell-off text-muted" style="font-size: 48px;"></i>
                                                 <h5 class="mt-3 text-muted">Không có thông báo nào</h5>
-                                                <p class="text-muted">Chưa có thông báo nào được tạo hoặc không tìm thấy kết quả phù hợp.</p>
-                                                <a href="{{ route('admin.notifications.create') }}" class="btn btn-primary">
+                                                <p class="text-muted">Chưa có thông báo nào được tạo hoặc không tìm thấy
+                                                    kết quả phù hợp.</p>
+                                                <a href="{{ route('admin.notifications.create') }}"
+                                                    class="btn btn-primary">
                                                     <i class="bx bx-plus mr-1"></i>Tạo thông báo đầu tiên
                                                 </a>
                                             </div>
@@ -378,12 +395,12 @@
                     </div>
 
                     <!-- Enhanced Pagination -->
-                    @if($notifications->hasPages())
+                    @if ($notifications->hasPages())
                         <div class="pagination-wrapper bg-light p-3 border-top">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="pagination-info">
                                     <small class="text-muted">
-                                        Hiển thị {{ $notifications->firstItem() }} - {{ $notifications->lastItem() }} 
+                                        Hiển thị {{ $notifications->firstItem() }} - {{ $notifications->lastItem() }}
                                         trong tổng số {{ $notifications->total() }} kết quả
                                     </small>
                                 </div>

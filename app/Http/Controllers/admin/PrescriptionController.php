@@ -13,6 +13,7 @@ use App\Models\PrescriptionHistory;
 use App\Models\PrescriptionItem;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -244,8 +245,9 @@ class PrescriptionController extends Controller
     {
         Prescription::findOrFail($id)->delete();
 
-        return to_route('admin.prescriptions.index')
-            ->with('success', 'Đơn thuốc đã được xóa mềm.');
+        return response()->json([
+            'message' => 'Đơn thuốc đã được xóa mềm.'
+        ]);
     }
 
 
@@ -276,10 +278,24 @@ class PrescriptionController extends Controller
     // Khôi phục đơn thuốc đã xóa
     public function restore($id)
     {
-        Prescription::onlyTrashed()->findOrFail($id)->restore();
+        try {
+            $prescription = Prescription::onlyTrashed()->findOrFail($id);
+            $prescription->restore();
 
-        return to_route('admin.prescriptions.trashed')
-            ->with('success', 'Đơn thuốc đã được khôi phục.');
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Đơn thuốc đã được khôi phục thành công.'
+            ]);
+            return to_route('admin.prescriptions.trashed')
+                ->with('success', 'Đơn thuốc đã được khôi phục.');
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Đơn thuốc không tồn tại hoặc đã được khôi phục trước đó.'
+            ], 404);
+            return to_route('admin.prescriptions.trashed')
+                ->with('error', 'Đơn thuốc không tồn tại hoặc đã được khôi phục.');
+        }
     }
 
 
