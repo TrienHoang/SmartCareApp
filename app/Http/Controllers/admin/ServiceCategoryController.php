@@ -9,9 +9,22 @@ use Illuminate\Http\Request;
 class ServiceCategoryController extends Controller
 {
     // Hiển thị danh sách danh mục dịch vụ
-    public function index()
+    public function index(Request $request)
     {
-        $categories = ServiceCategory::orderBy('created_at', 'desc')->paginate(10);
+        $query = ServiceCategory::query();
+
+        // Tìm kiếm theo tên danh mục
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Lọc theo trạng thái
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $categories = $query->orderBy('created_at', 'desc')->paginate(10);
+
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -25,59 +38,49 @@ class ServiceCategoryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|max:100',
-            'description' => 'nullable|string',
+            'name' => ['sometimes', 'string', 'max:100', 'unique:service_categories,name'],
+            'description' => ['nullable', 'string'],
+            'status' => ['nullable', 'in:active,inactive'],
         ]);
-        // Kiểm tra thủ công nếu name rỗng
-        if (trim($request->input('name')) === '') {
-            return back()
-                ->withErrors(['name' => 'Vui lòng nhập tên danh mục.']) // Thông báo lỗi
-                ->withInput(); // Giữ lại dữ liệu cũ
-        }
-
 
         ServiceCategory::create([
-            'name' => $validated['name'],
+            'name' => $validated['name'] ?? 'Không tên', // hoặc bạn có thể báo lỗi tùy yêu cầu
             'description' => $validated['description'] ?? null,
+            'status' => $validated['status'] ?? 'inactive',
         ]);
 
-        return redirect()->route('admin.categories.index')->with('success', 'Thêm danh mục thành công!');
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Thêm danh mục thành công!');
     }
 
     // Hiển thị form chỉnh sửa danh mục dịch vụ
     public function edit($id)
     {
         $serviceCategory = ServiceCategory::findOrFail($id);
-
-        // Nếu có submit form (method POST hoặc PUT), kiểm tra rỗng
-        if (request()->isMethod('post') || request()->isMethod('put')) {
-            if (trim(request()->input('name')) === '') {
-                return back()
-                    ->withErrors(['name' => 'Vui lòng nhập tên danh mục.'])
-                    ->withInput();
-            }
-        }
-
         return view('admin.categories.edit', compact('serviceCategory'));
     }
 
-
     // Cập nhật danh mục dịch vụ
+
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:service_categories,name,' . $id,
-            'description' => 'nullable|string',
+            'name' => ['sometimes', 'string', 'max:100', 'unique:service_categories,name,' . $id],
+            'description' => ['nullable', 'string'],
+            'status' => ['nullable', 'in:active,inactive'],
         ]);
 
         $serviceCategory = ServiceCategory::findOrFail($id);
-        $serviceCategory->name = $validated['name'];
-        $serviceCategory->description = $validated['description'] ?? null;
-        $serviceCategory->save();
+        $serviceCategory->update([
+            'name' => $validated['name'] ?? $serviceCategory->name,
+            'description' => $validated['description'] ?? $serviceCategory->description,
+            'status' => $validated['status'] ?? $serviceCategory->status,
+        ]);
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'Cập nhật danh mục dịch vụ thành công!');
     }
+
 
     // Xóa danh mục dịch vụ
     public function destroy($id)
@@ -94,5 +97,13 @@ class ServiceCategoryController extends Controller
     {
         $serviceCategory = ServiceCategory::findOrFail($id);
         return view('admin.categories.show', compact('serviceCategory'));
+    }
+    public function toggleStatus($id)
+    {
+        $category = ServiceCategory::findOrFail($id);
+        $category->status = $category->status === 'active' ? 'inactive' : 'active';
+        $category->save();
+
+        return redirect()->back()->with('success', 'Trạng thái danh mục đã được cập nhật.');
     }
 }
