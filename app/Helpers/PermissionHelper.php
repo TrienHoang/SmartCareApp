@@ -86,21 +86,52 @@ if (!function_exists('getPermissionLabel')) {
 
             // 14. Thống kê
             'view_statistics' => 'Xem thống kê',
+
             // 15. Quản lý đơn xin nghỉ phép của bác sĩ
             'view_doctor_leaves' => 'Xem đơn xin nghỉ phép của bác sĩ',
             'edit_doctor_leaves' => 'Duyệt đơn xin nghỉ phép của bác sĩ',
-
 
             //15. loại dịch vụ
             'view_categories' => 'Xem loại dịch vụ',
             'create_categories' => 'Thêm loại dịch vụ',
             'edit_categories' => 'Sửa loại dịch vụ',
             'delete_categories' => 'Xóa loại dịch vụ',
+
             //16. Quản lý FAQ
             'view_faqs' => 'Xem câu hỏi thường gặp',
             'create_faqs' => 'Thêm câu hỏi thường gặp',
             'edit_faqs' => 'Sửa câu hỏi thường gặp',
             'delete_faqs' => 'Xóa câu hỏi thường gặp',
+
+            // 17. Quản lý phòng khám
+            'view_rooms' => 'Xem danh sách phòng khám',
+            'create_rooms' => 'Thêm phòng khám mới',
+            'edit_rooms' => 'Chỉnh sửa phòng khám',
+            'delete_rooms' => 'Xoá phòng khám',
+
+            // 18. Quản lý lịch nghỉ bác sĩ
+            'view_doctor_leaves' => 'Xem danh sách nghỉ phép',
+            'create_doctor_leaves' => 'Thêm lịch nghỉ phép',
+            'edit_doctor_leaves' => 'Sửa lịch nghỉ phép',
+            'delete_doctor_leaves' => 'Xoá nghỉ phép',
+
+            // 19. Quản lý bài viết
+            'view_blogs' => 'Xem bài viết',
+            'create_blogs' => 'Thêm bài viết',
+            'edit_blogs' => 'Sửa bài viết',
+            'delete_blogs' => 'Xoá bài viết',
+
+            // 20. Quản lý voucher
+            'view_vouchers' => 'Xem danh sách voucher',
+            'create_vouchers' => 'Thêm voucher mới',
+            'edit_vouchers' => 'Chỉnh sửa voucher',
+            'delete_vouchers' => 'Xoá voucher',
+
+            // 21. Quản lý lịch sử upload
+            'view_upload_histories' => 'Xem lịch sử upload',
+
+            // 22. Quản lý lịch sử chỉnh sửa đơn thuốc
+            'view_prescription_histories' => 'Xem lịch sử chỉnh sửa đơn thuốc',
         ];
 
         return $labels[$permission] ?? $permission;
@@ -128,6 +159,12 @@ if (!function_exists('getPermissionGroupLabel')) {
             'support' => 'Hỗ trợ & Thông báo',
             'statistics' => 'Thống kê',
             'doctor_leaves' => 'Nghỉ phép bác sĩ',
+            'rooms' => 'Phòng khám',
+            'doctor_leaves' => 'Nghỉ phép bác sĩ',
+            'blogs' => 'Bài viết',
+            'vouchers' => 'Voucher',
+            'upload_histories' => 'Lịch sử upload',
+            'prescription_histories' => 'Lịch sử đơn thuốc',
         ];
 
         return $groups[$group] ?? ucfirst(str_replace('_', ' ', $group));
