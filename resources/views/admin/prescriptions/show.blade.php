@@ -9,7 +9,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h2 class="mb-0">Chi tiết đơn thuốc #{{ $prescription->id }}</h2>
-                        <small class="text-muted">Được tạo ngày {{ $prescription->created_at ? $prescription->created_at->format('d/m/Y H:i') : 'Không xác định' }}</small>
+                        <small class="text-muted">Được tạo ngày {{ \Carbon\Carbon::parse($prescription->created_at)->format('d/m/Y H:i') }}</small>
                     </div>
                     <div class="btn-group">
                         @can('edit_prescriptions')

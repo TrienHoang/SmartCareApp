@@ -44,11 +44,10 @@
 
 
                                 <div class="col-md-6">
-                                    <label for="prescribed_at" class="form-label fw-semibold">Ngày kê đơn <span
-                                            class="text-danger">*</span></label>
-                                    <input type="datetime-local" name="prescribed_at" id="prescribed_at"
-                                        class="form-control @error('prescribed_at') is-invalid @enderror"
-                                        value="{{ old('prescribed_at', now()->format('Y-m-d\TH:i')) }}">
+                                    <label for="prescribed_at" class="form-label">Ngày kê toa</label>
+                                    <input type="text" id="prescribed_at" name="prescribed_at"
+                                        class="form-control flatpickr @error('prescribed_at') is-invalid @enderror"
+                                        value="{{ old('prescribed_at') }}" placeholder="Chọn ngày và giờ">
                                     @error('prescribed_at')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -221,6 +220,15 @@
                     e.target.closest('.medicine-item').remove();
                     updateRemoveButtons();
                 }
+            });
+
+            flatpickr("#prescribed_at", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                time_24hr: true,
+                minDate: "today",
+                locale: "vn",
+                disableMobile: true
             });
 
             updateRemoveButtons();
