@@ -249,7 +249,7 @@
                                         <td>
                                             <div class="user-info">
                                                 <h6 class="mb-0 font-weight-semibold text-primary">{{ $user->full_name }}</h6>
-                                                <small class="text-muted">@{{ $user->username }}</small>
+                                                <small class="text-muted">{{ $user->username }}</small>
                                             </div>
                                         </td>
                                         <td>
@@ -298,10 +298,6 @@
                                                    class="btn btn-outline-warning" data-toggle="tooltip" title="Chỉnh sửa">
                                                     <i class="bx bx-edit"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-outline-danger"
-                                                        data-toggle="tooltip" title="Xóa" onclick="deleteUser({{ $user->id }})">
-                                                    <i class="bx bx-trash"></i>
-                                                </button>
                                             </div>
                                         </td>
                                     </tr>
