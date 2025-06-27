@@ -17,12 +17,12 @@
                                 <ol class="breadcrumb">
                                     <li class="">
                                         <a href="{{ route('admin.dashboard.index') }}" class="text-decoration-none">
-                                           </i>Trang chủ > 
+                                            </i>Trang chủ >
                                         </a>
                                     </li>
                                     <li class="">
                                         <a href="{{ route('admin.notifications.index') }}" class="text-decoration-none">
-                                            </i>Thông báo > 
+                                            </i>Thông báo >
                                         </a>
                                     </li>
                                     <li class="breadcrumb-item active">Chi tiết</li>
@@ -54,14 +54,16 @@
                                     </div>
                                 </div>
                                 <div class="status-badge">
-                                    <span class="badge
+                                    <span
+                                        class="badge
                                         @if ($notification->status == 'sent') bg-success
                                         @elseif ($notification->status == 'scheduled') bg-info 
                                         @elseif ($notification->status == 'sending') bg-warning
                                         @elseif ($notification->status == 'failed') bg-danger
                                         @else bg-dark @endif
                                         rounded-pill px-3 py-2">
-                                        <i class="bx 
+                                        <i
+                                            class="bx 
                                             @if ($notification->status == 'sent') bx-check-circle
                                             @elseif ($notification->status == 'scheduled') bx-time-five
                                             @elseif ($notification->status == 'sending') bx-loader-alt bx-spin
@@ -161,7 +163,7 @@
                                                                 {{ $notification->sender_id ? $notification->sender->name : 'Hệ thống' }}
                                                             </strong> --}}
                                                             @if ($notification->sender_id)
-                                                                <strong >Hệ thống</strong>
+                                                                <strong>Hệ thống</strong>
                                                             @endif
                                                         </div>
                                                     </div>
@@ -214,11 +216,13 @@
                                         <div class="card-body p-3">
                                             <div class="timeline-item mb-2">
                                                 <small class="text-muted d-block">Ngày tạo</small>
-                                                <span class="fw-medium">{{ $notification->created_at->format('d/m/Y H:i') }}</span>
+                                                <span
+                                                    class="fw-medium">{{ $notification->created_at->format('d/m/Y H:i') }}</span>
                                             </div>
                                             <div class="timeline-item">
                                                 <small class="text-muted d-block">Cập nhật cuối</small>
-                                                <span class="fw-medium">{{ $notification->updated_at->format('d/m/Y H:i') }}</span>
+                                                <span
+                                                    class="fw-medium">{{ $notification->updated_at->format('d/m/Y H:i') }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -229,13 +233,14 @@
                             <div class="row mt-4">
                                 <div class="col-12">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <a href="{{ route('admin.notifications.index') }}" 
-                                           class="btn btn-outline-secondary waves-effect">
+                                        <a href="{{ route('admin.notifications.index') }}"
+                                            class="btn btn-outline-secondary waves-effect">
                                             <i class="bx bx-arrow-back me-1"></i>Quay lại danh sách
                                         </a>
                                         <div class="btn-group" role="group">
-                                            @if($notification->status !== 'sent')
-                                                <a class="btn btn-outline-primary" href="{{ route('admin.notifications.edit', $notification) }}">
+                                            @if ($notification->status !== 'sent')
+                                                <a class="btn btn-outline-primary"
+                                                    href="{{ route('admin.notifications.edit', $notification) }}">
                                                     <i class="bx bx-edit-alt me-1"></i>Chỉnh sửa
                                                 </a>
                                             @endif
@@ -258,21 +263,24 @@
         .border-left-primary {
             border-left: 4px solid var(--bs-primary) !important;
         }
+
         .border-left-info {
             border-left: 4px solid var(--bs-info) !important;
         }
+
         .border-left-warning {
             border-left: 4px solid var(--bs-warning) !important;
         }
+
         .border-left-success {
             border-left: 4px solid var(--bs-success) !important;
         }
-        
+
         .notification-content {
             line-height: 1.6;
             font-size: 0.95rem;
         }
-        
+
         .avatar {
             width: 50px;
             height: 50px;
@@ -281,32 +289,32 @@
             justify-content: center;
             border-radius: 50%;
         }
-        
+
         .recipients-list .badge {
             font-size: 0.85rem;
             font-weight: 500;
         }
-        
+
         .card {
             border: 1px solid #e3e6f0;
             border-radius: 0.35rem;
         }
-        
+
         .card-header {
             background-color: #f8f9fc;
             border-bottom: 1px solid #e3e6f0;
         }
-        
+
         .timeline-item:not(:last-child) {
             border-bottom: 1px solid #eee;
             padding-bottom: 8px;
         }
-        
+
         .btn-group .btn {
             border-radius: 0.375rem;
             margin-left: 0.25rem;
         }
-        
+
         .alert {
             border: none;
             border-radius: 0.5rem;
@@ -315,21 +323,20 @@
         .timeline-item {
             border-left: none !important;
         }
-        
+
         @media (max-width: 768px) {
             .d-flex.justify-content-between {
                 flex-direction: column;
                 gap: 1rem;
             }
-            
+
             .btn-group {
                 width: 100%;
             }
-            
+
             .btn-group .btn {
                 flex: 1;
             }
         }
     </style>
 @endsection
-

@@ -206,7 +206,7 @@
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             <i class="bx bx-more-vertical"></i>
                                         </button>
-                                        <div class="dropdown-menu">
+<div class="dropdown-menu">
                                             <a class="dropdown-item" href="#" onclick="exportData('excel')">
                                                 <i class="bx bx-download mr-2"></i>Xuất Excel
                                             </a>

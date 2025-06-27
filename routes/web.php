@@ -349,6 +349,8 @@
     Route::put('admin/categories/edit/{id}', [ServiceCategoryController::class, 'update'])->name('admin.categories.update');
     Route::delete('admin/categories/destroy/{id}', [ServiceCategoryController::class, 'destroy'])->name('admin.categories.destroy');
     Route::get('admin/categories/show/{id}', [ServiceCategoryController::class, 'show'])->name('admin.categories.show');
+    Route::patch('admin/categories/toggle-status/{id}', [ServiceCategoryController::class, 'toggleStatus'])->name('admin.categories.toggle-status');
+
 
     // quản lý dịch vụ
     Route::get('admin/services', [ServiceController::class, 'index'])->name('admin.services.index');
@@ -393,13 +395,8 @@
     Route::put('admin/schedules/edit/{id}', [SchedulesController::class, 'update'])->name('admin.schedules.update');
     Route::delete('admin/schedules/destroy/{id}', [SchedulesController::class, 'destroy'])->name('admin.schedules.destroy');
     Route::get('admin/schedules/show/{id}', [SchedulesController::class, 'show'])->name('admin.schedules.show');
-    // quản lý lịch hẹn khám
-    // Route::prefix('admin/appointments')->name('admin.appointments.')->group(function () {
-    //     Route::get('/', [AppointmentController::class, 'index'])->name('index');
-    //     Route::get('/create', [AppointmentController::class, 'create'])->name('create');
-    //     Route::post('/store', [AppointmentController::class, 'store'])->name('store');
-    // });
-    // Quản lý lịch nghỉ của bác sĩ
+
+    // Quản lý đánh giá bác sĩ 
     Route::group([
         'prefix' => 'admin/doctor_leaves',
         'as' => 'admin.doctor_leaves.',
@@ -517,16 +514,27 @@
             'middleware' => ['auth', 'checkAdmin']
         ], function () {
             Route::get('/', [FaqController::class, 'index'])->name('index');
+
             Route::get('/create', [FaqController::class, 'create'])
                 ->middleware('check_permission:create_faqs')->name('create');
+
             Route::post('/store', [FaqController::class, 'store'])
                 ->middleware('check_permission:create_faqs')->name('store');
-            Route::get('/edit/{id}', [FaqController::class, 'edit'])
+
+            Route::get('/edit/{faq}', [FaqController::class, 'edit']) // đổi id → faq
                 ->middleware('check_permission:edit_faqs')->name('edit');
-            Route::put('/update/{id}', [FaqController::class, 'update'])
+
+            Route::put('/update/{faq}', [FaqController::class, 'update']) // đổi id → faq
                 ->middleware('check_permission:edit_faqs')->name('update');
-            Route::delete('/destroy/{id}', [FaqController::class, 'destroy'])
+
+            Route::delete('/destroy/{faq}', [FaqController::class, 'destroy']) // đổi id → faq
                 ->middleware('check_permission:delete_faqs')->name('destroy');
+
+            Route::get('/show/{faq}', [FaqController::class, 'show'])
+                ->middleware('check_permission:view_faqs')->name('show');
+
+            Route::patch('/toggle-status/{faq}', [FaqController::class, 'toggleStatus'])
+                ->middleware('check_permission:edit_faqs')->name('toggle-status');
         });
 
 
