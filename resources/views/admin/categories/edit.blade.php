@@ -1,6 +1,8 @@
 @extends('admin.dashboard')
 @section('title', 'Chỉnh sửa Danh mục Dịch vụ')
 
+@section('title', 'Chỉnh sửa Danh mục Dịch vụ')
+
 @section('content')
     <div class="content-wrapper">
         <div class="content-header row">
@@ -55,7 +57,7 @@
                                             <input type="text" class="form-control @error('name') is-invalid @enderror"
                                                 id="name" name="name"
                                                 value="{{ old('name', $serviceCategory->name) }}"
-                                                placeholder="Nhập tên danh mục..." required>
+                                                placeholder="Nhập tên danh mục...">
                                             @error('name')
                                                 <div class="invalid-feedback">
                                                     {{ $message }}

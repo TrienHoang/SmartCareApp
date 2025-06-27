@@ -35,9 +35,17 @@ class FaqController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'question' => 'required|unique:faqs,question',
-            'answer' => 'required',
-            'service_category_id' => 'required|exists:service_categories,id',
+            'question' => 'sometimes|string|max:255',
+            'answer' => 'nullable|string',
+            'service_category_id' => 'nullable|exists:service_categories,id',
+        ], [
+            'question.sometimes' => 'Câu hỏi không bắt buộc, nhưng nếu có thì phải hợp lệ.',
+            'question.string' => 'Câu hỏi phải là chuỗi ký tự.',
+            'question.max' => 'Câu hỏi không được vượt quá 255 ký tự.',
+
+            'answer.string' => 'Câu trả lời phải là chuỗi ký tự.',
+
+            'service_category_id.exists' => 'Danh mục được chọn không hợp lệ.',
         ]);
 
         Faq::create([
@@ -71,7 +79,16 @@ class FaqController extends Controller
             'question' => 'sometimes|string|max:255',
             'answer' => 'nullable|string',
             'service_category_id' => 'nullable|exists:service_categories,id',
+        ], [
+            'question.sometimes' => 'Câu hỏi không bắt buộc, nhưng nếu có thì phải hợp lệ.',
+            'question.string' => 'Câu hỏi phải là chuỗi ký tự.',
+            'question.max' => 'Câu hỏi không được vượt quá 255 ký tự.',
+
+            'answer.string' => 'Câu trả lời phải là chuỗi ký tự.',
+
+            'service_category_id.exists' => 'Danh mục được chọn không hợp lệ.',
         ]);
+
 
 
         $faq->update([

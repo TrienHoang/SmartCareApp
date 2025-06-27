@@ -11,46 +11,50 @@
             <h4 class="py-3 breadcrumb-wrapper mb-0">
                 <span class="text-muted fw-light">Quản lý /</span> Lịch hẹn khám
             </h4>
-            <div>
-                <button class="btn btn-primary" onclick="window.location.reload()">
-                    <i class="bx bx-refresh"></i> Làm mới
-                </button>
-            </div>
+            <button class="btn btn-primary" onclick="window.location.reload()">
+                <i class="bx bx-refresh"></i> Làm mới
+            </button>
         </div>
 
         <!-- Thống kê nhanh -->
-        <div class="stats-card">
+        <div class="stats-card mb-4">
             <h5 class="mb-3">Thống kê tổng quan</h5>
             <div class="stats-grid">
-                <div class="stat-item">
+                <div class="stat-item total">
+                    <i class="bx bx-send icon"></i>
                     <div class="stat-number">{{ $stats['total'] }}</div>
-                    <div>Tổng lịch hẹn</div>
+                    <div>Đã gửi</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item today">
+                    <i class="bx bx-calendar icon"></i>
                     <div class="stat-number">{{ $stats['today'] }}</div>
-                    <div>Hôm nay</div>
+                    <div>Đã lên lịch</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item pending">
+                    <i class="bx bx-loader icon bx-spin"></i>
                     <div class="stat-number">{{ $stats['pending'] }}</div>
                     <div>Chờ xác nhận</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item confirmed">
+                    <i class="bx bx-check-circle icon"></i>
                     <div class="stat-number">{{ $stats['confirmed'] }}</div>
                     <div>Đã xác nhận</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item completed">
+                    <i class="bx bx-check-double icon"></i>
                     <div class="stat-number">{{ $stats['completed'] }}</div>
                     <div>Hoàn thành</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item cancelled">
+                    <i class="bx bx-x-circle icon"></i>
                     <div class="stat-number">{{ $stats['cancelled'] }}</div>
-                    <div>Đã hủy</div>
+                    <div>Thất bại</div>
                 </div>
             </div>
         </div>
 
         <!-- Bộ lọc -->
-        <div class="filter-section">
+        <div class="filter-section mb-4">
             <form method="GET" action="{{ route('admin.appointments.index') }}" class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label">Tìm kiếm bệnh nhân</label>
@@ -111,13 +115,13 @@
                 <div class="col-md-2">
                     <label class="form-label">Từ ngày</label>
                     <input type="date" class="form-control" name="date_from"
-                        value="{{ old('date_from', $from_input ?? request('date_from')) }}">
+                        value="{{ old('date_from', request('date_from')) }}">
                 </div>
 
                 <div class="col-md-2">
                     <label class="form-label">Đến ngày</label>
                     <input type="date" class="form-control" name="date_to"
-                        value="{{ old('date_to', $to_input ?? request('date_to')) }}">
+                        value="{{ old('date_to', request('date_to')) }}">
                 </div>
 
                 <div class="col-md-12">
@@ -131,6 +135,7 @@
             </form>
         </div>
 
+        <!-- Thông báo thành công và lỗi -->
         <script>
             @if (session('success'))
                 toastr.success("{{ session('success') }}", "Thành công");
@@ -139,7 +144,6 @@
             @if (session('error'))
                 toastr.error("{{ session('error') }}", "Lỗi");
             @endif
-
         </script>
 
         <!-- Bảng danh sách -->
@@ -193,40 +197,36 @@
                     <tbody>
                         @forelse ($appointments as $key => $appointment)
                             <tr>
-                                <td>{{ $appointments->firstItem() + $key }}</td>
-                                <td>
+                                <td data-label="STT">{{ $appointments->firstItem() + $key }}</td>
+                                <td data-label="Bệnh nhân">
                                     <div class="d-flex flex-column">
                                         <strong>{{ $appointment->patient->full_name ?? 'N/A' }}</strong>
                                         <small class="text-muted">{{ $appointment->patient->phone ?? '' }}</small>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Bác sĩ">
                                     <div class="d-flex flex-column">
                                         <span>{{ $appointment->doctor->user->full_name ?? 'N/A' }}</span>
                                         <small class="text-muted">{{ $appointment->doctor->specialization ?? '' }}</small>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Phòng/Khoa">
                                     <div class="d-flex flex-column">
                                         <span>{{ $appointment->doctor->room->name ?? 'N/A' }}</span>
                                         <small
                                             class="text-muted">{{ $appointment->doctor->department->name ?? '' }}</small>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Thời gian">
                                     <div class="d-flex flex-column">
                                         <span>{{ $appointment->formatted_time }}</span>
-                                        @php
-                                            $endTime = \Carbon\Carbon::parse(
-                                                $appointment->appointment_time,
-                                            )->addMinutes($appointment->service->duration ?? 30);
-                                        @endphp
-                                        <small class="text-muted">
-                                            {{ $endTime->format('H:i') }} (Dự kiến)
+                                        <small
+                                            class="text-muted">{{ \Carbon\Carbon::parse($appointment->end_time)->format('H:i') }}
+                                            (Dự kiến)
                                         </small>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Trạng thái">
                                     @php
                                         $statusConfig = [
                                             'pending' => [
@@ -257,7 +257,7 @@
                                         <i class="bx {{ $config['icon'] }}"></i> {{ $config['text'] }}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-label="Thanh toán">
                                     @if (
                                         ($appointment->payment && $appointment->payment->status === 'paid') ||
                                             ($appointment->order && $appointment->order->status === 'completed'))
@@ -266,7 +266,7 @@
                                         <span class="badge bg-danger">Chưa thanh toán</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="Thao tác">
                                     <div class="table-actions">
                                         <a href="{{ route('admin.appointments.show', $appointment->id) }}"
                                             class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
@@ -278,17 +278,6 @@
                                                 class="btn btn-sm btn-outline-warning" title="Chỉnh sửa">
                                                 <i class="bx bx-edit"></i>
                                             </a>
-                                        @endif
-                                        @if (
-                                            $appointment->status !== 'completed' &&
-                                                !($appointment->order && $appointment->order->status === 'completed') &&
-                                                $appointment->payment &&
-                                                $appointment->payment->status !== 'paid')
-                                            <form action="{{ route('admin.appointments.pay', $appointment->id) }}"
-                                                method="POST" class="d-inline">
-                                                @csrf
-                                                <button class="btn btn-sm btn-outline-success">Thanh toán</button>
-                                            </form>
                                         @endif
 
                                         @if ($appointment->status === 'confirmed')
@@ -307,10 +296,9 @@
                                             </form>
                                         @endif
 
-
                                         @if (in_array($appointment->status, ['pending', 'confirmed']))
                                             <button class="btn btn-sm btn-outline-danger"
-                                                onclick="cancelAppointment({{ $appointment->id }})" title="Hủy lịch hẹn">
+                                                onclick="showCancelModal({{ $appointment->id }})" title="Hủy lịch hẹn">
                                                 <i class="bx bx-x-circle"></i>
                                             </button>
                                         @endif
@@ -319,7 +307,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center py-4">
+                                <td colspan="8" class="text-center py-4">
                                     <div class="text-muted">
                                         <i class="bx bx-calendar-x" style="font-size: 3rem;"></i>
                                         <div class="mt-2">Không tìm thấy lịch hẹn nào</div>
@@ -335,8 +323,8 @@
                 <div class="card-footer">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="text-muted">
-                            Hiển thị {{ $appointments->firstItem() }} - {{ $appointments->lastItem() }}
-                            trong tổng số {{ $appointments->total() }} bản ghi
+                            Hiển thị {{ $appointments->firstItem() }} - {{ $appointments->lastItem() }} trong tổng số
+                            {{ $appointments->total() }} bản ghi
                         </div>
                         {{ $appointments->appends(request()->query())->links('pagination::bootstrap-5') }}
                     </div>
@@ -382,8 +370,27 @@
         </div>
     </div>
 
-
+    {{-- Modal hủy lịch hẹn --}}
+    <div class="modal fade" id="cancelModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="cancelForm" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">Xác nhận hủy lịch hẹn</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn <strong>hủy lịch hẹn</strong> này không?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không</button>
+                        <button type="submit" class="btn btn-danger">Xác nhận hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script src="{{ asset('js/Appointment/index.js') }}"></script>
-
-
 @endsection

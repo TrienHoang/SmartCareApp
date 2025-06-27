@@ -379,7 +379,7 @@
                                     </small>
                                 </div>
                                 <div class="pagination-links">
-                                    {{ $categories->links('pagination::bootstrap-4') }}
+                                    {{ $categories->links('pagination::bootstrap-5') }}
                                 </div>
                             </div>
                         </div>
