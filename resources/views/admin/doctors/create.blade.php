@@ -1,26 +1,22 @@
 @extends('admin.dashboard')
 
 @section('content')
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="card-title">
-                            <i class="fas fa-user-md"></i> Thêm bác sĩ mới
-                        </h3>
-                    </div>
-                    <div class="card-body">
-
-
-                        <form action="{{ route('admin.doctors.store') }}" method="POST" id="doctorForm">
-                            @csrf
-                            <div class="form-group">
-                                <label for="user_id">
-                                    <i class="fas fa-user"></i> Chọn người dùng có sẵn
-                                </label>
-                                <select name="user_id" id="user_id"
-                                    class="form-control @error('user_id') is-invalid @enderror">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex align-items-center">
+                    <i class="fas fa-user-md mr-2"></i>
+                    <h4 class="mb-0">Thêm bác sĩ mới</h4>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('admin.doctors.store') }}" method="POST">
+                        @csrf
+                        <div class="row">
+                            {{-- Người dùng --}}
+                            <div class="col-12 mb-3">
+                                <label><i class="fas fa-user"></i> Người dùng có sẵn</label>
+                                <select name="user_id" class="form-control @error('user_id') is-invalid @enderror">
                                     <option value="">-- Chọn người dùng --</option>
                                     @foreach($availableUsers as $user)
                                         <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
@@ -29,92 +25,87 @@
                                     @endforeach
                                 </select>
                                 @error('user_id')
-                                    <small class="text-danger">{{ $message }}</small>
+                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
                                 @enderror
-                                <small class="form-text text-muted">Hoặc nhập tên mới bên dưới.</small>
                             </div>
 
-                            <div class="form-group">
-                                <label for="specialization">Chuyên môn <span class="text-danger">*</span></label>
+                            {{-- Chuyên môn --}}
+                            <div class="col-md-6 col-12 mb-3">
+                                <label>Chuyên môn <span class="text-danger">*</span></label>
                                 <input type="text" name="specialization"
-                                    class="form-control @error('specialization') is-invalid @enderror"
-                                    value="{{ old('specialization') }}">
+                                       class="form-control @error('specialization') is-invalid @enderror"
+                                       value="{{ old('specialization') }}">
                                 @error('specialization')
-                                    <small class="text-danger d-flex align-items-center mt-1">
-                                        <i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}
+                                    <small class="text-danger d-block mt-1">
+                                        <i class="fas fa-exclamation-circle"></i> {{ $message }}
                                     </small>
                                 @enderror
                             </div>
 
-                            <div class="form-group">
-                                <label for="department_id">Phòng ban <span class="text-danger">*</span></label>
-                                <select name="department_id" id="department_id"
-                                    class="form-control @error('department_id') is-invalid @enderror">
+                            {{-- Phòng ban --}}
+                            <div class="col-md-6 col-12 mb-3">
+                                <label>Phòng ban <span class="text-danger">*</span></label>
+                                <select name="department_id"
+                                        class="form-control @error('department_id') is-invalid @enderror">
                                     <option value="">-- Chọn phòng ban --</option>
-                                    @foreach($departments as $department)
-                                        <option value="{{ $department->id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
-                                            {{ $department->name }}
+                                    @foreach($departments as $dept)
+                                        <option value="{{ $dept->id }}" {{ old('department_id') == $dept->id ? 'selected' : '' }}>
+                                            {{ $dept->name }}
                                         </option>
                                     @endforeach
                                 </select>
                                 @error('department_id')
-                                    <small class="text-danger d-flex align-items-center mt-1">
-                                        <i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}
+                                    <small class="text-danger d-block mt-1">
+                                        <i class="fas fa-exclamation-circle"></i> {{ $message }}
                                     </small>
                                 @enderror
                             </div>
 
-                            <div class="form-group">
-                                <label for="room_id">Phòng khám <span class="text-danger">*</span></label>
-                                <select name="room_id" id="room_id"
-                                    class="form-control @error('room_id') is-invalid @enderror">
+                            {{-- Phòng khám --}}
+                            <div class="col-md-6 col-12 mb-3">
+                                <label>Phòng khám <span class="text-danger">*</span></label>
+                                <select name="room_id"
+                                        class="form-control @error('room_id') is-invalid @enderror">
                                     <option value="">-- Chọn phòng khám --</option>
                                     @foreach($rooms as $room)
                                         <option value="{{ $room->id }}" {{ old('room_id') == $room->id ? 'selected' : '' }}>
-                                            {{ $room->name ?? $room->room_number }}
+                                            {{ $room->name ?? 'Phòng ' . $room->room_number }}
                                         </option>
                                     @endforeach
                                 </select>
                                 @error('room_id')
-                                    <small class="text-danger d-flex align-items-center mt-1">
-                                        <i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}
+                                    <small class="text-danger d-block mt-1">
+                                        <i class="fas fa-exclamation-circle"></i> {{ $message }}
                                     </small>
                                 @enderror
                             </div>
 
-                            <div class="form-group">
-                                <label for="biography">Tiểu sử</label>
-                                <textarea name="biography" class="form-control @error('biography') is-invalid @enderror"
-                                    rows="4">{{ old('biography') }}</textarea>
+                            {{-- Tiểu sử --}}
+                            <div class="col-12 mb-3">
+                                <label>Tiểu sử</label>
+                                <textarea name="biography" rows="4"
+                                          class="form-control @error('biography') is-invalid @enderror">{{ old('biography') }}</textarea>
                                 @error('biography')
-                                    <small class="text-danger d-flex align-items-center mt-1">
-                                        <i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}
+                                    <small class="text-danger d-block mt-1">
+                                        <i class="fas fa-exclamation-circle"></i> {{ $message }}
                                     </small>
                                 @enderror
                             </div>
+                        </div>
 
-                            <div class="form-group text-center">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fas fa-plus"></i> Thêm bác sĩ
-                                </button>
-                                <a href="{{ route('admin.doctors.index') }}" class="btn btn-secondary ml-2">
-                                    <i class="fas fa-arrow-left"></i> Quay lại
-                                </a>
-                            </div>
-                        </form>
-                    </div>
+                        {{-- Nút hành động --}}
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus-circle"></i> Thêm bác sĩ
+                            </button>
+                            <a href="{{ route('admin.doctors.index') }}" class="btn btn-secondary ml-2">
+                                <i class="fas fa-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-
-    <style>
-        .text-danger i {
-            font-size: 0.9rem;
-        }
-
-        .card {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+</div>
 @endsection
