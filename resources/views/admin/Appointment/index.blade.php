@@ -20,29 +20,35 @@
         <div class="stats-card mb-4">
             <h5 class="mb-3">Thống kê tổng quan</h5>
             <div class="stats-grid">
-                <div class="stat-item">
+                <div class="stat-item total">
+                    <i class="bx bx-send icon"></i>
                     <div class="stat-number">{{ $stats['total'] }}</div>
-                    <div>Tổng lịch hẹn</div>
+                    <div>Đã gửi</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item today">
+                    <i class="bx bx-calendar icon"></i>
                     <div class="stat-number">{{ $stats['today'] }}</div>
-                    <div>Hôm nay</div>
+                    <div>Đã lên lịch</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item pending">
+                    <i class="bx bx-loader icon bx-spin"></i>
                     <div class="stat-number">{{ $stats['pending'] }}</div>
                     <div>Chờ xác nhận</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item confirmed">
+                    <i class="bx bx-check-circle icon"></i>
                     <div class="stat-number">{{ $stats['confirmed'] }}</div>
                     <div>Đã xác nhận</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item completed">
+                    <i class="bx bx-check-double icon"></i>
                     <div class="stat-number">{{ $stats['completed'] }}</div>
                     <div>Hoàn thành</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item cancelled">
+                    <i class="bx bx-x-circle icon"></i>
                     <div class="stat-number">{{ $stats['cancelled'] }}</div>
-                    <div>Đã hủy</div>
+                    <div>Thất bại</div>
                 </div>
             </div>
         </div>
@@ -191,35 +197,36 @@
                     <tbody>
                         @forelse ($appointments as $key => $appointment)
                             <tr>
-                                <td>{{ $appointments->firstItem() + $key }}</td>
-                                <td>
+                                <td data-label="STT">{{ $appointments->firstItem() + $key }}</td>
+                                <td data-label="Bệnh nhân">
                                     <div class="d-flex flex-column">
                                         <strong>{{ $appointment->patient->full_name ?? 'N/A' }}</strong>
                                         <small class="text-muted">{{ $appointment->patient->phone ?? '' }}</small>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Bác sĩ">
                                     <div class="d-flex flex-column">
                                         <span>{{ $appointment->doctor->user->full_name ?? 'N/A' }}</span>
                                         <small class="text-muted">{{ $appointment->doctor->specialization ?? '' }}</small>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Phòng/Khoa">
                                     <div class="d-flex flex-column">
                                         <span>{{ $appointment->doctor->room->name ?? 'N/A' }}</span>
                                         <small
                                             class="text-muted">{{ $appointment->doctor->department->name ?? '' }}</small>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Thời gian">
                                     <div class="d-flex flex-column">
                                         <span>{{ $appointment->formatted_time }}</span>
                                         <small
                                             class="text-muted">{{ \Carbon\Carbon::parse($appointment->end_time)->format('H:i') }}
-                                            (Dự kiến)</small>
+                                            (Dự kiến)
+                                        </small>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Trạng thái">
                                     @php
                                         $statusConfig = [
                                             'pending' => [
@@ -250,7 +257,7 @@
                                         <i class="bx {{ $config['icon'] }}"></i> {{ $config['text'] }}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-label="Thanh toán">
                                     @if (
                                         ($appointment->payment && $appointment->payment->status === 'paid') ||
                                             ($appointment->order && $appointment->order->status === 'completed'))
@@ -259,7 +266,7 @@
                                         <span class="badge bg-danger">Chưa thanh toán</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="Thao tác">
                                     <div class="table-actions">
                                         <a href="{{ route('admin.appointments.show', $appointment->id) }}"
                                             class="btn btn-sm btn-outline-primary" title="Xem chi tiết">

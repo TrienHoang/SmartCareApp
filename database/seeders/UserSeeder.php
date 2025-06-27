@@ -22,6 +22,13 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'full_name' => "Bác sĩ $i",
                 'phone' => "09000000$i",
+                'gender' => rand(0, 1) ? 'Nam' : 'Nữ',
+                'date_of_birth' => now()
+                    ->subYears(rand(10, 50))
+                    ->subMonths(rand(0, 11))
+                    ->subDays(rand(0, 28))
+                    ->format('Y-m-d'),
+                'address' => fake()->address(),
                 'role_id' => $doctorRoleId,
                 'status' => 'online',
             ]);
@@ -35,6 +42,13 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'full_name' => "Bệnh nhân $i",
                 'phone' => "09880000$i",
+                'gender' => rand(0, 1) ? 'Nam' : 'Nữ',
+                'date_of_birth' => now()
+                    ->subYears(rand(10, 50))
+                    ->subMonths(rand(0, 11))
+                    ->subDays(rand(0, 28))
+                    ->format('Y-m-d'),
+                'address' => fake()->address(),
                 'role_id' => $patientRoleId,
                 'status' => 'offline',
             ]);
