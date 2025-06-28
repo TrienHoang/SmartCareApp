@@ -53,11 +53,11 @@ $this->call([
             UploadHistorySeeder::class,
 
             BlogSeeder::class,
-            NotificationSeeder::class,
+            // NotificationSeeder::class,
             FaqSeeder::class,
             OrderSeeder::class,
             // NotificationSeeder::class,
-              FaqSeeder::class,
+            //   FaqSeeder::class,
             ReviewSeeder::class,
         ]);
         

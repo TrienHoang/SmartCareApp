@@ -1,137 +1,127 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@yield('title', 'Admin Dashboard')</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
     @include('admin.partials.header')
 
     <style>
-    html, body {
-        height: 100%;
-        margin: 0;
-    }
-
-    .layout-wrapper {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .layout-container {
-        flex: 1;
-        display: flex;
-        overflow: hidden;
-    }
-
-    .layout-menu.menu-vertical {
-        height: auto;
-        flex-shrink: 0;
-        overflow-y: auto;
-        width: 260px;
-        transition: all 0.3s ease;
-        background-color: #f8f9fa;
-        border-right: 1px solid #e9ecef;
-    }
-
-    .layout-menu.menu-vertical.hide-menu {
-        margin-left: -260px;
-    }
-
-    .layout-page {
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-        overflow: hidden;
-    }
-
-    .content-wrapper {
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-    }
-
-    .container-xxl.container-p-y {
-        flex-grow: 1;
-        overflow-y: auto;
-        padding: 1.5rem;
-    }
-
-    .content-footer.footer {
-        flex-shrink: 0;
-        padding: 1rem 1.5rem;
-        background-color: #f8f9fa;
-        border-top: 1px solid #e9ecef;
-    }
-
-    @media (max-width: 991.98px) {
-        .layout-menu.menu-vertical {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1050;
-            transform: translateX(-100%);
-            width: 260px;
-            height: 100vh;
-            background-color: #f8f9fa;
+        html,
+        body {
+            height: 100%;
+            margin: 0;
         }
 
-        .layout-menu.menu-vertical.show-menu {
-            transform: translateX(0%);
+        .layout-wrapper {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .layout-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
         }
 
         .layout-page {
-            margin-left: 0 !important;
-            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        .layout-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1040;
-            display: none;
+        .content-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        .layout-overlay.show {
-            display: block;
+        .container-xxl.container-p-y {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
         }
 
-        .navbar .navbar-toggler {
-            display: block;
-        }
-    }
 
-    @media (min-width: 992px) {
-        .layout-menu.menu-vertical {
-            transform: translateX(0%);
+        .content-footer.footer {
+            flex-shrink: 0;
+            padding: 1rem 1.5rem;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
         }
 
-        .navbar .navbar-toggler {
-            display: none;
+        @media (max-width: 991.98px) {
+            .layout-menu.menu-vertical {
+                position: fixed;
+                top: 0;
+                left: 0;
+                z-index: 1050;
+                transform: translateX(-100%);
+                width: 260px;
+                height: 100vh;
+                background-color: #f8f9fa;
+            }
+
+            .layout-menu.menu-vertical.show-menu {
+                transform: translateX(0%);
+            }
+
+            .layout-page {
+                margin-left: 0 !important;
+                width: 100%;
+            }
+
+            .layout-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1040;
+                display: none;
+            }
+
+            .layout-overlay.show {
+                display: block;
+            }
+
+            .navbar .navbar-toggler {
+                display: block;
+            }
         }
 
-        .layout-overlay {
-            display: none !important;
+        @media (min-width: 992px) {
+            .layout-menu.menu-vertical {
+                transform: translateX(0%);
+            }
+
+            .navbar .navbar-toggler {
+                display: none;
+            }
+
+            .layout-overlay {
+                display: none !important;
+            }
         }
-    }
-</style>
+    </style>
 
 </head>
+
 <body>
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
@@ -143,9 +133,10 @@
                         @yield('content')
                     </div>
                     @include('admin.partials.footer')
-                    <div class="layout-overlay" onclick="toggleSidebar()"></div> </div>
+                    <div class="layout-overlay" onclick="toggleSidebar()"></div>
                 </div>
             </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
@@ -153,7 +144,6 @@
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
     @include('admin.partials.scripts')
 
     <script>
@@ -186,4 +176,5 @@
     @stack('scripts')
     @yield('scripts')
 </body>
+
 </html>
