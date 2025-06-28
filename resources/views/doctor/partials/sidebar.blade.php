@@ -47,7 +47,7 @@
             </li>
 
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="{{ route('doctor.prescriptions.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-capsule"></i>
                     <div>Đơn thuốc</div>
                 </a>
