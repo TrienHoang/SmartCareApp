@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+@extends('doctor.dashboard')
 @section('title', 'Chi tiết đơn thuốc')
 
 @section('content')
@@ -13,14 +13,14 @@
                     </div>
                     <div class="btn-group">
                         @can('edit_prescriptions')
-                            <a href="{{ route('admin.prescriptions.edit', $prescription->id) }}" class="btn btn-warning">
+                            <a href="{{ route('doctor.prescriptions.edit', $prescription->id) }}" class="btn btn-warning">
                                 <i class="fas fa-edit"></i> Chỉnh sửa
                             </a>
                         @endcan
-                        <a href="{{ route('admin.prescriptions.print', $prescription->id) }}" class="btn btn-primary" target="_blank">
+                        <a href="#" class="btn btn-primary" target="_blank">
                             <i class="fas fa-print"></i> In đơn thuốc
                         </a>
-                        <a href="{{ route('admin.prescriptions.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('doctor.prescriptions.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Quay lại
                         </a>
                     </div>

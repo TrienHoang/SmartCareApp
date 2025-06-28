@@ -13,47 +13,19 @@
         <div class="card-body">
             <form method="GET">
                 <div class="row g-3">
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <input type="text" name="patient_name" class="form-control" placeholder="Tên bệnh nhân" value="{{ request('patient_name') }}">
                     </div>
                     <div class="col-md-3">
-                        <input type="text" name="doctor_name" class="form-control" placeholder="Tên bác sĩ" value="{{ request('doctor_name') }}">
-                    </div>
-                    <div class="col-md-2">
                         <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
                     </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">
                             <i class="fas fa-search"></i> Tìm
                         </button>
-                    </div>
-                    <div class="col-md-4">
-                        <select name="medicine_id" class="form-control">
-                            <option value="">-- Tất cả thuốc --</option>
-                            @foreach ($medicines as $id => $name)
-                                <option value="{{ $id }}" {{ request('medicine_id') == $id ? 'selected' : '' }}>
-                                    {{ $name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <select name="department_id" class="form-control">
-                            <option value="">-- Tất cả khoa --</option>
-                            @foreach ($departments as $department)
-                                <option value="{{ $department->id }}" {{ request('department_id') == $department->id ? 'selected' : '' }}>
-                                    {{ $department->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <a href="{{ route('doctor.prescriptions.index') }}" class="btn btn-secondary w-100">
-                            Đặt lại
-                        </a>
                     </div>
                 </div>
             </form>
@@ -80,8 +52,7 @@
                         <tr>
                             <th>STT</th>
                             <th>Bệnh nhân</th>
-                            <th>Bác sĩ</th>
-                            <th>Ngày</th>
+                            <th>Ngày kê</th>
                             <th>Số loại thuốc</th>
                             <th>Tổng số lượng</th>
                             <th>Hành động</th>
@@ -92,22 +63,21 @@
                             <tr>
                                 <td>{{ ($prescriptions->currentPage() - 1) * $prescriptions->perPage() + $loop->iteration }}</td>
                                 <td>{{ $prescription->medicalRecord->appointment->patient->full_name }}</td>
-                                <td>{{ $prescription->medicalRecord->appointment->doctor->user->full_name }}</td>
-                                <td>{{ $prescription->formatted_date }}</td>
+                                <td>{{ $prescription->prescribed_at->format('d/m/Y') }}</td>
                                 <td>{{ $prescription->prescriptionItems->count() }}</td>
                                 <td>{{ $prescription->prescriptionItems->sum('quantity') }}</td>
                                 <td>
                                     <a href="{{ route('doctor.prescriptions.show', $prescription->id) }}" class="btn btn-sm btn-info">
                                         <i class="bx bx-show-alt"></i>
                                     </a>
-                                    <a href="{{ route('doctor.prescriptions.edit', $prescription->id) }}" class="btn btn-sm btn-warning">
-                                        <i class="bx bx-edit"></i>
+                                    <a href="#" class="btn btn-sm btn-secondary" target="_blank">
+                                        <i class="bx bx-printer"></i>
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center">Không có đơn thuốc</td>
+                                <td colspan="6" class="text-center">Không có đơn thuốc nào.</td>
                             </tr>
                         @endforelse
                     </tbody>

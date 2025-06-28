@@ -118,22 +118,28 @@
 @endsection
 
 @section('scripts')
-    <!-- Flatpickr & locale -->
+    {{-- ✅ jQuery phải được load đầu tiên --}}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    {{-- ✅ Bootstrap Bundle sau jQuery --}}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    {{-- ✅ jQuery UI --}}
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    {{-- ✅ Flatpickr --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/vn.js"></script>
 
-    <!-- jQuery UI (autocomplete) -->
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        $(document).ready(function() {
             let medicineIndex = 0;
 
-            // Autocomplete medical record
             const $recordInput = $('#medical_record_display');
             const $recordId = $('#medical_record_id');
 
+            // ✅ Autocomplete tìm hồ sơ bệnh án (chỉ bệnh nhân bác sĩ đã khám)
             $recordInput.autocomplete({
                 source: function(request, response) {
                     $.ajax({
@@ -143,22 +149,28 @@
                             q: request.term
                         },
                         success: function(data) {
+                            console.log("🩺 Kết quả hồ sơ bệnh án:", data);
                             response(data.map(item => ({
                                 label: item.text,
-                                value: item.id
+                                value: item.text,
+                                id: item.id
                             })));
+                        },
+                        error: function(xhr) {
+                            console.error('❌ AJAX lỗi:', xhr.responseText);
                         }
                     });
                 },
                 minLength: 2,
                 delay: 300,
                 select: function(event, ui) {
-                    $recordInput.val(ui.item.label);
-                    $recordId.val(ui.item.value);
+                    $recordInput.val(ui.item.label); // Gán hiển thị
+                    $recordId.val(ui.item.id); // Gán ID vào input ẩn
                     return false;
                 }
             });
 
+            // ✅ Load lại giá trị nếu có (trong trường hợp lỗi validate)
             if ($recordId.val()) {
                 $.ajax({
                     url: "{{ route('doctor.prescriptions.searchMedicalRecords') }}",
@@ -174,7 +186,7 @@
                 });
             }
 
-            // Autocomplete thuốc
+            // ✅ Autocomplete thuốc
             function initMedicineAutocomplete(container) {
                 const $input = $(container).find('.medicine-autocomplete');
                 const $hidden = $(container).find('.medicine-hidden-id');
@@ -190,7 +202,8 @@
                             success: function(data) {
                                 response(data.map(item => ({
                                     label: item.text,
-                                    value: item.id
+                                    value: item.text,
+                                    id: item.id
                                 })));
                             }
                         });
@@ -199,7 +212,7 @@
                     delay: 250,
                     select: function(event, ui) {
                         $input.val(ui.item.label);
-                        $hidden.val(ui.item.value);
+                        $hidden.val(ui.item.id);
                         return false;
                     }
                 });
@@ -225,15 +238,12 @@
                 });
             }
 
-            document.getElementById('add-medicine').addEventListener('click', addMedicineItem);
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.remove-medicine')) {
-                    e.target.closest('.medicine-item').remove();
-                    updateRemoveButtons();
-                }
+            $('#add-medicine').on('click', addMedicineItem);
+            $(document).on('click', '.remove-medicine', function() {
+                $(this).closest('.medicine-item').remove();
+                updateRemoveButtons();
             });
 
-            // Khởi tạo Flatpickr (sau khi vn.js đã load)
             flatpickr("#prescribed_at", {
                 enableTime: true,
                 dateFormat: "Y-m-d H:i",
@@ -246,4 +256,5 @@
             updateRemoveButtons();
         });
     </script>
+
 @endsection
