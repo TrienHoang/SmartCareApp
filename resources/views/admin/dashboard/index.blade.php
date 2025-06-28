@@ -212,7 +212,7 @@
                         <div class="d-flex gap-2">
                             <form method="GET" id="timeFrameForm" class="d-inline-block">
                                 <select name="type" id="timeFrameSelect"
-                                    class="form-select form-select-sm border-0 bg-light"
+                                    class="form-select form-select-sm border-1 bg-light"
                                     onchange="toggleCustomDateRange()">
                                     <option value="day" {{ request('type') == 'day' ? 'selected' : '' }}>Theo ngày
                                     </option>
