@@ -1,6 +1,6 @@
 @extends('admin.dashboard')
 @section('content')
-    <div class="container-fluid py-4">
+    <div class="container-fluid py-4 dashboard-scroll">
         <div class="d-flex justify-content-end mb-3 gap-2">
             <button class="btn btn-success btn-sm" onclick="exportData('excel')">
                 <i class="fas fa-file-excel me-1"></i> Xuất Excel
@@ -13,7 +13,7 @@
         <!-- Tổng quan thống kê chính -->
         <div class="row g-4 mb-4">
             <div class="col-xl-3 col-md-6">
-                <div class="card border-0 shadow-sm bg-gradient-warning text-white h-100">
+                <div class="card border-0 shadow bg-gradient-warning text-white h-100">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
@@ -30,7 +30,7 @@
             </div>
 
             <div class="col-xl-3 col-md-6">
-                <div class="card border-0 shadow-sm bg-gradient-primary text-white h-100">
+                <div class="card border-0 shadow bg-gradient-primary text-white h-100">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
@@ -46,7 +46,7 @@
             </div>
 
             <div class="col-xl-3 col-md-6">
-                <div class="card border-0 shadow-sm bg-gradient-success text-white h-100">
+                <div class="card border-0 shadow bg-gradient-success text-white h-100">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
@@ -62,7 +62,7 @@
             </div>
 
             <div class="col-xl-3 col-md-6">
-                <div class="card border-0 shadow-sm bg-gradient-info text-white h-100">
+                <div class="card border-0 shadow bg-gradient-info text-white h-100">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
@@ -81,7 +81,7 @@
         <!-- Trạng thái lịch hẹn chi tiết -->
         <div class="row g-4 mb-4">
             <div class="col-xl-3 col-md-6">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow h-100">
                     <div class="card-body p-4 text-center">
                         <div class="d-flex align-items-center justify-content-center mb-3">
                             <i class="fas fa-clock text-warning fa-2x me-2"></i>
@@ -95,7 +95,7 @@
             </div>
 
             <div class="col-xl-3 col-md-6">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow h-100">
                     <div class="card-body p-4 text-center">
                         <div class="d-flex align-items-center justify-content-center mb-3">
                             <i class="fas fa-hourglass-half text-primary fa-2x me-2"></i>
@@ -109,7 +109,7 @@
             </div>
 
             <div class="col-xl-3 col-md-6">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow h-100">
                     <div class="card-body p-4 text-center">
                         <div class="d-flex align-items-center justify-content-center mb-3">
                             <i class="fas fa-user-check text-success fa-2x me-2"></i>
@@ -123,7 +123,7 @@
             </div>
 
             <div class="col-xl-3 col-md-6">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow h-100">
                     <div class="card-body p-4 text-center">
                         <div class="d-flex align-items-center justify-content-center mb-3">
                             <i class="fas fa-times-circle text-danger fa-2x me-2"></i>
@@ -140,7 +140,7 @@
         <!-- Lịch hẹn hôm nay -->
         <div class="row g-4 mb-4">
             <div class="col-12">
-                <div class="card border-0 shadow-sm">
+                <div class="card border-0 shadow">
                     <div class="card-header bg-light border-0 py-3">
                         <h5 class="mb-0 fw-bold text-dark">
                             <i class="fas fa-calendar-day text-primary me-2"></i>
@@ -203,7 +203,7 @@
         <!-- Biểu đồ và tăng trưởng -->
         <div class="row g-4 mb-4">
             <div class="col-lg-8">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow h-100">
                     <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
                         <h5 class="mb-0 fw-bold">
                             <i class="fas fa-chart-line text-primary me-2"></i>
@@ -248,7 +248,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow h-100">
                     <div class="card-header bg-white border-0 py-3">
                         <h5 class="mb-0 fw-bold">
                             <i class="fas fa-trending-up text-success me-2"></i>
@@ -258,7 +258,7 @@
                     <div class="card-body d-flex flex-column justify-content-center text-center">
                         <div class="mb-3">
                             @if ($bookingGrowthValue > 0)
-                                <div class="bg-success bg-opacity-10 p-4 rounded-3 mb-3">
+                                <div class=" bg-opacity-10 p-4 rounded-3 mb-3">
                                     <i class="fas fa-arrow-up text-success fa-3x mb-2"></i>
                                     <h3 class="text-success fw-bold mb-0">+{{ $bookingGrowthValue }}%</h3>
                                 </div>
@@ -286,7 +286,7 @@
         <!-- Bảng thống kê chi tiết -->
         <div class="row g-4 mb-4">
             <div class="col-12">
-                <div class="card border-0 shadow-sm">
+                <div class="card border-0 shadow">
                     <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
                         <h5 class="mb-0 fw-bold">
                             <i class="fas fa-table text-info me-2"></i>
@@ -294,7 +294,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                             <table class="table table-hover">
                                 <thead class="table-light">
                                     <tr>
@@ -332,10 +332,11 @@
             </div>
         </div>
 
+
         <!-- Thống kê dịch vụ và bác sĩ -->
         <div class="row g-4 mb-4">
             <div class="col-lg-6">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow h-100">
                     <div class="card-header bg-white border-0 py-3">
                         <h5 class="mb-0 fw-bold">
                             <i class="fas fa-chart-pie text-warning me-2"></i>
@@ -356,7 +357,7 @@
             </div>
 
             <div class="col-lg-6">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow h-100">
                     <div class="card-header bg-white border-0 py-3">
                         <h5 class="mb-0 fw-bold">
                             <i class="fas fa-user-md text-info me-2"></i>
@@ -367,7 +368,7 @@
                         @foreach ($doctorStats as $doctor)
                             <div class="d-flex align-items-center p-3 mb-3 bg-light rounded-3 hover-shadow">
                                 <img src="{{ $doctor['avatar'] != 'default.png' ? asset('storage/' . $doctor['avatar']) : 'https://i.pravatar.cc/60' }}"
-                                    alt="Avatar" class="rounded-circle me-3 border border-2 border-white shadow-sm"
+                                    alt="Avatar" class="rounded-circle me-3 border border-2 border-white shadow"
                                     width="60" height="60">
                                 <div class="flex-grow-1">
                                     <h6 class="mb-1 fw-bold">{{ $doctor['name'] }}</h6>
@@ -393,7 +394,7 @@
         <!-- Hiệu suất và bệnh nhân -->
         <div class="row g-4 mb-4">
             <div class="col-lg-6">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow h-100">
                     <div class="card-header bg-white border-0 py-3">
                         <h5 class="mb-0 fw-bold">
                             <i class="fas fa-chart-bar text-success me-2"></i>
@@ -429,29 +430,13 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Thời gian chờ trung bình -->
-                            @if (isset($performanceStats['avg_waiting_time']))
-                                <div class="col-12">
-                                    <div class="p-4 bg-info bg-opacity-10 rounded-3">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-hourglass-half text-info fa-2x me-3"></i>
-                                            <div class="flex-grow-1">
-                                                <h6 class="text-muted mb-1">Thời gian chờ TB</h6>
-                                                <h3 class="fw-bold text-info mb-0">
-                                                    {{ $performanceStats['avg_waiting_time'] }} phút</h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-6">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow h-100">
                     <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
                         <h5 class="mb-0 fw-bold">
                             <i class="fas fa-users text-primary me-2"></i>

@@ -70,6 +70,25 @@
         })->name('dashboard');
         Route::get('dashboard/export-excel', [DashboardController::class, 'exportExcel']);
         Route::get('dashboard/export-pdf', [DashboardController::class, 'exportPdf']);
+    });
+
+
+    // Nhóm users
+    Route::group([
+        'prefix' => 'admin',
+        'as' => 'admin.',
+        'middleware' => 'checkAdmin'
+    ], function () {
+        // Dashboard
+        Route::get('/dashboard', function () {
+            return view(view: 'admin.dashboard');
+        })->name('dashboard');
+
+        //thống kê
+        Route::prefix('dashboard')->name('dashboard.')->group(function () {
+            Route::get('/', [DashboardController::class, 'index'])->name('index');
+            Route::get('/export', [DashboardController::class, 'export'])->name('export');
+        });
 
 
         // Nhóm users
