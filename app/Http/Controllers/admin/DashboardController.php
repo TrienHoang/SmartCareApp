@@ -129,6 +129,23 @@ class DashboardController extends Controller
             ->whereYear('date', $year)
             ->first();
 
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        if ($request->query('type') === 'custom' && $startDate && $endDate) {
+            $start = Carbon::parse($startDate);
+            $end = Carbon::parse($endDate);
+
+            // Kiểm tra: nếu start sau end hoặc cách nhau quá 2 tháng (~62 ngày)
+            if ($start->gt($end)) {
+                return back()->with('error', 'Ngày bắt đầu không được sau ngày kết thúc.');
+            }
+
+            if ($start->diffInDays($end) > 62) {
+                return back()->with('error', 'Vui lòng chọn khoảng thời gian không vượt quá 2 tháng.');
+            }
+        }
+
         // 4. Biểu đồ 7 ngày gần nhất (line theo ngày)
         $dates = collect(range(0, 6))->map(fn($i) => now()->copy()->subDays($i))->reverse();
         $dailyLabels = [];
