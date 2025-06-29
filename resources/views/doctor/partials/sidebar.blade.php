@@ -15,13 +15,9 @@
 
     <ul class="menu-inner py-1">
 
-        {{-- Dashboard --}}
-        <li class="menu-item">
-            <a href="#" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-bar-chart-alt"></i>
-                <div>Thống kê</div>
-            </a>
-        </li>
+
+
+        {{-- Nếu là User --}}
 
         {{-- Nếu là Admin --}}
         @if ($user->role->name === 'admin')
@@ -30,6 +26,15 @@
 
         {{-- Nếu là Doctor --}}
         @if ($user->role->name === 'doctor')
+            @php
+                $doctorId = $user->doctor->id; // Giả sử bạn đã có ID của bác sĩ từ user
+            @endphp
+            <li class="menu-item">
+                <a href="{{ route('doctor.dashboard', $doctorId) }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-bar-chart-alt"></i>
+                    <div>Thống kê</div>
+                </a>
+            </li>
             <li class="menu-header small text-uppercase"><span class="menu-header-text">Bác sĩ</span></li>
 
             <li class="menu-item">
