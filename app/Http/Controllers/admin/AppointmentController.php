@@ -421,6 +421,18 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
+        // Nếu trạng thái mới là 'completed' thì tạo medical record nếu chưa có
+        if ($request->status === 'completed') {
+            $existing = MedicalRecord::where('appointment_id', $appointment->id)->exists();
+
+            if (!$existing) {
+                MedicalRecord::create([
+                    'appointment_id' => $appointment->id,
+                    'code' => 'MR' . now()->format('YmdHis') . $appointment->id,
+                ]);
+            }
+        }
+
         // Lưu thông tin cũ
         $oldStatus    = $appointment->status;
         $oldTime      = $appointment->appointment_time;
