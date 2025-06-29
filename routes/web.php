@@ -575,3 +575,8 @@
         Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
         // Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
     });
+
+
+    // Trong routes/web.php hoặc routes/doctor.php
+
+    require __DIR__.'/doctor.php';
