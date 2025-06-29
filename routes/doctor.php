@@ -19,5 +19,6 @@ Route::prefix('doctor')
                 Route::get('/{id}/edit', [PrescriptionController::class, 'edit'])->name('edit');
                 Route::put('/{id}', [PrescriptionController::class, 'update'])->name('update');
                 Route::get('/{id}/export-pdf', [PrescriptionController::class, 'exportPdf'])->name('exportPdf');
+                Route::post('/{id}/finalize', [PrescriptionController::class, 'finalize'])->name('finalize');
             });
     });
