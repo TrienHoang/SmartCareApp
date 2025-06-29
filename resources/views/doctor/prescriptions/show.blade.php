@@ -9,7 +9,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h2 class="mb-0">Chi tiết đơn thuốc #{{ $prescription->id }}</h2>
-                        <small class="text-muted">Được tạo ngày {{ \Carbon\Carbon::parse($prescription->created_at)->format('d/m/Y H:i') }}</small>
+                        <small class="text-muted">Được tạo vào lúc {{ \Carbon\Carbon::parse($prescription->created_at)->format('H:i d/m/Y') }}</small>
                     </div>
                     <div class="btn-group">
                         @can('edit_prescriptions')
@@ -17,9 +17,9 @@
                                 <i class="fas fa-edit"></i> Chỉnh sửa
                             </a>
                         @endcan
-                        <a href="#" class="btn btn-primary" target="_blank">
+                        {{-- <a href="#" class="btn btn-primary" target="_blank">
                             <i class="fas fa-print"></i> In đơn thuốc
-                        </a>
+                        </a> --}}
                         <a href="{{ route('doctor.prescriptions.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Quay lại
                         </a>
@@ -130,7 +130,7 @@
                             <div class="col-sm-5 font-weight-bold">Ngày kê đơn:</div>
                             <div class="col-sm-7">
                                 <i class="fas fa-calendar-alt text-muted mr-1"></i>
-                                <td>{{ $prescription->formatted_date }}</td>
+                                <td>{{ $prescription->prescribed_at->format('d/m/Y H:i') }}</td>
                             </div>
                         </div>
                         <hr class="my-2">

@@ -73,7 +73,7 @@
                                     <a href="{{ route('doctor.prescriptions.edit', $prescription->id) }}" class="btn btn-sm btn-primary" target="_blank }}">
                                         <i class="bx bx-edit"></i>
                                     </a>
-                                    <a href="#" class="btn btn-sm btn-secondary" target="_blank">
+                                    <a href="{{ route('doctor.prescriptions.exportPdf', $prescription->id) }}" class="btn btn-sm btn-secondary" target="_blank">
                                         <i class="bx bx-printer"></i>
                                     </a>
                                 </td>
