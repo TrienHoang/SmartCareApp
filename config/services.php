@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'facebook' => [
+        'client_id' => '602049758990374',
+        'client_secret' => '9c78ec92dee6fe1b75097d632ccc6cf1',
+        'redirect' => 'http://localhost:8000/auth/facebook/callback',
+    ],
+
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
+    ],
 ];
