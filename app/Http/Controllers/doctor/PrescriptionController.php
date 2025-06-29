@@ -169,7 +169,8 @@ class PrescriptionController extends Controller
         return response()->json($records->map(function ($record) {
             return [
                 'id' => $record->id,
-                'text' => "#{$record->code} - {$record->appointment->patient->full_name}"
+                'text' => "#{$record->code} - {$record->appointment->patient->full_name}",
+                'diagnosis' => $record->diagnosis
             ];
         }));
     }
