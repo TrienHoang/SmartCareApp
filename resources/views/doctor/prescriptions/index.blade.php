@@ -70,6 +70,9 @@
                                     <a href="{{ route('doctor.prescriptions.show', $prescription->id) }}" class="btn btn-sm btn-info">
                                         <i class="bx bx-show-alt"></i>
                                     </a>
+                                    <a href="{{ route('doctor.prescriptions.edit', $prescription->id) }}" class="btn btn-sm btn-primary" target="_blank }}">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
                                     <a href="#" class="btn btn-sm btn-secondary" target="_blank">
                                         <i class="bx bx-printer"></i>
                                     </a>
