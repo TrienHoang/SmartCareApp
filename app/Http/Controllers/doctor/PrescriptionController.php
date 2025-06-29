@@ -38,24 +38,33 @@ class PrescriptionController extends Controller
             });
         }
 
-        $from = $request->filled('date_from') ? now()->parse($request->date_from)->startOfDay() : null;
-        $to = $request->filled('date_to') ? now()->parse($request->date_to)->endOfDay() : null;
+        $from_input = $request->date_from;
+        $to_input = $request->date_to;
 
-        if ($from && $to && $from->gt($to)) {
-            [$from, $to] = [$to, $from];
-        }
+        if ($request->filled('date_from') || $request->filled('date_to')) {
+            $from = $request->filled('date_from') ? Carbon::parse($request->date_from)->startOfDay() : null;
+            $to = $request->filled('date_to') ? Carbon::parse($request->date_to)->endOfDay() : null;
 
-        if ($from && $to) {
-            $query->whereBetween('prescribed_at', [$from, $to]);
-        } elseif ($from) {
-            $query->where('prescribed_at', '>=', $from);
-        } elseif ($to) {
-            $query->where('prescribed_at', '<=', $to);
+            if ($from && $to && $from->gt($to)) {
+                session()->flash('date_swapped', true);
+
+                // Hoán đổi giá trị để không lọc sai
+                [$from, $to] = [$to, $from];
+                [$from_input, $to_input] = [$to_input, $from_input];
+            }
+
+            if ($from && $to) {
+                $query->whereBetween('prescribed_at', [$from, $to]);
+            } elseif ($from) {
+                $query->where('prescribed_at', '>=', $from);
+            } elseif ($to) {
+                $query->where('prescribed_at', '<=', $to);
+            }
         }
 
         $prescriptions = $query->orderByDesc('prescribed_at')->paginate(10);
 
-        return view('doctor.prescriptions.index', compact('prescriptions'));
+        return view('doctor.prescriptions.index', compact('prescriptions', 'from_input', 'to_input'));
     }
 
     public function create()
