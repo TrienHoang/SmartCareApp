@@ -1,9 +1,33 @@
 <?php
 
+use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Http\Controllers\doctor\FileUploadController;
 use App\Http\Controllers\Doctor\PrescriptionController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
+Route::prefix('doctor')
+    ->middleware(['auth'])
+    ->name('doctor.dashboard.') // <- THÊM DÒNG NÀY ĐỂ route có prefix tên đúng
+    ->group(function () {
+
+        // Route trang dashboard bác sĩ
+        Route::get('dashboard', function (Request $request) {
+            $user = Auth::user();
+            $doctorId = optional($user->doctor)->id ?? \App\Models\Doctor::where('user_id', $user->id)->value('id');
+
+            abort_if(!$doctorId, 403, 'Không tìm thấy bác sĩ');
+
+            return app(DoctorDashboardController::class)->index($request, $doctorId);
+        })->name('index');
+        // Route export pdf
+
+    });
+// Route export excel
+Route::get('doctor/{doctor}/dashboard/export-excel', [DoctorDashboardController::class, 'exportExcel'])->name('doctor.dashboard.stats-excel');
+// Route export pdf
+Route::get('doctor/{doctor}/dashboard/export-pdf', [DoctorDashboardController::class, 'exportPDF'])->name('doctor.dashboard.stats-pdf');
 Route::prefix('doctor')
     ->name('doctor.')
     ->middleware('auth', 'checkRole:doctor')
