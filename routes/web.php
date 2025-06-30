@@ -573,12 +573,12 @@ Route::group([
 //     return view('doctor.dashboard');
 // })->name('doctor.dashboard');
 
-    Route::prefix('doctor')->name('doctor.')->middleware('auth')->group(function () {
-        Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
-        // Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
-    });
+Route::prefix('doctor')->name('doctor.')->middleware('auth')->group(function () {
+    Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
+    // Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
+});
 
 
-    // Trong routes/web.php hoặc routes/doctor.php
+// Trong routes/web.php hoặc routes/doctor.php
 
-    require __DIR__.'/doctor.php';
+require __DIR__ . '/doctor.php';

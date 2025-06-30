@@ -30,7 +30,7 @@
                 $doctorId = $user->doctor->id; // Giả sử bạn đã có ID của bác sĩ từ user
             @endphp
             <li class="menu-item">
-                <a href="{{ route('doctor.dashboard', $doctorId) }}" class="menu-link">
+                <a href="{{ route('doctor.dashboard.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-bar-chart-alt"></i>
                     <div>Thống kê</div>
                 </a>
