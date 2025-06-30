@@ -10,13 +10,23 @@ use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\DoctorStatsExport;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class DoctorDashboardController extends Controller
 {
-    public function index(Request $request, $doctorId)
+    public function index(Request $request)
     {
-        $doctor = Doctor::findOrFail($doctorId);
+        $user = Auth::user();
+
+        // Kiểm tra mối quan hệ: mỗi user là 1 bác sĩ
+        $doctor = $user->doctor;
+
+        if (!$doctor) {
+            abort(403, 'Không tìm thấy thông tin bác sĩ');
+        }
+
+        $doctorId = $doctor->id;
 
         // Tổng số bệnh nhân
         $totalPatients = Appointment::where('doctor_id', $doctorId)
@@ -35,7 +45,7 @@ class DoctorDashboardController extends Controller
             ->where('appointments.status', 'completed')
             ->sum('services.price');
 
-        // Dữ liệu biểu đồ 7 ngày gần nhất
+        // Biểu đồ 7 ngày
         $visitsChart = collect();
         $startDate = Carbon::now()->subDays(6)->startOfDay();
         $endDate = Carbon::now()->endOfDay();
@@ -46,6 +56,7 @@ class DoctorDashboardController extends Controller
                 ->where('status', 'completed')
                 ->whereDate('appointment_time', $date->format('Y-m-d'))
                 ->count();
+
             $visitsChart->push([
                 'day' => $date->format('d/m'),
                 'total' => $count
@@ -91,10 +102,12 @@ class DoctorDashboardController extends Controller
         } elseif ($type === 'custom') {
             $start = $request->input('start_date');
             $end = $request->input('end_date');
+
             if ($start && $end) {
                 $startDate = Carbon::parse($start)->startOfDay();
                 $endDate = Carbon::parse($end)->endOfDay();
                 $diff = $startDate->diffInDays($endDate);
+
                 if ($diff <= 31) {
                     $dateRange = new \DatePeriod($startDate, new \DateInterval('P1D'), $endDate->copy()->addDay());
                     foreach ($dateRange as $date) {
@@ -109,7 +122,6 @@ class DoctorDashboardController extends Controller
                             ->sum('services.price');
                     }
                 } else {
-                    // Thống kê theo tuần
                     $currentStart = $startDate->copy()->startOfWeek();
                     while ($currentStart <= $endDate) {
                         $weekEnd = $currentStart->copy()->endOfWeek()->min($endDate);
