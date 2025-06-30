@@ -159,4 +159,26 @@ class FileUploadController extends Controller
         return view('doctor.files.show', compact('file'));
     }
 
+    public function download($id)
+    {
+        $doctorId = Auth::user()->doctor->id;
+
+        $file = FileUpload::whereHas('appointment', function ($query) use ($doctorId) {
+            $query->where('doctor_id', $doctorId);
+        })->findOrFail($id);
+
+        $filePath = storage_path('app/public/' . $file->file_path);
+
+        if (!file_exists($filePath)) {
+            return back()->with('error', 'File không tồn tại hoặc đã bị xóa!');
+        }
+
+        UploadHistory::create([
+            'file_upload_id' => $file->id,
+            'action' => 'downloaded',
+            'timestamp' => now(),
+        ]);
+
+        return response()->download($filePath, $file->file_name);
+    }
 }

@@ -62,5 +62,6 @@ Route::prefix('doctor')
                 Route::get('/create', [FileUploadController::class, 'create'])->name('create');
                 Route::post('/', [FileUploadController::class, 'store'])->name('store');
                 Route::get('/{id}', [FileUploadController::class, 'show'])->name('show');
+                Route::get('/{id}/download', [FileUploadController::class, 'download'])->name('download');
             });
     });

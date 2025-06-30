@@ -160,7 +160,7 @@
                                                     class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="#"
+                                                <a href="{{ route('doctor.files.download', $file->id) }}"
                                                     class="btn btn-sm btn-outline-success" title="Tải xuống">
                                                     <i class="fas fa-download"></i>
                                                 </a>
