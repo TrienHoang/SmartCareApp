@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Svg\Gradient\Stop;
 
 class FileUploadController extends Controller
 {
@@ -180,5 +181,37 @@ class FileUploadController extends Controller
         ]);
 
         return response()->download($filePath, $file->file_name);
+    }
+
+    public function destroy($id)
+    {
+        $doctorId = Auth::user()->doctor->id;
+
+        $file = FileUpload::whereHas('appointment', function ($q) use ($doctorId) {
+            $q->where('doctor_id', $doctorId);
+        })->findOrFail($id);
+
+        DB::beginTransaction();
+        
+        try {
+            if (Storage::disk('public')->exists($file->file_path)) {
+                Storage::disk('public')->delete($file->file_path);  
+            }
+
+            UploadHistory::create([
+                'file_upload_id' => $file->id,
+                'action' => 'deleted',
+                'timestamp' => now(),
+            ]);
+            
+            $file->delete();
+
+            DB::commit();
+
+            return back()->with('success', 'Đã xóa file thành công!');
+        }catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Đã xảy ra lỗi trong quá trình xóa file: ' . $e->getMessage());
+        }
     }
 }

@@ -55,7 +55,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -83,16 +83,13 @@
                             $imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
                         @endphp
 
-                        @if(in_array(strtolower($fileExtension), $imageExtensions))
+                        @if (in_array(strtolower($fileExtension), $imageExtensions))
                             <div class="form-group">
                                 <label class="font-weight-bold">Xem trước:</label>
                                 <div class="text-center">
-                                    <img src="{{ Storage::url($file->file_path) }}" 
-                                         alt="{{ $file->file_name }}" 
-                                         class="img-fluid rounded shadow"
-                                         style="max-height: 400px; cursor: pointer;"
-                                         data-toggle="modal" 
-                                         data-target="#imageModal">
+                                    <img src="{{ Storage::url($file->file_path) }}" alt="{{ $file->file_name }}"
+                                        class="img-fluid rounded shadow" style="max-height: 400px; cursor: pointer;"
+                                        data-toggle="modal" data-target="#imageModal">
                                     <p class="text-muted mt-2"><small>Click để xem kích thước đầy đủ</small></p>
                                 </div>
                             </div>
@@ -106,25 +103,29 @@
                         <h6 class="m-0 font-weight-bold text-primary">Lịch sử File</h6>
                     </div>
                     <div class="card-body">
-                        @if($file->uploadHistories && $file->uploadHistories->count() > 0)
+                        @if ($file->uploadHistories && $file->uploadHistories->count() > 0)
                             <div class="timeline">
-                                @foreach($file->uploadHistories->sortByDesc('timestamp') as $history)
+                                @foreach ($file->uploadHistories->sortByDesc('timestamp') as $history)
                                     <div class="timeline-item mb-3">
                                         <div class="d-flex align-items-center">
                                             <div class="timeline-marker mr-3">
                                                 @switch($history->action)
                                                     @case('uploaded')
                                                         <i class="fas fa-upload text-success"></i>
-                                                        @break
+                                                    @break
+
                                                     @case('downloaded')
                                                         <i class="fas fa-download text-info"></i>
-                                                        @break
+                                                    @break
+
                                                     @case('category_updated')
                                                         <i class="fas fa-edit text-warning"></i>
-                                                        @break
+                                                    @break
+
                                                     @case('deleted')
                                                         <i class="fas fa-trash text-danger"></i>
-                                                        @break
+                                                    @break
+
                                                     @default
                                                         <i class="fas fa-info-circle text-secondary"></i>
                                                 @endswitch
@@ -136,16 +137,20 @@
                                                             @switch($history->action)
                                                                 @case('uploaded')
                                                                     File được tải lên
-                                                                    @break
+                                                                @break
+
                                                                 @case('downloaded')
                                                                     File được tải xuống
-                                                                    @break
+                                                                @break
+
                                                                 @case('category_updated')
                                                                     Cập nhật danh mục
-                                                                    @break
+                                                                @break
+
                                                                 @case('deleted')
                                                                     File bị xóa
-                                                                    @break
+                                                                @break
+
                                                                 @default
                                                                     {{ ucfirst($history->action) }}
                                                             @endswitch
@@ -199,21 +204,24 @@
                                 @switch($file->appointment->status)
                                     @case('pending')
                                         <span class="badge badge-warning">Chờ xác nhận</span>
-                                        @break
+                                    @break
+
                                     @case('confirmed')
                                         <span class="badge badge-info">Đã xác nhận</span>
-                                        @break
+                                    @break
+
                                     @case('completed')
                                         <span class="badge badge-success">Hoàn thành</span>
-                                        @break
+                                    @break
+
                                     @case('cancelled')
                                         <span class="badge badge-danger">Đã hủy</span>
-                                        @break
+                                    @break
                                 @endswitch
                             </p>
                         </div>
 
-                        @if($file->appointment->reason)
+                        @if ($file->appointment->reason)
                             <div class="form-group">
                                 <label class="font-weight-bold">Lý do khám:</label>
                                 <p class="mb-0 text-muted">{{ $file->appointment->reason }}</p>
@@ -221,8 +229,7 @@
                         @endif
 
                         <div class="form-group mb-0">
-                            <a href="{{ route('doctor.appointments.show', $file->appointment->id) }}" 
-                               class="btn btn-outline-primary btn-sm">
+                            <a href="#" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-eye"></i> Xem chi tiết cuộc hẹn
                             </a>
                         </div>
@@ -230,7 +237,7 @@
                 </div>
 
                 <!-- Patient Information -->
-                @if($file->appointment->patient)
+                @if ($file->appointment->patient)
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
                             <h6 class="m-0 font-weight-bold text-primary">Thông tin Bệnh nhân</h6>
@@ -241,7 +248,7 @@
                                 <p class="mb-0">{{ $file->appointment->patient->full_name }}</p>
                             </div>
 
-                            @if($file->appointment->patient->phone)
+                            @if ($file->appointment->patient->phone)
                                 <div class="form-group">
                                     <label class="font-weight-bold">Số điện thoại:</label>
                                     <p class="mb-0">
@@ -252,7 +259,7 @@
                                 </div>
                             @endif
 
-                            @if($file->appointment->patient->email)
+                            @if ($file->appointment->patient->email)
                                 <div class="form-group">
                                     <label class="font-weight-bold">Email:</label>
                                     <p class="mb-0">
@@ -263,7 +270,7 @@
                                 </div>
                             @endif
 
-                            @if($file->appointment->patient->date_of_birth)
+                            @if ($file->appointment->patient->date_of_birth)
                                 <div class="form-group">
                                     <label class="font-weight-bold">Ngày sinh:</label>
                                     <p class="mb-0">
@@ -273,14 +280,14 @@
                                 </div>
                             @endif
 
-                            @if($file->appointment->patient->gender)
+                            @if ($file->appointment->patient->gender)
                                 <div class="form-group">
                                     <label class="font-weight-bold">Giới tính:</label>
                                     <p class="mb-0">{{ $file->appointment->patient->gender }}</p>
                                 </div>
                             @endif
 
-                            @if($file->appointment->patient->address)
+                            @if ($file->appointment->patient->address)
                                 <div class="form-group mb-0">
                                     <label class="font-weight-bold">Địa chỉ:</label>
                                     <p class="mb-0">{{ $file->appointment->patient->address }}</p>
@@ -297,19 +304,17 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <a href="{{ route('doctor.files.download', $file->id) }}" 
-                               class="btn btn-success">
+                            <a href="{{ route('doctor.files.download', $file->id) }}" class="btn btn-success">
                                 <i class="fas fa-download"></i> Tải xuống File
                             </a>
-                            
-                            <button type="button" class="btn btn-warning" 
-                                    data-toggle="modal" data-target="#categoryModal">
+
+                            <button type="button" class="btn btn-warning" data-toggle="modal"
+                                data-target="#categoryModal">
                                 <i class="fas fa-edit"></i> Chỉnh sửa Danh mục
                             </button>
-                            
-                            <button type="button" class="btn btn-danger delete-btn"
-                                    data-file-id="{{ $file->id }}"
-                                    data-file-name="{{ $file->file_name }}">
+
+                            <button type="button" class="btn btn-danger delete-btn" data-file-id="{{ $file->id }}"
+                                data-file-name="{{ $file->file_name }}">
                                 <i class="fas fa-trash"></i> Xóa File
                             </button>
                         </div>
@@ -320,7 +325,7 @@
     </div>
 
     <!-- Image Modal -->
-    @if(in_array(strtolower($fileExtension), $imageExtensions))
+    @if (in_array(strtolower($fileExtension), $imageExtensions))
         <div class="modal fade" id="imageModal" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
@@ -331,9 +336,7 @@
                         </button>
                     </div>
                     <div class="modal-body text-center">
-                        <img src="{{ Storage::url($file->file_path) }}" 
-                             alt="{{ $file->file_name }}" 
-                             class="img-fluid">
+                        <img src="{{ Storage::url($file->file_path) }}" alt="{{ $file->file_name }}" class="img-fluid">
                     </div>
                 </div>
             </div>
@@ -354,8 +357,8 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="newCategory">Danh mục mới</label>
-                            <input type="text" id="newCategory" class="form-control" 
-                                   value="{{ $file->file_category }}" required>
+                            <input type="text" id="newCategory" class="form-control"
+                                value="{{ $file->file_category }}" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -396,81 +399,82 @@
 @endsection
 
 @push('styles')
-<style>
-.timeline {
-    position: relative;
-}
+    <style>
+        .timeline {
+            position: relative;
+        }
 
-.timeline-item {
-    position: relative;
-}
+        .timeline-item {
+            position: relative;
+        }
 
-.timeline-marker {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #f8f9fc;
-    border: 2px solid #e3e6f0;
-}
+        .timeline-marker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fc;
+            border: 2px solid #e3e6f0;
+        }
 
-.timeline-content {
-    flex: 1;
-    padding: 10px 15px;
-    background-color: #f8f9fc;
-    border-radius: 5px;
-    border-left: 3px solid #e3e6f0;
-}
+        .timeline-content {
+            flex: 1;
+            padding: 10px 15px;
+            background-color: #f8f9fc;
+            border-radius: 5px;
+            border-left: 3px solid #e3e6f0;
+        }
 
-.d-grid {
-    display: grid;
-}
+        .d-grid {
+            display: grid;
+        }
 
-.gap-2 {
-    gap: 0.5rem;
-}
-</style>
+        .gap-2 {
+            gap: 0.5rem;
+        }
+    </style>
 @endpush
 
 @push('scripts')
-<script>
-$(document).ready(function() {
-    // Handle category update
-    $('#categoryForm').submit(function(e) {
-        e.preventDefault();
-        
-        const newCategory = $('#newCategory').val();
-        
-        $.ajax({
-            url: '{{ route("doctor.files.updateCategory", $file->id) }}',
-            method: 'PUT',
-            data: {
-                _token: '{{ csrf_token() }}',
-                file_category: newCategory
-            },
-            success: function(response) {
-                if (response.success) {
-                    $('#categoryModal').modal('hide');
-                    location.reload();
-                }
-            },
-            error: function() {
-                alert('Có lỗi xảy ra khi cập nhật danh mục!');
-            }
-        });
-    });
+    <script>
+        $(document).ready(function() {
+            // Handle category update
+            $('#categoryForm').submit(function(e) {
+                e.preventDefault();
 
-    // Handle delete
-    $('.delete-btn').click(function() {
-        const fileId = $(this).data('file-id');
-        const fileName = $(this).data('file-name');
-        
-        $('#fileName').text(fileName);
-        $('#deleteForm').attr('action', '{{ route("doctor.files.destroy", ":id") }}'.replace(':id', fileId));
-        $('#deleteModal').modal('show');
-    });
-});
-</script>
+                const newCategory = $('#newCategory').val();
+
+                $.ajax({
+                    // url: '{{ route('doctor.files.updateCategory', $file->id) }}',
+                    method: 'PUT',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        file_category: newCategory
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#categoryModal').modal('hide');
+                            location.reload();
+                        }
+                    },
+                    error: function() {
+                        alert('Có lỗi xảy ra khi cập nhật danh mục!');
+                    }
+                });
+            });
+
+            // Handle delete
+            $('.delete-btn').click(function() {
+                const fileId = $(this).data('file-id');
+                const fileName = $(this).data('file-name');
+
+                $('#fileName').text(fileName);
+                $('#deleteForm').attr('action', '{{ route('doctor.files.destroy', ':id') }}'.replace(':id',
+                    fileId));
+                $('#deleteModal').modal('show');
+            });
+        });
+    </script>
 @endpush
