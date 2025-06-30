@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\doctor\FileUploadController;
 use App\Http\Controllers\Doctor\PrescriptionController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,5 +21,16 @@ Route::prefix('doctor')
                 Route::put('/{id}', [PrescriptionController::class, 'update'])->name('update');
                 Route::get('/{id}/export-pdf', [PrescriptionController::class, 'exportPdf'])->name('exportPdf');
                 Route::post('/{id}/finalize', [PrescriptionController::class, 'finalize'])->name('finalize');
+            });
+    });
+
+Route::prefix('doctor')
+    ->name('doctor.')
+    ->middleware('auth', 'checkRole:doctor')
+    ->group(function () {
+        Route::prefix('files')
+            ->name('files.')
+            ->group(function () {
+                Route::get('/', [FileUploadController::class, 'index'])->name('index');
             });
     });
