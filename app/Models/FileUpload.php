@@ -23,6 +23,9 @@ class FileUpload extends Model
         'uploaded_at' => 'datetime'
     ];
 
+    public $timestamps = false;
+
+
     /**
      * Relationship với User (người upload)
      */

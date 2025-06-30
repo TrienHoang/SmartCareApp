@@ -1,15 +1,20 @@
 <?php
 
-namespace App\Http\Controllers\doctor;
+namespace App\Http\Controllers\Doctor;
 
 use App\Http\Controllers\Controller;
-use App\Models\Appointment;
 use App\Models\FileUpload;
+use App\Models\UploadHistory;
+use App\Models\Appointment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class FileUploadController extends Controller
 {
+
     public function index(Request $request)
     {
         $doctorId = Auth::user()->doctor->id;
@@ -48,4 +53,110 @@ class FileUploadController extends Controller
 
         return view('doctor.files.index', compact('files', 'appointments', 'categories'));
     }
+
+    /**
+     * Hiển thị form upload file
+     */
+    public function create(Request $request)
+    {
+        $doctorId = Auth::user()->doctor->id;
+
+        // Lấy danh sách appointments của doctor
+        $appointments = Appointment::where('doctor_id', $doctorId)
+            ->whereIn('status', ['confirmed', 'completed'])
+            ->with('patient:id,full_name')
+            ->orderBy('appointment_time', 'desc')
+            ->get();
+
+        $selectedAppointment = null;
+        if ($request->filled('appointment_id')) {
+            $selectedAppointment = $appointments->find($request->appointment_id);
+        }
+
+        return view('doctor.files.create', compact('appointments', 'selectedAppointment'));
+    }
+
+    /**
+     * Xử lý upload file
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'appointment_id' => 'required|exists:appointments,id',
+            'files.*' => 'required|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png,gif',
+            'file_category' => 'required|string|max:100',
+            'description' => 'nullable|string|max:500'
+        ], [
+            'files.*.max' => 'Mỗi file không được vượt quá 10MB',
+            'files.*.mimes' => 'Chỉ chấp nhận file: PDF, DOC, DOCX, JPG, JPEG, PNG, GIF'
+        ]);
+
+        $doctorId = Auth::user()->doctor->id;
+
+        // Kiểm tra appointment có thuộc về doctor này không
+        $appointment = Appointment::where('id', $request->appointment_id)
+            ->where('doctor_id', $doctorId)
+            ->firstOrFail();
+
+        DB::beginTransaction();
+        try {
+            $uploadedFiles = [];
+
+            foreach ($request->file('files') as $file) {
+                // Tạo tên file unique
+                $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+
+                // Lưu file vào storage
+                $filePath = $file->storeAs('uploads/appointments/' . $request->appointment_id, $fileName, 'public');
+
+                // Lưu thông tin vào database
+                $fileUpload = FileUpload::create([
+                    'user_id' => Auth::id(),
+                    'appointment_id' => $request->appointment_id,
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_path' => $filePath,
+                    'file_category' => $request->file_category,
+                    'uploaded_at' => now()
+                ]);
+
+                // Ghi log upload history
+                UploadHistory::create([
+                    'file_upload_id' => $fileUpload->id,
+                    'action' => 'uploaded',
+                    'timestamp' => now()
+                ]);
+
+                $uploadedFiles[] = $fileUpload;
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'redirect_url' => route('doctor.files.index'),
+                'message' => 'Đã tải lên ' . count($uploadedFiles) . ' file thành công!'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi trong quá trình tải file: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function show($id)
+    {
+        $doctorId = Auth::user()->doctor->id;
+
+        $file = FileUpload::with(['appointment.patient', 'uploadHistories'])
+            ->whereHas('appointment', function ($q) use ($doctorId) {
+                $q->where('doctor_id', $doctorId);
+            })
+            ->findOrFail($id);
+
+        return view('doctor.files.show', compact('file'));
+    }
+
 }

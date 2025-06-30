@@ -28,6 +28,8 @@ Route::prefix('doctor')
 Route::get('doctor/{doctor}/dashboard/export-excel', [DoctorDashboardController::class, 'exportExcel'])->name('doctor.dashboard.stats-excel');
 // Route export pdf
 Route::get('doctor/{doctor}/dashboard/export-pdf', [DoctorDashboardController::class, 'exportPDF'])->name('doctor.dashboard.stats-pdf');
+
+// kê đơn thuốc
 Route::prefix('doctor')
     ->name('doctor.')
     ->middleware('auth', 'checkRole:doctor')
@@ -48,6 +50,7 @@ Route::prefix('doctor')
             });
     });
 
+// quản lý file tải lên
 Route::prefix('doctor')
     ->name('doctor.')
     ->middleware('auth', 'checkRole:doctor')
@@ -56,5 +59,8 @@ Route::prefix('doctor')
             ->name('files.')
             ->group(function () {
                 Route::get('/', [FileUploadController::class, 'index'])->name('index');
+                Route::get('/create', [FileUploadController::class, 'create'])->name('create');
+                Route::post('/', [FileUploadController::class, 'store'])->name('store');
+                Route::get('/{id}', [FileUploadController::class, 'show'])->name('show');
             });
     });
