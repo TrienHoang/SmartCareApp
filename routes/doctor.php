@@ -6,8 +6,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
-// Route cho trang dashboard bác sĩ
-// Group toàn bộ route cho bác sĩ
+Route::middleware(['auth', 'checkRole:doctor'])
+    ->name('doctor.')
+    ->group(function () {
+
+        // Redirect to doctor dashboard if authenticated
+        Route::get('/', function (Request $request) {
+            $doctor = Auth::user();
+            return redirect()->route('doctor.dashboard', ['doctor' => $doctor->id]);
+        })->name('dashboard');
+    });
 Route::prefix('doctor')
     ->middleware(['auth', 'checkRole:doctor'])
     ->name('doctor.')

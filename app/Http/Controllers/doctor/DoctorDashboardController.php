@@ -27,6 +27,14 @@ class DoctorDashboardController extends Controller
 
         $doctorId = $doctor->id;
 
+        // Nếu chưa có type, gán mặc định type=month và year=năm hiện tại
+        if (!$request->has('type')) {
+            $request->merge([
+                'type' => 'month',
+                'year' => now()->year
+            ]);
+        }
+
         // Validate dữ liệu đầu vào
         $validator = Validator::make($request->all(), [
             'type' => 'required|in:month,year,custom',
@@ -70,7 +78,7 @@ class DoctorDashboardController extends Controller
         }
 
         // Lấy dữ liệu đã validate
-        $type = $request->query('type', 'month');
+        $type = $request->input('type', 'month');
         $start = $request->input('start_date');
         $end = $request->input('end_date');
         $year = $request->input('year', now()->year);
@@ -252,6 +260,8 @@ class DoctorDashboardController extends Controller
             'revenueLabel'
         ));
     }
+
+
     public function exportExcel($doctorId)
     {
         $doctor = Doctor::findOrFail($doctorId);
