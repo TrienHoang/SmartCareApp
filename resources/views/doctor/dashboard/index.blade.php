@@ -143,23 +143,40 @@
                         <i class="fas fa-chart-line text-primary me-2"></i>
                         Biểu đồ đặt lịch & doanh thu
                     </h5>
-                    <form method="GET" id="timeFrameForm" class="d-inline-block">
-                        <select name="type" id="timeFrameSelect"
-                            class="form-select form-select-sm border-1 bg-light"
-                            onchange="this.form.submit()">
-                            <option value="month" {{ $type == 'month' ? 'selected' : '' }}>Theo tháng</option>
-                            <option value="year" {{ $type == 'year' ? 'selected' : '' }}>Theo năm</option>
-                            <option value="custom" {{ $type == 'custom' ? 'selected' : '' }}>Tùy chọn</option>
-                        </select>
-                        @if($type == 'month')
-                            <input type="number" name="year" class="form-control form-control-sm d-inline-block ms-2" value="{{ request('year', now()->year) }}" min="2000" max="{{ now()->year }}">
-                        @endif
-                        @if($type == 'custom')
-                            <input type="date" name="start_date" class="form-control form-control-sm" value="{{ request('start_date') }}">
-                            <input type="date" name="end_date" class="form-control form-control-sm" value="{{ request('end_date') }}">
-                            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i></button>
-                        @endif
-                    </form>
+<form method="GET" id="timeFrameForm" class="row g-2 align-items-end">
+    <div class="col-auto">
+        <label for="timeFrameSelect" class="form-label fw-bold">Lọc theo</label>
+        <select name="type" id="timeFrameSelect" class="form-select form-select-sm" onchange="this.form.submit()" style="font-size: 14px;">
+            <option value="month" {{ $type == 'month' ? 'selected' : '' }}>Theo tháng</option>
+            <option value="year" {{ $type == 'year' ? 'selected' : '' }}>Theo năm</option>
+        </select>
+    </div>
+
+    @if($type == 'month')
+        <div class="col-auto">
+            <label for="yearInput" class="form-label fw-bold">Năm</label>
+            <input type="number" name="year" id="yearInput" class="form-control form-control-sm" value="{{ request('year', now()->year) }}" min="2000" max="{{ now()->year }}" style="font-size: 14px;">
+        </div>
+    @endif
+
+    <div class="col-auto">
+        <label for="startDate" class="form-label fw-bold">Từ ngày</label>
+        <input type="date" name="start_date" id="startDate" class="form-control form-control-sm" value="{{ request('start_date') }}" style="font-size: 14px;">
+    </div>
+
+    <div class="col-auto">
+        <label for="endDate" class="form-label fw-bold">Đến ngày</label>
+        <input type="date" name="end_date" id="endDate" class="form-control form-control-sm" value="{{ request('end_date') }}" style="font-size: 14px;">
+    </div>
+
+    <div class="col-auto">
+        <label class="form-label fw-bold invisible">Tìm</label>
+        <button type="submit" class="btn btn-sm btn-primary" style="font-size: 14px;">
+            <i class="fas fa-filter me-1"></i> Lọc dữ liệu
+        </button>
+    </div>
+</form>
+
                 </div>
                 <div class="card-body">
                     <canvas id="bookingRevenueChart" height="120"></canvas>
