@@ -447,7 +447,7 @@
                 const newCategory = $('#newCategory').val();
 
                 $.ajax({
-                    // url: '{{ route('doctor.files.updateCategory', $file->id) }}',
+                    url: '#',
                     method: 'PUT',
                     data: {
                         _token: '{{ csrf_token() }}',

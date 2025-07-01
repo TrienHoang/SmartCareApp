@@ -214,4 +214,27 @@ class FileUploadController extends Controller
             return back()->with('error', 'Đã xảy ra lỗi trong quá trình xóa file: ' . $e->getMessage());
         }
     }
+
+    public function getByAppointment($appointmentId)
+    {
+        $doctorId = Auth::user()->doctor->id;
+
+       $appointment = Appointment::where('id', $appointmentId)
+            ->where('doctor_id', $doctorId)
+            ->first();
+        
+        if (!$appointment){
+            return response()->json([
+                'error' => 'Không có quyền truy cập'
+            ], 403);
+        }
+
+        $file = FileUpload::where('appointment_id', $appointmentId)
+                            ->orderBy('uploaded_at', 'desc')
+                            ->get(['id', 'file_name', 'file_category', 'uploaded_at']);
+
+        return response()->json([
+            'files' => $file
+        ]);
+    }
 }

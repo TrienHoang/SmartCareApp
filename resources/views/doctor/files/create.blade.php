@@ -42,6 +42,13 @@
                                     </option>
                                 @endforeach
                             </select>
+                            <div id="appointmentFiles" class="mt-4 hidden">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Các file đã tải lên cho cuộc hẹn
+                                    này:</label>
+                                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1" id="appointmentFilesList">
+                                    <!-- AJAX sẽ chèn dữ liệu ở đây -->
+                                </ul>
+                            </div>
                             @error('appointment_id')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
@@ -389,6 +396,59 @@
             xhr.open('POST', this.action);
             // xhr.setRequestHeader(...) => Có thể bỏ nếu bạn đã dùng @csrf trong form
             xhr.send(formData);
+        });
+        const appointmentSelect = document.querySelector('select[name="appointment_id"]');
+        const filesContainer = document.getElementById('appointmentFiles');
+        const appointmentFilesList = document.getElementById('appointmentFilesList');
+
+        const baseUrl = "{{ route('doctor.files.byAppointment', ['appointmentId' => '__ID__']) }}";
+
+        appointmentSelect.addEventListener('change', function() {
+            const appointmentId = this.value;
+
+            if (!appointmentId) {
+                filesContainer.classList.add('hidden');
+                appointmentFilesList.innerHTML = '';
+                return;
+            }
+
+            const url = baseUrl.replace('__ID__', appointmentId);
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Không thể lấy danh sách file.');
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.files || data.files.length === 0) {
+                        appointmentFilesList.innerHTML =
+                            `<li class="text-gray-500 italic">Không có file nào được tải lên cho cuộc hẹn này.</li>`;
+                    } else {
+                        appointmentFilesList.innerHTML = '';
+                        data.files.forEach(file => {
+                            const formattedTime = new Date(file.uploaded_at).toLocaleString('vi-VN', {
+                                timeZone: 'Asia/Ho_Chi_Minh',
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit'
+                            });
+                            const item = document.createElement('li');
+                            item.innerHTML =
+                                `<strong>${file.file_name}</strong> <span class="text-gray-500">(${file.file_category})</span> - <span class="text-gray-400 text-xs">${formattedTime}</span>`;
+                            appointmentFilesList.appendChild(item);
+                        });
+                    }
+                    filesContainer.classList.remove('hidden');
+                })
+                .catch(err => {
+                    console.error(err);
+                    appointmentFilesList.innerHTML =
+                        `<li class="text-red-500 italic">Lỗi khi tải danh sách file.</li>`;
+                    filesContainer.classList.remove('hidden');
+                });
         });
     </script>
 @endpush
