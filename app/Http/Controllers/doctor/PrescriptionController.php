@@ -220,56 +220,47 @@ class PrescriptionController extends Controller
 
     public function update(UpdatePrescriptionRequest $request, $id)
     {
-        // $request->validate([
-        //     'prescribed_at' => ['required', 'date', 'before_or_equal:now'],
-        //     'medicines' => 'required|array|min:1',
-        //     'medicines.*.medicine_id' => 'required|exists:medicines,id',
-        //     'medicines.*.quantity' => 'required|numeric|min:1',
-        //     'medicines.*.usage_instructions' => 'nullable|string|max:255',
-        //     'notes' => 'nullable|string|max:1000',
-        // ], [
-        //     'prescribed_at.required' => 'Vui lòng chọn ngày kê đơn.',
-        //     'prescribed_at.date' => 'Ngày kê đơn không hợp lệ.',
-        //     'prescribed_at.before_or_equal' => 'Ngày kê đơn không được lớn hơn thời điểm hiện tại.',
-        //     'medicines.required' => 'Vui lòng thêm ít nhất một loại thuốc.',
-        //     'medicines.array' => 'Danh sách thuốc không hợp lệ.',
-        //     'medicines.min' => 'Vui lòng thêm ít nhất một loại thuốc.',
-        //     'medicines.*.medicine_id.required' => 'Vui lòng chọn thuốc.',
-        //     'medicines.*.medicine_id.exists' => 'Thuốc đã chọn không tồn tại.',
-        //     'medicines.*.quantity.required' => 'Vui lòng nhập số lượng thuốc.',
-        //     'medicines.*.quantity.numeric' => 'Số lượng thuốc phải là số.',
-        //     'medicines.*.quantity.min' => 'Số lượng thuốc phải lớn hơn 0.',
-        //     'medicines.*.usage_instructions.string' => 'Hướng dẫn sử dụng phải là chuỗi ký tự.',
-        //     'medicines.*.usage_instructions.max' => 'Hướng dẫn sử dụng không được vượt quá 255 ký tự.',
-        //     'notes.string' => 'Ghi chú phải là chuỗi ký tự.',
-        //     'notes.max' => 'Ghi chú không được vượt quá 1000 ký tự.',
-        // ]);
-
-
         $doctor = Auth::user()->doctor;
 
+        // Lấy đơn thuốc thuộc bác sĩ đang đăng nhập
         $prescription = Prescription::whereHas('medicalRecord.appointment', function ($q) use ($doctor) {
             $q->where('doctor_id', $doctor->id);
         })->findOrFail($id);
 
+        // ✅ Ngăn không cho sửa nếu đã finalized
+        if ($prescription->is_finalized) {
+            return redirect()->route('doctor.prescriptions.index')
+                ->with('error', 'Đơn thuốc này đã được hoàn tất và không thể chỉnh sửa.');
+        }
+
+        // ✅ Ngăn vượt quá số lần chỉnh sửa
+        if ($prescription->edit_count >= 3) {
+            return redirect()->route('doctor.prescriptions.index')
+                ->with('error', 'Bạn đã vượt quá số lần chỉnh sửa đơn thuốc cho phép.');
+        }
+
         DB::beginTransaction();
         try {
-            // Cập nhật thông tin đơn thuốc chính
+            // ✅ Cập nhật thông tin đơn thuốc
             $prescription->update([
                 'prescribed_at' => Carbon::parse($request->prescribed_at),
                 'notes' => $request->notes,
+                'is_finalized' => $request->has('is_finalized'), // checkbox từ form
             ]);
 
-            // Lấy danh sách ID thuốc mới từ request
+            // ✅ Refresh lại model để lấy giá trị mới của is_finalized
+            $prescription->refresh();
+
+            // ✅ Cập nhật danh sách thuốc
             $newItems = collect($request->medicines)->filter(function ($item) {
                 return !empty($item['medicine_id']) && !empty($item['quantity']);
             });
 
-            // Xóa các thuốc cũ không còn tồn tại trong danh sách mới
+            // Xóa các thuốc cũ không còn trong danh sách mới
             $existingMedicineIds = $newItems->pluck('medicine_id')->toArray();
             $prescription->prescriptionItems()->whereNotIn('medicine_id', $existingMedicineIds)->delete();
 
-            // Cập nhật hoặc thêm thuốc mới
+            // Cập nhật hoặc thêm mới thuốc
             foreach ($newItems as $item) {
                 $prescription->prescriptionItems()->updateOrCreate(
                     [
@@ -283,11 +274,32 @@ class PrescriptionController extends Controller
                 );
             }
 
+            // ✅ Tăng số lần chỉnh sửa nếu chưa finalized
+            $prescription->increment('edit_count');
+
             DB::commit();
             return redirect()->route('doctor.prescriptions.index')->with('success', 'Đã cập nhật đơn thuốc thành công.');
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật đơn thuốc.');
         }
+    }
+    public function finalize($id)
+    {
+        $doctor = Auth::user()->doctor;
+
+        $prescription = Prescription::whereHas('medicalRecord.appointment', function ($q) use ($doctor) {
+            $q->where('doctor_id', $doctor->id);
+        })->findOrFail($id);
+
+        if ($prescription->is_finalized) {
+            return back()->with('info', 'Đơn thuốc này đã được hoàn tất trước đó.');
+        }
+
+        $prescription->update([
+            'is_finalized' => true
+        ]);
+
+        return redirect()->route('doctor.prescriptions.index')->with('success', 'Đơn thuốc đã được xác nhân hoàn tất.');
     }
 }

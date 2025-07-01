@@ -50,6 +50,12 @@
                     <div>Hồ sơ bệnh án</div>
                 </a>
             </li>
+            <li class="menu-item">
+                <a href="{{ route('doctor.files.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-file"></i>
+                    <div>Quản lý file tải lên</div>
+                </a>
+            </li>
 
             <li class="menu-item">
                 <a href="{{ route('doctor.prescriptions.index') }}" class="menu-link">

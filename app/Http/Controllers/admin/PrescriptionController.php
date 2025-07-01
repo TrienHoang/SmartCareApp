@@ -152,6 +152,10 @@ class PrescriptionController extends Controller
             $med->formatted_price = number_format($med->price, 0, ',', '.') . 'đ';
         }
 
+        if ($prescription->is_finalized) {
+            session()->flash('warning', '⚠️ Đơn thuốc này đã được đánh dấu hoàn tất. Việc chỉnh sửa cần được cân nhắc kỹ lưỡng.');
+        }
+
         return view('admin.prescriptions.edit', compact('prescription', 'medicalRecords', 'medicines'));
     }
 
@@ -160,6 +164,9 @@ class PrescriptionController extends Controller
     {
         $prescription = Prescription::with('items')->findOrFail($id);
 
+        if ($prescription->is_finalized) {
+            return back()->with('error', 'Đơn thuốc đã được hoàn tất và không thể chỉnh sửa.');
+        }
         $errors = [];
         foreach ($request->medicines as $i => $item) {
             if (!Medicine::whereKey($item['medicine_id'])->exists()) {
