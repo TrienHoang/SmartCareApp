@@ -27,7 +27,6 @@ class DoctorDashboardController extends Controller
 
         $doctorId = $doctor->id;
 
-        // Nếu chưa có type, gán mặc định type=month và year=năm hiện tại
         if (!$request->has('type')) {
             $request->merge([
                 'type' => 'month',
@@ -35,7 +34,6 @@ class DoctorDashboardController extends Controller
             ]);
         }
 
-        // Validate dữ liệu đầu vào
         $validator = Validator::make($request->all(), [
             'type' => 'required|in:month,year,custom',
             'year' => [
@@ -77,13 +75,11 @@ class DoctorDashboardController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        // Lấy dữ liệu đã validate
         $type = $request->input('type', 'month');
         $start = $request->input('start_date');
         $end = $request->input('end_date');
         $year = $request->input('year', now()->year);
 
-        // Validate khoảng thời gian tối đa 62 ngày cho custom
         if ($type === 'custom') {
             $startDate = Carbon::parse($start)->startOfDay();
             $endDate = Carbon::parse($end)->endOfDay();
@@ -93,18 +89,15 @@ class DoctorDashboardController extends Controller
             }
         }
 
-        // Tổng số bệnh nhân
         $totalPatients = Appointment::where('doctor_id', $doctorId)
             ->whereNotNull('patient_id')
             ->distinct('patient_id')
             ->count();
 
-        // Lịch hẹn hôm nay
         $todayAppointments = Appointment::where('doctor_id', $doctorId)
             ->whereDate('appointment_time', today())
             ->count();
 
-        // Trạng thái lịch hẹn hôm nay
         $appointments_pending = Appointment::where('doctor_id', $doctorId)
             ->where('status', 'pending')
             ->whereDate('appointment_time', today())
@@ -125,13 +118,11 @@ class DoctorDashboardController extends Controller
             ->whereDate('appointment_time', today())
             ->count();
 
-        // Doanh thu
         $totalRevenue = Appointment::join('services', 'appointments.service_id', '=', 'services.id')
             ->where('appointments.doctor_id', $doctorId)
             ->where('appointments.status', 'completed')
             ->sum('services.price');
 
-        // Tỷ lệ thành công và hủy
         $totalAppointments = Appointment::where('doctor_id', $doctorId)->count();
         $successAppointments = Appointment::where('doctor_id', $doctorId)
             ->where('status', 'completed')
@@ -143,7 +134,6 @@ class DoctorDashboardController extends Controller
         $successRate = $totalAppointments > 0 ? round($successAppointments / $totalAppointments * 100, 1) : 0;
         $cancelRate = $totalAppointments > 0 ? round($cancelAppointments / $totalAppointments * 100, 1) : 0;
 
-        // Thống kê chính
         $statLabels = [];
         $statBookings = [];
         $statRevenue = [];
@@ -213,7 +203,6 @@ class DoctorDashboardController extends Controller
             }
         }
 
-        // Tính toán tăng trưởng
         $growthValue = 0;
         $growthLabel = 'Không đổi';
         if (count($statBookings) > 1) {
@@ -236,6 +225,9 @@ class DoctorDashboardController extends Controller
             }
         }
 
+        // Thống kê số lượng file đã tải lên
+        $fileUploadsCount = \App\Models\FileUpload::where('user_id', $user->id)->count();
+
         return view('doctor.dashboard.index', compact(
             'doctor',
             'totalPatients',
@@ -257,9 +249,11 @@ class DoctorDashboardController extends Controller
             'growthValue',
             'growthLabel',
             'revenueGrowth',
-            'revenueLabel'
+            'revenueLabel',
+            'fileUploadsCount'
         ));
     }
+
 
 
     public function exportExcel($doctorId)
