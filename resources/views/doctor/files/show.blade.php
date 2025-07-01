@@ -18,9 +18,6 @@
                 <h1 class="h3 mb-0 text-gray-800 mt-2">Chi tiết File</h1>
             </div>
             <div>
-                <a href="{{ route('doctor.files.download', $file->id) }}" class="btn btn-success mr-2">
-                    <i class="fas fa-download"></i> Tải xuống
-                </a>
                 <a href="{{ route('doctor.files.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Quay lại
                 </a>

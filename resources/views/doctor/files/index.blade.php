@@ -10,9 +10,14 @@
                 <h1 class="h3 mb-0 text-gray-800">Quản lý File Tải lên</h1>
                 <p class="mb-0 text-muted">Quản lý các file đã tải lên cho bệnh nhân</p>
             </div>
-            <a href="{{ route('doctor.files.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Tải lên File
-            </a>
+            <div class="d-flex">
+                <a href="{{ route('doctor.files.create') }}" class="btn btn-primary mr-2">
+                    <i class="fas fa-plus"></i> Tải lên File
+                </a>
+                <a href="{{ route('doctor.files.trash') }}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> File đã xóa mềm
+                </a>
+            </div>
         </div>
 
         <!-- Alerts -->
@@ -205,16 +210,14 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Xác nhận xóa file</h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p>Bạn có chắc chắn muốn xóa file <strong id="fileName"></strong>?</p>
                     <p class="text-danger"><small>Hành động này không thể hoàn tác!</small></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                     <form id="deleteForm" method="POST" style="display: inline;">
                         @csrf
                         @method('DELETE')

@@ -55,9 +55,6 @@ class FileUploadController extends Controller
         return view('doctor.files.index', compact('files', 'appointments', 'categories'));
     }
 
-    /**
-     * Hiển thị form upload file
-     */
     public function create(Request $request)
     {
         $doctorId = Auth::user()->doctor->id;
@@ -77,9 +74,6 @@ class FileUploadController extends Controller
         return view('doctor.files.create', compact('appointments', 'selectedAppointment'));
     }
 
-    /**
-     * Xử lý upload file
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -264,5 +258,67 @@ class FileUploadController extends Controller
             'success' => true,
             'message' => 'Đã cập nhật danh mục file thành công!'
         ]);
+    }
+
+    // Hiển thị thùng rác
+    public function trash()
+    {
+        $doctorId = Auth::user()->doctor->id;
+
+        $files = FileUpload::onlyTrashed()
+            ->whereHas('appointment', function ($q) use ($doctorId) {
+                $q->where('doctor_id', $doctorId);
+            })
+            ->orderBy('uploaded_at', 'desc')
+            ->paginate(10);
+
+        return view('doctor.files.trash', compact('files'));
+    }
+
+    // Khôi phục file đã xóa
+    public function restore($id)
+    {
+        $doctorId = Auth::user()->doctor->id;
+
+        $file = FileUpload::onlyTrashed()
+            ->whereHas('appointment', function ($q) use ($doctorId) {
+                $q->where('doctor_id', $doctorId);
+            })->findOrFail($id);
+
+        $file->restore();
+
+        UploadHistory::create([
+            'file_upload_id' => $file->id,
+            'action' => 'restored',
+            'timestamp' => now(),
+        ]);
+
+        return redirect()->route('doctor.files.trash')->with('success', 'Đã khôi phục file!');
+    }
+
+    // Xóa vĩnh viễn file
+    public function forceDelete($id)
+    {
+        $doctorId = Auth::user()->doctor->id;
+
+        $file = FileUpload::onlyTrashed()
+            ->whereHas('appointment', function ($q) use ($doctorId) {
+                $q->where('doctor_id', $doctorId);
+            })->findOrFail($id);
+
+        // Xóa vật lý file khỏi ổ đĩa nếu tồn tại
+        if (Storage::disk('public')->exists($file->file_path)) {
+            Storage::disk('public')->delete($file->file_path);
+        }
+
+        UploadHistory::create([
+            'file_upload_id' => $file->id,
+            'action' => 'force_deleted',
+            'timestamp' => now(),
+        ]);
+
+        $file->forceDelete();
+
+        return redirect()->route('doctor.files.trash')->with('success', 'Đã xóa vĩnh viễn file!');
     }
 }
