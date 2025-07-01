@@ -142,10 +142,7 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="badge badge-info category-badge"
-                                                data-file-id="{{ $file->id }}"
-                                                data-category="{{ $file->file_category }}" style="cursor: pointer;"
-                                                title="Click để chỉnh sửa">
+                                            <span class="badge badge-info">
                                                 {{ $file->file_category }}
                                             </span>
                                         </td>

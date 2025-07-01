@@ -225,6 +225,13 @@
                             </div>
                         @endif
 
+                        @if ($file->note)
+                            <div class="mt-3">
+                                <strong>Ghi chú:</strong>
+                                <p class="text-gray-700">{{ $file->note }}</p>
+                            </div>
+                        @endif
+
                         <div class="form-group mb-0">
                             <a href="#" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-eye"></i> Xem chi tiết cuộc hẹn
@@ -350,7 +357,7 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="newCategory">Danh mục mới</label>
-                            <select id="newCategory" class="form-control" required
+                            <select id="newCategory" class="form-control"
                                 data-current="{{ $file->file_category }}">
                                 <option value="">-- Chọn danh mục --</option>
                                 <option value="Kết quả xét nghiệm"
