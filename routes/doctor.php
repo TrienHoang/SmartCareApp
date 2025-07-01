@@ -86,5 +86,7 @@ Route::prefix('doctor')
                 Route::get('/{id}', [FileUploadController::class, 'show'])->name('show');
                 Route::get('/{id}/download', [FileUploadController::class, 'download'])->name('download');
                 Route::delete('/{id}', [FileUploadController::class, 'destroy'])->name('destroy');
+                Route::put('/{id}/update-category', [FileUploadController::class, 'updateCategory'])
+                    ->name('updateCategory');
             });
     });

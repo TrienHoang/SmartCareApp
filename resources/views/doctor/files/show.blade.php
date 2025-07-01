@@ -308,8 +308,8 @@
                                 <i class="fas fa-download"></i> Tải xuống File
                             </a>
 
-                            <button type="button" class="btn btn-warning" data-toggle="modal"
-                                data-target="#categoryModal">
+                            <button type="button" class="btn btn-warning" data-bs-toggle="modal"
+                                data-bs-target="#categoryModal">
                                 <i class="fas fa-edit"></i> Chỉnh sửa Danh mục
                             </button>
 
@@ -331,9 +331,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">{{ $file->file_name }}</h5>
-                        <button type="button" class="close" data-dismiss="modal">
-                            <span>&times;</span>
-                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center">
                         <img src="{{ Storage::url($file->file_path) }}" alt="{{ $file->file_name }}" class="img-fluid">
@@ -344,26 +342,36 @@
     @endif
 
     <!-- Category Edit Modal -->
-    <div class="modal fade" id="categoryModal" tabindex="-1" role="dialog">
+    <div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Chỉnh sửa danh mục</h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="categoryForm">
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="newCategory">Danh mục mới</label>
-                            <input type="text" id="newCategory" class="form-control"
-                                value="{{ $file->file_category }}" required>
+                            <select id="newCategory" class="form-control" required
+                                data-current="{{ $file->file_category }}">
+                                <option value="">-- Chọn danh mục --</option>
+                                <option value="Kết quả xét nghiệm"
+                                    {{ $file->file_category == 'Kết quả xét nghiệm' ? 'selected' : '' }}>Kết quả xét nghiệm
+                                </option>
+                                <option value="Chẩn đoán hình ảnh"
+                                    {{ $file->file_category == 'Chẩn đoán hình ảnh' ? 'selected' : '' }}>Chẩn đoán hình ảnh
+                                </option>
+                                <option value="Đơn thuốc" {{ $file->file_category == 'Đơn thuốc' ? 'selected' : '' }}>Đơn
+                                    thuốc</option>
+                                <option value="Khác" {{ $file->file_category == 'Khác' ? 'selected' : '' }}>Khác
+                                </option>
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary" id="updateCategoryBtn" disabled>Cập nhật</button>
                     </div>
                 </form>
             </div>
@@ -376,16 +384,14 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Xác nhận xóa file</h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p>Bạn có chắc chắn muốn xóa file <strong id="fileName"></strong>?</p>
                     <p class="text-danger"><small>Hành động này không thể hoàn tác!</small></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                     <form id="deleteForm" method="POST" style="display: inline;">
                         @csrf
                         @method('DELETE')
@@ -395,6 +401,7 @@
             </div>
         </div>
     </div>
+
 
 @endsection
 
@@ -440,27 +447,63 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            // Handle category update
+            const $select = $('#newCategory');
+            const $submitBtn = $('#updateCategoryBtn');
+            const original = $select.data('current');
+
+            // Khi mở modal, reset lại trạng thái ban đầu
+            $('#categoryModal').on('shown.bs.modal', function() {
+                const selected = $select.val();
+                $submitBtn.prop('disabled', selected === original);
+            });
+
+            // Theo dõi thay đổi dropdown
+            $select.on('change', function() {
+                const selected = $(this).val();
+                $submitBtn.prop('disabled', selected === original || selected === "");
+            });
+
+            // Submit
             $('#categoryForm').submit(function(e) {
                 e.preventDefault();
+                const selected = $select.val();
 
-                const newCategory = $('#newCategory').val();
+                if (selected === original) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Không có thay đổi',
+                        text: 'Bạn chưa thay đổi danh mục.'
+                    });
+                    return;
+                }
 
                 $.ajax({
-                    url: '#',
+                    url: '{{ route('doctor.files.updateCategory', $file->id) }}',
                     method: 'PUT',
                     data: {
                         _token: '{{ csrf_token() }}',
-                        file_category: newCategory
+                        file_category: selected
                     },
                     success: function(response) {
                         if (response.success) {
                             $('#categoryModal').modal('hide');
-                            location.reload();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Cập nhật thành công',
+                                text: response.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload();
+                            });
                         }
                     },
                     error: function() {
-                        alert('Có lỗi xảy ra khi cập nhật danh mục!');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Thất bại',
+                            text: 'Có lỗi xảy ra khi cập nhật danh mục!'
+                        });
                     }
                 });
             });

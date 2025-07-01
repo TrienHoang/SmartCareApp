@@ -192,10 +192,10 @@ class FileUploadController extends Controller
         })->findOrFail($id);
 
         DB::beginTransaction();
-        
+
         try {
             if (Storage::disk('public')->exists($file->file_path)) {
-                Storage::disk('public')->delete($file->file_path);  
+                Storage::disk('public')->delete($file->file_path);
             }
 
             UploadHistory::create([
@@ -203,13 +203,13 @@ class FileUploadController extends Controller
                 'action' => 'deleted',
                 'timestamp' => now(),
             ]);
-            
+
             $file->delete();
 
             DB::commit();
 
             return back()->with('success', 'Đã xóa file thành công!');
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Đã xảy ra lỗi trong quá trình xóa file: ' . $e->getMessage());
         }
@@ -219,22 +219,50 @@ class FileUploadController extends Controller
     {
         $doctorId = Auth::user()->doctor->id;
 
-       $appointment = Appointment::where('id', $appointmentId)
+        $appointment = Appointment::where('id', $appointmentId)
             ->where('doctor_id', $doctorId)
             ->first();
-        
-        if (!$appointment){
+
+        if (!$appointment) {
             return response()->json([
                 'error' => 'Không có quyền truy cập'
             ], 403);
         }
 
         $file = FileUpload::where('appointment_id', $appointmentId)
-                            ->orderBy('uploaded_at', 'desc')
-                            ->get(['id', 'file_name', 'file_category', 'uploaded_at']);
+            ->orderBy('uploaded_at', 'desc')
+            ->get(['id', 'file_name', 'file_category', 'uploaded_at']);
 
         return response()->json([
             'files' => $file
+        ]);
+    }
+
+    public function updateCategory(Request $request, $id)
+    {
+        $request->validate([
+            'file_category' => 'required|string|max:100'
+        ]);
+
+        $doctorId = Auth::user()->doctor->id;
+
+        $file = FileUpload::whereHas('appointment', function ($q) use ($doctorId) {
+            $q->where('doctor_id', $doctorId);
+        })->findOrFail($id);
+
+        $oldCategory = $file->file_category;
+        $file->update(['file_category' => $request->file_category]);
+
+        // Ghi log update
+        UploadHistory::create([
+            'file_upload_id' => $file->id,
+            'action' => 'category_updated',
+            'timestamp' => now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã cập nhật danh mục file thành công!'
         ]);
     }
 }
