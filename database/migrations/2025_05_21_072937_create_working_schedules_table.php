@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->string('day_of_week', 10)->nullable()->comment('Thứ trong tuần');
             $table->string('start_time', 10)->nullable()->comment('Giờ bắt đầu');
             $table->string('end_time', 10)->nullable()->comment('Giờ kết thúc');
+            $table->datetime('day')->comment('Ngày làm việc');
             $table->timestamps();
         });
     }
