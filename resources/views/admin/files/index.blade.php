@@ -112,7 +112,7 @@
                                     class="btn btn-sm btn-info">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="{{ asset('storage/' . $file->file_path) }}" download
+                                <a href="{{ route('admin.files.download', $file->id) }}" download
                                     class="btn btn-sm btn-success">
                                     <i class="fas fa-download"></i>
                                 </a>

@@ -60,6 +60,14 @@
                                     </p>
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Số lần tải xuống:</label>
+                                    <p class="mb-0">
+                                        <span class="badge badge-info">{{ $file->download_count }}</span>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row">

@@ -63,4 +63,16 @@ class AdminFileController extends Controller
         $file = FileUpload::findOrFail($id);
         return view('admin.files.show', compact('file'));
     }
+
+    public function download($id)
+    {
+        $file = FileUpload::findOrFail($id);
+        $path = storage_path('app/public/' . $file->file_path);
+        if (!file_exists($path)) {
+            abort(404, 'File không tồn tại trên hệ thống');
+        }
+
+        $file->increment('download_count');
+        return response()->download($path, $file->file_name);
+    }
 }
