@@ -110,6 +110,7 @@ class FileUploadController extends Controller
                     'appointment_id' => $request->appointment_id,
                     'file_name' => $file->getClientOriginalName(),
                     'file_path' => $filePath,
+                    'size' => $file->getSize(),
                     'file_category' => $request->file_category,
                     'note' => $request->note,
                     'uploaded_at' => now()
