@@ -104,4 +104,12 @@ class AdminFileController extends Controller
             return redirect()->with('error', 'Đã xảy ra lỗi trong quá trình xóa file: ' . $e->getMessage());
         }
     }
+
+    public function trash(){
+        $files = FileUpload::onlyTrashed()
+                ->orderBy('uploaded_at', 'desc')
+                ->paginate(10);
+
+        return view('admin.files.trash', compact('files'));
+    }
 }

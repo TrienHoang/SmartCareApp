@@ -575,6 +575,8 @@ Route::group([
     ], function () {
         Route::get('/', [AdminFileController::class, 'index'])->name('index');
 
+        Route::get('/trash', [AdminFileController::class, 'trash'])->name('trash');
+
         Route::get('/{id}', [AdminFileController::class, 'show'])->name('show');
 
         Route::get('/{id}/download', [AdminFileController::class, 'download'])->name('download');
@@ -590,9 +592,6 @@ Route::group([
 
         Route::put('/{id}/update-category', [AdminFileController::class, 'updateCategory'])
             ->middleware('check_permission:upload_files')->name('updateCategory');
-
-        Route::get('/trash', [AdminFileController::class, 'trash'])->name('trash');
-
     });
 });
 
