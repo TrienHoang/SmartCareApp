@@ -593,7 +593,6 @@ Route::group([
 
         Route::get('/trash', [AdminFileController::class, 'trash'])->name('trash');
 
-        Route::get('/by-appointment/{appointmentId}', [AdminFileController::class, 'getByAppointment'])->name('byAppointment');
     });
 });
 

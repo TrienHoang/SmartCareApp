@@ -4,8 +4,11 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\FileUpload;
+use App\Models\UploadHistory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AdminFileController extends Controller
 {
@@ -74,5 +77,31 @@ class AdminFileController extends Controller
 
         $file->increment('download_count');
         return response()->download($path, $file->file_name);
+    }
+
+    public function destroy($id)
+    {
+        $file = FileUpload::findOrFail($id);
+        DB::beginTransaction();
+
+        try {
+            if (Storage::disk('public')->exists($file->file_path)) {
+                Storage::disk('public')->delete($file->file_path);
+            }
+
+            UploadHistory::create([
+                'file_upload_id' => $file->id,
+                'action' => 'deleted',
+                'timestamp' => now(),
+            ]);
+
+            $file->delete();
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Đã xóa file thành công!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->with('error', 'Đã xảy ra lỗi trong quá trình xóa file: ' . $e->getMessage());
+        }
     }
 }

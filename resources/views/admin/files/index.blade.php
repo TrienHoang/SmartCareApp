@@ -116,7 +116,7 @@
                                     class="btn btn-sm btn-success">
                                     <i class="fas fa-download"></i>
                                 </a>
-                                <form method="POST" action="{{ route('doctor.files.destroy', $file->id) }}"
+                                <form method="POST" action="{{ route('admin.files.destroy', $file->id) }}"
                                     class="d-inline" onsubmit="return confirm('Xoá file này?')">
                                     @csrf
                                     @method('DELETE')
@@ -144,7 +144,7 @@
                         </small>
                     </div>
                     <div class="pagination-links">
-                        {{ $files->links('pagination::bootstrap-4') }}
+                        {{ $files->links('pagination::bootstrap-5') }}
                     </div>
                 </div>
             </div>
