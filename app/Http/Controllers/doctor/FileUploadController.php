@@ -303,12 +303,37 @@ class FileUploadController extends Controller
     {
         $doctorId = Auth::user()->doctor->id;
 
+        // Nếu là xóa toàn bộ
+        if ($id === 'all') {
+            $files = FileUpload::onlyTrashed()
+                ->whereHas('appointment', function ($q) use ($doctorId) {
+                    $q->where('doctor_id', $doctorId);
+                })->get();
+
+            foreach ($files as $file) {
+                // Xóa vật lý file khỏi ổ đĩa nếu tồn tại
+                if (Storage::disk('public')->exists($file->file_path)) {
+                    Storage::disk('public')->delete($file->file_path);
+                }
+
+                // Lưu lịch sử xóa
+                UploadHistory::create([
+                    'file_upload_id' => $file->id,
+                    'action' => 'force_deleted',
+                    'timestamp' => now(),
+                ]);
+
+                $file->forceDelete();
+            }
+
+            return redirect()->route('doctor.files.trash')->with('success', 'Đã xóa vĩnh viễn tất cả file!');
+        }
+
         $file = FileUpload::onlyTrashed()
             ->whereHas('appointment', function ($q) use ($doctorId) {
                 $q->where('doctor_id', $doctorId);
             })->findOrFail($id);
 
-        // Xóa vật lý file khỏi ổ đĩa nếu tồn tại
         if (Storage::disk('public')->exists($file->file_path)) {
             Storage::disk('public')->delete($file->file_path);
         }

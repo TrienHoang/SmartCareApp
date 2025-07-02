@@ -105,15 +105,17 @@ class AdminFileController extends Controller
         }
     }
 
-    public function trash(){
+    public function trash()
+    {
         $files = FileUpload::onlyTrashed()
-                ->orderBy('uploaded_at', 'desc')
-                ->paginate(10);
+            ->orderBy('uploaded_at', 'desc')
+            ->paginate(10);
 
         return view('admin.files.trash', compact('files'));
     }
 
-    public function restore($id){
+    public function restore($id)
+    {
         $file = FileUpload::onlyTrashed()->findOrFail($id);
         $file->restore();
 
@@ -124,5 +126,38 @@ class AdminFileController extends Controller
         ]);
 
         return redirect()->route('admin.files.trash')->with('success', 'Đã khôi phục file!');
+    }
+
+    public function forceDelete(Request $request, $id = null)
+    {
+        // Nếu truyền 'all' => xóa toàn bộ trong thùng rác
+        if ($id === 'all') {
+            $files = FileUpload::onlyTrashed()->get();
+        }
+        // Nếu truyền mảng ID (qua form hoặc AJAX)
+        elseif (is_array($request->input('ids'))) {
+            $ids = $request->input('ids');
+            $files = FileUpload::onlyTrashed()->whereIn('id', $ids)->get();
+        }
+        // Truyền 1 ID duy nhất
+        else {
+            $files = collect([FileUpload::onlyTrashed()->findOrFail($id)]);
+        }
+
+        foreach ($files as $file) {
+            if (Storage::disk('public')->exists($file->file_path)) {
+                Storage::disk('public')->delete($file->file_path);
+            }
+
+            UploadHistory::create([
+                'file_upload_id' => $file->id,
+                'action' => 'force_deleted',
+                'timestamp' => now(),
+            ]);
+
+            $file->forceDelete();
+        }
+
+        return redirect()->route('admin.files.trash')->with('success', 'Đã xóa vĩnh viễn file!');
     }
 }

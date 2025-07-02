@@ -312,6 +312,20 @@
             const deleteModal = document.getElementById('deleteModal');
             const emptyTrashModal = document.getElementById('emptyTrashModal');
 
+            const checkboxes = [
+                document.getElementById('confirmEmptyCheck1'),
+                document.getElementById('confirmEmptyCheck2'),
+                document.getElementById('confirmEmptyCheck3')
+            ];
+            const deleteBtn = document.getElementById('confirmEmptyTrash');
+
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const allChecked = checkboxes.every(c => c.checked);
+                    deleteBtn.disabled = !allChecked;
+                });
+            });
+
             // Restore Modal Handler
             if (restoreModal) {
                 restoreModal.addEventListener('show.bs.modal', function(event) {
@@ -417,24 +431,10 @@
                             this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xóa...';
                             this.disabled = true;
 
-                            // Simulate processing (replace with actual implementation)
-                            setTimeout(() => {
-                                alert(
-                                    'Tính năng này đang được phát triển!\n\nBạn cần tạo route và method tương ứng trong controller.'
-                                );
-
-                                // Reset states
-                                isProcessing = false;
-                                this.innerHTML =
-                                    '<i class="fas fa-trash-alt me-2"></i>Xóa tất cả vĩnh viễn';
-                                this.disabled = false;
-
-                                // Close modal and reset
-                                const modalInstance = bootstrap.Modal.getInstance(emptyTrashModal);
-                                if (modalInstance) {
-                                    modalInstance.hide();
-                                }
-                            }, 1500);
+                            const form = document.getElementById('forceDeleteAllForm');
+                            if (form) {
+                                form.submit();
+                            }
                         }
                     });
                 }
@@ -698,9 +698,14 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-times me-2"></i>Hủy bỏ
                     </button>
-                    <button type="button" class="btn btn-danger" id="confirmEmptyTrash" disabled>
-                        <i class="fas fa-trash-alt me-2"></i>Xóa tất cả vĩnh viễn
-                    </button>
+                    <form action="{{ route('admin.files.forceDelete', 'all') }}" method="POST" id="forceDeleteAllForm">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger" id="confirmEmptyTrash" disabled>
+                            <i class="fas fa-trash-alt me-2"></i>Xóa tất cả vĩnh viễn
+                        </button>
+                    </form>
+
                 </div>
             </div>
         </div>
