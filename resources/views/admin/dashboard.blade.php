@@ -25,7 +25,7 @@
         }
 
         .layout-wrapper {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
@@ -176,5 +176,5 @@
     @stack('scripts')
     @yield('scripts')
 </body>
-
+@stack('modals')
 </html>

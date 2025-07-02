@@ -110,6 +110,7 @@ class FileUploadController extends Controller
                     'appointment_id' => $request->appointment_id,
                     'file_name' => $file->getClientOriginalName(),
                     'file_path' => $filePath,
+                    'size' => $file->getSize(),
                     'file_category' => $request->file_category,
                     'note' => $request->note,
                     'uploaded_at' => now()
@@ -203,7 +204,7 @@ class FileUploadController extends Controller
 
             DB::commit();
 
-            return back()->with('success', 'Đã xóa file thành công!');
+            return redirect()->route('doctor.files.index')->with('success', 'Đã xóa file thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Đã xảy ra lỗi trong quá trình xóa file: ' . $e->getMessage());
@@ -302,12 +303,37 @@ class FileUploadController extends Controller
     {
         $doctorId = Auth::user()->doctor->id;
 
+        // Nếu là xóa toàn bộ
+        if ($id === 'all') {
+            $files = FileUpload::onlyTrashed()
+                ->whereHas('appointment', function ($q) use ($doctorId) {
+                    $q->where('doctor_id', $doctorId);
+                })->get();
+
+            foreach ($files as $file) {
+                // Xóa vật lý file khỏi ổ đĩa nếu tồn tại
+                if (Storage::disk('public')->exists($file->file_path)) {
+                    Storage::disk('public')->delete($file->file_path);
+                }
+
+                // Lưu lịch sử xóa
+                UploadHistory::create([
+                    'file_upload_id' => $file->id,
+                    'action' => 'force_deleted',
+                    'timestamp' => now(),
+                ]);
+
+                $file->forceDelete();
+            }
+
+            return redirect()->route('doctor.files.trash')->with('success', 'Đã xóa vĩnh viễn tất cả file!');
+        }
+
         $file = FileUpload::onlyTrashed()
             ->whereHas('appointment', function ($q) use ($doctorId) {
                 $q->where('doctor_id', $doctorId);
             })->findOrFail($id);
 
-        // Xóa vật lý file khỏi ổ đĩa nếu tồn tại
         if (Storage::disk('public')->exists($file->file_path)) {
             Storage::disk('public')->delete($file->file_path);
         }

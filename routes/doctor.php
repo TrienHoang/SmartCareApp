@@ -40,9 +40,9 @@ Route::get('doctor/{doctor}/dashboard/export-excel', [DoctorDashboardController:
 // Route export pdf
 Route::get('doctor/{doctor}/dashboard/export-pdf', [DoctorDashboardController::class, 'exportPDF'])->name('doctor.dashboard.stats-pdf');
 
-// kê đơn thuốc
 Route::prefix('doctor')
     ->name('doctor.')
+    ->middleware(['auth', 'checkRole:doctor']) 
     ->group(function () {
 
         // Dashboard
@@ -68,13 +68,8 @@ Route::prefix('doctor')
                 Route::get('/{id}/export-pdf', [PrescriptionController::class, 'exportPdf'])->name('exportPdf');
                 Route::post('/{id}/finalize', [PrescriptionController::class, 'finalize'])->name('finalize');
             });
-    });
 
-// quản lý file tải lên
-Route::prefix('doctor')
-    ->name('doctor.')
-    ->middleware('auth', 'checkRole:doctor')
-    ->group(function () {
+        // File uploads
         Route::prefix('files')
             ->name('files.')
             ->group(function () {
@@ -85,12 +80,9 @@ Route::prefix('doctor')
                 Route::get('/{id}', [FileUploadController::class, 'show'])->name('show');
                 Route::get('/{id}/download', [FileUploadController::class, 'download'])->name('download');
                 Route::delete('/{id}', [FileUploadController::class, 'destroy'])->name('destroy');
-                Route::put('/{id}/update-category', [FileUploadController::class, 'updateCategory'])
-                    ->name('updateCategory');
-
+                Route::put('/{id}/update-category', [FileUploadController::class, 'updateCategory'])->name('updateCategory');
                 Route::put('/{id}/restore', [FileUploadController::class, 'restore'])->name('restore');
                 Route::delete('/{id}/force-delete', [FileUploadController::class, 'forceDelete'])->name('forceDelete');
-                Route::get('/by-appointment/{appointmentId}', [FileUploadController::class, 'getByAppointment'])
-                    ->name('byAppointment');
+                Route::get('/by-appointment/{appointmentId}', [FileUploadController::class, 'getByAppointment'])->name('byAppointment');
             });
     });
