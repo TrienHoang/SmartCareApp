@@ -566,19 +566,5 @@ Route::group([
     // Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('payment_histories.index');
     // Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('payment_histories.show');
 });
-
-
-// phân quyền bác sĩ
-// Route::get('/doctor/dashboard', function () {
-//     return view('doctor.dashboard');
-// })->name('doctor.dashboard');
-
-Route::prefix('doctor')->name('doctor.')->middleware('auth')->group(function () {
-    Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
-    // Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
-});
-
-
 // Trong routes/web.php hoặc routes/doctor.php
-
 require __DIR__ . '/doctor.php';

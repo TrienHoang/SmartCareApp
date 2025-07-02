@@ -142,21 +142,30 @@ class DoctorLeaveController extends Controller
                 ->withInput();
         }
 
-        $leave->update([
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'reason' => $request->reason,
-        ]);
+        // Kiểm tra sự thay đổi
+        $isChanged =
+            $leave->start_date != $request->start_date ||
+            $leave->end_date != $request->end_date ||
+            $leave->reason != $request->reason;
 
-        // Gửi thông báo cập nhật đến admin
-        $admins = User::where('role_id', 1)->get();
-        foreach ($admins as $admin) {
-            $admin->notify(new \App\Notifications\DoctorLeaveCreated($leave, true));
+        if ($isChanged) {
+            $leave->update([
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'reason' => $request->reason,
+            ]);
+
+            // Gửi thông báo cập nhật đến admin
+            $admins = User::where('role_id', 1)->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new \App\Notifications\DoctorLeaveCreated($leave, true));
+            }
+
+            return redirect()->route('doctor.leaves.index')->with('success', 'Cập nhật lịch nghỉ thành công! Đã gửi thông báo đến quản trị viên.');
         }
 
-        return redirect()->route('doctor.leaves.index')->with('success', 'Cập nhật lịch nghỉ thành công! Đã gửi thông báo đến quản trị viên.');
+        return redirect()->route('doctor.leaves.index')->with('success', 'Lịch nghỉ không thay đổi, không cần gửi thông báo.');
     }
-
 
     public function destroy($id)
     {
