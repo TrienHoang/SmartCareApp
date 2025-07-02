@@ -159,7 +159,7 @@
                                 <option value="custom" {{ $type == 'custom' ? 'selected' : '' }}>Tùy chỉnh</option>
                             </select>
                             @error('type')
-                                <small class="text-danger">{{ $message }}</small>
+                                <small class="text-danger invalid-feedback">{{ $message }}</small>
                             @enderror
                         </div>
 
@@ -169,7 +169,7 @@
                                    value="{{ request('year', now()->year) }}" min="2000" max="{{ now()->year }}"
                                    style="width: 70px; font-size: 13px;" {{ $type == 'custom' ? 'disabled' : '' }}>
                             @error('year')
-                                <small class="text-danger">{{ $message }}</small>
+                                <small class="text-danger invalid-feedback">{{ $message }}</small>
                             @enderror
                         </div>
 
@@ -179,7 +179,7 @@
                                    value="{{ request('start_date') }}" style="width: 130px; font-size: 13px;"
                                    {{ $type != 'custom' ? 'disabled' : '' }}>
                             @error('start_date')
-                                <small class="text-danger">{{ $message }}</small>
+                                <small class="text-danger invalid-feedback">{{ $message }}</small>
                             @enderror
                         </div>
 
@@ -189,7 +189,7 @@
                                    value="{{ request('end_date') }}" style="width: 130px; font-size: 13px;"
                                    {{ $type != 'custom' ? 'disabled' : '' }}>
                             @error('end_date')
-                                <small class="text-danger">{{ $message }}</small>
+                                <small class="text-danger invalid-feedback">{{ $message }}</small>
                             @enderror
                         </div>
 
@@ -384,25 +384,46 @@
             const startDate = document.getElementById('startDate');
             const endDate = document.getElementById('endDate');
 
-            // Tự động chọn type=custom khi nhập ngày
+            // Lưu trữ trạng thái của startDate và endDate
+            let customDateState = {
+                startDate: startDate.value,
+                endDate: endDate.value
+            };
+
+            // Hàm cập nhật trạng thái các trường input
             function updateFilterType() {
-                if (startDate.value || endDate.value) {
-                    filterType.value = 'custom';
+                if (filterType.value === 'custom') {
                     yearInput.disabled = true;
                     startDate.disabled = false;
                     endDate.disabled = false;
+                    // Khôi phục giá trị startDate và endDate nếu có
+                    startDate.value = customDateState.startDate || '';
+                    endDate.value = customDateState.endDate || '';
                 } else {
-                    yearInput.disabled = filterType.value === 'custom';
-                    startDate.disabled = filterType.value !== 'custom';
-                    endDate.disabled = filterType.value !== 'custom';
+                    yearInput.disabled = false;
+                    startDate.disabled = true;
+                    endDate.disabled = true;
+                    // Lưu giá trị hiện tại của startDate và endDate trước khi vô hiệu hóa
+                    customDateState.startDate = startDate.value;
+                    customDateState.endDate = endDate.value;
                 }
             }
 
+            // Gọi hàm updateFilterType khi thay đổi filterType
             filterType.addEventListener('change', updateFilterType);
-            startDate.addEventListener('change', updateFilterType);
-            endDate.addEventListener('change', updateFilterType);
 
-            // Validate phía client
+            // Cập nhật trạng thái khi thay đổi ngày
+            startDate.addEventListener('change', function() {
+                customDateState.startDate = startDate.value;
+            });
+            endDate.addEventListener('change', function() {
+                customDateState.endDate = endDate.value;
+            });
+
+            // Cập nhật trạng thái ban đầu
+            updateFilterType();
+
+            // Validate phía client khi submit form
             filterForm.addEventListener('submit', function(event) {
                 let errors = [];
                 let valid = true;
@@ -468,6 +489,14 @@
                             feedback.textContent = error.message;
                         }
                     });
+                } else {
+                    // Reset customDateState nếu không chọn chế độ custom
+                    if (filterType.value !== 'custom') {
+                        customDateState.startDate = '';
+                        customDateState.endDate = '';
+                        startDate.value = '';
+                        endDate.value = '';
+                    }
                 }
             });
 
