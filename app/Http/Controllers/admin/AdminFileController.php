@@ -38,12 +38,33 @@ class AdminFileController extends Controller
         }
 
         // Tìm theo ngày tải lên
-        if ($request->filled('date_from') && $request->filled('date_to')) {
-            $query->whereBetween('uploaded_at', [
-                Carbon::parse($request->date_from)->startOfDay(),
-                Carbon::parse($request->date_to)->endOfDay(),
-            ]);
+        $from_input = $request->date_from;
+        $to_input = $request->date_to;
+
+        if ($request->filled('date_from') || $request->filled('date_to')) {
+            $from = $request->filled('date_from') ? Carbon::parse($request->date_from)->startOfDay() : null;
+            $to = $request->filled('date_to') ? Carbon::parse($request->date_to)->endOfDay() : null;
+
+            if ($from && $to && $from->gt($to)) {
+                // Hoán đổi giá trị nếu from > to
+                [$from, $to] = [$to, $from];
+                [$from_input, $to_input] = [$to_input, $from_input];
+
+                return redirect()->route('admin.files.index', [
+                    'date_from' => $from_input,
+                    'date_to' => $to_input,
+                ])->with('date_swapped', true);
+            }
+
+            if ($from && $to) {
+                $query->whereBetween('uploaded_at', [$from, $to]);
+            } elseif ($from) {
+                $query->where('uploaded_at', '>=', $from);
+            } elseif ($to) {
+                $query->where('uploaded_at', '<=', $to);
+            }
         }
+
 
         // Lọc theo danh mục file
         if ($request->filled('category')) {
@@ -58,13 +79,14 @@ class AdminFileController extends Controller
         $totalFiles = FileUpload::count();
         $totalSize = FileUpload::sum('size'); // Nếu có cột size
 
-        return view('admin.files.index', compact('files', 'totalFiles', 'totalSize', 'categories'));
+        return view('admin.files.index', compact('files', 'totalFiles', 'totalSize', 'categories', 'from_input', 'to_input'));
     }
 
     public function show($id)
     {
         $file = FileUpload::findOrFail($id);
-        return view('admin.files.show', compact('file'));
+        $categories = FileUpload::select('file_category')->whereNotNull('file_category')->distinct()->pluck('file_category');
+        return view('admin.files.show', compact('file', 'categories'));
     }
 
     public function download($id)
@@ -98,7 +120,7 @@ class AdminFileController extends Controller
             $file->delete();
             DB::commit();
 
-            return redirect()->back()->with('success', 'Đã xóa file thành công!');
+            return redirect()->route('admin.files.index')->with('success', 'Đã xóa file thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->with('error', 'Đã xảy ra lỗi trong quá trình xóa file: ' . $e->getMessage());
@@ -159,5 +181,30 @@ class AdminFileController extends Controller
         }
 
         return redirect()->route('admin.files.trash')->with('success', 'Đã xóa vĩnh viễn file!');
+    }
+
+    public function updateCategory(Request $request, $id)
+    {
+        $request->validate([
+            'file_category' => 'required|string|max:100'
+        ], [
+            'file_category.required' => 'Vui lý chọn danh mục file',
+        ]);
+
+        $file = FileUpload::findOrFail($id);
+
+        $oldCategory = $file->file_category;
+        $file->update(['file_category' => $request->file_category]);
+
+        UploadHistory::create([
+            'file_upload_id' => $file->id,
+            'action' => 'category_updated',
+            'timestamp' => now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã cập nhật danh mục file thành công!'
+        ]);
     }
 }

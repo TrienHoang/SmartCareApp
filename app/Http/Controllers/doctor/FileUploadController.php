@@ -204,7 +204,7 @@ class FileUploadController extends Controller
 
             DB::commit();
 
-            return back()->with('success', 'Đã xóa file thành công!');
+            return redirect()->route('doctor.files.index')->with('success', 'Đã xóa file thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Đã xảy ra lỗi trong quá trình xóa file: ' . $e->getMessage());

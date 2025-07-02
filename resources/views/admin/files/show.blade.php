@@ -254,7 +254,8 @@
                         @endif
 
                         <div class="form-group mb-0">
-                            <a href="{{ route('admin.appointments.show', $file->appointment->id) }}" class="btn btn-outline-primary btn-sm">
+                            <a href="{{ route('admin.appointments.show', $file->appointment->id) }}"
+                                class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-eye"></i> Xem chi tiết cuộc hẹn
                             </a>
                         </div>
@@ -380,16 +381,12 @@
                             <label for="newCategory">Danh mục mới</label>
                             <select id="newCategory" class="form-control" data-current="{{ $file->file_category }}">
                                 <option value="">-- Chọn danh mục --</option>
-                                <option value="Kết quả xét nghiệm"
-                                    {{ $file->file_category == 'Kết quả xét nghiệm' ? 'selected' : '' }}>Kết quả xét nghiệm
-                                </option>
-                                <option value="Chẩn đoán hình ảnh"
-                                    {{ $file->file_category == 'Chẩn đoán hình ảnh' ? 'selected' : '' }}>Chẩn đoán hình ảnh
-                                </option>
-                                <option value="Đơn thuốc" {{ $file->file_category == 'Đơn thuốc' ? 'selected' : '' }}>Đơn
-                                    thuốc</option>
-                                <option value="Khác" {{ $file->file_category == 'Khác' ? 'selected' : '' }}>Khác
-                                </option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category }}"
+                                        {{ $file->file_category == $category ? 'selected' : '' }}>
+                                        {{ $category }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
