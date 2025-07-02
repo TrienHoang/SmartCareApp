@@ -15,6 +15,7 @@ class FileUploadFactory extends Factory
             'appointment_id' => Appointment::inRandomOrder()->first()?->id ?? 1,
             'file_name' => fake()->word() . '.pdf',
             'file_path' => 'uploads/' . fake()->uuid() . '.pdf',
+            'size' => fake()->randomFloat(2, 1, 100),
             'file_category' => fake()->randomElement(['xray', 'form', 'prescription']),
             'note' => fake()->sentence(),
             'uploaded_at' => now()

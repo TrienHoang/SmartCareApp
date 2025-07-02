@@ -57,4 +57,10 @@ class AdminFileController extends Controller
 
         return view('admin.files.index', compact('files', 'totalFiles', 'totalSize', 'categories'));
     }
+
+    public function show($id)
+    {
+        $file = FileUpload::findOrFail($id);
+        return view('admin.files.show', compact('file'));
+    }
 }

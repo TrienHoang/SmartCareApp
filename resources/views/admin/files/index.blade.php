@@ -108,7 +108,7 @@
                             </td>
                             <td>{{ $file->note ?? '-' }}</td>
                             <td>
-                                <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank"
+                                <a href="{{ route('admin.files.show', $file->id) }}" target="_blank"
                                     class="btn btn-sm btn-info">
                                     <i class="fas fa-eye"></i>
                                 </a>
