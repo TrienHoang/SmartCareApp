@@ -80,7 +80,7 @@ class FileUploadController extends Controller
             'appointment_id' => 'required|exists:appointments,id',
             'files.*' => 'required|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png,gif',
             'file_category' => 'required|string|max:100',
-            'description' => 'nullable|string|max:500'
+            'note' => 'nullable|string|max:500'
         ], [
             'files.*.max' => 'Mỗi file không được vượt quá 10MB',
             'files.*.mimes' => 'Chỉ chấp nhận file: PDF, DOC, DOCX, JPG, JPEG, PNG, GIF'
@@ -111,6 +111,7 @@ class FileUploadController extends Controller
                     'file_name' => $file->getClientOriginalName(),
                     'file_path' => $filePath,
                     'file_category' => $request->file_category,
+                    'note' => $request->note,
                     'uploaded_at' => now()
                 ]);
 

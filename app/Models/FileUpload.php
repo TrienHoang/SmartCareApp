@@ -17,6 +17,7 @@ class FileUpload extends Model
         'file_name',
         'file_path',
         'file_category',
+        'note',
         'uploaded_at'
     ];
 
