@@ -1,4 +1,3 @@
-
 @extends('doctor.dashboard')
 
 @section('title', 'Thống kê bác sĩ: ' . ($doctor->user->full_name ?? $doctor->name))
@@ -196,7 +195,7 @@
 
                         <div>
                             <button type="submit" class="btn btn-primary btn-sm" style="font-size: 13px; height: 31px; padding: 0 16px;">
-                                <i class="fas fa-filter me-1"></i>
+                                <i class="fas fa-filter me-1"></i> Lọc
                             </button>
                         </div>
                     </form>
@@ -334,22 +333,6 @@
         </div>
     </div>
 
-    <!-- Số lượng file đã tải lên -->
-    <div class="row g-4 mb-4">
-        <div class="col-12">
-            <div class="p-4 rounded-3 d-flex align-items-center" style="background: #e0f2fe;">
-                <i class="fas fa-upload fa-2x me-3" style="color: #0284c7;"></i>
-                <div>
-                    <h6 class="mb-1" style="color: #0284c7;">Số lượng file đã tải lên</h6>
-                    <h3 class="fw-bold mb-0" style="color: #0284c7;">
-                        {{ $fileUploadsCount ?? 0 }} file
-                    </h3>
-                    <small class="text-muted">Tính tổng số file liên quan đến tài khoản người dùng</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <style>
         .bg-gradient-primary {
             background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
@@ -401,38 +384,23 @@
             const startDate = document.getElementById('startDate');
             const endDate = document.getElementById('endDate');
 
-            // Tự động chọn type=custom khi nhập ngày, xóa ngày khi chọn month/year
+            // Tự động chọn type=custom khi nhập ngày
             function updateFilterType() {
-                if (filterType.value === 'custom') {
+                if (startDate.value || endDate.value) {
+                    filterType.value = 'custom';
                     yearInput.disabled = true;
                     startDate.disabled = false;
                     endDate.disabled = false;
                 } else {
-                    yearInput.disabled = false;
-                    startDate.disabled = true;
-                    endDate.disabled = true;
-                    // Xóa giá trị của startDate và endDate khi chọn month hoặc year
-                    startDate.value = '';
-                    endDate.value = '';
+                    yearInput.disabled = filterType.value === 'custom';
+                    startDate.disabled = filterType.value !== 'custom';
+                    endDate.disabled = filterType.value !== 'custom';
                 }
             }
 
             filterType.addEventListener('change', updateFilterType);
-            startDate.addEventListener('change', () => {
-                if (startDate.value || endDate.value) {
-                    filterType.value = 'custom';
-                    updateFilterType();
-                }
-            });
-            endDate.addEventListener('change', () => {
-                if (startDate.value || endDate.value) {
-                    filterType.value = 'custom';
-                    updateFilterType();
-                }
-            });
-
-            // Khởi tạo trạng thái ban đầu
-            updateFilterType();
+            startDate.addEventListener('change', updateFilterType);
+            endDate.addEventListener('change', updateFilterType);
 
             // Validate phía client
             filterForm.addEventListener('submit', function(event) {
