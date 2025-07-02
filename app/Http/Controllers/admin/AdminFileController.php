@@ -112,4 +112,17 @@ class AdminFileController extends Controller
 
         return view('admin.files.trash', compact('files'));
     }
+
+    public function restore($id){
+        $file = FileUpload::onlyTrashed()->findOrFail($id);
+        $file->restore();
+
+        UploadHistory::create([
+            'file_upload_id' => $file->id,
+            'action' => 'restored',
+            'timestamp' => now(),
+        ]);
+
+        return redirect()->route('admin.files.trash')->with('success', 'Đã khôi phục file!');
+    }
 }
