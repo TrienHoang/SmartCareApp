@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\AdminFileController;
 use App\Http\Controllers\admin\DoctorLeaveController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\admin\RoleController;
@@ -31,9 +32,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use Illuminate\Support\Facades\Auth;
 
-Route::get('/', function () {
-    return view('client.home');
-})->name('home');
+require __DIR__ . '/client.php';
 
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -565,6 +564,35 @@ Route::group([
 
     // Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('payment_histories.index');
     // Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('payment_histories.show');
+
+
+    // quản lý file tải lên
+    Route::group([
+        'prefix' => 'files',
+        'as' => 'files.',
+        'middleware' => 'check_permission:view_medical_documents'
+    ], function () {
+        Route::get('/', [AdminFileController::class, 'index'])->name('index');
+
+        Route::get('/trash', [AdminFileController::class, 'trash'])->name('trash');
+
+        Route::get('/{id}', [AdminFileController::class, 'show'])->name('show');
+
+        Route::get('/{id}/download', [AdminFileController::class, 'download'])->name('download');
+
+        Route::delete('/{id}', [AdminFileController::class, 'destroy'])
+            ->middleware('check_permission:delete_files')->name('destroy');
+
+        Route::put('/{id}/restore', [AdminFileController::class, 'restore'])
+            ->middleware('check_permission:delete_files')->name('restore');
+
+        Route::delete('/{id}/force-delete', [AdminFileController::class, 'forceDelete'])
+            ->middleware('check_permission:delete_files')->name('forceDelete');
+
+        Route::put('/{id}/update-category', [AdminFileController::class, 'updateCategory'])
+            ->middleware('check_permission:upload_files')->name('updateCategory');
+    });
 });
 // Trong routes/web.php hoặc routes/doctor.php
+
 require __DIR__ . '/doctor.php';

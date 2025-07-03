@@ -154,7 +154,7 @@
         <li class="menu-item">
             <a href="{{ route('admin.files.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-folder"></i>
-                <div>Quản lý File</div>
+                <div>Quản lý Tài liệu y tế</div>
             </a>
         </li>
 
