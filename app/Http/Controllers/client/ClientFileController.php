@@ -12,8 +12,24 @@ class ClientFileController extends Controller
 {
     public function index()
     {
-        $files = FileUpload::where('user_id', Auth::id())->orderBy('id', 'desc')->paginate(5);
-        return view('client.uploads.index', compact('files'));
+        $query = FileUpload::where('user_id', Auth::id());
+        
+        if (request()->filled('keyword')) {
+            $keyword = request()->get('keyword');
+            $query->where(function ($q) use ($keyword) {
+                $q->where('file_name', 'like', '%' . $keyword . '%')
+                    ->orWhere('note', 'like', '%' . $keyword . '%');
+            });
+        }
+
+        $files = $query->orderBy('uploaded_at', 'desc')->paginate(5)->withQueryString();
+
+        $allFilesQuery = FileUpload::where('user_id', Auth::id());
+        $totalDocuments = $allFilesQuery->count();
+        $totalSize = $allFilesQuery->sum('size');
+        $latestUploaded = $allFilesQuery->orderByDesc('uploaded_at')->first();
+
+        return view('client.uploads.index', compact('files', 'totalDocuments', 'totalSize', 'latestUploaded'));
     }
 
     public function create()

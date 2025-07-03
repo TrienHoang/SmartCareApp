@@ -49,7 +49,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Tổng tài liệu</p>
-                                <p class="text-2xl font-bold text-gray-900">{{ $files->count() }}</p>
+                                <p class="text-2xl font-bold text-gray-900">{{ $totalDocuments }}</p>
                             </div>
                             <div class="p-3 bg-blue-100 rounded-full">
                                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Dung lượng</p>
                                 <p class="text-2xl font-bold text-gray-900">
-                                    {{ number_format($files->sum('size') / 1024, 2) }} KB</p>
+                                    {{ number_format($totalSize / 1024, 2) }} KB</p>
                             </div>
                             <div class="p-3 bg-indigo-100 rounded-full">
                                 <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor"
@@ -84,7 +84,7 @@
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Tài liệu mới nhất</p>
                                 <p class="text-2xl font-bold text-gray-900">
-                                    {{ $files->first() ? $files->first()->uploaded_at?->format('d/m') : 'N/A' }}</p>
+                                    {{ $latestUploaded?->uploaded_at?->format('d/m') ?? 'N/A' }}</p>
                             </div>
                             <div class="p-3 bg-green-100 rounded-full">
                                 <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
@@ -119,15 +119,16 @@
                         <span class="relative invisible">Tạo mới tài liệu</span>
                     </a>
 
-                    <div class="relative">
-                        <input type="text" placeholder="Tìm kiếm tài liệu..."
+                    <form method="GET" action="{{ route('client.uploads.index') }}" class="relative">
+                        <input type="text" name="keyword" value="{{ request('keyword') }}"
+                            placeholder="Tìm kiếm tài liệu..."
                             class="w-full sm:w-80 px-4 py-3 pl-12 pr-4 text-gray-700 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
                         <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                    </div>
+                    </form>
                 </div>
             </div>
 
@@ -295,28 +296,36 @@
                         @endforeach
                     </div>
                 @else
-                    <!-- Empty State -->
-                    <div class="text-center py-16">
-                        <div
-                            class="mx-auto w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-6">
-                            <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                </path>
-                            </svg>
+                    @if (request()->filled('keyword'))
+                        <p class="text-gray-500 text-center py-16">
+                            Không tìm thấy tài liệu nào phù hợp với từ khóa:
+                            <strong class="text-blue-600">"{{ request('keyword') }}"</strong>
+                        </p>
+                    @else
+                        <!-- Empty State -->
+                        <div class="text-center py-16">
+                            <div
+                                class="mx-auto w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-6">
+                                <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-medium text-gray-900 mb-2">Chưa có tài liệu nào</h3>
+                            <p class="text-gray-500 mb-6">Bắt đầu bằng cách tải lên tài liệu y tế đầu tiên của bạn</p>
+                            <a href="{{ route('client.uploads.create') }}"
+                                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4">
+                                    </path>
+                                </svg>
+                                Tải lên tài liệu đầu tiên
+                            </a>
                         </div>
-                        <h3 class="text-xl font-medium text-gray-900 mb-2">Chưa có tài liệu nào</h3>
-                        <p class="text-gray-500 mb-6">Bắt đầu bằng cách tải lên tài liệu y tế đầu tiên của bạn</p>
-                        <a href="{{ route('client.uploads.create') }}"
-                            class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
-                                </path>
-                            </svg>
-                            Tải lên tài liệu đầu tiên
-                        </a>
-                    </div>
+                    @endif
                 @endif
             </div>
 
