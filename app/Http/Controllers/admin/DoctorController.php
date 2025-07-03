@@ -17,21 +17,41 @@ class DoctorController extends Controller
 {
     public function index(Request $request)
     {
+        // Lấy danh sách bác sĩ kèm các mối quan hệ liên quan
         $query = Doctor::with(['user', 'department', 'room']);
 
+        // Bộ lọc theo phòng ban
         if ($request->filled('department_id')) {
             $query->where('department_id', $request->department_id);
         }
 
+        // Bộ lọc theo chuyên môn
         if ($request->filled('specialization')) {
             $query->where('specialization', 'like', '%' . $request->specialization . '%');
+        }
+
+        // Bộ lọc theo tên bác sĩ (tìm trong user.full_name)
+        if ($request->filled('name')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('full_name', 'like', '%' . $request->name . '%');
+            });
         }
 
         $doctors = $query->paginate(10);
         $departments = Department::all();
 
-        return view('admin.doctors.index', compact('doctors', 'departments'));
+        // ✅ Gán cờ "đang nghỉ" cho từng bác sĩ
+        foreach ($doctors as $doctor) {
+            $doctor->is_on_leave_today = $doctor->isOnLeaveToday();
+        }
+
+        // ✅ Lấy danh sách người dùng chưa là bác sĩ
+        $existingDoctorUserIds = Doctor::pluck('user_id')->toArray();
+        $availableUsers = User::whereNotIn('id', $existingDoctorUserIds)->get();
+
+        return view('admin.doctors.index', compact('doctors', 'departments', 'availableUsers'));
     }
+
 
     public function create()
     {

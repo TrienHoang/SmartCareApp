@@ -30,7 +30,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Cuộc hẹn <span class="text-red-500">*</span>
                             </label>
-                            <select name="appointment_id" required
+                            <select name="appointment_id"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 @error('appointment_id') border-red-500 @enderror">
                                 <option value="">Chọn cuộc hẹn...</option>
                                 @foreach ($appointments as $appointment)
@@ -123,7 +123,7 @@
                                         Chọn File
                                     </label>
                                     <input type="file" name="files[]" id="files" multiple
-                                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" class="hidden" required>
+                                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" class="hidden">
                                     <p class="text-sm text-gray-500 mt-2">
                                         Hỗ trợ: PDF, DOC, DOCX, JPG, JPEG, PNG, GIF (Tối đa 10MB mỗi file)
                                     </p>
@@ -333,7 +333,11 @@
             updateFileInput(); // BẮT BUỘC có dòng này
 
             if (selectedFiles.length === 0) {
-                alert('Vui lòng chọn ít nhất một file để tải lên');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Không có tập tập tin',
+                    text: 'Bạn cần chọn chọn ít nhất 1 file để tải lên'
+                });
                 return;
             }
 
@@ -341,7 +345,11 @@
             if (categoryOther && categoryOther.checked) {
                 const customCategory = document.querySelector('input[name="custom_category"]').value;
                 if (!customCategory.trim()) {
-                    alert('Vui lòng nhập danh mục khác');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Không có tập tập tin',
+                        text: 'Vui lòng nhập loại tài liệu khác'
+                    });
                     return;
                 }
                 categoryOther.value = customCategory;
@@ -383,19 +391,31 @@
                         }, 1000);
 
                     } else {
-                        alert(response.message || 'Có lỗi xảy ra khi tải file');
-                        document.getElementById('uploadModal').classList.add('hidden');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: response.message || 'Có lỗi xảy ra khi tải file',
+                            confirmButtonText: 'Đóng'
+                        }).then(() => {
+                            document.getElementById('uploadModal').classList.add('hidden');
+                        });
                     }
                 } catch (e) {
-                    alert('Phản hồi không hợp lệ từ server');
-                    document.getElementById('uploadModal').classList.add('hidden');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Phản hồi không hợp lệ từ server',
+                        confirmButtonText: 'Đóng'
+                    }).then(() => {
+                        document.getElementById('uploadModal').classList.add('hidden');
+                    });
                 }
             });
 
 
-            xhr.open('POST', this.action);
-            // xhr.setRequestHeader(...) => Có thể bỏ nếu bạn đã dùng @csrf trong form
-            xhr.send(formData);
+        xhr.open('POST', this.action);
+        // xhr.setRequestHeader(...) => Có thể bỏ nếu bạn đã dùng @csrf trong form
+        xhr.send(formData);
         });
         const appointmentSelect = document.querySelector('select[name="appointment_id"]');
         const filesContainer = document.getElementById('appointmentFiles');

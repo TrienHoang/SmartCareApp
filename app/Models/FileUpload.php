@@ -16,6 +16,7 @@ class FileUpload extends Model
         'appointment_id',
         'file_name',
         'file_path',
+        'size',
         'file_category',
         'note',
         'uploaded_at'

@@ -78,6 +78,7 @@ class FileUploadController extends Controller
     {
         $request->validate([
             'appointment_id' => 'required|exists:appointments,id',
+<<<<<<< HEAD
             'files.*' => 'required|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png,gif',
             'file_category' => 'required|string|max:100',
             'note' => 'nullable|string|max:500'
@@ -111,11 +112,57 @@ class FileUploadController extends Controller
                     'file_name' => $file->getClientOriginalName(),
                     'file_path' => $filePath,
                     'file_category' => $request->file_category,
+=======
+            'file_category' => 'required|string|max:255',
+            'files.*' => 'required|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png,gif',
+            'custom_category' => 'nullable|string|max:255',
+            'note' => 'nullable|string|max:1000'
+        ], [
+            'appointment_id.required' => 'Vui lòng chọn lịch hẹn',
+            'appointment_id.exists' => 'Lịch hẹn không tồn tại',
+            'file_category.required' => 'Vuiện chọn danh mục file',
+            'file_category.max' => 'Danh mục file khó qua 255 ký tự',
+            'files.*.required' => 'Vui lòng chọn file',
+            'files.*.max' => 'File khó qua 10MB',
+            'files.*.mimes' => 'Chỉ nhập hợp lệ: file pdf, doc, docx, jpg, jpeg, png, gif',
+        ]);
+
+        try {
+            // ✅ Lấy thông tin cuộc hẹn và user_id an toàn
+            $appointment = Appointment::with('patient')->findOrFail($request->appointment_id);
+            $userId = $appointment->patient_id;
+
+            $uploadedFiles = [];
+
+            foreach ($request->file('files') as $file) {
+                // Tạo tên file ngẫu nhiên
+                $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+
+                // Đường dẫn lưu file
+                $filePath = $file->storeAs(
+                    'uploads/appointments/' . $appointment->id,
+                    $fileName,
+                    'public'
+                );
+
+                // Tạo bản ghi FileUpload
+                $fileUpload = FileUpload::create([
+                    'user_id' => $userId,
+                    'appointment_id' => $appointment->id,
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_path' => $filePath,
+                    'size' => $file->getSize(),
+                    'file_category' => $request->file_category === 'Khác' ? $request->custom_category : $request->file_category,
+>>>>>>> 8b50d06627551d61ef7f0f455357c188c304bd94
                     'note' => $request->note,
                     'uploaded_at' => now()
                 ]);
 
+<<<<<<< HEAD
                 // Ghi log upload history
+=======
+                // Lưu lịch sử upload
+>>>>>>> 8b50d06627551d61ef7f0f455357c188c304bd94
                 UploadHistory::create([
                     'file_upload_id' => $fileUpload->id,
                     'action' => 'uploaded',
@@ -125,6 +172,7 @@ class FileUploadController extends Controller
                 $uploadedFiles[] = $fileUpload;
             }
 
+<<<<<<< HEAD
             DB::commit();
 
             return response()->json([
@@ -138,6 +186,17 @@ class FileUploadController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Đã xảy ra lỗi trong quá trình tải file: ' . $e->getMessage(),
+=======
+            return response()->json([
+                'success' => true,
+                'message' => 'Tải file thành công!',
+                'redirect_url' => route('doctor.files.index')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi trong quá trình tải file: ' . $e->getMessage()
+>>>>>>> 8b50d06627551d61ef7f0f455357c188c304bd94
             ], 500);
         }
     }
@@ -203,7 +262,11 @@ class FileUploadController extends Controller
 
             DB::commit();
 
+<<<<<<< HEAD
             return back()->with('success', 'Đã xóa file thành công!');
+=======
+            return redirect()->route('doctor.files.index')->with('success', 'Đã xóa file thành công!');
+>>>>>>> 8b50d06627551d61ef7f0f455357c188c304bd94
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Đã xảy ra lỗi trong quá trình xóa file: ' . $e->getMessage());
@@ -302,12 +365,44 @@ class FileUploadController extends Controller
     {
         $doctorId = Auth::user()->doctor->id;
 
+<<<<<<< HEAD
+=======
+        // Nếu là xóa toàn bộ
+        if ($id === 'all') {
+            $files = FileUpload::onlyTrashed()
+                ->whereHas('appointment', function ($q) use ($doctorId) {
+                    $q->where('doctor_id', $doctorId);
+                })->get();
+
+            foreach ($files as $file) {
+                // Xóa vật lý file khỏi ổ đĩa nếu tồn tại
+                if (Storage::disk('public')->exists($file->file_path)) {
+                    Storage::disk('public')->delete($file->file_path);
+                }
+
+                // Lưu lịch sử xóa
+                UploadHistory::create([
+                    'file_upload_id' => $file->id,
+                    'action' => 'force_deleted',
+                    'timestamp' => now(),
+                ]);
+
+                $file->forceDelete();
+            }
+
+            return redirect()->route('doctor.files.trash')->with('success', 'Đã xóa vĩnh viễn tất cả file!');
+        }
+
+>>>>>>> 8b50d06627551d61ef7f0f455357c188c304bd94
         $file = FileUpload::onlyTrashed()
             ->whereHas('appointment', function ($q) use ($doctorId) {
                 $q->where('doctor_id', $doctorId);
             })->findOrFail($id);
 
+<<<<<<< HEAD
         // Xóa vật lý file khỏi ổ đĩa nếu tồn tại
+=======
+>>>>>>> 8b50d06627551d61ef7f0f455357c188c304bd94
         if (Storage::disk('public')->exists($file->file_path)) {
             Storage::disk('public')->delete($file->file_path);
         }

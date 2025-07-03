@@ -1,4 +1,4 @@
-@extends('doctor.dashboard')
+@extends('admin.dashboard')
 
 @section('title', 'Thùng rác File đã xóa')
 
@@ -23,7 +23,7 @@
                                 </div>
                             </div>
                             <div class="text-end">
-                                <a href="{{ route('doctor.files.index') }}" class="btn btn-outline-primary">
+                                <a href="{{ route('admin.files.index') }}" class="btn btn-outline-primary">
                                     <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
                                 </a>
                             </div>
@@ -67,7 +67,7 @@
                                 </div>
                                 <h4 class="text-muted mb-2">Thùng rác trống</h4>
                                 <p class="text-muted mb-0">Không có file nào trong thùng rác.</p>
-                                <a href="{{ route('doctor.files.index') }}" class="btn btn-primary mt-3">
+                                <a href="{{ route('admin.files.index') }}" class="btn btn-primary mt-3">
                                     <i class="fas fa-plus me-2"></i>Quản lý file
                                 </a>
                             </div>
@@ -140,7 +140,7 @@
                                                 <td class="text-center">
                                                     <div class="btn-group" role="group">
                                                         <!-- Restore Button -->
-                                                        <form action="{{ route('doctor.files.restore', $file->id) }}"
+                                                        <form action="{{ route('admin.files.restore', $file->id) }}"
                                                             method="POST" class="d-inline restore-form">
                                                             @csrf
                                                             @method('PUT')
@@ -154,7 +154,7 @@
                                                         </form>
 
                                                         <!-- Force Delete Button -->
-                                                        <form action="{{ route('doctor.files.forceDelete', $file->id) }}"
+                                                        <form action="{{ route('admin.files.forceDelete', $file->id) }}"
                                                             method="POST" class="d-inline delete-form">
                                                             @csrf
                                                             @method('DELETE')
@@ -698,7 +698,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-times me-2"></i>Hủy bỏ
                     </button>
-                    <form action="{{ route('doctor.files.forceDelete', 'all') }}" method="POST" id="forceDeleteAllForm">
+                    <form action="{{ route('admin.files.forceDelete', 'all') }}" method="POST" id="forceDeleteAllForm">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger" id="confirmEmptyTrash" disabled>

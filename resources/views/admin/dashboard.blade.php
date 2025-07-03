@@ -17,8 +17,6 @@
 
     @include('admin.partials.header')
 
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    
     <style>
         html,
         body {
@@ -27,7 +25,7 @@
         }
 
         .layout-wrapper {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
@@ -178,5 +176,5 @@
     @stack('scripts')
     @yield('scripts')
 </body>
-
+@stack('modals')
 </html>

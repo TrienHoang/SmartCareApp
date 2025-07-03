@@ -27,7 +27,10 @@
                                         </a>
                                     </li>
                                     <li class="breadcrumb-item active text-primary font-weight-semibold">
-                                        Bác sĩ
+                                        
+                                                                                <a href="{{ route('admin.doctors.create') }}" class="text-decoration-none">
+                                            Bác sĩ >
+                                        </a>
                                     </li>
                                 </ol>
                             </nav>
@@ -39,6 +42,7 @@
                 <div class="btn-group float-md-right">
                     <button type="button" class="btn btn-gradient-primary" data-bs-toggle="modal" data-bs-target="#createDoctorModal">
                         <i class="bx bx-plus mr-1"></i>Thêm bác sĩ
+                        
                     </button>
                 </div>
             </div>
@@ -224,6 +228,9 @@
                                     <th class="border-top-0 text-center">
                                         <i class="bx bx-cog mr-1"></i>Hành động
                                     </th>
+                                    <th class="border-top-0">
+                                        <i class="bx bx-time-five mr-1"></i>Trạng thái
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -293,6 +300,20 @@
                                                 @endif
                                             </div>
                                         </td>
+
+                                        <td>
+                                            @if ($doctor->is_on_leave_today)
+                                                @php $leave = $doctor->currentLeave(); @endphp
+                                                <span class="badge badge-danger" data-toggle="tooltip" title="{{ $leave->reason ?? 'Đang nghỉ' }}">
+                                                    <i class="bx bx-block mr-1"></i> Nghỉ hôm nay
+                                                </span>
+                                            @else
+                                                <span class="badge badge-success">
+                                                    <i class="bx bx-check-circle mr-1"></i> Làm việc
+                                                </span>
+                                            @endif
+                                        </td>
+
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
                                                 {{-- Thiếu show --}}
@@ -310,6 +331,7 @@
                                                 </button>
                                             </div>
                                         </td>
+
                                     </tr>
                                 @empty
                                     <tr>
@@ -350,77 +372,6 @@
         </div>
     </div>
 
-    {{-- Create Doctor Modal --}}
-    <div class="modal fade" id="createDoctorModal" tabindex="-1" aria-labelledby="createDoctorModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-gradient-primary text-white border-0">
-                    <h5 class="modal-title" id="createDoctorModalLabel">
-                        <i class="bx bx-user-plus me-2"></i>Thêm bác sĩ mới
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('admin.doctors.store') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="user_id" class="form-label font-weight-semibold">Chọn người dùng <span class="text-danger">*</span></label>
-                                <select class="form-control custom-select" id="user_id" name="user_id" required>
-                                    <option value="">-- Chọn người dùng --</option>
-                                    {{-- Giả sử bạn có $users từ controller --}}
-                                    {{-- @foreach($users as $user)
-                                        <option value="{{ $user->id }}">{{ $user->full_name }} (@{{ $user->username }})</option>
-                                    @endforeach --}}
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="department_id" class="form-label font-weight-semibold">Phòng ban <span class="text-danger">*</span></label>
-                                <select class="form-control custom-select" id="department_id" name="department_id" required>
-                                    <option value="">-- Chọn phòng ban --</option>
-                                    @foreach($departments as $dept)
-                                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-12 mb-3">
-                                <label for="specialization" class="form-label font-weight-semibold">Chuyên môn <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="specialization" name="specialization" required
-                                       placeholder="Ví dụ: Tim mạch, Nhi khoa, Thần kinh...">
-                            </div>
-                            <div class="col-12 mb-3">
-                                <label for="experience" class="form-label font-weight-semibold">Kinh nghiệm</label>
-                                <textarea class="form-control" id="experience" name="experience" rows="3"
-                                          placeholder="Mô tả kinh nghiệm làm việc của bác sĩ..."></textarea>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="license_number" class="form-label font-weight-semibold">Số giấy phép hành nghề</label>
-                                <input type="text" class="form-control" id="license_number" name="license_number"
-                                       placeholder="Nhập số giấy phép...">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="qualification" class="form-label font-weight-semibold">Trình độ</label>
-                                <select class="form-control custom-select" id="qualification" name="qualification">
-                                    <option value="">-- Chọn trình độ --</option>
-                                    <option value="Bác sĩ">Bác sĩ</option>
-                                    <option value="Thạc sĩ">Thạc sĩ</option>
-                                    <option value="Tiến sĩ">Tiến sĩ</option>
-                                    <option value="Giáo sư">Giáo sư</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="bx bx-x mr-1"></i>Hủy
-                        </button>
-                        <button type="submit" class="btn btn-gradient-primary">
-                            <i class="bx bx-check mr-1"></i>Thêm bác sĩ
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+
 
                                     @endsection

@@ -70,6 +70,12 @@
                     <div>Tài khoản</div>
                 </a>
             </li>
+            <li class="menu-item">
+                <a href="{{ route('doctor.leaves.index') }}" class="menu-link">
+             <i class="menu-icon tf-icons bx bx-calendar-x"></i>
+            <div>Lịch nghỉ phép</div>
+</a>
+            </li>
         @endif
 
     </ul>
