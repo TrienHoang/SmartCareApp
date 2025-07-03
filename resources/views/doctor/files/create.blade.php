@@ -333,7 +333,11 @@
             updateFileInput(); // BẮT BUỘC có dòng này
 
             if (selectedFiles.length === 0) {
-                alert('Vui lòng chọn ít nhất một file để tải lên');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Không có tập tập tin',
+                    text: 'Bạn cần chọn chọn ít nhất 1 file để tải lên'
+                });
                 return;
             }
 
@@ -341,7 +345,11 @@
             if (categoryOther && categoryOther.checked) {
                 const customCategory = document.querySelector('input[name="custom_category"]').value;
                 if (!customCategory.trim()) {
-                    alert('Vui lòng nhập danh mục khác');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Không có tập tập tin',
+                        text: 'Vui lòng nhập loại tài liệu khác'
+                    });
                     return;
                 }
                 categoryOther.value = customCategory;
@@ -383,19 +391,31 @@
                         }, 1000);
 
                     } else {
-                        alert(response.message || 'Có lỗi xảy ra khi tải file');
-                        document.getElementById('uploadModal').classList.add('hidden');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: response.message || 'Có lỗi xảy ra khi tải file',
+                            confirmButtonText: 'Đóng'
+                        }).then(() => {
+                            document.getElementById('uploadModal').classList.add('hidden');
+                        });
                     }
                 } catch (e) {
-                    alert('Phản hồi không hợp lệ từ server');
-                    document.getElementById('uploadModal').classList.add('hidden');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Phản hồi không hợp lệ từ server',
+                        confirmButtonText: 'Đóng'
+                    }).then(() => {
+                        document.getElementById('uploadModal').classList.add('hidden');
+                    });
                 }
             });
 
 
-            xhr.open('POST', this.action);
-            // xhr.setRequestHeader(...) => Có thể bỏ nếu bạn đã dùng @csrf trong form
-            xhr.send(formData);
+        xhr.open('POST', this.action);
+        // xhr.setRequestHeader(...) => Có thể bỏ nếu bạn đã dùng @csrf trong form
+        xhr.send(formData);
         });
         const appointmentSelect = document.querySelector('select[name="appointment_id"]');
         const filesContainer = document.getElementById('appointmentFiles');
