@@ -65,6 +65,17 @@
             <div class="card-header">
                 <h5 class="mb-0">Chỉnh sửa Đơn thuốc</h5>
             </div>
+            @if (session('warning'))
+                <div class="alert alert-warning">
+                    {{ session('warning') }}
+                </div>
+            @endif
+
+            @if ($prescription->is_finalized)
+                <div class="alert alert-danger">
+                    Đơn thuốc này đã được hoàn tất và có thể không nên chỉnh sửa.
+                </div>
+            @endif
             <div class="card-body">
                 <form action="{{ route('admin.prescriptions.update', $prescription->id) }}" method="POST">
                     @csrf
@@ -108,22 +119,27 @@
                     <div id="medicine-list">
                         @foreach ($prescription->items as $index => $item)
                             <div class="medicine-item border rounded p-3 mb-3 shadow-sm bg-light position-relative">
-                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-medicine-btn" aria-label="Xóa"></button>
+                                <button type="button"
+                                    class="btn-close position-absolute top-0 end-0 m-2 remove-medicine-btn"
+                                    aria-label="Xóa"></button>
                                 <div class="row g-2">
                                     <div class="col-md-4">
                                         <label class="form-label">Tên thuốc</label>
                                         <select name="medicines[{{ $index }}][medicine_id]" class="form-select">
                                             <option value="">-- Chọn thuốc --</option>
                                             @foreach ($medicines as $med)
-                                                <option value="{{ $med->id }}" {{ $item->medicine_id == $med->id ? 'selected' : '' }}>
-                                                    {{ $med->name }} ({{ $med->unit }}) - {{ $med->formatted_price }}
+                                                <option value="{{ $med->id }}"
+                                                    {{ $item->medicine_id == $med->id ? 'selected' : '' }}>
+                                                    {{ $med->name }} ({{ $med->unit }}) -
+                                                    {{ $med->formatted_price }}
                                                 </option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="col-md-2">
                                         <label class="form-label">Số lượng</label>
-                                        <input type="number" name="medicines[{{ $index }}][quantity]" class="form-control" value="{{ $item->quantity }}">
+                                        <input type="number" name="medicines[{{ $index }}][quantity]"
+                                            class="form-control" value="{{ $item->quantity }}">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Hướng dẫn sử dụng</label>
@@ -132,7 +148,9 @@
                                 </div>
                             </div>
                         @endforeach
-                        <script>let medicineIndex = {{ count($prescription->items) }};</script>
+                        <script>
+                            let medicineIndex = {{ count($prescription->items) }};
+                        </script>
                     </div>
 
                     <button type="button" onclick="addMedicine()" class="btn btn-outline-secondary mb-4">
@@ -166,8 +184,6 @@
             disableMobile: true,
             appendTo: document.body
         });
-
-        
     </script>
     <script src="{{ asset('js/Prescription/edit.js') }}"></script>
 @endpush

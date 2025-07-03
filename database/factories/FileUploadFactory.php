@@ -16,6 +16,7 @@ class FileUploadFactory extends Factory
             'file_name' => fake()->word() . '.pdf',
             'file_path' => 'uploads/' . fake()->uuid() . '.pdf',
             'file_category' => fake()->randomElement(['xray', 'form', 'prescription']),
+            'note' => fake()->sentence(),
             'uploaded_at' => now()
         ];
     }

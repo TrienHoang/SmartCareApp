@@ -40,7 +40,7 @@ class Doctor extends Model
     {
         return $this->belongsTo(Department::class);
     }
-     public function appointments()
+    public function appointments()
     {
         return $this->hasMany(Appointment::class);
     }
@@ -49,5 +49,8 @@ class Doctor extends Model
     {
         return $this->hasMany(Review::class);
     }
+    public function file_uploads()
+    {
+        return $this->hasMany(FileUpload::class);
+    }
 }
-

@@ -193,7 +193,7 @@
                 <div class="card">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="fas fa-pills"></i> Danh sách thuốc kê đơn</h5>
-                        <span class="badge badge-light">{{ $prescription->items->count() }} loại thuốc</span>
+                        <span class="badge badge-light" style="color: #516377">{{ $prescription->items->count() }} loại thuốc</span>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">

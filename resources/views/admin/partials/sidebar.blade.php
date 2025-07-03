@@ -102,6 +102,32 @@
             </ul>
         </li>
 
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-task"></i>
+                <div>Quản Lý Làm Việc</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('admin.tasks.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.tasks.create') }}" class="menu-link">
+                        <div>Thêm mới</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.calendar') }}" class="menu-link">
+                        <div>Lịch làm việc</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+
+
         <!-- Dịch vụ & đơn thuốc -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Dịch vụ & đơn thuốc</span></li>
 
