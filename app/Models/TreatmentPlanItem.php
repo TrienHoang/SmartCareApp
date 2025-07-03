@@ -21,11 +21,28 @@ class TreatmentPlanItem extends Model
         'notes',
     ];
 
-    /**
-     * Lấy kế hoạch điều trị mà bước này thuộc về.
-     */
-    public function plan()
+    protected $casts = [
+        'expected_start_date' => 'datetime',
+        'expected_end_date' => 'datetime',
+        'actual_end_date' => 'datetime',
+    ];
+
+    // Quan hệ với TreatmentPlan (Many-to-One)
+    public function treatmentPlan()
     {
-        return $this->belongsTo(TreatmentPlan::class, 'treatment_plan_id');
+        return $this->belongsTo(TreatmentPlan::class);
+    }
+
+    public function getBadgeClassForStatus($status = null)
+    {
+        $statusToUse = $status ?? $this->status;
+        switch ($statusToUse) {
+            case 'draft': return 'bg-dark';
+            case 'active': return 'bg-info';
+            case 'completed': return 'bg-success';
+            case 'paused': return 'bg-warning';
+            case 'cancelled': return 'bg-danger';
+            default: return 'bg-secondary'; // Fallback
+        }
     }
 }

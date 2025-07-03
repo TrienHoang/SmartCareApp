@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Http\Controllers\Doctor\PrescriptionController;
+use App\Http\Controllers\doctor\TreatmentPlanController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -34,5 +35,25 @@ Route::prefix('doctor')
                 Route::put('/{id}', [PrescriptionController::class, 'update'])->name('update');
 
                 Route::get('/{id}/export-pdf', [PrescriptionController::class, 'exportPdf'])->name('exportPdf');
+            });
+
+
+        // Treatment Plans (Kế hoạch điều trị)
+        Route::prefix('treatment-plans')
+            ->name('treatment-plans.')
+            ->group(function () {
+                Route::get('/searchPatient', [TreatmentPlanController::class, 'searchPatient'])->name('searchPatient');
+
+                Route::get('', [TreatmentPlanController::class, 'index'])->name('index');
+                Route::get('/create', [TreatmentPlanController::class, 'create'])->name('create');
+                Route::post('', [TreatmentPlanController::class, 'store'])->name('store');
+        
+                // Các route chứa {treatmentPlan} phải nằm SAU
+                Route::get('/{treatmentPlan}', [TreatmentPlanController::class, 'show'])->name('show');
+                Route::get('/{treatmentPlan}/edit', [TreatmentPlanController::class, 'edit'])->name('edit');
+                Route::put('/{treatmentPlan}', [TreatmentPlanController::class, 'update'])->name('update');
+                Route::delete('/{treatmentPlan}', [TreatmentPlanController::class, 'destroy'])->name('destroy');
+        
+                Route::patch('treatment-plan-items/{itemId}/update-status', [TreatmentPlanController::class, 'updateItemStatus'])->name('treatment-plan-items.update-status');
             });
     });
