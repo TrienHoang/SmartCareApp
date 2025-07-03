@@ -15,7 +15,7 @@ class DepartmentController extends Controller
     public function index()
     {
         // Lấy tối đa 5 phòng ban mỗi trang
-        $departments = Department::paginate(5);
+        $departments = Department::paginate(2);
 
         return view('admin.departments.index', compact('departments'));
     }

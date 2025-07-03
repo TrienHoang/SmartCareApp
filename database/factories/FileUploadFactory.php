@@ -22,4 +22,3 @@ class FileUploadFactory extends Factory
         ];
     }
 }
-

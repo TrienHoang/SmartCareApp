@@ -18,11 +18,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-$this->call([
-            RoleSeeder::class,
-            PermissionSeeder::class,
-            RolePermissionSeeder::class,
+        $this->call([
 
+            TaskSeeder::class, // đã bao gồm tạo Task + Comment + Log
             UserSeeder::class,
             DepartmentSeeder::class,
             RoomSeeder::class,
@@ -60,6 +58,6 @@ $this->call([
             //   FaqSeeder::class,
             ReviewSeeder::class,
         ]);
-        
+
     }
 }
