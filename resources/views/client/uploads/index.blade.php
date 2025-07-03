@@ -230,7 +230,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center space-x-3">
-                                                <a href="#" download
+                                                <a href="{{ route('client.uploads.download', $file->id) }}"
                                                     class="group inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-colors duration-200">
                                                     <svg class="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200"
                                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">

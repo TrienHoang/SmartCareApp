@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\FileUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ClientFileController extends Controller
 {
@@ -129,5 +130,16 @@ class ClientFileController extends Controller
 
             return back()->withErrors(['general' => 'Có lỗi xảy ra trong quá trình tải lên'])->withInput();
         }
+    }
+
+    public function download($id)
+    {
+        $file = FileUpload::where('user_id', Auth::id())->findOrFail($id);
+
+        if(!Storage::disk('public')->exists($file->file_path)) {
+            return back()->with('error', 'File không tìm thấy');
+        }
+
+        return Storage::disk('public')->download($file->file_path, $file->file_name);
     }
 }
