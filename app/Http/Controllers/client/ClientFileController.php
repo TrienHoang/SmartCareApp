@@ -12,7 +12,7 @@ class ClientFileController extends Controller
 {
     public function index()
     {
-        $files = FileUpload::where('user_id', Auth::id())->orderBy('id', 'desc')->get();
+        $files = FileUpload::where('user_id', Auth::id())->orderBy('id', 'desc')->paginate(5);
         return view('client.uploads.index', compact('files'));
     }
 
