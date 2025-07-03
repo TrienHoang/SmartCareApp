@@ -55,4 +55,5 @@ class DoctorLeaveCreated extends Notification
                 ? 'Vui lòng kiểm tra lại nội dung đơn nghỉ vừa được chỉnh sửa.'
                 : 'Vui lòng xem xét và duyệt yêu cầu này.');
     }
+    
 }
