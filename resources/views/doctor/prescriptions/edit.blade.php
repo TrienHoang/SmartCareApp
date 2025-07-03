@@ -28,6 +28,29 @@
                                 </div>
                             @endif
 
+                            @if ($prescription->is_finalized)
+                                <div class="alert alert-success">Đơn thuốc đã hoàn tất và không thể chỉnh sửa.</div>
+                            @elseif ($prescription->edit_count >= 3)
+                                <div class="alert alert-warning">Bạn đã vượt quá số lần chỉnh sửa cho phép (3 lần).</div>
+                            @endif
+                            @if (!$prescription->is_finalized && $prescription->edit_count >= 3)
+                                <div class="alert alert-warning">
+                                    <strong>⚠️ Bạn đã chỉnh sửa đơn thuốc này {{ $prescription->edit_count }}
+                                        lần.</strong><br>
+                                    Nếu không cần chỉnh sửa thêm, hãy nhấn nút <strong>“Hoàn tất đơn thuốc”</strong> để xác
+                                    nhận.
+                                </div>
+
+                                <form method="POST"
+                                    action="{{ route('doctor.prescriptions.finalize', $prescription->id) }}" class="mb-3">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check-circle me-1"></i> ✅ Hoàn tất đơn thuốc
+                                    </button>
+                                </form>
+                            @endif
+
+
                             <div class="row g-4">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Hồ sơ bệnh án</label>
@@ -98,9 +121,16 @@
                         </div>
 
                         <div class="card-footer bg-light d-flex justify-content-between">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i> Cập nhật đơn thuốc
-                            </button>
+                            @if ($prescription->is_finalized || $prescription->edit_count >= 3)
+                                <button type="button" class="btn btn-secondary" disabled>
+                                    <i class="fas fa-ban me-1"></i> Không thể chỉnh sửa
+                                </button>
+                            @else
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Cập nhật đơn thuốc
+                                </button>
+                            @endif
+
                             <a href="{{ route('doctor.prescriptions.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-times me-1"></i> Hủy
                             </a>
@@ -140,6 +170,17 @@
 @endsection
 
 @section('scripts')
+
+    @if ($prescription->is_finalized || $prescription->edit_count >= 3)
+        <script>
+            $(document).ready(function() {
+                $('form input, form textarea, form select, form button').not('[type=button], .btn-secondary').prop(
+                    'disabled', true);
+                $('#add-medicine').prop('disabled', true);
+                $('.remove-medicine').prop('disabled', true);
+            });
+        </script>
+    @endif
     {{-- ✅ jQuery phải được load đầu tiên --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 

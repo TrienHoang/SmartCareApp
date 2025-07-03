@@ -13,11 +13,14 @@ class Prescription extends Model
     protected $fillable = [
         'medical_record_id',
         'prescribed_at',
-        'notes'
+        'notes',
+        'is_finalized',
+        'edit_count'
     ];
     public $timestamps = false;
     protected $casts = [
-        'prescribed_at' => 'datetime'
+        'prescribed_at' => 'datetime',
+        'is_finalized' => 'boolean'
     ];
     public function items()
     {

@@ -4,15 +4,21 @@
 
 @section('content')
 <div class="container-fluid py-4 dashboard-scroll">
+    <!-- Thông báo lỗi chung -->
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div class="d-flex justify-content-end mb-3 gap-2">
-      <a href="{{ route('doctor.dashboard.stats-excel', ['doctor' => $doctor->id]) }}" class="btn btn-success btn-sm">
-
-        <i class="fas fa-file-excel me-1"></i> Xuất Excel
-    </a>
-
-    <a href="{{ route('doctor.dashboard.stats-pdf', ['doctor' => $doctor->id]) }}" class="btn btn-danger btn-sm">
-        <i class="fas fa-file-pdf me-1"></i> Xuất PDF
-    </a>
+        <a href="{{ route('doctor.dashboard.stats-excel', ['doctor' => $doctor->id]) }}" class="btn btn-success btn-sm">
+            <i class="fas fa-file-excel me-1"></i> Xuất Excel
+        </a>
+        <a href="{{ route('doctor.dashboard.stats-pdf', ['doctor' => $doctor->id]) }}" class="btn btn-danger btn-sm">
+            <i class="fas fa-file-pdf me-1"></i> Xuất PDF
+        </a>
     </div>
 
     <!-- Tổng quan thống kê chính -->
@@ -78,6 +84,7 @@
             </div>
         </div>
     </div>
+
     <!-- Thống kê trạng thái lịch hẹn hôm nay -->
     <div class="row g-4 mb-4">
         <div class="col-xl-3 col-md-6">
@@ -143,40 +150,55 @@
                         <i class="fas fa-chart-line text-primary me-2"></i>
                         Biểu đồ đặt lịch & doanh thu
                     </h5>
-<form method="GET" id="timeFrameForm" class="row g-2 align-items-end">
-    <div class="col-auto">
-        <label for="timeFrameSelect" class="form-label fw-bold">Lọc theo</label>
-        <select name="type" id="timeFrameSelect" class="form-select form-select-sm" onchange="this.form.submit()" style="font-size: 14px;">
-            <option value="month" {{ $type == 'month' ? 'selected' : '' }}>Theo tháng</option>
-            <option value="year" {{ $type == 'year' ? 'selected' : '' }}>Theo năm</option>
-        </select>
-    </div>
+                    <form method="GET" class="d-flex align-items-end gap-3" style="flex-wrap: nowrap;" id="filterForm">
+                        <div class="d-flex flex-column">
+                            <label class="form-label mb-1" style="font-size: 12px; font-weight: 600;">Lọc theo</label>
+                            <select name="type" id="filterType" class="form-select form-select-sm" style="width: 100px; font-size: 13px;">
+                                <option value="month" {{ $type == 'month' ? 'selected' : '' }}>Theo tháng</option>
+                                <option value="year" {{ $type == 'year' ? 'selected' : '' }}>Theo năm</option>
+                                <option value="custom" {{ $type == 'custom' ? 'selected' : '' }}>Tùy chỉnh</option>
+                            </select>
+                            @error('type')
+                                <small class="text-danger invalid-feedback">{{ $message }}</small>
+                            @enderror
+                        </div>
 
-    @if($type == 'month')
-        <div class="col-auto">
-            <label for="yearInput" class="form-label fw-bold">Năm</label>
-            <input type="number" name="year" id="yearInput" class="form-control form-control-sm" value="{{ request('year', now()->year) }}" min="2000" max="{{ now()->year }}" style="font-size: 14px;">
-        </div>
-    @endif
+                        <div class="d-flex flex-column">
+                            <label class="form-label mb-1" style="font-size: 12px; font-weight: 600;">Năm</label>
+                            <input type="number" name="year" id="yearInput" class="form-control form-control-sm"
+                                   value="{{ request('year', now()->year) }}" min="2000" max="{{ now()->year }}"
+                                   style="width: 70px; font-size: 13px;" {{ $type == 'custom' ? 'disabled' : '' }}>
+                            @error('year')
+                                <small class="text-danger invalid-feedback">{{ $message }}</small>
+                            @enderror
+                        </div>
 
-    <div class="col-auto">
-        <label for="startDate" class="form-label fw-bold">Từ ngày</label>
-        <input type="date" name="start_date" id="startDate" class="form-control form-control-sm" value="{{ request('start_date') }}" style="font-size: 14px;">
-    </div>
+                        <div class="d-flex flex-column">
+                            <label class="form-label mb-1" style="font-size: 12px; font-weight: 600;">Từ ngày</label>
+                            <input type="date" name="start_date" id="startDate" class="form-control form-control-sm"
+                                   value="{{ request('start_date') }}" style="width: 130px; font-size: 13px;"
+                                   {{ $type != 'custom' ? 'disabled' : '' }}>
+                            @error('start_date')
+                                <small class="text-danger invalid-feedback">{{ $message }}</small>
+                            @enderror
+                        </div>
 
-    <div class="col-auto">
-        <label for="endDate" class="form-label fw-bold">Đến ngày</label>
-        <input type="date" name="end_date" id="endDate" class="form-control form-control-sm" value="{{ request('end_date') }}" style="font-size: 14px;">
-    </div>
+                        <div class="d-flex flex-column">
+                            <label class="form-label mb-1" style="font-size: 12px; font-weight: 600;">Đến ngày</label>
+                            <input type="date" name="end_date" id="endDate" class="form-control form-control-sm"
+                                   value="{{ request('end_date') }}" style="width: 130px; font-size: 13px;"
+                                   {{ $type != 'custom' ? 'disabled' : '' }}>
+                            @error('end_date')
+                                <small class="text-danger invalid-feedback">{{ $message }}</small>
+                            @enderror
+                        </div>
 
-    <div class="col-auto">
-        <label class="form-label fw-bold invisible">Tìm</label>
-        <button type="submit" class="btn btn-sm btn-primary" style="font-size: 14px;">
-            <i class="fas fa-filter me-1"></i> Lọc dữ liệu
-        </button>
-    </div>
-</form>
-
+                        <div>
+                            <button type="submit" class="btn btn-primary btn-sm" style="font-size: 13px; height: 31px; padding: 0 16px;">
+                                <i class="fas fa-filter me-1"></i> Lọc
+                            </button>
+                        </div>
+                    </form>
                 </div>
                 <div class="card-body">
                     <canvas id="bookingRevenueChart" height="120"></canvas>
@@ -193,30 +215,6 @@
                 </div>
                 <div class="card-body d-flex flex-column justify-content-center text-center">
                     <div class="mb-3">
-                        @php
-                            // Tính toán tăng trưởng lịch hẹn
-                            $growthValue = 0;
-                            $growthLabel = '';
-                            if (isset($statBookings) && count($statBookings) > 1) {
-                                $last = end($statBookings);
-                                $prev = prev($statBookings);
-                                if ($prev > 0) {
-                                    $growthValue = round((($last - $prev) / $prev) * 100, 1);
-                                }
-                                $growthLabel = $growthValue > 0 ? 'Tăng' : ($growthValue < 0 ? 'Giảm' : 'Không đổi');
-                            }
-                            // Tính toán tăng trưởng doanh thu
-                            $revenueGrowth = 0;
-                            $revenueLabel = '';
-                            if (isset($statRevenue) && count($statRevenue) > 1) {
-                                $lastR = end($statRevenue);
-                                $prevR = prev($statRevenue);
-                                if ($prevR > 0) {
-                                    $revenueGrowth = round((($lastR - $prevR) / $prevR) * 100, 1);
-                                }
-                                $revenueLabel = $revenueGrowth > 0 ? 'Tăng' : ($revenueGrowth < 0 ? 'Giảm' : 'Không đổi');
-                            }
-                        @endphp
                         <div class="p-3 rounded-3 bg-light mb-2">
                             <div class="mb-2">
                                 <span class="fw-semibold text-muted">Tăng trưởng số lịch hẹn</span>
@@ -262,46 +260,26 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @php
-                                    // Nếu có biến $statTable (từ controller), ưu tiên dùng, nếu không thì dùng $statLabels/$statBookings/$statRevenue
-                                    $hasStatTable = isset($statTable) && count($statTable);
-                                @endphp
-                                @if($hasStatTable)
-                                    @foreach($statTable as $row)
-                                        <tr>
-                                            <td>{{ $row['label'] }}</td>
-                                            <td>
-                                                <span class="badge bg-primary">{{ $row['bookings'] ?? 0 }}</span>
-                                            </td>
-                                            <td>
-                                                <span class="text-success fw-bold">
-                                                    {{ number_format($row['revenue'] ?? 0, 0, ',', '.') }}đ
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                @else
-                                    @forelse($statLabels as $i => $label)
-                                        <tr>
-                                            <td>{{ $label }}</td>
-                                            <td>
-                                                <span class="badge bg-primary">{{ $statBookings[$i] ?? 0 }}</span>
-                                            </td>
-                                            <td>
-                                                <span class="text-success fw-bold">
-                                                    {{ number_format($statRevenue[$i] ?? 0, 0, ',', '.') }}đ
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="3" class="text-center text-muted py-4">
-                                                <i class="fas fa-info-circle me-2"></i>
-                                                Không có dữ liệu
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                @endif
+                                @forelse($statLabels as $i => $label)
+                                    <tr>
+                                        <td>{{ $label }}</td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ $statBookings[$i] ?? 0 }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-success fw-bold">
+                                                {{ number_format($statRevenue[$i] ?? 0, 0, ',', '.') }}đ
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-4">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Không có dữ liệu
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -325,11 +303,6 @@
                                 <i class="fas fa-check-circle fa-2x me-3" style="color: #16a34a;"></i>
                                 <div>
                                     <h6 class="mb-1" style="color: #16a34a;">Tỷ lệ khám thành công</h6>
-                                    @php
-                                        $totalAppointments = \App\Models\Appointment::where('doctor_id', $doctor->id)->count();
-                                        $successAppointments = \App\Models\Appointment::where('doctor_id', $doctor->id)->where('status', 'completed')->count();
-                                        $successRate = $totalAppointments > 0 ? round($successAppointments / $totalAppointments * 100, 1) : 0;
-                                    @endphp
                                     <h3 class="fw-bold mb-0" style="color: #16a34a;">
                                         {{ $successRate }}%
                                     </h3>
@@ -345,10 +318,6 @@
                                 <i class="fas fa-times-circle fa-2x me-3" style="color: #dc2626;"></i>
                                 <div>
                                     <h6 class="mb-1" style="color: #dc2626;">Tỷ lệ hủy lịch khám</h6>
-                                    @php
-                                        $cancelAppointments = \App\Models\Appointment::where('doctor_id', $doctor->id)->where('status', 'cancelled')->count();
-                                        $cancelRate = $totalAppointments > 0 ? round($cancelAppointments / $totalAppointments * 100, 1) : 0;
-                                    @endphp
                                     <h3 class="fw-bold mb-0" style="color: #dc2626;">
                                         {{ $cancelRate }}%
                                     </h3>
@@ -393,10 +362,145 @@
         .rounded-3 {
             border-radius: 12px !important;
         }
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+        .invalid-feedback {
+            display: none;
+            font-size: 12px;
+            color: #dc3545;
+        }
+        .is-invalid ~ .invalid-feedback {
+            display: block;
+        }
     </style>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            const filterForm = document.getElementById('filterForm');
+            const filterType = document.getElementById('filterType');
+            const yearInput = document.getElementById('yearInput');
+            const startDate = document.getElementById('startDate');
+            const endDate = document.getElementById('endDate');
+
+            // Lưu trữ trạng thái của startDate và endDate
+            let customDateState = {
+                startDate: startDate.value,
+                endDate: endDate.value
+            };
+
+            // Hàm cập nhật trạng thái các trường input
+            function updateFilterType() {
+                if (filterType.value === 'custom') {
+                    yearInput.disabled = true;
+                    startDate.disabled = false;
+                    endDate.disabled = false;
+                    // Khôi phục giá trị startDate và endDate nếu có
+                    startDate.value = customDateState.startDate || '';
+                    endDate.value = customDateState.endDate || '';
+                } else {
+                    yearInput.disabled = false;
+                    startDate.disabled = true;
+                    endDate.disabled = true;
+                    // Lưu giá trị hiện tại của startDate và endDate trước khi vô hiệu hóa
+                    customDateState.startDate = startDate.value;
+                    customDateState.endDate = endDate.value;
+                }
+            }
+
+            // Gọi hàm updateFilterType khi thay đổi filterType
+            filterType.addEventListener('change', updateFilterType);
+
+            // Cập nhật trạng thái khi thay đổi ngày
+            startDate.addEventListener('change', function() {
+                customDateState.startDate = startDate.value;
+            });
+            endDate.addEventListener('change', function() {
+                customDateState.endDate = endDate.value;
+            });
+
+            // Cập nhật trạng thái ban đầu
+            updateFilterType();
+
+            // Validate phía client khi submit form
+            filterForm.addEventListener('submit', function(event) {
+                let errors = [];
+                let valid = true;
+
+                // Xóa trạng thái lỗi trước đó
+                [filterType, yearInput, startDate, endDate].forEach(input => {
+                    input.classList.remove('is-invalid');
+                    const feedback = input.nextElementSibling;
+                    if (feedback && feedback.classList.contains('invalid-feedback')) {
+                        feedback.textContent = '';
+                    }
+                });
+
+                // Validate type
+                if (!['month', 'year', 'custom'].includes(filterType.value)) {
+                    errors.push({ field: filterType, message: 'Vui lòng chọn loại thống kê hợp lệ.' });
+                    valid = false;
+                }
+
+                // Validate year nếu type là month hoặc year
+                if (filterType.value === 'month' || filterType.value === 'year') {
+                    const year = parseInt(yearInput.value);
+                    if (!yearInput.value || isNaN(year)) {
+                        errors.push({ field: yearInput, message: 'Vui lòng nhập năm hợp lệ.' });
+                        valid = false;
+                    } else if (year < 2000 || year > {{ now()->year }}) {
+                        errors.push({ field: yearInput, message: 'Năm phải từ 2000 đến {{ now()->year }}.' });
+                        valid = false;
+                    }
+                }
+
+                // Validate ngày nếu type là custom
+                if (filterType.value === 'custom') {
+                    if (!startDate.value) {
+                        errors.push({ field: startDate, message: 'Vui lòng chọn ngày bắt đầu.' });
+                        valid = false;
+                    }
+                    if (!endDate.value) {
+                        errors.push({ field: endDate, message: 'Vui lòng chọn ngày kết thúc.' });
+                        valid = false;
+                    }
+                    if (startDate.value && endDate.value) {
+                        const start = new Date(startDate.value);
+                        const end = new Date(endDate.value);
+                        if (start > end) {
+                            errors.push({ field: startDate, message: 'Ngày bắt đầu không được lớn hơn ngày kết thúc.' });
+                            valid = false;
+                        }
+                        const diffDays = (end - start) / (1000 * 60 * 60 * 24);
+                        if (diffDays > 62) {
+                            errors.push({ field: endDate, message: 'Khoảng thời gian tối đa là 62 ngày.' });
+                            valid = false;
+                        }
+                    }
+                }
+
+                if (!valid) {
+                    event.preventDefault();
+                    errors.forEach(error => {
+                        error.field.classList.add('is-invalid');
+                        const feedback = error.field.nextElementSibling;
+                        if (feedback && feedback.classList.contains('invalid-feedback')) {
+                            feedback.textContent = error.message;
+                        }
+                    });
+                } else {
+                    // Reset customDateState nếu không chọn chế độ custom
+                    if (filterType.value !== 'custom') {
+                        customDateState.startDate = '';
+                        customDateState.endDate = '';
+                        startDate.value = '';
+                        endDate.value = '';
+                    }
+                }
+            });
+
+            // Biểu đồ
             const bookingRevenueCtx = document.getElementById('bookingRevenueChart').getContext('2d');
             const bookingRevenueChart = new Chart(bookingRevenueCtx, {
                 type: 'bar',
@@ -458,6 +562,5 @@
             });
         });
     </script>
-</div>
 </div>
 @endsection
