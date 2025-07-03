@@ -197,6 +197,13 @@
             </a>
         </li>
 
+        <li class="menu-item">
+            <a href="{{ route('admin.files.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-folder"></i>
+                <div>Quản lý Tài liệu y tế</div>
+            </a>
+        </li>
+
         <!-- Thanh toán -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Thanh toán</span></li>
 

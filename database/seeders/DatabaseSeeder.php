@@ -21,6 +21,42 @@ class DatabaseSeeder extends Seeder
         $this->call([
 
             TaskSeeder::class, // đã bao gồm tạo Task + Comment + Log
+            UserSeeder::class,
+            DepartmentSeeder::class,
+            RoomSeeder::class,
+
+            DoctorSeeder::class,
+            WorkingScheduleSeeder::class,
+            DoctorLeaveSeeder::class,
+
+            ServiceCategorySeeder::class,
+            ServiceSeeder::class,
+
+            AppointmentSeeder::class,           // 👈 phải chạy trước log/statistics
+            AppointmentLogSeeder::class,
+            StatisticSeeder::class,
+
+            PromotionSeeder::class,
+            PaymentSeeder::class,
+            PaymentHistorySeeder::class,
+
+            MedicineSeeder::class,
+            MedicalRecordSeeder::class,
+            PrescriptionSeeder::class,
+            PrescriptionItemSeeder::class,
+            TreatmentPlanSeeder::class,
+            TreatmentHistorySeeder::class,
+
+            FileUploadSeeder::class,
+            UploadHistorySeeder::class,
+
+            BlogSeeder::class,
+            // NotificationSeeder::class,
+            FaqSeeder::class,
+            OrderSeeder::class,
+            // NotificationSeeder::class,
+            //   FaqSeeder::class,
+            ReviewSeeder::class,
         ]);
 
     }

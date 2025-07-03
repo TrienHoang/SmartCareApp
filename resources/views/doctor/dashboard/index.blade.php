@@ -1,4 +1,3 @@
-
 @extends('doctor.dashboard')
 
 @section('title', 'Thống kê bác sĩ: ' . ($doctor->user->full_name ?? $doctor->name))
@@ -160,7 +159,7 @@
                                 <option value="custom" {{ $type == 'custom' ? 'selected' : '' }}>Tùy chỉnh</option>
                             </select>
                             @error('type')
-                                <small class="text-danger">{{ $message }}</small>
+                                <small class="text-danger invalid-feedback">{{ $message }}</small>
                             @enderror
                         </div>
 
@@ -170,7 +169,7 @@
                                    value="{{ request('year', now()->year) }}" min="2000" max="{{ now()->year }}"
                                    style="width: 70px; font-size: 13px;" {{ $type == 'custom' ? 'disabled' : '' }}>
                             @error('year')
-                                <small class="text-danger">{{ $message }}</small>
+                                <small class="text-danger invalid-feedback">{{ $message }}</small>
                             @enderror
                         </div>
 
@@ -180,7 +179,7 @@
                                    value="{{ request('start_date') }}" style="width: 130px; font-size: 13px;"
                                    {{ $type != 'custom' ? 'disabled' : '' }}>
                             @error('start_date')
-                                <small class="text-danger">{{ $message }}</small>
+                                <small class="text-danger invalid-feedback">{{ $message }}</small>
                             @enderror
                         </div>
 
@@ -190,13 +189,13 @@
                                    value="{{ request('end_date') }}" style="width: 130px; font-size: 13px;"
                                    {{ $type != 'custom' ? 'disabled' : '' }}>
                             @error('end_date')
-                                <small class="text-danger">{{ $message }}</small>
+                                <small class="text-danger invalid-feedback">{{ $message }}</small>
                             @enderror
                         </div>
 
                         <div>
                             <button type="submit" class="btn btn-primary btn-sm" style="font-size: 13px; height: 31px; padding: 0 16px;">
-                                <i class="fas fa-filter me-1"></i>
+                                <i class="fas fa-filter me-1"></i> Lọc
                             </button>
                         </div>
                     </form>
@@ -334,22 +333,6 @@
         </div>
     </div>
 
-    <!-- Số lượng file đã tải lên -->
-    <div class="row g-4 mb-4">
-        <div class="col-12">
-            <div class="p-4 rounded-3 d-flex align-items-center" style="background: #e0f2fe;">
-                <i class="fas fa-upload fa-2x me-3" style="color: #0284c7;"></i>
-                <div>
-                    <h6 class="mb-1" style="color: #0284c7;">Số lượng file đã tải lên</h6>
-                    <h3 class="fw-bold mb-0" style="color: #0284c7;">
-                        {{ $fileUploadsCount ?? 0 }} file
-                    </h3>
-                    <small class="text-muted">Tính tổng số file liên quan đến tài khoản người dùng</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <style>
         .bg-gradient-primary {
             background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
@@ -401,40 +384,46 @@
             const startDate = document.getElementById('startDate');
             const endDate = document.getElementById('endDate');
 
-            // Tự động chọn type=custom khi nhập ngày, xóa ngày khi chọn month/year
+            // Lưu trữ trạng thái của startDate và endDate
+            let customDateState = {
+                startDate: startDate.value,
+                endDate: endDate.value
+            };
+
+            // Hàm cập nhật trạng thái các trường input
             function updateFilterType() {
                 if (filterType.value === 'custom') {
                     yearInput.disabled = true;
                     startDate.disabled = false;
                     endDate.disabled = false;
+                    // Khôi phục giá trị startDate và endDate nếu có
+                    startDate.value = customDateState.startDate || '';
+                    endDate.value = customDateState.endDate || '';
                 } else {
                     yearInput.disabled = false;
                     startDate.disabled = true;
                     endDate.disabled = true;
-                    // Xóa giá trị của startDate và endDate khi chọn month hoặc year
-                    startDate.value = '';
-                    endDate.value = '';
+                    // Lưu giá trị hiện tại của startDate và endDate trước khi vô hiệu hóa
+                    customDateState.startDate = startDate.value;
+                    customDateState.endDate = endDate.value;
                 }
             }
 
+            // Gọi hàm updateFilterType khi thay đổi filterType
             filterType.addEventListener('change', updateFilterType);
-            startDate.addEventListener('change', () => {
-                if (startDate.value || endDate.value) {
-                    filterType.value = 'custom';
-                    updateFilterType();
-                }
+
+            // Cập nhật trạng thái khi thay đổi ngày
+            startDate.addEventListener('change', function() {
+                customDateState.startDate = startDate.value;
             });
-            endDate.addEventListener('change', () => {
-                if (startDate.value || endDate.value) {
-                    filterType.value = 'custom';
-                    updateFilterType();
-                }
+            endDate.addEventListener('change', function() {
+                customDateState.endDate = endDate.value;
             });
 
-            // Khởi tạo trạng thái ban đầu
+            // Cập nhật trạng thái ban đầu
             updateFilterType();
 
-            // Validate phía client
+            // Validate phía client khi submit form
             filterForm.addEventListener('submit', function(event) {
                 let errors = [];
                 let valid = true;
@@ -500,6 +489,14 @@
                             feedback.textContent = error.message;
                         }
                     });
+                } else {
+                    // Reset customDateState nếu không chọn chế độ custom
+                    if (filterType.value !== 'custom') {
+                        customDateState.startDate = '';
+                        customDateState.endDate = '';
+                        startDate.value = '';
+                        endDate.value = '';
+                    }
                 }
             });
 

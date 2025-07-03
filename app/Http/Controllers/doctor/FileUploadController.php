@@ -78,44 +78,51 @@ class FileUploadController extends Controller
     {
         $request->validate([
             'appointment_id' => 'required|exists:appointments,id',
+            'file_category' => 'required|string|max:255',
             'files.*' => 'required|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png,gif',
-            'file_category' => 'required|string|max:100',
-            'note' => 'nullable|string|max:500'
+            'custom_category' => 'nullable|string|max:255',
+            'note' => 'nullable|string|max:1000'
         ], [
-            'files.*.max' => 'Mỗi file không được vượt quá 10MB',
-            'files.*.mimes' => 'Chỉ chấp nhận file: PDF, DOC, DOCX, JPG, JPEG, PNG, GIF'
+            'appointment_id.required' => 'Vui lòng chọn lịch hẹn',
+            'appointment_id.exists' => 'Lịch hẹn không tồn tại',
+            'file_category.required' => 'Vuiện chọn danh mục file',
+            'file_category.max' => 'Danh mục file khó qua 255 ký tự',
+            'files.*.required' => 'Vui lòng chọn file',
+            'files.*.max' => 'File khó qua 10MB',
+            'files.*.mimes' => 'Chỉ nhập hợp lệ: file pdf, doc, docx, jpg, jpeg, png, gif',
         ]);
 
-        $doctorId = Auth::user()->doctor->id;
-
-        // Kiểm tra appointment có thuộc về doctor này không
-        $appointment = Appointment::where('id', $request->appointment_id)
-            ->where('doctor_id', $doctorId)
-            ->firstOrFail();
-
-        DB::beginTransaction();
         try {
+            // ✅ Lấy thông tin cuộc hẹn và user_id an toàn
+            $appointment = Appointment::with('patient')->findOrFail($request->appointment_id);
+            $userId = $appointment->patient_id;
+
             $uploadedFiles = [];
 
             foreach ($request->file('files') as $file) {
-                // Tạo tên file unique
+                // Tạo tên file ngẫu nhiên
                 $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
 
-                // Lưu file vào storage
-                $filePath = $file->storeAs('uploads/appointments/' . $request->appointment_id, $fileName, 'public');
+                // Đường dẫn lưu file
+                $filePath = $file->storeAs(
+                    'uploads/appointments/' . $appointment->id,
+                    $fileName,
+                    'public'
+                );
 
-                // Lưu thông tin vào database
+                // Tạo bản ghi FileUpload
                 $fileUpload = FileUpload::create([
-                    'user_id' => Auth::id(),
-                    'appointment_id' => $request->appointment_id,
+                    'user_id' => $userId,
+                    'appointment_id' => $appointment->id,
                     'file_name' => $file->getClientOriginalName(),
                     'file_path' => $filePath,
-                    'file_category' => $request->file_category,
+                    'size' => $file->getSize(),
+                    'file_category' => $request->file_category === 'Khác' ? $request->custom_category : $request->file_category,
                     'note' => $request->note,
                     'uploaded_at' => now()
                 ]);
 
-                // Ghi log upload history
+                // Lưu lịch sử upload
                 UploadHistory::create([
                     'file_upload_id' => $fileUpload->id,
                     'action' => 'uploaded',
@@ -125,19 +132,15 @@ class FileUploadController extends Controller
                 $uploadedFiles[] = $fileUpload;
             }
 
-            DB::commit();
-
             return response()->json([
                 'success' => true,
-                'redirect_url' => route('doctor.files.index'),
-                'message' => 'Đã tải lên ' . count($uploadedFiles) . ' file thành công!'
+                'message' => 'Tải file thành công!',
+                'redirect_url' => route('doctor.files.index')
             ]);
         } catch (\Exception $e) {
-            DB::rollback();
-
             return response()->json([
                 'success' => false,
-                'message' => 'Đã xảy ra lỗi trong quá trình tải file: ' . $e->getMessage(),
+                'message' => 'Đã xảy ra lỗi trong quá trình tải file: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -203,7 +206,7 @@ class FileUploadController extends Controller
 
             DB::commit();
 
-            return back()->with('success', 'Đã xóa file thành công!');
+            return redirect()->route('doctor.files.index')->with('success', 'Đã xóa file thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Đã xảy ra lỗi trong quá trình xóa file: ' . $e->getMessage());
@@ -302,12 +305,37 @@ class FileUploadController extends Controller
     {
         $doctorId = Auth::user()->doctor->id;
 
+        // Nếu là xóa toàn bộ
+        if ($id === 'all') {
+            $files = FileUpload::onlyTrashed()
+                ->whereHas('appointment', function ($q) use ($doctorId) {
+                    $q->where('doctor_id', $doctorId);
+                })->get();
+
+            foreach ($files as $file) {
+                // Xóa vật lý file khỏi ổ đĩa nếu tồn tại
+                if (Storage::disk('public')->exists($file->file_path)) {
+                    Storage::disk('public')->delete($file->file_path);
+                }
+
+                // Lưu lịch sử xóa
+                UploadHistory::create([
+                    'file_upload_id' => $file->id,
+                    'action' => 'force_deleted',
+                    'timestamp' => now(),
+                ]);
+
+                $file->forceDelete();
+            }
+
+            return redirect()->route('doctor.files.trash')->with('success', 'Đã xóa vĩnh viễn tất cả file!');
+        }
+
         $file = FileUpload::onlyTrashed()
             ->whereHas('appointment', function ($q) use ($doctorId) {
                 $q->where('doctor_id', $doctorId);
             })->findOrFail($id);
 
-        // Xóa vật lý file khỏi ổ đĩa nếu tồn tại
         if (Storage::disk('public')->exists($file->file_path)) {
             Storage::disk('public')->delete($file->file_path);
         }
