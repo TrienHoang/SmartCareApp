@@ -32,9 +32,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use Illuminate\Support\Facades\Auth;
 
-Route::get('/', function () {
-    return view('client.home');
-})->name('home');
+require __DIR__ . '/client.php';
 
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
