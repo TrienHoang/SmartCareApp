@@ -196,9 +196,6 @@
                                             <a href="{{ route('admin.doctor_leaves.edit', $leave->id) }}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" title="Chỉnh sửa">
                                                 <i class="bx bx-edit"></i>
                                             </a>
-                                            <button type="button" class="btn btn-sm btn-danger" onclick="deleteLeave({{ $leave->id }})" data-bs-toggle="tooltip" title="Xóa">
-                                                <i class="bx bx-trash"></i>
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>

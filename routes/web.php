@@ -34,7 +34,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use Illuminate\Support\Facades\Auth;
 
-require __DIR__ . '/client.php';
+Route::get('/', function () {
+    return view('client.home');
+})->name('home');
 
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -567,8 +569,7 @@ Route::group([
     // Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('payment_histories.index');
     // Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('payment_histories.show');
 
-
-    // quản lý file tải lên
+    // Quản lý file tải lên
     Route::group([
         'prefix' => 'files',
         'as' => 'files.',
@@ -613,5 +614,4 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
 });
 // Trong routes/web.php hoặc routes/doctor.php
-
 require __DIR__ . '/doctor.php';
