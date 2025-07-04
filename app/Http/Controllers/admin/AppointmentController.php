@@ -61,17 +61,6 @@ class AppointmentController extends Controller
             $query->where('service_id', $request->service_id);
         }
 
-        // Lọc theo trạng thái thanh toán (order)
-        // Lọc theo trạng thái thanh toán
-        if ($request->filled('payment_status')) {
-            if ($request->payment_status === 'completed') {
-                // Chỉ lấy lịch hẹn có ÍT NHẤT 1 payment = paid
-                $query->whereHas('payment', fn($q) => $q->where('status', 'paid'));
-            } elseif ($request->payment_status === 'unpaid') {
-                // Lấy lịch hẹn KHÔNG có bất kỳ payment = paid
-                $query->whereDoesntHave('payment', fn($q) => $q->where('status', 'paid'));
-            }
-        }
 
 
         // Lọc theo ngày
@@ -282,7 +271,7 @@ class AppointmentController extends Controller
             'user_id' => $request->patient_id,
             'appointment_id' => $appointment->id,
             'total_amount' => $price,
-            'status' => 'pending',
+            'status' => 'completed',
             'ordered_at' => now(),
         ]);
 
@@ -294,11 +283,21 @@ class AppointmentController extends Controller
             'price' => $price,
         ]);
 
-        // Tạo payment
-        Payment::updateOrCreate([
+        // Tạo payment đã thanh toán
+        $payment = Payment::create([
             'appointment_id' => $appointment->id,
             'amount' => $price,
-            'status' => 'unpaid',
+            'status' => 'paid',
+            'payment_method' => 'cash',  // hoặc mặc định phương thức khác nếu cần
+            'paid_at' => now(),
+        ]);
+
+        // Ghi log thanh toán
+        PaymentHistory::create([
+            'payment_id' => $payment->id,
+            'amount' => $payment->amount,
+            'payment_method' => 'cash',
+            'payment_date' => now(),
         ]);
 
         // Appointment::create($requestData);
