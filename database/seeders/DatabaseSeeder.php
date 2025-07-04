@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RolePermissionSeeder::class,
 
+            TaskSeeder::class, // đã bao gồm tạo Task + Comment + Log
             UserSeeder::class,
             DepartmentSeeder::class,
             RoomSeeder::class,

@@ -15,4 +15,9 @@ class WorkingSchedule extends Model
     {
         return $this->belongsTo(Doctor::class);
     }
+
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
+    }
 }

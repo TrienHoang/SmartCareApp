@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\admin\AdminFileController;
 use App\Http\Controllers\admin\DoctorLeaveController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\admin\RoleController;
 use App\Http\Controllers\admin\AppointmentController;
+use App\Http\Controllers\Admin\CalendarController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DoctorController;
@@ -24,6 +26,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\admin\FaqController;
+use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\TreatmentPlanController;
 use App\Models\Admin_notification;
 use App\Models\Role;
@@ -566,6 +569,50 @@ Route::group([
 
     // Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('payment_histories.index');
     // Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('payment_histories.show');
+
+    // Quản lý file tải lên
+    Route::group([
+        'prefix' => 'files',
+        'as' => 'files.',
+        'middleware' => 'check_permission:view_medical_documents'
+    ], function () {
+        Route::get('/', [AdminFileController::class, 'index'])->name('index');
+
+        Route::get('/trash', [AdminFileController::class, 'trash'])->name('trash');
+
+        Route::get('/{id}', [AdminFileController::class, 'show'])->name('show');
+
+        Route::get('/{id}/download', [AdminFileController::class, 'download'])->name('download');
+
+        Route::delete('/{id}', [AdminFileController::class, 'destroy'])
+            ->middleware('check_permission:delete_files')->name('destroy');
+
+        Route::put('/{id}/restore', [AdminFileController::class, 'restore'])
+            ->middleware('check_permission:delete_files')->name('restore');
+
+        Route::delete('/{id}/force-delete', [AdminFileController::class, 'forceDelete'])
+            ->middleware('check_permission:delete_files')->name('forceDelete');
+
+        Route::put('/{id}/update-category', [AdminFileController::class, 'updateCategory'])
+            ->middleware('check_permission:upload_files')->name('updateCategory');
+    });
+});
+
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    Route::resource('tasks', TaskController::class);
+});
+
+// routes/web.php
+Route::post('admin/tasks/{task}/comment', [TaskController::class, 'comment'])->name('admin.tasks.comment');
+
+// Nhóm route cho admin
+Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+
+    // Trang lịch làm việc
+    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
+
+    // API lấy dữ liệu sự kiện (task, appointment)
+    Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
     Route::group([
         'prefix' => 'treatment-plans',
         'as' => 'treatment-plans.',
@@ -620,9 +667,9 @@ Route::prefix('doctor')->name('doctor.')->middleware('auth')->group(function () 
     Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
     // Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
 });
+require __DIR__ . '/client.php';
 
 
 
 // Trong routes/web.php hoặc routes/doctor.php
-
 require __DIR__ . '/doctor.php';

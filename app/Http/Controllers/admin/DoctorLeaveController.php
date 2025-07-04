@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Doctor;
 use App\Models\DoctorLeave;
 use App\Models\Room;
+use App\Notifications\DoctorLeaveApproved;
 use Illuminate\Http\Request;
 
 class DoctorLeaveController extends Controller
@@ -71,17 +72,29 @@ class DoctorLeaveController extends Controller
 
         // Nếu đã duyệt (approved = 1), không cho thay đổi nữa
         if ($leave->approved == 1) {
-            return redirect()->route('admin.doctor_leaves.index')->with('error', 'Lịch nghỉ đã được duyệt và không thể chỉnh sửa.');
+            // Gửi notification nếu muốn (hoặc có thể gửi khi duyệt thành công ở nơi khác)
+            $leave->doctor->user->notify(new DoctorLeaveApproved($leave));
+
+            return redirect()->route('admin.doctor_leaves.index')
+                ->with('error', 'Lịch nghỉ đã được duyệt và không thể chỉnh sửa.');
         }
 
-        // Nếu trạng thái hiện tại là 0 và yêu cầu là 1, thì cho phép cập nhật
-        if ($leave->approved == 0 && $request->input('approved') == 1) {
-            $leave->approved = 1;
-            $leave->save();
-            return redirect()->route('admin.doctor_leaves.index')->with('success', 'Duyệt lịch nghỉ thành công.');
+        // Kiểm tra có thay đổi trạng thái approved không
+        if ($leave->approved == $request->approved) {
+            return redirect()->route('admin.doctor_leaves.index')
+                ->with('info', 'Không có thay đổi nào được thực hiện.');
         }
 
-        // Trường hợp còn lại (ví dụ: yêu cầu chuyển từ 0 sang 0) thì không cần cập nhật
-        return redirect()->route('admin.doctor_leaves.index')->with('info', 'Không có thay đổi nào được thực hiện.');
+        // Cập nhật trạng thái approved
+        $leave->approved = $request->approved;
+        $leave->save();
+
+        // Nếu trạng thái chuyển sang duyệt, gửi notification
+        if ($leave->approved == 1) {
+            $leave->doctor->user->notify(new DoctorLeaveApproved($leave));
+        }
+
+        return redirect()->route('admin.doctor_leaves.index')
+            ->with('success', 'Cập nhật trạng thái duyệt lịch nghỉ thành công.');
     }
 }
