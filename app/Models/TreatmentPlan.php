@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TreatmentPlan extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+
 
     // Cho phép mass assignment cho các trường này
     protected $fillable = [
@@ -21,6 +23,11 @@ class TreatmentPlan extends Model
         'start_date',
         'end_date',
         'status',
+    ];
+       protected $casts = [
+        'start_date' => 'datetime', // Hoặc 'date' nếu bạn chỉ quan tâm đến ngày
+        'end_date' => 'datetime',   // Hoặc 'date' nếu bạn chỉ quan tâm đến ngày
+        // created_at và updated_at đã được Laravel tự động cast, không cần thêm ở đây
     ];
 
     /**

@@ -20,7 +20,12 @@ class TreatmentPlanItem extends Model
         'status',
         'notes',
     ];
-
+    protected $casts = [
+        // Hoặc 'date' tùy thuộc vào kiểu dữ liệu trong DB
+         'expected_start_date' => 'datetime',
+        'expected_end_date' => 'datetime',
+        'actual_end_date' => 'datetime',
+    ];
     /**
      * Lấy kế hoạch điều trị mà bước này thuộc về.
      */

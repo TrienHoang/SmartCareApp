@@ -14,16 +14,17 @@ return new class extends Migration
         Schema::create('treatment_plan_histories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('treatment_plan_id')
-                  ->constrained('treatment_plans')
-                  ->onDelete('cascade');
+                ->constrained('treatment_plans')
+                ->onDelete('cascade');
             $table->foreignId('changed_by_id')
-                  ->nullable()
-                  ->constrained('users')
-                  ->onDelete('set null');
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null');
             $table->text('change_description');
             $table->json('old_data')->nullable();
             $table->json('new_data')->nullable();
             $table->timestamp('changed_at')->useCurrent();
+            $table->timestamps();
         });
     }
 
