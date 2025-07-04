@@ -5,9 +5,9 @@ use App\Http\Controllers\Doctor\PrescriptionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Doctor\DoctorReviewController;
+use App\Http\Controllers\Doctor\DoctorAppointmentController;
 
-// Route cho trang dashboard bác sĩ
-// Group toàn bộ route cho bác sĩ
 Route::prefix('doctor')
     ->middleware(['auth', 'checkRole:doctor'])
     ->name('doctor.')
@@ -18,7 +18,7 @@ Route::prefix('doctor')
         Route::get('/{doctor}/dashboard/export-excel', [DoctorDashboardController::class, 'exportExcel'])->name('dashboard.stats-excel');
         Route::get('/{doctor}/dashboard/export-pdf', [DoctorDashboardController::class, 'exportPDF'])->name('dashboard.stats-pdf');
 
-        // Prescriptions (Đơn thuốc)
+        // Prescriptions
         Route::prefix('prescriptions')
             ->name('prescriptions.')
             ->group(function () {
@@ -35,4 +35,10 @@ Route::prefix('doctor')
 
                 Route::get('/{id}/export-pdf', [PrescriptionController::class, 'exportPdf'])->name('exportPdf');
             });
+
+        // Reviews
+        Route::get('/reviews', [DoctorReviewController::class, 'index'])->name('reviews.index');
+
+        // Appointments
+        Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
     });
