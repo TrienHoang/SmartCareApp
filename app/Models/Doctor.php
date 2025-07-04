@@ -53,4 +53,21 @@ class Doctor extends Model
     {
         return $this->hasMany(FileUpload::class);
     }
+
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'doctor_service');
+    }
+
+    public function workingSchedules()
+    {
+        return $this->hasMany(WorkingSchedule::class);
+    }
+
+    public function leaves()
+    {
+        return $this->hasMany(DoctorLeave::class)
+            ->where('approved', true)
+            ->whereNull('deleted_at');
+    }
 }

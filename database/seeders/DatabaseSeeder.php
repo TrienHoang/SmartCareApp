@@ -57,6 +57,7 @@ class DatabaseSeeder extends Seeder
             // NotificationSeeder::class,
             //   FaqSeeder::class,
             ReviewSeeder::class,
+            DoctorServiceSeeder::class,
         ]);
 
     }

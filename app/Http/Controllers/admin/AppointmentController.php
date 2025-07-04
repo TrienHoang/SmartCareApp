@@ -21,6 +21,7 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\WorkingSchedule;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -657,5 +658,69 @@ class AppointmentController extends Controller
         }
 
         return back()->with('success', 'Thanh toán thành công!');
+    }
+
+    public function getDoctorServices(Doctor $doctor)
+    {
+        $services = $doctor->services()->with('department')->get();
+        return response()->json($services);
+    }
+
+    public function getDoctorWorkingDays(Doctor $doctor)
+    {
+        $dayMap = [
+            'Sunday' => 0,
+            'Chủ nhật' => 0,
+            'Monday' => 1,
+            'Thứ hai' => 1,
+            'Tuesday' => 2,
+            'Thứ ba' => 2,
+            'Wednesday' => 3,
+            'Thứ tư' => 3,
+            'Thursday' => 4,
+            'Thứ năm' => 4,
+            'Friday' => 5,
+            'Thứ sáu' => 5,
+            'Saturday' => 6,
+            'Thứ bảy' => 6,
+        ];
+
+        // Ngày làm việc theo thứ (0-6)
+        $daysOfWeek = $doctor->workingSchedules()
+            ->whereNotNull('day_of_week')
+            ->pluck('day_of_week')
+            ->map(fn($d) => $dayMap[$d] ?? null)
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        // Ngày làm việc cụ thể (YYYY-MM-DD)
+        $specificDates = $doctor->workingSchedules()
+            ->whereNotNull('day')
+            ->where('day', '>=', now()->toDateString())
+            ->pluck('day')
+            ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
+            ->unique()
+            ->values()
+            ->toArray();
+
+        // Ngày nghỉ (đã duyệt)
+        $vacationDates = $doctor->leaves()
+            ->where('end_date', '>=', now())
+            ->get()
+            ->flatMap(function ($leave) {
+                $period = CarbonPeriod::create($leave->start_date, $leave->end_date);
+                return collect($period)->map(fn($date) => $date->format('Y-m-d'));
+            })
+            ->unique()
+            ->values()
+            ->toArray();
+
+        return response()->json([
+            'daysOfWeek' => $daysOfWeek,
+            'specificDates' => $specificDates,
+            'vacationDates' => $vacationDates,
+        ]);
     }
 }
