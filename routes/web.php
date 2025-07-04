@@ -613,5 +613,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // API lấy dữ liệu sự kiện (task, appointment)
     Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
 });
+require __DIR__ . '/client.php';
 // Trong routes/web.php hoặc routes/doctor.php
 require __DIR__ . '/doctor.php';
