@@ -5,6 +5,7 @@ use App\Http\Controllers\admin\DoctorLeaveController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\admin\RoleController;
 use App\Http\Controllers\admin\AppointmentController;
+use App\Http\Controllers\Admin\CalendarController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DoctorController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\admin\FaqController;
+use App\Http\Controllers\Admin\TaskController;
 use App\Models\Admin_notification;
 use App\Models\Role;
 use App\Models\User;
@@ -592,6 +594,23 @@ Route::group([
         Route::put('/{id}/update-category', [AdminFileController::class, 'updateCategory'])
             ->middleware('check_permission:upload_files')->name('updateCategory');
     });
+});
+
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    Route::resource('tasks', TaskController::class);
+});
+
+// routes/web.php
+Route::post('admin/tasks/{task}/comment', [TaskController::class, 'comment'])->name('admin.tasks.comment');
+
+// Nhóm route cho admin
+Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+
+    // Trang lịch làm việc
+    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
+
+    // API lấy dữ liệu sự kiện (task, appointment)
+    Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
 });
 // Trong routes/web.php hoặc routes/doctor.php
 

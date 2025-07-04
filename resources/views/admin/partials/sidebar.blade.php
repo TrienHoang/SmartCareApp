@@ -29,7 +29,9 @@
                 <div>Người dùng</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item"><a href="{{ route('admin.users.index') }}" class="menu-link"><div>Danh sách</div></a></li>
+                <li class="menu-item"><a href="{{ route('admin.users.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
             </ul>
         </li>
 
@@ -39,7 +41,9 @@
                 <div>Vai trò</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item"><a href="{{ route('admin.roles.index') }}" class="menu-link"><div>Danh sách</div></a></li>
+                <li class="menu-item"><a href="{{ route('admin.roles.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
             </ul>
         </li>
 
@@ -52,8 +56,12 @@
                 <div>Quản lý bác sĩ</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item"><a href="{{ route('admin.doctors.index') }}" class="menu-link"><div>Danh sách bác sĩ</div></a></li>
-                <li class="menu-item"><a href="{{ route('admin.schedules.index') }}" class="menu-link"><div>Lịch làm việc bác sĩ</div></a></li>
+                <li class="menu-item"><a href="{{ route('admin.doctors.index') }}" class="menu-link">
+                        <div>Danh sách bác sĩ</div>
+                    </a></li>
+                <li class="menu-item"><a href="{{ route('admin.schedules.index') }}" class="menu-link">
+                        <div>Lịch làm việc bác sĩ</div>
+                    </a></li>
             </ul>
         </li>
 
@@ -70,7 +78,9 @@
                 <div>Quản lý phòng ban</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item"><a href="{{ route('admin.departments.index') }}" class="menu-link"><div>Danh sách</div></a></li>
+                <li class="menu-item"><a href="{{ route('admin.departments.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
             </ul>
         </li>
 
@@ -83,10 +93,40 @@
                 <div>Quản lý lịch hẹn khám</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item"><a href="{{ route('admin.appointments.index') }}" class="menu-link"><div>Danh sách</div></a></li>
-                <li class="menu-item"><a href="{{ route('admin.appointments.create') }}" class="menu-link"><div>Thêm mới</div></a></li>
+                <li class="menu-item"><a href="{{ route('admin.appointments.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
+                <li class="menu-item"><a href="{{ route('admin.appointments.create') }}" class="menu-link">
+                        <div>Thêm mới</div>
+                    </a></li>
             </ul>
         </li>
+
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-task"></i>
+                <div>Quản Lý Làm Việc</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('admin.tasks.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.tasks.create') }}" class="menu-link">
+                        <div>Thêm mới</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.calendar') }}" class="menu-link">
+                        <div>Lịch làm việc</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+
 
         <!-- Dịch vụ & đơn thuốc -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Dịch vụ & đơn thuốc</span></li>
@@ -111,8 +151,12 @@
                 <div>Quản lý đơn thuốc</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item"><a href="{{ route('admin.prescriptions.index') }}" class="menu-link"><div>Danh sách</div></a></li>
-                <li class="menu-item"><a href="{{ route('admin.prescriptions.create') }}" class="menu-link"><div>Thêm mới</div></a></li>
+                <li class="menu-item"><a href="{{ route('admin.prescriptions.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
+                <li class="menu-item"><a href="{{ route('admin.prescriptions.create') }}" class="menu-link">
+                        <div>Thêm mới</div>
+                    </a></li>
             </ul>
         </li>
 
@@ -123,7 +167,9 @@
                 <div>Quản lý đơn hàng</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item"><a href="{{ route('orders.index') }}" class="menu-link"><div>Danh sách</div></a></li>
+                <li class="menu-item"><a href="{{ route('orders.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
             </ul>
         </li>
 
@@ -161,13 +207,18 @@
         <!-- Thanh toán -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Thanh toán</span></li>
 
+
         <li class="menu-item">
             <a href="{{ route('admin.payment_histories.index') }}" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-wallet"></i>
-                <div>Lịch sử thanh toán</div>
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                <div>lịch sử thanh toán</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item"><a href="{{ route('admin.payment_histories.index') }}" class="menu-link"><div>Danh sách</div></a></li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
+                        <div>List</div>
+                    </a>
+                </li>
             </ul>
         </li>
 
