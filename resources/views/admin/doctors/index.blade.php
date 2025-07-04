@@ -22,16 +22,10 @@
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb bg-transparent p-0">
                                     <li class="">
-                                        <a href="{{ route('admin.dashboard.index') }}" class="text-decoration-none">
-                                            Trang chủ >
-                                        </a>
+                                    <a href="{{ route('admin.dashboard.index') }}" class="text-decoration-none">Trang chủ</a>
+
                                     </li>
-                                    <li class="breadcrumb-item active text-primary font-weight-semibold">
-                                        
-                                                                                <a href="{{ route('admin.doctors.create') }}" class="text-decoration-none">
-                                            Bác sĩ >
-                                        </a>
-                                    </li>
+
                                 </ol>
                             </nav>
                         </div>
@@ -41,8 +35,10 @@
             <div class="content-header-right col-md-4 col-12">
                 <div class="btn-group float-md-right">
                     <button type="button" class="btn btn-gradient-primary" data-bs-toggle="modal" data-bs-target="#createDoctorModal">
-                        <i class="bx bx-plus mr-1"></i>Thêm bác sĩ
-                        
+                                        <a href="{{ route('admin.doctors.create') }}"
+                                            class="btn btn-success btn-lg waves-effect waves-light shadow-lg text-white">
+                                            <i class="bx bx-plus me-2"></i> Thêm bác sĩ mới
+                                        </a>
                     </button>
                 </div>
             </div>
@@ -264,7 +260,7 @@
                                                         {{ $doctor->user->full_name ?? 'Không có thông tin' }}
                                                     </h6>
                                                     <small class="text-muted">
-                                                        @{{ $doctor->user->username ?? 'N/A' }}
+                                                        {{ $doctor->user->username ?? 'N/A' }}
                                                     </small>
                                                 </div>
                                             </div>
@@ -317,7 +313,7 @@
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
                                                 {{-- Thiếu show --}}
-                                                <a href="" 
+                                                <a href="{{ route('admin.doctors.show', $doctor->id) }}" 
                                                    class="btn btn-outline-info" data-toggle="tooltip" title="Chi tiết">
                                                     <i class="bx bx-show-alt"></i>
                                                 </a>
@@ -325,10 +321,13 @@
                                                    class="btn btn-outline-warning" data-toggle="tooltip" title="Chỉnh sửa">
                                                     <i class="bx bx-edit"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-outline-danger"
-                                                        data-toggle="tooltip" title="Xóa" onclick="deleteDoctor({{ $doctor->id }})">
-                                                    <i class="bx bx-trash"></i>
-                                                </button>
+<form action="{{ route('admin.doctors.destroy', $doctor->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa bác sĩ {{ $doctor->user->full_name }}?')">
+    @csrf
+    @method('DELETE')
+    <button type="submit" class="btn btn-outline-danger" title="Xóa">
+        <i class="bx bx-trash"></i>
+    </button>
+</form>
                                             </div>
                                         </td>
 

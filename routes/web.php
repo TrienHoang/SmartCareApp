@@ -307,6 +307,9 @@ Route::group([
 
         Route::delete('/delete/{doctor}', [DoctorController::class, 'destroy'])
             ->middleware('check_permission:delete_doctors')->name('destroy');
+
+        Route::get('/{doctor}', [DoctorController::class, 'show'])
+            ->middleware('check_permission:view_doctors')->name('show');
     });
 
 

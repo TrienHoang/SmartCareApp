@@ -20,9 +20,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
 
-<<<<<<< HEAD
             TaskSeeder::class, // đã bao gồm tạo Task + Comment + Log
-=======
             UserSeeder::class,
             DepartmentSeeder::class,
             RoomSeeder::class,
@@ -59,7 +57,6 @@ class DatabaseSeeder extends Seeder
             // NotificationSeeder::class,
             //   FaqSeeder::class,
             ReviewSeeder::class,
->>>>>>> 8b50d06627551d61ef7f0f455357c188c304bd94
         ]);
 
     }

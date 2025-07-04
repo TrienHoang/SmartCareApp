@@ -57,4 +57,5 @@ class Review extends Model
     {
         return $this->belongsTo(Appointment::class, 'appointment_id');
     }
+    
 }

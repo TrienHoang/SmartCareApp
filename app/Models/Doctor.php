@@ -46,6 +46,10 @@ class Doctor extends Model
     {
         return $this->hasMany(DoctorLeave::class);
     }
+    public function reviews()
+{
+    return $this->hasMany(\App\Models\Review::class, 'doctor_id', 'id');
+}
 
     // --------------------
     // Custom Methods
@@ -78,4 +82,6 @@ class Doctor extends Model
             ->whereDate('end_date', '>=', $today)
             ->first(); // hoặc ->get() nếu bạn muốn danh sách
     }
+
+    
 }

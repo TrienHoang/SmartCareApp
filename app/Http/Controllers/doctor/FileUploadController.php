@@ -78,41 +78,6 @@ class FileUploadController extends Controller
     {
         $request->validate([
             'appointment_id' => 'required|exists:appointments,id',
-<<<<<<< HEAD
-            'files.*' => 'required|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png,gif',
-            'file_category' => 'required|string|max:100',
-            'note' => 'nullable|string|max:500'
-        ], [
-            'files.*.max' => 'Mỗi file không được vượt quá 10MB',
-            'files.*.mimes' => 'Chỉ chấp nhận file: PDF, DOC, DOCX, JPG, JPEG, PNG, GIF'
-        ]);
-
-        $doctorId = Auth::user()->doctor->id;
-
-        // Kiểm tra appointment có thuộc về doctor này không
-        $appointment = Appointment::where('id', $request->appointment_id)
-            ->where('doctor_id', $doctorId)
-            ->firstOrFail();
-
-        DB::beginTransaction();
-        try {
-            $uploadedFiles = [];
-
-            foreach ($request->file('files') as $file) {
-                // Tạo tên file unique
-                $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-
-                // Lưu file vào storage
-                $filePath = $file->storeAs('uploads/appointments/' . $request->appointment_id, $fileName, 'public');
-
-                // Lưu thông tin vào database
-                $fileUpload = FileUpload::create([
-                    'user_id' => Auth::id(),
-                    'appointment_id' => $request->appointment_id,
-                    'file_name' => $file->getClientOriginalName(),
-                    'file_path' => $filePath,
-                    'file_category' => $request->file_category,
-=======
             'file_category' => 'required|string|max:255',
             'files.*' => 'required|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png,gif',
             'custom_category' => 'nullable|string|max:255',
@@ -153,16 +118,11 @@ class FileUploadController extends Controller
                     'file_path' => $filePath,
                     'size' => $file->getSize(),
                     'file_category' => $request->file_category === 'Khác' ? $request->custom_category : $request->file_category,
->>>>>>> 8b50d06627551d61ef7f0f455357c188c304bd94
                     'note' => $request->note,
                     'uploaded_at' => now()
                 ]);
 
-<<<<<<< HEAD
-                // Ghi log upload history
-=======
                 // Lưu lịch sử upload
->>>>>>> 8b50d06627551d61ef7f0f455357c188c304bd94
                 UploadHistory::create([
                     'file_upload_id' => $fileUpload->id,
                     'action' => 'uploaded',
@@ -172,21 +132,6 @@ class FileUploadController extends Controller
                 $uploadedFiles[] = $fileUpload;
             }
 
-<<<<<<< HEAD
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'redirect_url' => route('doctor.files.index'),
-                'message' => 'Đã tải lên ' . count($uploadedFiles) . ' file thành công!'
-            ]);
-        } catch (\Exception $e) {
-            DB::rollback();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Đã xảy ra lỗi trong quá trình tải file: ' . $e->getMessage(),
-=======
             return response()->json([
                 'success' => true,
                 'message' => 'Tải file thành công!',
@@ -196,7 +141,6 @@ class FileUploadController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Đã xảy ra lỗi trong quá trình tải file: ' . $e->getMessage()
->>>>>>> 8b50d06627551d61ef7f0f455357c188c304bd94
             ], 500);
         }
     }
@@ -262,11 +206,7 @@ class FileUploadController extends Controller
 
             DB::commit();
 
-<<<<<<< HEAD
-            return back()->with('success', 'Đã xóa file thành công!');
-=======
             return redirect()->route('doctor.files.index')->with('success', 'Đã xóa file thành công!');
->>>>>>> 8b50d06627551d61ef7f0f455357c188c304bd94
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Đã xảy ra lỗi trong quá trình xóa file: ' . $e->getMessage());
@@ -365,8 +305,6 @@ class FileUploadController extends Controller
     {
         $doctorId = Auth::user()->doctor->id;
 
-<<<<<<< HEAD
-=======
         // Nếu là xóa toàn bộ
         if ($id === 'all') {
             $files = FileUpload::onlyTrashed()
@@ -393,16 +331,11 @@ class FileUploadController extends Controller
             return redirect()->route('doctor.files.trash')->with('success', 'Đã xóa vĩnh viễn tất cả file!');
         }
 
->>>>>>> 8b50d06627551d61ef7f0f455357c188c304bd94
         $file = FileUpload::onlyTrashed()
             ->whereHas('appointment', function ($q) use ($doctorId) {
                 $q->where('doctor_id', $doctorId);
             })->findOrFail($id);
 
-<<<<<<< HEAD
-        // Xóa vật lý file khỏi ổ đĩa nếu tồn tại
-=======
->>>>>>> 8b50d06627551d61ef7f0f455357c188c304bd94
         if (Storage::disk('public')->exists($file->file_path)) {
             Storage::disk('public')->delete($file->file_path);
         }

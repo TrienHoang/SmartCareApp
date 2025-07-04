@@ -10,7 +10,10 @@ class Department extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'description'
+        'name',
+        'description',
+        'is_active'
+
     ];
 
     public function doctors()
@@ -22,5 +25,9 @@ class Department extends Model
     {
         return $this->hasMany(Room::class, 'department_id');
     }
-}
 
+    public function doctor()
+    {
+        return $this->hasOne(Doctor::class);
+    }
+}

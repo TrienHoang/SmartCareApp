@@ -12,13 +12,40 @@ class DepartmentController extends Controller
 {
 
 
-    public function index()
+    public function index(Request $request)
     {
-        // Lấy tối đa 5 phòng ban mỗi trang
-        $departments = Department::paginate(2);
+        $query = Department::with(['doctors.user']) // nhiều bác sĩ, lấy luôn user
+            ->withCount('doctors');
+
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('status') && in_array($request->status, ['active', 'inactive'])) {
+            $query->where('is_active', $request->status === 'active' ? 1 : 0);
+        }
+
+        if ($request->filled('created_at')) {
+            $query->whereDate('created_at', $request->created_at);
+        }
+
+        if ($request->filled('empty') && $request->empty == '1') {
+            $query->has('doctors', '=', 0);
+        }
+
+        $departments = $query->orderBy('created_at', 'desc')
+            ->paginate(5)
+            ->withQueryString();
 
         return view('admin.departments.index', compact('departments'));
     }
+
+
+
+
     public function create()
     {
         return view('admin.departments.create');
@@ -27,19 +54,31 @@ class DepartmentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:departments,name',
-            'description' => 'nullable|string',
+            'name'        => 'required|string|max:100|unique:departments,name',
+            'description' => 'nullable|string|max:1000',
+            'is_active'   => 'required|in:0,1',
         ], [
-            'name.required' => '⚠️ Vui lòng nhập tên phòng ban.',
-            'name.unique' => '❌ Phòng ban này đã tồn tại.',
-            'name.max' => '⚠️ Tên phòng ban không được vượt quá 100 ký tự.',
+            'name.required'      => '⚠️ Vui lòng nhập tên phòng ban.',
+            'name.unique'        => '❌ Phòng ban này đã tồn tại.',
+            'name.max'           => '⚠️ Tên phòng ban không được vượt quá 100 ký tự.',
+            'description.max'    => '⚠️ Mô tả không vượt quá 1000 ký tự.',
+            'is_active.required' => '⚠️ Vui lòng chọn trạng thái hoạt động.',
+            'is_active.in'       => '⚠️ Trạng thái không hợp lệ.',
         ]);
 
-        \App\Models\Department::create($validated);
+        Department::create([
+            'name'        => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'is_active'   => $validated['is_active'] == '1' ? 1 : 0,
+        ]);
 
         return redirect()->route('admin.departments.index')
             ->with('success', '✅ Thêm phòng ban thành công!');
     }
+
+
+
+
 
 
     public function edit(Department $department)
@@ -48,9 +87,12 @@ class DepartmentController extends Controller
     }
 
 
+
+
     public function update(Request $request, Department $department)
     {
-        $request->validate([
+        // ✅ Validate dữ liệu vào
+        $validated = $request->validate([
             'name' => [
                 'required',
                 'string',
@@ -58,17 +100,26 @@ class DepartmentController extends Controller
                 Rule::unique('departments')->ignore($department->id),
             ],
             'description' => 'nullable|string',
+            'is_active' => 'required|in:0,1', // 👈 xử lý trạng thái hoạt động
         ], [
-            'name.required' => 'Vui lòng nhập tên phòng ban.',
-            'name.unique'   => 'Tên phòng ban đã tồn tại.',
-            'name.max'      => 'Tên phòng ban không được vượt quá 100 ký tự.',
-            'description.string' => 'Mô tả phải là chuỗi.',
+            'name.required' => '⚠️ Vui lòng nhập tên phòng ban.',
+            'name.unique'   => '❌ Tên phòng ban đã tồn tại.',
+            'name.max'      => '⚠️ Tên phòng ban không được vượt quá 100 ký tự.',
+            'description.string' => '⚠️ Mô tả phải là chuỗi.',
+            'is_active.required' => '⚠️ Vui lòng chọn trạng thái.',
+            'is_active.in' => '⚠️ Trạng thái không hợp lệ.',
         ]);
 
-        $department->update($request->only('name', 'description'));
+        // ✅ Cập nhật phòng ban
+        $department->update($validated);
 
-        return redirect()->route('admin.departments.index')->with('success', '✅ Cập nhật phòng ban thành công!');
+        return redirect()->route('admin.departments.index')
+            ->with('success', '✅ Cập nhật phòng ban thành công!');
     }
+
+
+
+
 
     public function destroy(Department $department)
     {

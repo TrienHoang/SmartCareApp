@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreDoctorRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -65,29 +66,61 @@ class DoctorController extends Controller
         return view('admin.doctors.create', compact('availableUsers', 'departments', 'rooms'));
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'user_id' => 'required|numeric|exists:users,id',
-            'specialization' => 'required|string|max:100',
-            'department_id' => 'required|exists:departments,id',
-            'room_id' => 'required|exists:rooms,id',
-            'biography' => 'nullable|string|max:1000',
-        ], [
-            'user_id.required' => '🧑 Vui lòng chọn người dùng.',
-            'specialization.required' => '💼 Vui lòng nhập chuyên môn.',
-            'department_id.required' => '🏥 Vui lòng chọn phòng ban.',
-            'room_id.required' => '🏨 Vui lòng chọn phòng khám.',
-        ]);
 
-        if (Doctor::where('user_id', $validated['user_id'])->exists()) {
+
+    public function store(StoreDoctorRequest $request)
+    {
+        $validated = $request->validated();
+
+        $department = Department::find($validated['department_id']);
+        if (!$department || !$department->is_active) {
+            return back()->withInput()
+                ->with('error', '❌ Không thể thêm bác sĩ vào phòng ban đã ngừng hoạt động.');
+        }
+
+        $existingDoctor = Doctor::where('user_id', $validated['user_id'])->first();
+
+        if ($existingDoctor) {
+            if ($existingDoctor->department_id != $validated['department_id']) {
+                return back()->withInput()
+                    ->with('error', '⚠️ Người dùng này đã là bác sĩ ở phòng ban khác.');
+            }
+
             return back()->withInput()->with('error', '⚠️ Người dùng này đã là bác sĩ.');
         }
 
-        Doctor::create($validated);
+        DB::beginTransaction();
 
-        return redirect()->route('admin.doctors.index')->with('success', '✅ Thêm bác sĩ mới thành công.');
+        try {
+            $doctor = Doctor::create($validated);
+
+            Log::info('👨‍⚕️ Bác sĩ mới được tạo', [
+                'doctor_id'     => $doctor->id,
+                'user_id'       => $validated['user_id'],
+                'department_id' => $validated['department_id'],
+                'created_by'    => auth()->id(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.doctors.index')
+                ->with('success', '✅ Thêm bác sĩ mới thành công.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('❌ Lỗi khi thêm bác sĩ', [
+                'error'     => $e->getMessage(),
+                'user_id'   => $validated['user_id'],
+                'performed_by' => auth()->id(),
+            ]);
+
+            return back()->withInput()
+                ->with('error', '❌ Có lỗi xảy ra khi thêm bác sĩ. Vui lòng thử lại.');
+        }
     }
+
+
+
 
     public function edit(Doctor $doctor)
     {
@@ -102,17 +135,30 @@ class DoctorController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'specialization' => 'required|string|max:100',
-            'department_id' => 'required|exists:departments,id',
-            'room_id' => 'required|exists:rooms,id',
-            'biography' => 'nullable|string|max:1000',
-        ], [
-            'specialization.required' => '💼 Vui lòng nhập chuyên môn.',
-            'department_id.required' => '🏥 Vui lòng chọn phòng ban.',
-            'room_id.required' => '🏨 Vui lòng chọn phòng khám.',
+            'department_id'  => 'required|exists:departments,id',
+            'room_id'        => 'required|exists:rooms,id',
+            'biography'      => 'nullable|string|max:1000',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
+        }
+
+        $department = Department::find($request->department_id);
+        if (!$department || !$department->is_active) {
+            return back()->withInput()
+                ->with('error', '❌ Không thể chuyển bác sĩ sang phòng ban đã ngừng hoạt động.');
+        }
+
+        if ($request->department_id != $doctor->department_id) {
+            $hasDoctorInTargetDepartment = Doctor::where('department_id', $request->department_id)
+                ->where('id', '!=', $doctor->id)
+                ->exists();
+
+            if ($hasDoctorInTargetDepartment) {
+                return back()->withInput()
+                    ->with('error', '⚠️ Phòng ban này đã có bác sĩ. Vui lòng chọn phòng ban khác.');
+            }
         }
 
         try {
@@ -120,22 +166,27 @@ class DoctorController extends Controller
 
             $doctor->update([
                 'specialization' => $request->specialization,
-                'department_id' => $request->department_id,
-                'room_id' => $request->room_id,
-                'biography' => $request->biography,
+                'department_id'  => $request->department_id,
+                'room_id'        => $request->room_id,
+                'biography'      => $request->biography,
             ]);
 
             DB::commit();
 
             $name = $doctor->user->full_name ?? 'bác sĩ';
-            return redirect()->route('admin.doctors.index')->with('success', "✅ Đã cập nhật thông tin bác sĩ '{$name}' thành công!");
+            return redirect()->route('admin.doctors.index')
+                ->with('success', "✅ Cập nhật thông tin bác sĩ '{$name}' thành công!");
         } catch (\Exception $e) {
             DB::rollBack();
+
             Log::error('❌ Lỗi khi cập nhật bác sĩ: ' . $e->getMessage());
 
-            return back()->withInput()->with('error', '❌ Có lỗi xảy ra khi cập nhật. Vui lòng thử lại!');
+            return back()->withInput()
+                ->with('error', '❌ Có lỗi xảy ra khi cập nhật. Vui lòng thử lại!');
         }
     }
+
+
 
     public function destroy(Doctor $doctor)
     {
@@ -157,5 +208,13 @@ class DoctorController extends Controller
             return redirect()->route('admin.doctors.index')
                 ->with('error', '❌ Có lỗi xảy ra khi xóa bác sĩ. Vui lòng thử lại!');
         }
+    }
+
+    public function show(Doctor $doctor)
+    {
+        // Load các mối quan hệ liên quan nếu cần
+        $doctor->load(['user', 'department', 'room']);
+
+        return view('admin.doctors.show', compact('doctor'));
     }
 }
