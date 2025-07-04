@@ -165,6 +165,11 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
+        if ($doctor->status !== 'active') {
+            return back()->withErrors([
+                'doctor_id' => 'Bác sĩ hiện không hoạt động, vui lòng chọn bác sĩ khác.'
+            ])->withInput();
+        }
 
         // Kiểm tra xem bác sĩ có lịch hẹn trùng không
         $conflict = AppointmentHelper::isConflict(
@@ -356,6 +361,12 @@ class AppointmentController extends Controller
                 'service_id' => 'Dịch vụ bạn chọn thuộc chuyên khoa: ' . ($service->department->name ?? 'Không xác định') .
                     ', nhưng bác sĩ được chỉ định hiện thuộc chuyên khoa: ' . ($doctor->department->name ?? 'Không xác định') . '.' .
                     ' Bạn có thể chọn một trong các dịch vụ phù hợp: ' . $recommendedList . '.'
+            ])->withInput();
+        }
+
+        if ($doctor->status !== 'active') {
+            return back()->withErrors([
+                'doctor_id' => 'Bác sĩ hiện không hoạt động, vui lòng chọn bác sĩ khác.'
             ])->withInput();
         }
 
