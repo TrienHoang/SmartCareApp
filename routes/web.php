@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\admin\FaqController;
 use App\Http\Controllers\Admin\TaskController;
+use App\Http\Controllers\Admin\TreatmentPlanController;
 use App\Models\Admin_notification;
 use App\Models\Role;
 use App\Models\User;
@@ -612,7 +613,63 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     // API lấy dữ liệu sự kiện (task, appointment)
     Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
+    Route::group([
+        'prefix' => 'treatment-plans',
+        'as' => 'treatment-plans.',
+        'middleware' => ['auth', 'checkAdmin'] // ✅ chỉ giữ 2 middleware chung
+    ], function () {
+
+        // 1. Quản lý Danh sách Kế hoạch Điều trị
+        Route::get('/', [TreatmentPlanController::class, 'index'])->name('index');
+
+        // 2. Xem và Chỉnh sửa Chi tiết Kế hoạch Điều trị
+        Route::get('/{id}/edit', [TreatmentPlanController::class, 'edit'])->name('edit'); // Đổi từ /edit/{id} thành /{id}/edit
+        Route::put('/{id}/edit', [TreatmentPlanController::class, 'update'])->name('update'); // Đổi từ /edit/{id} thành /{id}/edit
+
+        // Xóa Kế hoạch Điều trị
+        Route::delete('/{id}/destroy', [TreatmentPlanController::class, 'destroy'])->name('destroy'); // Đổi từ /destroy/{id} thành /{id}/destroy
+
+        // Xem Chi tiết Kế hoạch Điều trị
+        Route::get('/{id}/show', [TreatmentPlanController::class, 'show'])->name('show'); // Đổi từ /show/{id} thành /{id}/show
+
+        // 4. Theo dõi Lịch sử và Kiểm soát Phiên bản
+        Route::get('/{id}/history', [TreatmentPlanController::class, 'history'])->name('history'); // Đổi tên từ logs sang history và đường dẫn
+
+        // 3. Theo dõi và Thống kê Tiến độ Điều trị (Dashboard tổng quan)
+        Route::get('/dashboard', [TreatmentPlanController::class, 'dashboard'])->name('dashboard');
+
+        // 5. Quản lý Bác sĩ và Chuyển giao Kế hoạch
+        Route::post('/{id}/transfer-doctor', [TreatmentPlanController::class, 'transferDoctor'])->name('transfer-doctor');
+
+        // 6. In ấn và Xuất báo cáo
+        Route::get('/{id}/export-pdf', [TreatmentPlanController::class, 'exportPdf'])->name('exportPdf');
+        Route::get('/{id}/export-excel', [TreatmentPlanController::class, 'exportExcel'])->name('exportExcel');
+        // Route để in chi tiết một kế hoạch
+        Route::delete('/{id}', [TreatmentPlanController::class, 'destroy'])->name('destroy');
+
+        Route::get('trash', [TreatmentPlanController::class, 'trash'])->name('trash');
+        Route::post('restore/{id}', [TreatmentPlanController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{id}', [TreatmentPlanController::class, 'forceDelete'])->name('force-delete');
+
+        Route::post('bulk-restore', [TreatmentPlanController::class, 'bulkRestore'])->name('bulkRestore');
+        Route::post('bulk-delete', [TreatmentPlanController::class, 'bulkDelete'])->name('bulkDelete');
+        Route::delete('empty-trash', [TreatmentPlanController::class, 'emptyTrash'])->name('emptyTrash');
+    });
+});
+
+
+// phân quyền bác sĩ
+// Route::get('/doctor/dashboard', function () {
+//     return view('doctor.dashboard');
+// })->name('doctor.dashboard');
+
+Route::prefix('doctor')->name('doctor.')->middleware('auth')->group(function () {
+    Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
+    // Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
 });
 require __DIR__ . '/client.php';
+
+
+
 // Trong routes/web.php hoặc routes/doctor.php
 require __DIR__ . '/doctor.php';
