@@ -4,55 +4,41 @@
 
 @section('content')
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-7 col-md-9">
-            <div class="card shadow-sm border-0 mt-4">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Chỉnh sửa lịch nghỉ</h4>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ route('doctor.leaves.update', $leave->id) }}">
-                        @csrf
-                        @method('PUT')
+    <h3 class="mb-4">Chỉnh sửa lịch nghỉ</h3>
 
-                        <div class="mb-3">
-                            <label for="start_date" class="form-label fw-semibold">Ngày bắt đầu <span class="text-danger">*</span></label>
-                            <input type="date" name="start_date" id="start_date" class="form-control @error('start_date') is-invalid @enderror"
-                                   value="{{ old('start_date', $leave->start_date) }}">
-                            @error('start_date')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="end_date" class="form-label fw-semibold">Ngày kết thúc <span class="text-danger">*</span></label>
-                            <input type="date" name="end_date" id="end_date" class="form-control @error('end_date') is-invalid @enderror"
-                                   value="{{ old('end_date', $leave->end_date) }}">
-                            @error('end_date')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="reason" class="form-label fw-semibold">Lý do <span class="text-danger">*</span></label>
-                            <textarea name="reason" id="reason" class="form-control @error('reason') is-invalid @enderror" rows="4" placeholder="Nhập lý do nghỉ">{{ old('reason', $leave->reason) }}</textarea>
-                            @error('reason')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i> Cập nhật
-                            </button>
-                            <a href="{{ route('doctor.leaves.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-1"></i> Quay lại
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+    {{-- Thông tin bác sĩ --}}
+    <div class="mb-4 border rounded p-3 bg-light">
+        <h5>Thông tin bác sĩ</h5>
+        <p><strong>Họ tên:</strong> {{ Auth::user()->full_name }}</p>
+        <p><strong>Tên đăng nhập:</strong> {{ Auth::user()->username }}</p>
+        <p><strong>Khoa:</strong> {{ Auth::user()->doctor->department->name ?? 'Chưa cập nhật' }}</p>
     </div>
+
+    {{-- Form sửa lịch nghỉ --}}
+    <form method="POST" action="{{ route('doctor.leaves.update', $leave->id) }}">
+        @csrf
+        @method('PUT')
+
+        <div class="mb-3">
+            <label for="start_date" class="form-label">Ngày bắt đầu</label>
+            <input type="date" name="start_date" class="form-control" value="{{ old('start_date', $leave->start_date) }}">
+            @error('start_date') <small class="text-danger">{{ $message }}</small> @enderror
+        </div>
+
+        <div class="mb-3">
+            <label for="end_date" class="form-label">Ngày kết thúc</label>
+            <input type="date" name="end_date" class="form-control" value="{{ old('end_date', $leave->end_date) }}">
+            @error('end_date') <small class="text-danger">{{ $message }}</small> @enderror
+        </div>
+
+        <div class="mb-3">
+            <label for="reason" class="form-label">Lý do</label>
+            <textarea name="reason" class="form-control" rows="4">{{ old('reason', $leave->reason) }}</textarea>
+            @error('reason') <small class="text-danger">{{ $message }}</small> @enderror
+        </div>
+
+        <button type="submit" class="btn btn-primary">Cập nhật</button>
+        <a href="{{ route('doctor.leaves.index') }}" class="btn btn-secondary">Hủy</a>
+    </form>
 </div>
 @endsection

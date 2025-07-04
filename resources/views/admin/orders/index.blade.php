@@ -294,9 +294,6 @@
                                                 <i class="bx bx-receipt text-muted" style="font-size: 48px;"></i>
                                                 <h5 class="mt-3 text-muted">Không có đơn hàng nào</h5>
                                                 <p class="text-muted">Chưa có đơn hàng nào được tạo hoặc không tìm thấy kết quả phù hợp.</p>
-                                                <a href="{{ route('orders.create') ?? '#' }}" class="btn btn-primary">
-                                                    <i class="bx bx-plus mr-1"></i>Tạo đơn hàng đầu tiên
-                                                </a>
                                             </div>
                                         </td>
                                     </tr>

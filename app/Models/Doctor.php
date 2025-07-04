@@ -28,9 +28,9 @@ class Doctor extends Model
     }
 
     public function doctor()
-{
-    return $this->hasOne(Doctor::class, 'user_id');
-}
+    {
+        return $this->hasOne(Doctor::class, 'user_id');
+    }
 
     public function department()
     {
@@ -42,8 +42,6 @@ class Doctor extends Model
         return $this->belongsTo(Room::class);
     }
 
-    
-
     public function appointments()
     {
         return $this->hasMany(Appointment::class);
@@ -54,44 +52,15 @@ class Doctor extends Model
         return $this->hasMany(DoctorLeave::class);
     }
     public function reviews()
-{
-    return $this->hasMany(\App\Models\Review::class, 'doctor_id', 'id');
-}
-
-    // --------------------
-    // Custom Methods
-    // --------------------
-
-    /**
-     * Kiểm tra bác sĩ có đang nghỉ hôm nay không (đã được duyệt).
-     */
-    public function isOnLeaveToday()
     {
-        $today = Carbon::today()->toDateString();
-
-        return $this->leaves()
-            ->where('approved', true)
-            ->whereDate('start_date', '<=', $today)
-            ->whereDate('end_date', '>=', $today)
-            ->exists();
+        return $this->hasMany(Review::class);
     }
-
-    /**
-     * Lấy danh sách ngày nghỉ hiện tại (đang diễn ra).
-     */
-    public function currentLeave()
+    public function file_uploads()
     {
-        $today = Carbon::today()->toDateString();
-
-        return $this->leaves()
-            ->where('approved', true)
-            ->whereDate('start_date', '<=', $today)
-            ->whereDate('end_date', '>=', $today)
-            ->first(); // hoặc ->get() nếu bạn muốn danh sách
+        return $this->hasMany(FileUpload::class);
     }
-
-
-    
-
-    
+    public function treatmentPlans()
+    {
+        return $this->hasMany(TreatmentPlan::class);
+    }
 }

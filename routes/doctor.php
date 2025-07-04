@@ -108,11 +108,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->prefix('doctor')->name('doctor.')->group(function () {
-    
+
     // Xem danh sách đánh giá
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
 
     // Cập nhật trạng thái hiển thị đánh giá (ẩn / hiện)
     Route::patch('/reviews/{review}/toggle', [ReviewController::class, 'toggleVisibility'])->name('reviews.toggle');
 });
-

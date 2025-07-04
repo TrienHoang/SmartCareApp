@@ -32,6 +32,9 @@
                 <li class="menu-item"><a href="{{ route('admin.users.index') }}" class="menu-link">
                         <div>Danh sách</div>
                     </a></li>
+                <li class="menu-item"><a href="{{ route('admin.users.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
             </ul>
         </li>
 
@@ -41,6 +44,9 @@
                 <div>Vai trò</div>
             </a>
             <ul class="menu-sub">
+                <li class="menu-item"><a href="{{ route('admin.roles.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
                 <li class="menu-item"><a href="{{ route('admin.roles.index') }}" class="menu-link">
                         <div>Danh sách</div>
                     </a></li>
@@ -56,6 +62,12 @@
                 <div>Quản lý bác sĩ</div>
             </a>
             <ul class="menu-sub">
+                <li class="menu-item"><a href="{{ route('admin.doctors.index') }}" class="menu-link">
+                        <div>Danh sách bác sĩ</div>
+                    </a></li>
+                <li class="menu-item"><a href="{{ route('admin.schedules.index') }}" class="menu-link">
+                        <div>Lịch làm việc bác sĩ</div>
+                    </a></li>
                 <li class="menu-item"><a href="{{ route('admin.doctors.index') }}" class="menu-link">
                         <div>Danh sách bác sĩ</div>
                     </a></li>
@@ -83,6 +95,12 @@
                         <div>Danh sách phòng ban</div>
                     </a>
                 </li>
+                <li class="menu-item"><a href="{{ route('admin.departments.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
+                <li class="menu-item"><a href="{{ route('admin.departments.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
             </ul>
         </li>
 
@@ -125,7 +143,16 @@
                         <div>Lịch làm việc</div>
                     </a>
                 </li>
+
             </ul>
+        </li>
+
+
+        <li class="menu-item">
+            <a href="{{ route('admin.treatment-plans.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-notepad"></i> <!-- Icon phù hợp với "kế hoạch điều trị" -->
+                <div>Quản lý kế hoạch điều trị</div>
+            </a>
         </li>
 
 
@@ -169,6 +196,9 @@
                 <div>Quản lý đơn hàng</div>
             </a>
             <ul class="menu-sub">
+                <li class="menu-item"><a href="{{ route('orders.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
                 <li class="menu-item"><a href="{{ route('orders.index') }}" class="menu-link">
                         <div>Danh sách</div>
                     </a></li>
@@ -221,6 +251,9 @@
                         <div>Danh Sách</div>
                     </a>
                 </li>
+                <li class="menu-item"><a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
             </ul>
         </li>
 

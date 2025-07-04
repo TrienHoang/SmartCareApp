@@ -47,9 +47,9 @@ class DoctorLeaveController extends Controller
         $end = Carbon::parse($request->end_date);
         $days = $start->diffInDays($end) + 1;
 
-        if ($days > 7) {
+        if ($days > 3) {
             return redirect()->back()
-                ->withErrors(['end_date' => 'Không được nghỉ quá 7 ngày.'])
+                ->withErrors(['end_date' => 'Không được nghỉ quá 3 ngày.'])
                 ->withInput();
         }
 
@@ -131,14 +131,13 @@ class DoctorLeaveController extends Controller
             'end_date.after_or_equal' => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
             'reason.required' => 'Vui lòng nhập lý do nghỉ phép.',
         ]);
-
         $start = Carbon::parse($request->start_date);
         $end = Carbon::parse($request->end_date);
         $days = $start->diffInDays($end) + 1;
 
-        if ($days > 7) {
+        if ($days > 3) {
             return redirect()->back()
-                ->withErrors(['end_date' => 'Không được nghỉ quá 7 ngày.'])
+                ->withErrors(['end_date' => 'Không được nghỉ quá 3 ngày.'])
                 ->withInput();
         }
 
