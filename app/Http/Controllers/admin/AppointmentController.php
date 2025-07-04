@@ -149,7 +149,7 @@ class AppointmentController extends Controller
         $timeOnly = $appointmentDate->format('H:i');
         $day = $appointmentDate->format('Y-m-d');
 
-        $doctor   = Doctor::with('department')->findOrFail($request->doctor_id);
+        $doctor = Doctor::with(['department', 'user'])->findOrFail($request->doctor_id);
         $service  = Service::with('department')->findOrFail($request->service_id);
 
         if ((int) $doctor->department_id !== (int) $service->department_id) {
@@ -165,7 +165,7 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        if ($doctor->status !== 'active') {
+        if ($doctor->user->status !== 'online') {
             return back()->withErrors([
                 'doctor_id' => 'Bác sĩ hiện không hoạt động, vui lòng chọn bác sĩ khác.'
             ])->withInput();
@@ -348,7 +348,7 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        $doctor = Doctor::with('department')->findOrFail($request->doctor_id);
+        $doctor = Doctor::with(['department', 'user'])->findOrFail($request->doctor_id);
         $service = Service::with('department')->findOrFail($request->service_id);
 
         if ((int) $doctor->department_id !== (int) $service->department_id) {
@@ -364,7 +364,7 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        if ($doctor->status !== 'active') {
+        if ($doctor->user->status !== 'online') {
             return back()->withErrors([
                 'doctor_id' => 'Bác sĩ hiện không hoạt động, vui lòng chọn bác sĩ khác.'
             ])->withInput();
