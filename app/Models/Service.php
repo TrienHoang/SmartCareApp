@@ -28,19 +28,24 @@ class Service extends Model
     {
         return $this->belongsTo(ServiceCategory::class, 'service_cate_id');
     }
-       public function appointments()
-{
-    return $this->hasMany(\App\Models\Appointment::class);
-}
+    public function appointments()
+    {
+        return $this->hasMany(\App\Models\Appointment::class);
+    }
 
     public function orders()
     {
         return $this->belongsToMany(Order::class, 'order_service')
-                    ->withPivot('quantity', 'price')
-                    ->withTimestamps();
+            ->withPivot('quantity', 'price')
+            ->withTimestamps();
     }
 
-    public function department(){
+    public function department()
+    {
         return $this->belongsTo(Department::class);
+    }
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
     }
 }

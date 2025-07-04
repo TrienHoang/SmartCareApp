@@ -59,6 +59,7 @@ $this->call([
             // NotificationSeeder::class,
             //   FaqSeeder::class,
             ReviewSeeder::class,
+            DoctorServiceSeeder::class,
         ]);
         
     }

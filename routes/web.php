@@ -256,6 +256,12 @@ Route::group([
 
         Route::post('/{id}/pay', [AppointmentController::class, 'pay'])
             ->middleware('check_permission:edit_appointments')->name('pay');
+
+        Route::get('/doctor/{doctor}/services', [AppointmentController::class, 'getDoctorServices'])
+            ->name('doctor.services');
+
+        Route::get('/doctor/{doctor}/working-days', [AppointmentController::class, 'getDoctorWorkingDays'])
+            ->name('doctor.working-days');
     });
     // quản lý đơn thuốc
     Route::group([
