@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Support\Facades\Log; // Thêm dòng này ở đầu file
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\Department;
 use Illuminate\Http\Request;
@@ -10,12 +10,10 @@ use Illuminate\Validation\Rule;
 
 class DepartmentController extends Controller
 {
-
-
     public function index(Request $request)
     {
-        $query = Department::with(['doctors.user']) // nhiều bác sĩ, lấy luôn user
-            ->withCount('doctors');
+        $query = Department::with(['doctors.user'])
+            ->withCount(['doctors', 'services']);
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -43,9 +41,6 @@ class DepartmentController extends Controller
         return view('admin.departments.index', compact('departments'));
     }
 
-
-
-
     public function create()
     {
         return view('admin.departments.create');
@@ -67,7 +62,7 @@ class DepartmentController extends Controller
         ]);
 
         Department::create([
-            'name'        => $validated['name'],
+            'name'        => trim($validated['name']),
             'description' => $validated['description'] ?? null,
             'is_active'   => $validated['is_active'] == '1' ? 1 : 0,
         ]);
@@ -76,22 +71,13 @@ class DepartmentController extends Controller
             ->with('success', '✅ Thêm phòng ban thành công!');
     }
 
-
-
-
-
-
     public function edit(Department $department)
     {
         return view('admin.departments.edit', compact('department'));
     }
 
-
-
-
     public function update(Request $request, Department $department)
     {
-        // ✅ Validate dữ liệu vào
         $validated = $request->validate([
             'name' => [
                 'required',
@@ -100,7 +86,7 @@ class DepartmentController extends Controller
                 Rule::unique('departments')->ignore($department->id),
             ],
             'description' => 'nullable|string',
-            'is_active' => 'required|in:0,1', // 👈 xử lý trạng thái hoạt động
+            'is_active' => 'required|in:0,1',
         ], [
             'name.required' => '⚠️ Vui lòng nhập tên phòng ban.',
             'name.unique'   => '❌ Tên phòng ban đã tồn tại.',
@@ -110,24 +96,18 @@ class DepartmentController extends Controller
             'is_active.in' => '⚠️ Trạng thái không hợp lệ.',
         ]);
 
-        // ✅ Cập nhật phòng ban
         $department->update($validated);
 
         return redirect()->route('admin.departments.index')
             ->with('success', '✅ Cập nhật phòng ban thành công!');
     }
 
-
-
-
-
     public function destroy(Department $department)
     {
         try {
-            // Kiểm tra nếu có bác sĩ thuộc phòng ban này
-            if ($department->doctors()->exists()) {
+            if ($department->doctors()->exists() || $department->services()->exists()) {
                 return redirect()->route('admin.departments.index')
-                    ->with('error', "❌ Không thể xóa phòng ban '{$department->name}' vì đang được sử dụng bởi bác sĩ!");
+                    ->with('error', "❌ Không thể xóa phòng ban '{$department->name}' vì đang được sử dụng bởi bác sĩ hoặc dịch vụ!");
             }
 
             $department->delete();
@@ -141,4 +121,18 @@ class DepartmentController extends Controller
                 ->with('error', '⚠️ Có lỗi xảy ra khi xóa phòng ban. Vui lòng thử lại sau!');
         }
     }
+
+public function show(Department $department)
+{
+    $department->load([
+        'doctors.user',
+        'rooms',
+        'services' => function ($query) {
+            $query->where('status', 'active') // 👉 chỉ dịch vụ đang hoạt động
+                  ->orderBy('name');
+        },
+    ]);
+
+    return view('admin.departments.show', compact('department'));
+}
 }

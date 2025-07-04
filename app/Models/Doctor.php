@@ -27,6 +27,11 @@ class Doctor extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function doctor()
+{
+    return $this->hasOne(Doctor::class, 'user_id');
+}
+
     public function department()
     {
         return $this->belongsTo(Department::class);
@@ -36,6 +41,8 @@ class Doctor extends Model
     {
         return $this->belongsTo(Room::class);
     }
+
+    
 
     public function appointments()
     {
@@ -82,6 +89,9 @@ class Doctor extends Model
             ->whereDate('end_date', '>=', $today)
             ->first(); // hoặc ->get() nếu bạn muốn danh sách
     }
+
+
+    
 
     
 }

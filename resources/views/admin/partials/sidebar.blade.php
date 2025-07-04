@@ -78,9 +78,11 @@
                 <div>Quản lý phòng ban</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item"><a href="{{ route('admin.departments.index') }}" class="menu-link">
-                        <div>Danh sách</div>
-                    </a></li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.departments.index') }}" class="menu-link">
+                        <div>Danh sách phòng ban</div>
+                    </a>
+                </li>
             </ul>
         </li>
 
@@ -216,7 +218,7 @@
             <ul class="menu-sub">
                 <li class="menu-item">
                     <a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
-                        <div>List</div>
+                        <div>Danh Sách</div>
                     </a>
                 </li>
             </ul>

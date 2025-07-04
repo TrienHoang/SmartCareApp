@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
 
 class Department extends Model
 {
@@ -11,11 +12,20 @@ class Department extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'is_active'
-
     ];
 
+    protected $with = ['doctors', 'rooms', 'services'];
+
+    // Scope phòng ban đang hoạt động
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', 1);
+    }
+
+    // Quan hệ
     public function doctors()
     {
         return $this->hasMany(Doctor::class);
@@ -26,8 +36,25 @@ class Department extends Model
         return $this->hasMany(Room::class, 'department_id');
     }
 
-    public function doctor()
+    public function services()
     {
-        return $this->hasOne(Doctor::class);
+        return $this->hasMany(Service::class, 'department_id');
+    }
+
+    // Tự động tạo slug
+    protected static function booted()
+    {
+        static::creating(function ($department) {
+            $department->slug = Str::slug($department->name);
+        });
+
+        static::updating(function ($department) {
+            $department->slug = Str::slug($department->name);
+        });
+    }
+
+    public function activeServices()
+    {
+        return $this->hasMany(Service::class)->where('status', 'active');
     }
 }

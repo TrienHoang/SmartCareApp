@@ -71,11 +71,20 @@
                 </a>
             </li>
             <li class="menu-item">
-                <a href="{{ route('doctor.leaves.index') }}" class="menu-link">
-             <i class="menu-icon tf-icons bx bx-calendar-x"></i>
-            <div>Lịch nghỉ phép</div>
-</a>
+                <a href="{{ route('doctor.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-user"></i>
+                    <div>Bác Sĩ</div>
+                </a>
             </li>
+
+            <li class="menu-item">
+                <a href="{{ route('doctor.reviews.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-star"></i>
+                    <div>Đánh giá của bệnh nhân</div>
+                </a>
+            </li>
+
+
         @endif
 
     </ul>

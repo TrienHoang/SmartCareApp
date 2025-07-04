@@ -72,32 +72,42 @@ class DoctorController extends Controller
     {
         $validated = $request->validated();
 
+        // ✅ Kiểm tra phòng ban có hoạt động
         $department = Department::find($validated['department_id']);
         if (!$department || !$department->is_active) {
             return back()->withInput()
                 ->with('error', '❌ Không thể thêm bác sĩ vào phòng ban đã ngừng hoạt động.');
         }
 
+        // ✅ Kiểm tra người dùng đã là bác sĩ chưa
         $existingDoctor = Doctor::where('user_id', $validated['user_id'])->first();
-
         if ($existingDoctor) {
-            if ($existingDoctor->department_id != $validated['department_id']) {
-                return back()->withInput()
-                    ->with('error', '⚠️ Người dùng này đã là bác sĩ ở phòng ban khác.');
-            }
+            return back()->withInput()
+                ->with('error', '⚠️ Người dùng này đã là bác sĩ.');
+        }
 
-            return back()->withInput()->with('error', '⚠️ Người dùng này đã là bác sĩ.');
+        // ✅ Kiểm tra phòng khám đã có bác sĩ chưa
+        $roomTaken = Doctor::where('room_id', $validated['room_id'])->exists();
+        if ($roomTaken) {
+            return back()->withInput()
+                ->with('error', '❌ Phòng khám này đã được phân cho bác sĩ khác.');
         }
 
         DB::beginTransaction();
-
         try {
-            $doctor = Doctor::create($validated);
+            $doctor = Doctor::create([
+                'user_id'       => $validated['user_id'],
+                'department_id' => $validated['department_id'],
+                'room_id'       => $validated['room_id'],
+                'specialization' => $validated['specialization'],
+                'biography'     => $validated['biography'] ?? null,
+            ]);
 
             Log::info('👨‍⚕️ Bác sĩ mới được tạo', [
                 'doctor_id'     => $doctor->id,
-                'user_id'       => $validated['user_id'],
-                'department_id' => $validated['department_id'],
+                'user_id'       => $doctor->user_id,
+                'department_id' => $doctor->department_id,
+                'room_id'       => $doctor->room_id,
                 'created_by'    => auth()->id(),
             ]);
 
@@ -118,6 +128,7 @@ class DoctorController extends Controller
                 ->with('error', '❌ Có lỗi xảy ra khi thêm bác sĩ. Vui lòng thử lại.');
         }
     }
+
 
 
 
@@ -144,20 +155,32 @@ class DoctorController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
+        // ✅ Kiểm tra phòng ban có hoạt động
         $department = Department::find($request->department_id);
         if (!$department || !$department->is_active) {
             return back()->withInput()
                 ->with('error', '❌ Không thể chuyển bác sĩ sang phòng ban đã ngừng hoạt động.');
         }
 
+        // ✅ Giới hạn tối đa 3 bác sĩ trong cùng 1 phòng ban
         if ($request->department_id != $doctor->department_id) {
-            $hasDoctorInTargetDepartment = Doctor::where('department_id', $request->department_id)
+            $doctorCount = Doctor::where('department_id', $request->department_id)->count();
+
+            if ($doctorCount >= 3) {
+                return back()->withInput()
+                    ->with('error', '⚠️ Phòng ban này đã đủ 3 bác sĩ. Vui lòng chọn phòng ban khác.');
+            }
+        }
+
+        // ✅ Đảm bảo mỗi phòng khám chỉ có 1 bác sĩ
+        if ($request->room_id != $doctor->room_id) {
+            $roomUsed = Doctor::where('room_id', $request->room_id)
                 ->where('id', '!=', $doctor->id)
                 ->exists();
 
-            if ($hasDoctorInTargetDepartment) {
+            if ($roomUsed) {
                 return back()->withInput()
-                    ->with('error', '⚠️ Phòng ban này đã có bác sĩ. Vui lòng chọn phòng ban khác.');
+                    ->with('error', '❌ Phòng khám này đã được phân cho bác sĩ khác.');
             }
         }
 
@@ -185,6 +208,7 @@ class DoctorController extends Controller
                 ->with('error', '❌ Có lỗi xảy ra khi cập nhật. Vui lòng thử lại!');
         }
     }
+
 
 
 
