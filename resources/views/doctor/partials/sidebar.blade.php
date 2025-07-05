@@ -38,7 +38,7 @@
             <li class="menu-header small text-uppercase"><span class="menu-header-text">Bác sĩ</span></li>
 
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="{{ route('doctor.appointments.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-calendar"></i>
                     <div>Lịch hẹn của tôi</div>
                 </a>
@@ -63,6 +63,11 @@
                     <div>Đơn thuốc</div>
                 </a>
             </li>
+            <li class="menu-item">
+                <a href="{{ route('doctor.reviews.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-star"></i>
+                    <div>Đánh giá từ bệnh nhân</div>
+                </a>
 
             <li class="menu-item">
                 <a href="#" class="menu-link">

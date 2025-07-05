@@ -3,12 +3,14 @@
 use App\Http\Controllers\doctor\DoctorController;
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Http\Controllers\Doctor\DoctorLeaveController;
-use App\Http\Controllers\doctor\FileUploadController;
+use App\Http\Controllers\Doctor\FileUploadController;
 use App\Http\Controllers\Doctor\PrescriptionController;
 use App\Http\Controllers\Doctor\ReviewController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Doctor\DoctorReviewController;
+use App\Http\Controllers\Doctor\DoctorAppointmentController;
 
 // ✅ Redirect khi truy cập /doctor/dashboard
 Route::middleware(['auth', 'checkRole:doctor'])
@@ -116,3 +118,9 @@ Route::middleware(['auth'])->prefix('doctor')->name('doctor.')->group(function (
     // Cập nhật trạng thái hiển thị đánh giá (ẩn / hiện)
     Route::patch('/reviews/{review}/toggle', [ReviewController::class, 'toggleVisibility'])->name('reviews.toggle');
 });
+
+        // 🟧 Reviews
+        Route::get('/reviews', [DoctorReviewController::class, 'index'])->name('reviews.index');
+
+        // 🟪 Appointments
+        Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');

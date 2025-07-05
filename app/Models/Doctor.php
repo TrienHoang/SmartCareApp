@@ -47,10 +47,7 @@ class Doctor extends Model
         return $this->hasMany(Appointment::class);
     }
 
-    public function leaves()
-    {
-        return $this->hasMany(DoctorLeave::class);
-    }
+
     public function reviews()
     {
         return $this->hasMany(Review::class);
@@ -62,5 +59,23 @@ class Doctor extends Model
     public function treatmentPlans()
     {
         return $this->hasMany(TreatmentPlan::class);
+    }
+    
+
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'doctor_service');
+    }
+
+    public function workingSchedules()
+    {
+        return $this->hasMany(WorkingSchedule::class);
+    }
+
+    public function leaves()
+    {
+        return $this->hasMany(DoctorLeave::class)
+            ->where('approved', true)
+            ->whereNull('deleted_at');
     }
 }
