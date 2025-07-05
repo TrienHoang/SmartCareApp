@@ -127,6 +127,14 @@
         </li>
 
 
+        <li class="menu-item">
+            <a href="{{ route('admin.treatment-plans.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-notepad"></i> <!-- Icon phù hợp với "kế hoạch điều trị" -->
+                <div>Quản lý kế hoạch điều trị</div>
+            </a>
+        </li>
+
+
 
         <!-- Dịch vụ & đơn thuốc -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Dịch vụ & đơn thuốc</span></li>
@@ -214,11 +222,9 @@
                 <div>lịch sử thanh toán</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
-                        <div>List</div>
-                    </a>
-                </li>
+                <li class="menu-item"><a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
             </ul>
         </li>
 

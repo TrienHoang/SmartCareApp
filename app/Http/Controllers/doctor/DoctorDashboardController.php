@@ -3,160 +3,217 @@
 namespace App\Http\Controllers\Doctor;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Doctor;
 use App\Models\Appointment;
+use App\Models\Doctor;
+use App\Models\Prescription;
+use App\Models\Review;
+use App\Models\Room;
+use App\Models\WorkingSchedule;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\DoctorStatsExport;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class DoctorDashboardController extends Controller
 {
-    public function index(Request $request, $doctorId = null)
+    public function index(Request $request)
     {
-        $user = auth()->user();
-        $doctor = $user->doctor ?? Doctor::find($doctorId);
+        $doctor = Doctor::where('user_id', Auth::id())->firstOrFail();
 
-        if (!$doctor) {
-            abort(403, 'Không tìm thấy thông tin bác sĩ.');
-        }
-
-        // Nếu không có type thì mặc định là tháng hiện tại
-        $request->merge([
-            'type' => $request->input('type', 'month'),
-            'year' => $request->input('year', now()->year),
-        ]);
-
-        // Validate dữ liệu lọc
-        $validator = Validator::make($request->all(), [
-            'type' => 'required|in:month,year,custom',
-            'year' => 'required_if:type,month,year|nullable|integer|min:2000|max:' . now()->year,
-            'start_date' => 'required_if:type,custom|date|nullable',
-            'end_date' => 'required_if:type,custom|date|nullable|after_or_equal:start_date',
-        ], [
-            'type.required' => 'Vui lòng chọn loại thống kê.',
-            'type.in' => 'Loại thống kê không hợp lệ.',
-            'year.required_if' => 'Vui lòng nhập năm.',
-            'year.integer' => 'Năm phải là số nguyên.',
-            'year.min' => 'Năm phải từ 2000 trở lên.',
-            'year.max' => 'Năm không được vượt quá hiện tại.',
-            'start_date.required_if' => 'Vui lòng chọn ngày bắt đầu.',
-            'start_date.date' => 'Ngày bắt đầu không hợp lệ.',
-            'end_date.required_if' => 'Vui lòng chọn ngày kết thúc.',
-            'end_date.date' => 'Ngày kết thúc không hợp lệ.',
-            'end_date.after_or_equal' => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        $type = $request->input('type');
-        $year = (int)$request->input('year');
+        $type = $request->input('type', 'month');
+        $year = $request->input('year', now()->year);
+        $month = $request->input('month', now()->month);
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
-        // Xử lý khoảng thời gian thống kê
-        $labels = [];
-        $appointmentsByTime = [];
-        $revenueByTime = [];
+        $request->validate([
+            'type' => 'in:month,year,custom',
+            'year' => 'required_if:type,month,year|integer|min:2000|max:' . now()->year,
+            'month' => 'required_if:type,month|integer|min:1|max:12',
+            'start_date' => 'required_if:type,custom|date',
+            'end_date' => 'required_if:type,custom|date|after_or_equal:start_date',
+        ]);
 
-        switch ($type) {
-            case 'month':
-                for ($month = 1; $month <= 12; $month++) {
-                    $labels[] = "Tháng $month";
-                    $appointments = Appointment::where('doctor_id', $doctor->id)
-                        ->whereYear('appointment_time', $year)
-                        ->whereMonth('appointment_time', $month);
-                    $appointmentsByTime[] = $appointments->count();
-                    $revenueByTime[] = $appointments->join('services', 'appointments.service_id', '=', 'services.id')
-                        ->where('appointments.status', 'completed')->sum('services.price');
-                }
-                break;
+        // Query lịch hẹn
+        $appointmentsQuery = Appointment::with(['service'])
+            ->where('doctor_id', $doctor->id)
+            ->select('id', 'patient_id', 'doctor_id', 'service_id', 'appointment_time', 'status');
 
-            case 'year':
-                for ($i = $year - 5; $i <= $year; $i++) {
-                    $labels[] = "Năm $i";
-                    $appointments = Appointment::where('doctor_id', $doctor->id)
-                        ->whereYear('appointment_time', $i);
-                    $appointmentsByTime[] = $appointments->count();
-                    $revenueByTime[] = $appointments->join('services', 'appointments.service_id', '=', 'services.id')
-                        ->where('appointments.status', 'completed')->sum('services.price');
-                }
-                break;
-
-            case 'custom':
-                $start = Carbon::parse($startDate)->startOfDay();
-                $end = Carbon::parse($endDate)->endOfDay();
-
-                if ($start->diffInDays($end) > 62) {
-                    return redirect()->back()->with('error', 'Khoảng thời gian thống kê tối đa là 62 ngày.');
-                }
-
-                $current = $start->copy();
-                while ($current->lte($end)) {
-                    $label = $current->format('d/m');
-                    $labels[] = $label;
-
-                    $appointments = Appointment::where('doctor_id', $doctor->id)
-                        ->whereDate('appointment_time', $current);
-                    $appointmentsByTime[] = $appointments->count();
-                    $revenueByTime[] = $appointments->join('services', 'appointments.service_id', '=', 'services.id')
-                        ->where('appointments.status', 'completed')->sum('services.price');
-
-                    $current->addDay();
-                }
-                break;
+        if ($type === 'month') {
+            $appointmentsQuery->whereYear('appointment_time', $year)
+                ->whereMonth('appointment_time', $month);
+        } elseif ($type === 'year') {
+            $appointmentsQuery->whereYear('appointment_time', $year);
+        } elseif ($type === 'custom' && $startDate && $endDate) {
+            $start = Carbon::parse($startDate);
+            $end = Carbon::parse($endDate);
+            if ($end->diffInDays($start) > 62) {
+                return redirect()->back()->withErrors(['end_date' => 'Khoảng thời gian tối đa là 62 ngày.']);
+            }
+            $appointmentsQuery->whereBetween('appointment_time', [$startDate, $endDate]);
         }
 
-        // Dữ liệu thống kê tổng
-        $today = now()->toDateString();
-
-        $totalRevenue = Appointment::join('services', 'appointments.service_id', '=', 'services.id')
-            ->where('doctor_id', $doctor->id)
-            ->where('appointments.status', 'completed')
-            ->sum('services.price');
-
-        $totalPatients = Appointment::where('doctor_id', $doctor->id)
-            ->whereNotNull('patient_id')
-            ->distinct('patient_id')->count('patient_id');
-
+        // Tổng hợp lịch hẹn
+        $totalAppointments = $appointmentsQuery->count();
         $todayAppointments = Appointment::where('doctor_id', $doctor->id)
-            ->whereDate('appointment_time', $today)
+            ->whereDate('appointment_time', now()->toDateString())
             ->count();
 
-        $appointments_pending = Appointment::where('doctor_id', $doctor->id)->where('status', 'pending')->count();
-        $appointments_confirmed = Appointment::where('doctor_id', $doctor->id)->where('status', 'confirmed')->count();
-        $appointments_completed = Appointment::where('doctor_id', $doctor->id)->where('status', 'completed')->count();
-        $appointments_cancelled = Appointment::where('doctor_id', $doctor->id)->where('status', 'cancelled')->count();
+        $appointments_pending = $appointmentsQuery->clone()->where('status', 'pending')->count();
+        $appointments_confirmed = $appointmentsQuery->clone()->where('status', 'confirmed')->count();
+        $appointments_completed = $appointmentsQuery->clone()->where('status', 'completed')->count();
+        $appointments_cancelled = $appointmentsQuery->clone()->where('status', 'cancelled')->count();
 
-        $totalAppointments = Appointment::where('doctor_id', $doctor->id)->count();
+        $totalRevenue = $appointmentsQuery->clone()
+            ->where('status', 'completed')
+            ->with('service')
+            ->get()
+            ->sum(fn($a) => $a->service->price ?? 0);
+
+        $totalPatients = $appointmentsQuery->clone()->distinct('patient_id')->count('patient_id');
+
+        $successRate = $totalAppointments > 0 ? round(($appointments_completed / $totalAppointments) * 100, 1) : 0;
+        $cancelRate = $totalAppointments > 0 ? round(($appointments_cancelled / $totalAppointments) * 100, 1) : 0;
+
+        $statLabels = [];
+        $statBookings = [];
+        $statRevenue = [];
+
+        if ($type === 'month') {
+            $daysInMonth = Carbon::create($year, $month)->daysInMonth;
+            for ($day = 1; $day <= $daysInMonth; $day++) {
+                $date = Carbon::create($year, $month, $day)->toDateString();
+                $statLabels[] = "Ngày $day";
+                $statBookings[] = Appointment::where('doctor_id', $doctor->id)
+                    ->whereDate('appointment_time', $date)
+                    ->count();
+                $statRevenue[] = Appointment::where('doctor_id', $doctor->id)
+                    ->whereDate('appointment_time', $date)
+                    ->where('status', 'completed')
+                    ->with('service')
+                    ->get()
+                    ->sum(fn($a) => $a->service->price ?? 0);
+            }
+        } elseif ($type === 'year') {
+            for ($m = 1; $m <= 12; $m++) {
+                $statLabels[] = "Tháng $m";
+                $statBookings[] = Appointment::where('doctor_id', $doctor->id)
+                    ->whereYear('appointment_time', $year)
+                    ->whereMonth('appointment_time', $m)
+                    ->count();
+                $statRevenue[] = Appointment::where('doctor_id', $doctor->id)
+                    ->whereYear('appointment_time', $year)
+                    ->whereMonth('appointment_time', $m)
+                    ->where('status', 'completed')
+                    ->with('service')
+                    ->get()
+                    ->sum(fn($a) => $a->service->price ?? 0);
+            }
+        } elseif ($type === 'custom') {
+            $start = Carbon::parse($startDate);
+            $end = Carbon::parse($endDate);
+            $days = $start->diffInDays($end) + 1;
+            for ($i = 0; $i < $days; $i++) {
+                $date = $start->copy()->addDays($i)->toDateString();
+                $statLabels[] = $date;
+                $statBookings[] = Appointment::where('doctor_id', $doctor->id)
+                    ->whereDate('appointment_time', $date)
+                    ->count();
+                $statRevenue[] = Appointment::where('doctor_id', $doctor->id)
+                    ->whereDate('appointment_time', $date)
+                    ->where('status', 'completed')
+                    ->with('service')
+                    ->get()
+                    ->sum(fn($a) => $a->service->price ?? 0);
+            }
+        }
+
+        // Tăng trưởng
+        $previousPeriod = Appointment::where('doctor_id', $doctor->id);
+
+        if ($type === 'month') {
+            $previousPeriod->whereYear('appointment_time', $month == 1 ? $year - 1 : $year)
+                ->whereMonth('appointment_time', $month == 1 ? 12 : $month - 1);
+            $growthLabel = 'So với tháng trước';
+        } elseif ($type === 'year') {
+            $previousPeriod->whereYear('appointment_time', $year - 1);
+            $growthLabel = 'So với năm trước';
+        } elseif ($type === 'custom') {
+            $start = Carbon::parse($startDate);
+            $days = Carbon::parse($endDate)->diffInDays($start);
+            $previousPeriod->whereBetween('appointment_time', [
+                $start->copy()->subDays($days + 1)->toDateString(),
+                $start->copy()->subDay()->toDateString()
+            ]);
+            $growthLabel = 'So với kỳ trước';
+        }
+
+        $currentBookings = $appointmentsQuery->count();
+        $previousBookings = $previousPeriod->count();
+        $growthValue = $previousBookings > 0 ? round((($currentBookings - $previousBookings) / $previousBookings) * 100, 1) : ($currentBookings > 0 ? 100 : 0);
+
+        $currentRevenue = $appointmentsQuery->clone()
+            ->where('status', 'completed')->with('service')
+            ->get()->sum(fn($a) => $a->service->price ?? 0);
+
+        $previousRevenue = $previousPeriod->clone()
+            ->where('status', 'completed')->with('service')
+            ->get()->sum(fn($a) => $a->service->price ?? 0);
+
+        $revenueGrowth = $previousRevenue > 0 ? round((($currentRevenue - $previousRevenue) / $previousRevenue) * 100, 1) : ($currentRevenue > 0 ? 100 : 0);
+        $revenueLabel = $growthLabel;
+
+        // Lịch làm việc (ca trực)
+        $schedulesQuery = WorkingSchedule::with('room')->where('doctor_id', $doctor->id);
+        if ($request->filled('day_of_week')) {
+            $schedulesQuery->where('day_of_week', $request->get('day_of_week'));
+        }
+        if ($request->filled('month') && $request->filled('year')) {
+            $schedulesQuery->whereMonth('day', $month)->whereYear('day', $year);
+        }
+        $schedules = $schedulesQuery->paginate(10)->withQueryString();
+
+        // Thống kê số ca trực
+        $scheduleStats = WorkingSchedule::where('doctor_id', $doctor->id);
+        if ($type === 'month') {
+            $scheduleStats->whereYear('day', $year)->whereMonth('day', $month);
+        } elseif ($type === 'year') {
+            $scheduleStats->whereYear('day', $year);
+        } elseif ($type === 'custom' && $startDate && $endDate) {
+            $scheduleStats->whereBetween('day', [$startDate, $endDate]);
+        }
+        $totalSchedules = $scheduleStats->count();
+        $todaySchedules = WorkingSchedule::where('doctor_id', $doctor->id)
+            ->whereDate('day', now()->toDateString())->count();
+
+        // Toa thuốc và đánh giá
+        $stats = [
+            'total_appointments' => $totalAppointments,
+            'today_appointments' => $todayAppointments,
+            'upcoming_appointments' => Appointment::where('doctor_id', $doctor->id)
+                ->where('appointment_time', '>=', now())->count(),
+            'total_prescriptions' => Prescription::where('doctor_id', $doctor->id)->count(),
+            'today_prescriptions' => Prescription::where('doctor_id', $doctor->id)
+                ->whereDate('created_at', now())->count(),
+            'average_rating' => Review::where('doctor_id', $doctor->id)->avg('rating') ?? 0,
+            'total_reviews' => Review::where('doctor_id', $doctor->id)->count(),
+            'today_schedules' => $todaySchedules,
+            'total_schedules' => $totalSchedules,
+        ];
+
+        $doctor->average_rating = number_format($stats['average_rating'], 1) ?: '-';
+        $rooms = Room::all();
+
         $successAppointments = $appointments_completed;
         $cancelAppointments = $appointments_cancelled;
 
-        $successRate = $totalAppointments > 0 ? round(($successAppointments / $totalAppointments) * 100, 2) : 0;
-        $cancelRate = $totalAppointments > 0 ? round(($cancelAppointments / $totalAppointments) * 100, 2) : 0;
-
-        // Tăng trưởng theo thời gian
-        $last = count($appointmentsByTime) > 1 ? $appointmentsByTime[count($appointmentsByTime) - 2] : 0;
-        $current = $appointmentsByTime[count($appointmentsByTime) - 1] ?? 0;
-
-        $growthValue = $last == 0 ? ($current > 0 ? 100 : 0) : round((($current - $last) / $last) * 100, 2);
-        $growthLabel = "So với kỳ trước";
-
-        $lastRevenue = count($revenueByTime) > 1 ? $revenueByTime[count($revenueByTime) - 2] : 0;
-        $currentRevenue = $revenueByTime[count($revenueByTime) - 1] ?? 0;
-
-        $revenueGrowth = $lastRevenue == 0 ? ($currentRevenue > 0 ? 100 : 0) : round((($currentRevenue - $lastRevenue) / $lastRevenue) * 100, 2);
-        $revenueLabel = "So với kỳ trước";
-
         return view('doctor.dashboard.index', compact(
             'doctor',
-            'type',
+            'schedules',
+            'rooms',
+            'stats',
             'totalRevenue',
             'totalPatients',
             'todayAppointments',
@@ -164,104 +221,138 @@ class DoctorDashboardController extends Controller
             'appointments_confirmed',
             'appointments_completed',
             'appointments_cancelled',
-            'totalAppointments',
-            'successAppointments',
-            'cancelAppointments',
+            'statLabels',
+            'statBookings',
+            'statRevenue',
+            'growthValue',
+            'revenueGrowth',
             'successRate',
             'cancelRate',
-            'growthValue',
             'growthLabel',
-            'revenueGrowth',
             'revenueLabel',
-            'labels',
-            'appointmentsByTime',
-            'revenueByTime'
-        ))->with([
-            'statLabels' => $labels,
-            'statBookings' => $appointmentsByTime,
-            'statRevenue' => $revenueByTime,
-        ]);
+            'type',
+            'successAppointments',
+            'cancelAppointments',
+            'successAppointments',
+            'totalAppointments'
+        ));
     }
-    public function exportExcel($doctorId)
+
+    public function exportExcel(Request $request, $doctorId)
     {
         $doctor = Doctor::findOrFail($doctorId);
+        return Excel::download(new DoctorStatsExport($doctor, $request->all()), 'doctor_stats_' . $doctorId . '.xlsx');
+    }
 
-        $totalPatients = Appointment::where('doctor_id', $doctorId)
-            ->whereNotNull('patient_id')
-            ->distinct('patient_id')
-            ->count();
+    public function exportPdf(Request $request, $doctorId)
+    {
+        $doctor = Doctor::findOrFail($doctorId);
+        $type = $request->input('type', 'month');
+        $year = $request->input('year', now()->year);
+        $month = $request->input('month', now()->month);
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
-        $todayAppointments = Appointment::where('doctor_id', $doctorId)
-            ->whereDate('appointment_time', today())
-            ->count();
+        $appointmentsQuery = Appointment::with(['service'])
+            ->where('doctor_id', $doctor->id)
+            ->select('id', 'patient_id', 'doctor_id', 'service_id', 'appointment_time', 'status');
 
-        $totalRevenue = Appointment::join('services', 'appointments.service_id', '=', 'services.id')
-            ->where('appointments.doctor_id', $doctorId)
-            ->where('appointments.status', 'completed')
-            ->sum('services.price');
-
-        $visitsChart = collect();
-        $startDate = Carbon::now()->subDays(6)->startOfDay();
-        $endDate = Carbon::now()->endOfDay();
-        $dateRange = new \DatePeriod($startDate, new \DateInterval('P1D'), $endDate->copy()->addDay());
-
-        foreach ($dateRange as $date) {
-            $count = Appointment::where('doctor_id', $doctorId)
-                ->where('status', 'completed')
-                ->whereDate('appointment_time', $date->format('Y-m-d'))
-                ->count();
-            $visitsChart->push([
-                'day' => $date->format('d/m'),
-                'total' => $count
-            ]);
+        if ($type === 'month') {
+            $appointmentsQuery->whereYear('appointment_time', $year)
+                ->whereMonth('appointment_time', $month);
+        } elseif ($type === 'year') {
+            $appointmentsQuery->whereYear('appointment_time', $year);
+        } elseif ($type === 'custom' && $startDate && $endDate) {
+            $appointmentsQuery->whereBetween('appointment_time', [$startDate, $endDate]);
         }
 
-        return Excel::download(
-            new DoctorStatsExport($doctor, $totalPatients, $todayAppointments, $totalRevenue, $visitsChart),
-            'thong_ke_bac_si.xlsx'
-        );
-    }
-
-    public function exportPDF($doctorId)
-    {
-        $doctor = Doctor::findOrFail($doctorId);
-
-        $totalPatients = Appointment::where('doctor_id', $doctorId)
-            ->whereNotNull('patient_id')
-            ->distinct('patient_id')
-            ->count();
-
-        $todayAppointments = Appointment::where('doctor_id', $doctorId)
-            ->whereDate('appointment_time', today())
-            ->count();
-
-        $totalRevenue = Appointment::where('appointments.doctor_id', $doctorId)
-            ->where('appointments.status', 'completed')
-            ->join('services', 'appointments.service_id', '=', 'services.id')
-            ->sum('services.price');
-
-        $visitsChart = Appointment::selectRaw('DATE(appointment_time) as day, COUNT(*) as total')
-            ->where('doctor_id', $doctorId)
+        $totalAppointments = $appointmentsQuery->count();
+        $totalRevenue = $appointmentsQuery->clone()
             ->where('status', 'completed')
-            ->groupByRaw('DATE(appointment_time)')
-            ->orderBy('day', 'desc')
-            ->limit(7)
+            ->with(['service'])
             ->get()
-            ->map(function ($item) {
-                return [
-                    'day' => \Carbon\Carbon::parse($item->day)->format('d/m'),
-                    'total' => $item->total,
-                ];
+            ->sum(function ($appointment) {
+                return $appointment->service ? $appointment->service->price : 0;
             });
+        $totalPatients = $appointmentsQuery->clone()->distinct('patient_id')->count('patient_id');
+        $todayAppointments = Appointment::where('doctor_id', $doctor->id)
+            ->whereDate('appointment_time', now()->toDateString())
+            ->count();
+        $appointments_completed = $appointmentsQuery->clone()->where('status', 'completed')->count();
+        $successRate = $totalAppointments > 0 ? round(($appointments_completed / $totalAppointments) * 100, 1) : 0;
 
-        $pdf = Pdf::loadView('doctor.dashboard.stats-pdf', [
-            'doctor' => $doctor,
-            'totalPatients' => $totalPatients,
-            'todayAppointments' => $todayAppointments,
-            'totalRevenue' => $totalRevenue,
-            'visitsChart' => $visitsChart,
-        ]);
+        $statLabels = [];
+        $statBookings = [];
+        $statRevenue = [];
 
-        return $pdf->download('thong-ke-bac-si-' . $doctor->id . '.pdf');
+        if ($type === 'month') {
+            $daysInMonth = Carbon::create($year, $month)->daysInMonth;
+            for ($day = 1; $day <= $daysInMonth; $day++) {
+                $date = Carbon::create($year, $month, $day)->toDateString();
+                $statLabels[] = "Ngày $day";
+                $statBookings[] = Appointment::where('doctor_id', $doctor->id)
+                    ->whereDate('appointment_time', $date)
+                    ->count();
+                $statRevenue[] = Appointment::where('doctor_id', $doctor->id)
+                    ->whereDate('appointment_time', $date)
+                    ->where('status', 'completed')
+                    ->with(['service'])
+                    ->get()
+                    ->sum(function ($appointment) {
+                        return $appointment->service ? $appointment->service->price : 0;
+                    });
+            }
+        } elseif ($type === 'year') {
+            for ($m = 1; $m <= 12; $m++) {
+                $statLabels[] = "Tháng $m";
+                $statBookings[] = Appointment::where('doctor_id', $doctor->id)
+                    ->whereYear('appointment_time', $year)
+                    ->whereMonth('appointment_time', $m)
+                    ->count();
+                $statRevenue[] = Appointment::where('doctor_id', $doctor->id)
+                    ->whereYear('appointment_time', $year)
+                    ->whereMonth('appointment_time', $m)
+                    ->where('status', 'completed')
+                    ->with(['service'])
+                    ->get()
+                    ->sum(function ($appointment) {
+                        return $appointment->service ? $appointment->service->price : 0;
+                    });
+            }
+        } elseif ($type === 'custom' && $startDate && $endDate) {
+            $start = Carbon::parse($startDate);
+            $end = Carbon::parse($endDate);
+            $days = $start->diffInDays($end) + 1;
+            for ($i = 0; $i < $days; $i++) {
+                $date = $start->copy()->addDays($i)->toDateString();
+                $statLabels[] = $date;
+                $statBookings[] = Appointment::where('doctor_id', $doctor->id)
+                    ->whereDate('appointment_time', $date)
+                    ->count();
+                $statRevenue[] = Appointment::where('doctor_id', $doctor->id)
+                    ->whereDate('appointment_time', $date)
+                    ->where('status', 'completed')
+                    ->with(['service'])
+                    ->get()
+                    ->sum(function ($appointment) {
+                        return $appointment->service ? $appointment->service->price : 0;
+                    });
+            }
+        }
+
+        $data = compact(
+            'doctor',
+            'totalAppointments',
+            'totalRevenue',
+            'totalPatients',
+            'todayAppointments',
+            'successRate',
+            'statLabels',
+            'statBookings',
+            'statRevenue'
+        );
+
+        $pdf = Pdf::loadView('doctor.dashboard.pdf', $data);
+        return $pdf->download('doctor_stats_' . $doctorId . '.pdf');
     }
 }

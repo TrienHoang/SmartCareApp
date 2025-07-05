@@ -53,6 +53,11 @@ class Doctor extends Model
     {
         return $this->hasMany(FileUpload::class);
     }
+        public function treatmentPlans()
+    {
+        return $this->hasMany(TreatmentPlan::class);
+    }
+    
 
     public function services()
     {

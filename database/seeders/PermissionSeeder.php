@@ -133,6 +133,26 @@ class PermissionSeeder extends Seeder
             // Prescription Histories
             ['name' => 'view_prescription_histories', 'description' => 'Xem lịch sử chỉnh sửa đơn thuốc', 'group' => 'Prescriptions'],
 
+            // ['name' => 'view_treatment_plans', 'description' => 'Xem danh sách kế hoạch điều trị', 'group' => 'Treatment Plans'],
+            ['name' => 'create_treatment_plans', 'description' => 'Tạo kế hoạch điều trị mới', 'group' => 'Treatment Plans'],
+            ['name' => 'edit_treatment_plans', 'description' => 'Chỉnh sửa kế hoạch điều trị', 'group' => 'Treatment Plans'],
+            ['name' => 'delete_treatment_plans', 'description' => 'Xóa kế hoạch điều trị', 'group' => 'Treatment Plans'],
+            ['name' => 'view_treatment_plan_logs', 'description' => 'Xem lịch sử thay đổi kế hoạch điều trị', 'group' => 'Treatment Plans'],
+            ['name' => 'export_treatment_plans_excel', 'description' => 'Xuất Excel kế hoạch điều trị', 'group' => 'Treatment Plans'],
+            ['name' => 'export_treatment_plans_pdf', 'description' => 'Xuất PDF kế hoạch điều trị', 'group' => 'Treatment Plans'],
+
+            // Quyền liên quan đến các bước điều trị (Treatment Plan Items)
+            ['name' => 'view_treatment_plan_items', 'description' => 'Xem các bước trong kế hoạch điều trị', 'group' => 'Treatment Plan Items'],
+            ['name' => 'create_treatment_plan_items', 'description' => 'Thêm bước mới vào kế hoạch điều trị', 'group' => 'Treatment Plan Items'],
+            ['name' => 'edit_treatment_plan_items', 'description' => 'Chỉnh sửa bước trong kế hoạch điều trị', 'group' => 'Treatment Plan Items'],
+            ['name' => 'delete_treatment_plan_items', 'description' => 'Xóa bước khỏi kế hoạch điều trị', 'group' => 'Treatment Plan Items'],
+
+            // Quyền liên quan đến lịch sử điều trị chung (Treatment History)
+            ['name' => 'view_treatment_history', 'description' => 'Xem lịch sử điều trị chung', 'group' => 'Treatment History'],
+            ['name' => 'create_treatment_history', 'description' => 'Thêm bản ghi lịch sử điều trị', 'group' => 'Treatment History'],
+            ['name' => 'edit_treatment_history', 'description' => 'Chỉnh sửa bản ghi lịch sử điều trị', 'group' => 'Treatment History'],
+            ['name' => 'delete_treatment_history', 'description' => 'Xóa bản ghi lịch sử điều trị', 'group' => 'Treatment History'],
+
         ];
 
         DB::table('permissions')->insert($permissions);
