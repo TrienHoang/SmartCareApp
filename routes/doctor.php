@@ -103,9 +103,10 @@ Route::prefix('doctor')
 
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/doctor/history', [DoctorController::class, 'history'])->name('doctor.history');
+    Route::get('/doctor/history', [DoctorController::class, 'history'])->name('doctor.history.index');
     Route::get('/doctor/history/{appointment}', [DoctorController::class, 'historyShow'])->name('doctor.history.show');
 });
+
 
 Route::middleware(['auth'])->prefix('doctor')->name('doctor.')->group(function () {
 

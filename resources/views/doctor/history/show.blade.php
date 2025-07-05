@@ -47,7 +47,7 @@
 </div>
 
 
-    <a href="{{ route('doctor.history') }}" class="btn btn-secondary">Quay lại danh sách</a>
+    <a href="{{ route('doctor.history.index') }}" class="btn btn-secondary">Quay lại danh sách</a>
 </div>
 @endsection
 

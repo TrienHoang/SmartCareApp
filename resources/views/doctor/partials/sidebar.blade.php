@@ -85,7 +85,7 @@
             </li>
 
             <li class="menu-item">
-                <a href="{{ route('doctor.history') }}" class="menu-link">
+                <a href="{{ route('doctor.history.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-history"></i>
                     <span>Xem lịch sử khám</span>
                 </a>
