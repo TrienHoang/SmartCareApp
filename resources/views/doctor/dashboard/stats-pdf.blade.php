@@ -57,7 +57,7 @@
         .info-table td.label {
             background-color: #f1f3f4;
             font-weight: bold;
-            width: 50%;
+            width: 60%;
         }
 
         .info-table td.value {
@@ -102,41 +102,90 @@
 <body>
 
     <div class="header">
-        {{-- <img src="{{ public_path('images/logo.png') }}" class="logo" alt="Logo"> --}}
         <h1>THỐNG KÊ BÁC SĨ</h1>
         <p><strong>Tên bác sĩ:</strong> {{ $doctor->user->full_name }}</p>
         <p><strong>Chuyên khoa:</strong> {{ $doctor->specialization ?? 'Chưa cập nhật' }}</p>
     </div>
 
+    {{-- Tổng quan --}}
     <div class="section-title">Tổng quan</div>
     <table class="info-table">
-        <tr>
-            <td class="label">Tổng bệnh nhân</td>
-            <td class="value">{{ $totalPatients }}</td>
-        </tr>
-        <tr>
-            <td class="label">Lịch hẹn hôm nay</td>
-            <td class="value">{{ $todayAppointments }}</td>
-        </tr>
-        <tr>
-            <td class="label">Tổng doanh thu</td>
-            <td class="value">{{ number_format($totalRevenue, 0, ',', '.') }} đ</td>
-        </tr>
+        <tr><td class="label">Tổng lịch hẹn</td><td class="value">{{ $totalAppointments }}</td></tr>
+        <tr><td class="label">Lịch hẹn hôm nay</td><td class="value">{{ $todayAppointments }}</td></tr>
+        <tr><td class="label">Lịch hẹn trong tuần</td><td class="value">{{ $weekAppointments }}</td></tr>
+        <tr><td class="label">Lịch hẹn trong tháng</td><td class="value">{{ $monthAppointments }}</td></tr>
+        <tr><td class="label">Tổng bệnh nhân</td><td class="value">{{ $totalPatients }}</td></tr>
+        <tr><td class="label">Tổng đơn thuốc</td><td class="value">{{ $totalPrescriptions }}</td></tr>
+        <tr><td class="label">Đơn thuốc hôm nay</td><td class="value">{{ $todayPrescriptions }}</td></tr>
+        <tr><td class="label">Tổng doanh thu</td><td class="value">{{ number_format($totalRevenue, 0, ',', '.') }} đ</td></tr>
     </table>
 
-    <div class="section-title">Lịch hẹn hoàn thành 7 ngày gần nhất</div>
+    {{-- Tỷ lệ lịch hẹn --}}
+    <div class="section-title">Tỷ lệ lịch hẹn</div>
+    <table class="info-table">
+        <tr><td class="label">Lịch hẹn hoàn thành</td><td class="value">{{ $successAppointments }} ({{ $successRate }}%)</td></tr>
+        <tr><td class="label">Lịch hẹn bị hủy</td><td class="value">{{ $cancelAppointments }} ({{ $cancelRate }}%)</td></tr>
+    </table>
+
+    {{-- Trạng thái lịch hẹn hôm nay --}}
+    <div class="section-title">Trạng thái lịch hẹn hôm nay</div>
+    <table class="info-table">
+        <tr><td class="label">Đang chờ xác nhận</td><td class="value">{{ $appointments_pending }}</td></tr>
+        <tr><td class="label">Đã xác nhận</td><td class="value">{{ $appointments_confirmed }}</td></tr>
+        <tr><td class="label">Đã hoàn thành</td><td class="value">{{ $appointments_completed }}</td></tr>
+        <tr><td class="label">Đã hủy</td><td class="value">{{ $appointments_cancelled }}</td></tr>
+    </table>
+
+    {{-- Top thuốc --}}
+    <div class="section-title">Top 5 thuốc được kê nhiều nhất</div>
     <table class="data-table">
         <thead>
             <tr>
-                <th>Ngày</th>
-                <th>Số lịch hoàn thành</th>
+                <th>Tên thuốc</th>
+                <th>Số lần kê</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($visitsChart as $row)
+            @foreach($topPrescribed as $item)
                 <tr>
-                    <td>{{ $row['day'] }}</td>
-                    <td>{{ $row['total'] }}</td>
+                    <td>{{ $item->medicine_name }}</td>
+                    <td>{{ $item->total }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    {{-- Nghỉ phép và ca làm --}}
+    <div class="section-title">Nghỉ phép & Ca làm</div>
+    <table class="info-table">
+        <tr><td class="label">Tổng yêu cầu nghỉ phép</td><td class="value">{{ $totalLeaves }}</td></tr>
+        <tr><td class="label">Số yêu cầu đã duyệt</td><td class="value">{{ $approvedLeaves }}</td></tr>
+        <tr><td class="label">Tổng ca làm việc</td><td class="value">{{ $totalHoursWorked }}</td></tr>
+    </table>
+
+    {{-- Tăng trưởng --}}
+    <div class="section-title">Tăng trưởng</div>
+    <table class="info-table">
+        <tr><td class="label">Tăng trưởng lịch hẹn</td><td class="value">{{ $growthValue }}% ({{ $growthLabel }})</td></tr>
+        <tr><td class="label">Tăng trưởng doanh thu</td><td class="value">{{ $revenueGrowth }}% ({{ $revenueLabel }})</td></tr>
+    </table>
+
+    {{-- Biểu đồ theo thời gian --}}
+    <div class="section-title">Thống kê {{ $type == 'month' ? 'theo ngày trong tháng' : 'theo tháng trong năm' }}</div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Thời gian</th>
+                <th>Số lịch hẹn</th>
+                <th>Doanh thu (đ)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($statLabels as $index => $label)
+                <tr>
+                    <td>{{ $label }}</td>
+                    <td>{{ $statBookings[$index] }}</td>
+                    <td>{{ number_format($statRevenue[$index], 0, ',', '.') }}</td>
                 </tr>
             @endforeach
         </tbody>

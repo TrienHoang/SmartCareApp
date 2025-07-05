@@ -23,22 +23,7 @@
 
     <!-- Tổng quan thống kê chính -->
     <div class="row g-4 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow bg-gradient-warning text-white h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-white-75 mb-2">Tổng doanh thu</h6>
-                            <h3 class="mb-0 fw-bold">{{ number_format($totalRevenue ?? 0, 0, ',', '.') }}đ</h3>
-                        </div>
-                        <div class="ms-3">
-                            <i class="fas fa-coins fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
+        <div class="col-lg-4 col-md-6">
             <div class="card border-0 shadow bg-gradient-primary text-white h-100">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center">
@@ -53,7 +38,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6">
+        <div class="col-lg-4 col-md-6">
             <div class="card border-0 shadow bg-gradient-success text-white h-100">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center">
@@ -68,7 +53,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6">
+        <div class="col-lg-4 col-md-6">
             <div class="card border-0 shadow bg-gradient-info text-white h-100">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center">
@@ -87,11 +72,11 @@
 
     <!-- Thống kê trạng thái lịch hẹn hôm nay -->
     <div class="row g-4 mb-4">
-        <div class="col-xl-3 col-md-6">
+        <div class="col-lg-3 col-md-6">
             <div class="card border-0 shadow h-100">
                 <div class="card-body p-4 text-center">
                     <div class="d-flex align-items-center justify-content-center mb-3">
-                        <i class="fas fa-clock text-warning fa-2x me-2"></i>
+                        <i class="fas fa-clock text-warning fa-2x me-3"></i>
                         <div>
                             <h4 class="mb-0 text-warning fw-bold">{{ $appointments_pending ?? 0 }}</h4>
                             <small class="text-muted">Chờ xác nhận</small>
@@ -100,11 +85,11 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6">
+        <div class="col-lg-3 col-md-6">
             <div class="card border-0 shadow h-100">
                 <div class="card-body p-4 text-center">
                     <div class="d-flex align-items-center justify-content-center mb-3">
-                        <i class="fas fa-hourglass-half text-primary fa-2x me-2"></i>
+                        <i class="fas fa-hourglass-half text-primary fa-2x me-3"></i>
                         <div>
                             <h4 class="mb-0 text-primary fw-bold">{{ $appointments_confirmed ?? 0 }}</h4>
                             <small class="text-muted">Lịch chờ khám</small>
@@ -113,11 +98,11 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6">
+        <div class="col-lg-3 col-md-6">
             <div class="card border-0 shadow h-100">
                 <div class="card-body p-4 text-center">
                     <div class="d-flex align-items-center justify-content-center mb-3">
-                        <i class="fas fa-user-check text-success fa-2x me-2"></i>
+                        <i class="fas fa-user-check text-success fa-2x me-3"></i>
                         <div>
                             <h4 class="mb-0 text-success fw-bold">{{ $appointments_completed ?? 0 }}</h4>
                             <small class="text-muted">Đã khám xong</small>
@@ -126,11 +111,11 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6">
+        <div class="col-lg-3 col-md-6">
             <div class="card border-0 shadow h-100">
                 <div class="card-body p-4 text-center">
                     <div class="d-flex align-items-center justify-content-center mb-3">
-                        <i class="fas fa-times-circle text-danger fa-2x me-2"></i>
+                        <i class="fas fa-times-circle text-danger fa-2x me-3"></i>
                         <div>
                             <h4 class="mb-0 text-danger fw-bold">{{ $appointments_cancelled ?? 0 }}</h4>
                             <small class="text-muted">Đã hủy lịch</small>
@@ -141,14 +126,14 @@
         </div>
     </div>
 
-    <!-- Biểu đồ và tăng trưởng -->
+    <!-- Biểu đồ lịch hẹn và tăng trưởng -->
     <div class="row g-4 mb-4">
         <div class="col-lg-8">
             <div class="card border-0 shadow h-100">
                 <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
                     <h5 class="mb-0 fw-bold">
                         <i class="fas fa-chart-line text-primary me-2"></i>
-                        Biểu đồ đặt lịch & doanh thu
+                        Biểu đồ lịch hẹn theo thời gian
                     </h5>
                     <form method="GET" class="d-flex align-items-end gap-3" style="flex-wrap: nowrap;" id="filterForm">
                         <div class="d-flex flex-column">
@@ -201,7 +186,7 @@
                     </form>
                 </div>
                 <div class="card-body">
-                    <canvas id="bookingRevenueChart" height="120"></canvas>
+                    <canvas id="appointmentChart" height="120"></canvas>
                 </div>
             </div>
         </div>
@@ -210,28 +195,19 @@
                 <div class="card-header bg-white border-0 py-3">
                     <h5 class="mb-0 fw-bold">
                         <i class="fas fa-trending-up text-success me-2"></i>
-                        Tăng trưởng
+                        Tăng trưởng lịch hẹn
                     </h5>
                 </div>
                 <div class="card-body d-flex flex-column justify-content-center text-center">
                     <div class="mb-3">
-                        <div class="p-3 rounded-3 bg-light mb-2">
-                            <div class="mb-2">
+                        <div class="p-4 rounded-3 bg-light mb-3">
+                            <div class="mb-3">
                                 <span class="fw-semibold text-muted">Tăng trưởng số lịch hẹn</span>
                             </div>
-                            <span class="fs-2 fw-bold {{ $growthValue > 0 ? 'text-success' : ($growthValue < 0 ? 'text-danger' : 'text-secondary') }}">
+                            <span class="display-4 fw-bold {{ $growthValue > 0 ? 'text-success' : ($growthValue < 0 ? 'text-danger' : 'text-secondary') }}">
                                 {{ $growthValue > 0 ? '+' : '' }}{{ $growthValue }}%
                             </span>
-                            <div class="small text-muted">{{ $growthLabel }}</div>
-                        </div>
-                        <div class="p-3 rounded-3 bg-light">
-                            <div class="mb-2">
-                                <span class="fw-semibold text-muted">Tăng trưởng doanh thu</span>
-                            </div>
-                            <span class="fs-2 fw-bold {{ $revenueGrowth > 0 ? 'text-success' : ($revenueGrowth < 0 ? 'text-danger' : 'text-secondary') }}">
-                                {{ $revenueGrowth > 0 ? '+' : '' }}{{ $revenueGrowth }}%
-                            </span>
-                            <div class="small text-muted">{{ $revenueLabel }}</div>
+                            <div class="mt-2 text-muted">{{ $growthLabel }}</div>
                         </div>
                     </div>
                 </div>
@@ -239,7 +215,7 @@
         </div>
     </div>
 
-    <!-- Bảng thống kê chi tiết & Hiệu suất hoạt động song song -->
+    <!-- Bảng thống kê chi tiết & Hiệu suất hoạt động -->
     <div class="row g-4 mb-4">
         <div class="col-lg-7">
             <div class="card border-0 shadow h-100">
@@ -256,20 +232,22 @@
                                 <tr>
                                     <th>Thời gian</th>
                                     <th>Lịch hẹn</th>
-                                    <th>Doanh thu</th>
+                                    <th>Trạng thái</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($statLabels as $i => $label)
                                     <tr>
-                                        <td>{{ $label }}</td>
+                                        <td class="fw-medium">{{ $label }}</td>
                                         <td>
-                                            <span class="badge bg-primary">{{ $statBookings[$i] ?? 0 }}</span>
+                                            <span class="badge bg-primary fs-6">{{ $statBookings[$i] ?? 0 }}</span>
                                         </td>
                                         <td>
-                                            <span class="text-success fw-bold">
-                                                {{ number_format($statRevenue[$i] ?? 0, 0, ',', '.') }}đ
-                                            </span>
+                                            @if(($statBookings[$i] ?? 0) > 0)
+                                                <span class="badge bg-success">Có hoạt động</span>
+                                            @else
+                                                <span class="badge bg-secondary">Không hoạt động</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
@@ -327,6 +305,21 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Tổng số lượt khám -->
+                        <div class="col-12">
+                            <div class="p-4 rounded-3 d-flex align-items-center" style="background: #e0f2fe;">
+                                <i class="fas fa-user-md fa-2x me-3" style="color: #0277bd;"></i>
+                                <div>
+                                    <h6 class="mb-1" style="color: #0277bd;">Tổng lượt khám</h6>
+                                    <h3 class="fw-bold mb-0" style="color: #0277bd;">
+                                        {{ $totalAppointments }}
+                                    </h3>
+                                    <small class="text-muted">
+                                        Tổng số lịch hẹn đã tạo
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -339,9 +332,6 @@
         }
         .bg-gradient-success {
             background: linear-gradient(45deg, #11998e 0%, #38ef7d 100%);
-        }
-        .bg-gradient-warning {
-            background: linear-gradient(45deg, #ff8a00 0%, #e52e71 100%);
         }
         .bg-gradient-info {
             background: linear-gradient(45deg, #43cea2 0%, #185a9d 100%);
@@ -384,51 +374,40 @@
             const startDate = document.getElementById('startDate');
             const endDate = document.getElementById('endDate');
 
-            // Lưu trữ trạng thái của startDate và endDate
             let customDateState = {
                 startDate: startDate.value,
                 endDate: endDate.value
             };
 
-            // Hàm cập nhật trạng thái các trường input
             function updateFilterType() {
                 if (filterType.value === 'custom') {
                     yearInput.disabled = true;
                     startDate.disabled = false;
                     endDate.disabled = false;
-                    // Khôi phục giá trị startDate và endDate nếu có
                     startDate.value = customDateState.startDate || '';
                     endDate.value = customDateState.endDate || '';
                 } else {
                     yearInput.disabled = false;
                     startDate.disabled = true;
                     endDate.disabled = true;
-                    // Lưu giá trị hiện tại của startDate và endDate trước khi vô hiệu hóa
                     customDateState.startDate = startDate.value;
                     customDateState.endDate = endDate.value;
                 }
             }
 
-            // Gọi hàm updateFilterType khi thay đổi filterType
             filterType.addEventListener('change', updateFilterType);
-
-            // Cập nhật trạng thái khi thay đổi ngày
             startDate.addEventListener('change', function() {
                 customDateState.startDate = startDate.value;
             });
             endDate.addEventListener('change', function() {
                 customDateState.endDate = endDate.value;
             });
-
-            // Cập nhật trạng thái ban đầu
             updateFilterType();
 
-            // Validate phía client khi submit form
             filterForm.addEventListener('submit', function(event) {
                 let errors = [];
                 let valid = true;
 
-                // Xóa trạng thái lỗi trước đó
                 [filterType, yearInput, startDate, endDate].forEach(input => {
                     input.classList.remove('is-invalid');
                     const feedback = input.nextElementSibling;
@@ -437,13 +416,11 @@
                     }
                 });
 
-                // Validate type
                 if (!['month', 'year', 'custom'].includes(filterType.value)) {
                     errors.push({ field: filterType, message: 'Vui lòng chọn loại thống kê hợp lệ.' });
                     valid = false;
                 }
 
-                // Validate year nếu type là month hoặc year
                 if (filterType.value === 'month' || filterType.value === 'year') {
                     const year = parseInt(yearInput.value);
                     if (!yearInput.value || isNaN(year)) {
@@ -455,7 +432,6 @@
                     }
                 }
 
-                // Validate ngày nếu type là custom
                 if (filterType.value === 'custom') {
                     if (!startDate.value) {
                         errors.push({ field: startDate, message: 'Vui lòng chọn ngày bắt đầu.' });
@@ -490,7 +466,6 @@
                         }
                     });
                 } else {
-                    // Reset customDateState nếu không chọn chế độ custom
                     if (filterType.value !== 'custom') {
                         customDateState.startDate = '';
                         customDateState.endDate = '';
@@ -500,62 +475,60 @@
                 }
             });
 
-            // Biểu đồ
-            const bookingRevenueCtx = document.getElementById('bookingRevenueChart').getContext('2d');
-            const bookingRevenueChart = new Chart(bookingRevenueCtx, {
-                type: 'bar',
+            // Biểu đồ lịch hẹn
+            const appointmentCtx = document.getElementById('appointmentChart').getContext('2d');
+            const appointmentChart = new Chart(appointmentCtx, {
+                type: 'line',
                 data: {
                     labels: {!! json_encode($statLabels) !!},
-                    datasets: [
-                        {
-                            type: 'bar',
-                            label: 'Lịch hẹn',
-                            data: {!! json_encode($statBookings) !!},
-                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                            borderColor: '#36A2EB',
-                            borderWidth: 1
-                        },
-                        {
-                            type: 'line',
-                            label: 'Doanh thu (đ)',
-                            data: {!! json_encode($statRevenue) !!},
-                            borderColor: '#FF6384',
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            tension: 0.3,
-                            yAxisID: 'y1'
-                        }
-                    ]
+                    datasets: [{
+                        label: 'Lịch hẹn',
+                        data: {!! json_encode($statBookings) !!},
+                        borderColor: '#36A2EB',
+                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#36A2EB',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
                 },
                 options: {
                     responsive: true,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            position: 'left',
                             title: {
                                 display: true,
-                                text: 'Lịch hẹn'
+                                text: 'Số lượng lịch hẹn'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
                             }
                         },
-                        y1: {
-                            beginAtZero: true,
-                            position: 'right',
-                            grid: {
-                                drawOnChartArea: false
-                            },
+                        x: {
                             title: {
                                 display: true,
-                                text: 'Doanh thu (đ)'
+                                text: 'Thời gian'
                             },
-                            ticks: {
-                                callback: function(value) {
-                                    return value.toLocaleString('vi-VN') + ' đ';
-                                }
+                            grid: {
+                                display: false
                             }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            hoverBackgroundColor: '#36A2EB'
                         }
                     }
                 }
