@@ -97,6 +97,13 @@
                 </a>
             </li>
 
+            <li class="menu-item">
+                <a href="{{ route('doctor.calendar.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-star"></i>
+                    <span>Lịch bác sĩ</span>
+                </a>
+            </li>
+
 
 
 

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Doctor\AppointmentController;
+use App\Http\Controllers\Doctor\CalendarController;
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Http\Controllers\Doctor\DoctorLeaveController;
 use App\Http\Controllers\Doctor\FileUploadController;
@@ -12,6 +14,7 @@ use App\Http\Controllers\Doctor\DoctorAppointmentController;
 
 use App\Http\Controllers\Doctor\DoctorController;
 use App\Http\Controllers\Doctor\ReviewController;
+use App\Http\Controllers\Doctor\TaskController;
 
 // ✅ Dashboard và thống kê
 Route::prefix('doctor')
@@ -116,4 +119,20 @@ Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'
     Route::get('/history/{appointment}', [DoctorController::class, 'historyShow'])->name('history.show');
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
     Route::patch('/reviews/{review}/toggle-visibility', [ReviewController::class, 'toggleVisibility'])->name('reviews.toggle');
+});
+
+Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
+    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
+    Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
+    Route::get('/calendar/test-database', [CalendarController::class, 'testDatabase'])->name('calendar.testDatabase');
+
+
+});
+
+Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
+    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
+    Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
+    Route::get('/calendar/test-database', [CalendarController::class, 'testDatabase'])->name('calendar.testDatabase');
+    Route::get('/tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
+    Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
 });
