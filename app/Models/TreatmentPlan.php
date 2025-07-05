@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TreatmentPlan extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+
 
     protected $fillable = [
         'patient_id',
@@ -21,10 +23,9 @@ class TreatmentPlan extends Model
         'end_date',
         'status',
     ];
-
-    protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
+       protected $casts = [
+        'start_date' => 'datetime', 
+        'end_date' => 'datetime',   
     ];
 
     public $timestamps = false;

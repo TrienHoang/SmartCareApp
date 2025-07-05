@@ -77,15 +77,20 @@ class UserController extends Controller
 
         $users = User::where(function ($query) use ($search) {
             $query->where('username', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%');
+                ->orWhere('email', 'like', '%' . $search . '%');
         })->paginate(10);
 
         return view('admin.users.search', compact('users'));
     }
+
     public function toggleStatus($id)
     {
-        $user = User::findOrFail($id);
+        // Không cho thay đổi trạng thái chính mình
+        if (Auth::id() == $id) {
+            return back()->with('error', 'Bạn không thể thay đổi trạng thái của chính mình.');
+        }
 
+        $user = User::findOrFail($id);
         $user->status = $user->status === 'online' ? 'offline' : 'online';
         $user->save();
 
