@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Exports\FilesExport;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FileUpload extends Model
 {
@@ -139,6 +141,12 @@ class FileUpload extends Model
             // Placeholder
         });
     }
+
+    public function export()
+    {
+        return Excel::download(new FilesExport, 'files.xlsx');
+    }
+
 
     protected static function boot()
     {

@@ -18,6 +18,16 @@
                                 </h2>
                                 <p class="text-muted mb-0">Theo dõi và quản lý tất cả tài liệu y tế trong hệ thống</p>
                             </div>
+                            <form id="export-form" action="{{ route('admin.files.export') }}" method="GET">
+                                @csrf
+                                <input type="hidden" name="ids" id="export-ids">
+                                <input type="hidden" name="keyword" value="{{ request('keyword') }}">
+                                <input type="hidden" name="uploader_type" value="{{ request('uploader_type') }}">
+                                <input type="hidden" name="date_from" value="{{ request('date_from') }}">
+                                <input type="hidden" name="date_to" value="{{ request('date_to') }}">
+                                <input type="hidden" name="file_category" value="{{ request('file_category') }}">
+                                <button type="submit" class="btn btn-success">Xuất Excel (theo chọn)</button>
+                            </form>
                         </div>
                         <div class="breadcrumb-wrapper col-12">
                             <nav aria-label="breadcrumb">
@@ -273,7 +283,8 @@
                                                     for="file-{{ $file->id }}"></label>
                                             </div>
                                         </td>
-                                        <td class="font-weight-bold text-primary">#{{ $file->id }}</td>
+                                        <td class="font-weight-bold text-primary">
+                                            #{{ $loop->iteration + ($files->currentPage() - 1) * $files->perPage() }}</td>
                                         <td>
                                             <div class="file-info d-flex align-items-center">
                                                 <div class="file-icon-modern bg-gradient-primary text-white mr-3">
@@ -680,6 +691,14 @@
                 checkbox.checked = this.checked;
             });
         });
+
+        document.getElementById('export-form').addEventListener('submit', function(e) {
+            const checked = Array.from(document.querySelectorAll('.file-checkbox:checked'))
+                .map(cb => cb.value);
+
+            document.getElementById('export-ids').value = checked.join(',');
+        });
+
 
         // Delete file function
         function deleteFile(id) {

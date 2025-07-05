@@ -370,6 +370,16 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
+        if (
+            $request->status === 'confirmed' &&
+            $appointmentDate->isPast() &&
+            $appointment->status === 'pending'
+        ) {
+            return back()->withErrors([
+                'status' => 'Không thể xác nhận lịch hẹn đã quá ngày.'
+            ])->withInput();
+        }
+
         // Kiểm tra trùng lịch
         $conflict = AppointmentHelper::isConflict(
             $request->doctor_id,

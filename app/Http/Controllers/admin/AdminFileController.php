@@ -5,6 +5,8 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Models\FileUpload;
 use App\Models\UploadHistory;
+use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -67,8 +69,8 @@ class AdminFileController extends Controller
 
 
         // Lọc theo danh mục file
-        if ($request->filled('category')) {
-            $query->where('file_category', $request->category);
+        if ($request->filled('file_category')) {
+            $query->where('file_category', $request->file_category);
         }
 
         $categories = FileUpload::select('file_category')->whereNotNull('file_category')->distinct()->pluck('file_category');
@@ -206,5 +208,92 @@ class AdminFileController extends Controller
             'success' => true,
             'message' => 'Đã cập nhật danh mục file thành công!'
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $fileName = 'files.xlsx';
+        $filePath = storage_path("app/public/{$fileName}");
+
+        $query = FileUpload::query();
+
+        // Nếu có gửi danh sách ids -> ưu tiên
+        if ($request->filled('ids')) {
+            $ids = explode(',', $request->ids);
+            $query->whereIn('id', $ids);
+        } else {
+            // Nếu không có ids -> áp dụng lọc như index()
+            if ($request->filled('keyword')) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('file_name', 'like', '%' . $request->keyword . '%')
+                        ->orWhere('note', 'like', '%' . $request->keyword . '%');
+                });
+            }
+
+            if ($request->filled('uploader_type')) {
+                if ($request->uploader_type === 'doctor') {
+                    $query->whereHas('user', function ($q) {
+                        $q->whereHas('doctor');
+                    });
+                } elseif ($request->uploader_type === 'patient') {
+                    $query->whereHas('user', function ($q) {
+                        $q->whereDoesntHave('doctor');
+                    });
+                }
+            }
+
+            if ($request->filled('date_from') || $request->filled('date_to')) {
+                $from = $request->filled('date_from') ? Carbon::parse($request->date_from)->startOfDay() : null;
+                $to = $request->filled('date_to') ? Carbon::parse($request->date_to)->endOfDay() : null;
+
+                if ($from && $to && $from->gt($to)) {
+                    [$from, $to] = [$to, $from];
+                }
+
+                if ($from && $to) {
+                    $query->whereBetween('uploaded_at', [$from, $to]);
+                } elseif ($from) {
+                    $query->where('uploaded_at', '>=', $from);
+                } elseif ($to) {
+                    $query->where('uploaded_at', '<=', $to);
+                }
+            }
+
+            if ($request->filled('file_category')) {
+                $query->where('file_category', $request->file_category);
+            }
+        }
+
+        $files = $query->orderBy('uploaded_at', 'desc')
+            ->get(['id', 'file_name', 'file_category', 'size', 'uploaded_at']);
+
+        // Tạo file
+        $writer = WriterEntityFactory::createXLSXWriter();
+        $writer->openToFile($filePath);
+
+        $headerStyle = (new StyleBuilder())->setFontBold(true)->build();
+
+        $headerRow = WriterEntityFactory::createRowFromArray([
+            'ID',
+            'Thông tin file',
+            'Danh mục',
+            'Kích thước (KB)',
+            'Ngày tạo'
+        ], $headerStyle);
+        $writer->addRow($headerRow);
+
+        foreach ($files as $file) {
+            $writer->addRow(WriterEntityFactory::createRowFromArray([
+                $file->id,
+                $file->file_name,
+                $file->file_category,
+                round($file->size / 1024, 2),
+                optional($file->uploaded_at)->format('Y-m-d H:i:s')
+            ]));
+        }
+
+        $writer->close();
+
+        return response()->download($filePath)->deleteFileAfterSend();
     }
 }

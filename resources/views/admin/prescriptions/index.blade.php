@@ -134,7 +134,7 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white mb-0">
-                                        {{ $prescriptions->sum(function ($p) {return $p->prescriptionItems->sum('quantity');}) }}
+                                        {{ $totalQuantity }}
                                     </h4>
                                     <small class="text-white">Tổng số lượng thuốc</small>
                                 </div>

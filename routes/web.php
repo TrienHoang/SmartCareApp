@@ -583,6 +583,7 @@ Route::group([
         'middleware' => 'check_permission:view_medical_documents'
     ], function () {
         Route::get('/', [AdminFileController::class, 'index'])->name('index');
+        Route::get('/export', [AdminFileController::class, 'export'])->name('export');
 
         Route::get('/trash', [AdminFileController::class, 'trash'])->name('trash');
 
