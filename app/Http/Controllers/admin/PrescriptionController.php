@@ -76,11 +76,13 @@ class PrescriptionController extends Controller
         }
 
         $prescriptions = $query->orderByDesc('prescribed_at')->paginate(10);
+        $todayCount = Prescription::whereDate('prescribed_at', today())->count();
+        $weeklyCount = Prescription::where('prescribed_at', '>=', now()->startOfWeek())->count();
         $prescriptions->appends($request->all());
         $medicines = Medicine::pluck('name', 'id')->all();
         $departments = Department::all();
 
-        return view('admin.prescriptions.index', compact('prescriptions', 'medicines', 'departments', 'from_input', 'to_input'));
+        return view('admin.prescriptions.index', compact('prescriptions', 'medicines', 'departments', 'from_input', 'to_input', 'todayCount', 'weeklyCount'));
     }
 
     public function create()
