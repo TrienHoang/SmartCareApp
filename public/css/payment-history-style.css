@@ -1,0 +1,82 @@
+/* ===== BẢNG & BỐ CỤC ===== */
+.table th {
+  background-color: #f5f7fa !important;
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.table td {
+  font-size: 13.5px;
+  vertical-align: middle;
+  padding: 10px 12px;
+}
+
+/* Hover hàng trong bảng */
+.table tbody tr:hover {
+  background-color: #eaf3ff !important;
+  transition: background-color 0.25s ease-in-out;
+}
+
+/* ===== NÚT ===== */
+.btn {
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.btn-outline-info {
+  color: #0dcaf0;
+  border-color: #0dcaf0;
+}
+.btn-outline-info:hover {
+  background-color: #0dcaf0;
+  color: #fff;
+}
+
+/* ===== BADGE / HIGHLIGHT ===== */
+.badge.bg-label-primary {
+  background-color: #007bff1a;
+  color: #007bff;
+  font-weight: 500;
+}
+
+/* ===== CARD ===== */
+.card {
+  border-radius: 10px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+/* ===== PHÂN TRANG ===== */
+.pagination .page-link {
+  color: #007bff;
+  font-size: 14px;
+  border-radius: 5px !important;
+}
+
+.pagination .page-link:hover {
+  background-color: #eaf4ff;
+  border-color: #d0e7ff;
+}
+
+/* ===== RESPONSIVE MOBILE TỐI ƯU ===== */
+@media (max-width: 768px) {
+  .table th,
+  .table td {
+    font-size: 13px !important;
+    padding: 8px;
+  }
+
+  .d-none.d-md-table-cell {
+    display: none !important;
+  }
+
+  h4 {
+    font-size: 18px;
+  }
+}

@@ -316,6 +316,30 @@
                 <div class="logo"><i class="fas fa-shield-virus"></i></div>
                 <h2>Đặt lại mật khẩu</h2>
                 <p class="desc">Vui lòng nhập mật khẩu mới của bạn</p>
+                @if ($errors->any())
+                    <div id="error-box"
+                        style="
+            background-color: #fff3f3;
+            border-left: 4px solid #e74c3c;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #c0392b;
+            font-size: 14px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        ">
+                        <ul style="list-style: none; padding-left: 0; margin: 0;">
+                            @foreach ($errors->all() as $error)
+                                <li style="margin-bottom: 6px;">
+                                    <i class="fas fa-exclamation-circle" style="margin-right: 6px;"></i>
+                                    {{ $error }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+
 
                 <form method="POST" action="{{ route('password.update') }}">
                     @csrf
@@ -385,9 +409,9 @@
             const pass = document.getElementById('password');
             const error = document.getElementById('password-error');
 
-            if (pass.value.length < 8) {
+            if (pass.value.length < 6) {
                 pass.classList.add('input-error');
-                error.textContent = 'Mật khẩu phải có ít nhất 8 ký tự.';
+                error.textContent = 'Mật khẩu phải có ít nhất 6 ký tự.';
                 error.style.display = 'block';
             } else {
                 pass.classList.remove('input-error');
@@ -413,6 +437,27 @@
                 error.style.display = 'none';
             }
         }
+        document.addEventListener("DOMContentLoaded", function() {
+            const errorBox = document.getElementById("error-box");
+            const passwordInput = document.getElementById("password");
+            const confirmInput = document.getElementById("password_confirmation");
+
+            if (passwordInput) {
+                passwordInput.addEventListener("input", () => {
+                    if (errorBox) {
+                        errorBox.style.display = "none";
+                    }
+                });
+            }
+
+            if (confirmInput) {
+                confirmInput.addEventListener("input", () => {
+                    if (errorBox) {
+                        errorBox.style.display = "none";
+                    }
+                });
+            }
+        });
     </script>
 </body>
 

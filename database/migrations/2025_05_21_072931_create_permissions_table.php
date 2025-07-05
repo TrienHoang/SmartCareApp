@@ -6,11 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 
 return new class extends Migration {
-    public function up(): void {
+    public function up(): void
+    {
         Schema::create('permissions', function (Blueprint $table) {
-            $table->id()->comment('ID quyền');
-            $table->string('name', 100)->comment('Tên quyền');
-            $table->text('description')->nullable()->comment('Mô tả quyền');
+            $table->id();
+            $table->string('name')->unique();
+            $table->string('description');        
+            $table->string('group');          
+            $table->timestamps();
         });
     }
 
