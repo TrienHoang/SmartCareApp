@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\doctor\DoctorController;
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Http\Controllers\Doctor\DoctorLeaveController;
 use App\Http\Controllers\Doctor\FileUploadController;
 use App\Http\Controllers\Doctor\PrescriptionController;
+use App\Http\Controllers\Doctor\ReviewController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -88,10 +90,37 @@ Route::prefix('doctor')
             Route::put('/{id}', [DoctorLeaveController::class, 'update'])->name('update');
             Route::delete('/{id}', [DoctorLeaveController::class, 'destroy'])->name('destroy');
         });
+    });
+
+Route::prefix('doctor')
+    ->name('doctor.')
+    ->middleware(['auth', 'checkRole:doctor'])
+    ->group(function () {
+        // Danh sách bác sĩ - URL: /doctor
+        Route::get('/', [DoctorController::class, 'index'])->name('index');
+
+        // Chi tiết bác sĩ - URL: /doctor/list/{id}
+        Route::get('/list/{id}', [DoctorController::class, 'show'])->name('show');
+    });
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/doctor/history', [DoctorController::class, 'history'])->name('doctor.history.index');
+    Route::get('/doctor/history/{appointment}', [DoctorController::class, 'historyShow'])->name('doctor.history.show');
+});
+
+
+Route::middleware(['auth'])->prefix('doctor')->name('doctor.')->group(function () {
+
+    // Xem danh sách đánh giá
+    Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+
+    // Cập nhật trạng thái hiển thị đánh giá (ẩn / hiện)
+    Route::patch('/reviews/{review}/toggle', [ReviewController::class, 'toggleVisibility'])->name('reviews.toggle');
+});
 
         // 🟧 Reviews
         Route::get('/reviews', [DoctorReviewController::class, 'index'])->name('reviews.index');
 
         // 🟪 Appointments
         Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
-    });

@@ -316,23 +316,48 @@ Route::group([
 
         Route::delete('/delete/{doctor}', [DoctorController::class, 'destroy'])
             ->middleware('check_permission:delete_doctors')->name('destroy');
+
+        Route::get('/{doctor}', [DoctorController::class, 'show'])
+            ->middleware('check_permission:view_doctors')->name('show');
     });
 
-
-    // Quản lý phòng ban
-
+    // Nhóm quản lý phòng ban
     Route::group([
         'prefix' => 'departments',
         'as' => 'departments.',
         'middleware' => 'check_permission:view_departments'
     ], function () {
-        Route::get('/', [DepartmentController::class, 'index'])->name('index');
-        Route::get('/create', [DepartmentController::class, 'create'])->middleware('check_permission:create_departments')->name('create');
-        Route::post('/', [DepartmentController::class, 'store'])->middleware('check_permission:create_departments')->name('store');
-        Route::get('/{department}/edit', [DepartmentController::class, 'edit'])->middleware('check_permission:edit_departments')->name('edit');
-        Route::put('/{department}', [DepartmentController::class, 'update'])->middleware('check_permission:edit_departments')->name('update');
-        Route::delete('/{department}', [DepartmentController::class, 'destroy'])->middleware('check_permission:delete_departments')->name('destroy');
+        Route::get('/', [DepartmentController::class, 'index'])
+            ->name('index');
+
+        Route::get('/create', [DepartmentController::class, 'create'])
+            ->middleware('check_permission:create_departments')
+            ->name('create');
+
+        Route::post('/store', [DepartmentController::class, 'store'])
+            ->middleware('check_permission:create_departments')
+            ->name('store');
+
+        Route::get('/edit/{department}', [DepartmentController::class, 'edit'])
+            ->middleware('check_permission:edit_departments')
+            ->name('edit');
+
+        Route::put('/update/{department}', [DepartmentController::class, 'update'])
+            ->middleware('check_permission:edit_departments')
+            ->name('update');
+
+        Route::delete('/delete/{department}', [DepartmentController::class, 'destroy'])
+            ->middleware('check_permission:delete_departments')
+            ->name('destroy');
+
+        Route::get('/{department}', [DepartmentController::class, 'show'])
+            ->middleware('check_permission:view_departments')
+            ->name('show');
     });
+
+
+
+
 
     // lịch sử thanh toán
     Route::group([
@@ -662,7 +687,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::delete('empty-trash', [TreatmentPlanController::class, 'emptyTrash'])->name('emptyTrash');
     });
 });
-
 
 // phân quyền bác sĩ
 // Route::get('/doctor/dashboard', function () {
