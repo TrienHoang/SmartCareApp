@@ -78,23 +78,25 @@
             <li class="menu-item">
                 <a href="{{ route('doctor.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-user"></i>
-                    <div>Bác Sĩ</div>
+                    <span>Danh sách bác sĩ</span>
+                </a>
+            </li>
+
+
+            <li class="menu-item">
+                <a href="{{ route('doctor.history.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-history"></i>
+                    <span>Lịch sử khám</span>
                 </a>
             </li>
 
             <li class="menu-item">
                 <a href="{{ route('doctor.reviews.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-star"></i>
-                    <div>Đánh giá của bệnh nhân</div>
+                    <span>Đánh giá từ bệnh nhân</span>
                 </a>
             </li>
 
-            <li class="menu-item">
-                <a href="{{ route('doctor.history.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-history"></i>
-                    <span>Xem lịch sử khám</span>
-                </a>
-            </li>
 
 
 
