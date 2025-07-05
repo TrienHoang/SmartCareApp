@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Http\Controllers\Doctor\DoctorLeaveController;
-use App\Http\Controllers\doctor\FileUploadController;
+use App\Http\Controllers\Doctor\FileUploadController;
 use App\Http\Controllers\Doctor\PrescriptionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Doctor\DoctorReviewController;
+use App\Http\Controllers\Doctor\DoctorAppointmentController;
 
 // ✅ Redirect khi truy cập /doctor/dashboard
 Route::middleware(['auth', 'checkRole:doctor'])
@@ -86,4 +88,10 @@ Route::prefix('doctor')
             Route::put('/{id}', [DoctorLeaveController::class, 'update'])->name('update');
             Route::delete('/{id}', [DoctorLeaveController::class, 'destroy'])->name('destroy');
         });
+
+        // 🟧 Reviews
+        Route::get('/reviews', [DoctorReviewController::class, 'index'])->name('reviews.index');
+
+        // 🟪 Appointments
+        Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
     });
