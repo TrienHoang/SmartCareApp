@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->text('reason')->nullable()->comment('Lý do nghỉ');
             $table->dateTime('created_at')->nullable()->comment('Thời gian lập phiếu');
             $table->boolean('approved')->default(false)->comment('Đã duyệt chưa');
+            $table->softDeletes()->comment('Thời gian bị xóa mềm');
         });
     }
 

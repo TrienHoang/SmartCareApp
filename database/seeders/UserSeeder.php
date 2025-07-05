@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
         $patientRoleId = Role::where('name', 'patient')->value('id');
 
         // Tạo 10 bác sĩ
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 5; $i++) {
             User::create([
                 'username' => "doctor$i",
                 'email' => "doctor$i@example.com",
@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
         }
 
         // Tạo 30 bệnh nhân
-        for ($i = 1; $i <= 30; $i++) {
+        for ($i = 1; $i <= 5; $i++) {
             User::create([
                 'username' => "patient$i",
                 'email' => "patient$i@example.com",

@@ -14,10 +14,17 @@ class UserController extends Controller
     {
         $query = User::query();
 
+        // Lọc theo vai trò
         if ($request->filled('role_id') && $request->role_id !== 'all') {
             $query->where('role_id', $request->role_id);
         }
 
+        // Lọc theo trạng thái
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Lọc theo từ khóa
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -26,8 +33,7 @@ class UserController extends Controller
                     ->orWhere('full_name', 'like', "%$search%");
             });
         }
-
-        $users = $query->paginate(10);
+        $users = $query->paginate(10)->appends($request->query());
         $roles = Role::all();
 
         return view('admin.users.index', compact('users', 'roles'));
@@ -77,15 +83,20 @@ class UserController extends Controller
 
         $users = User::where(function ($query) use ($search) {
             $query->where('username', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%');
+                ->orWhere('email', 'like', '%' . $search . '%');
         })->paginate(10);
 
         return view('admin.users.search', compact('users'));
     }
+
     public function toggleStatus($id)
     {
-        $user = User::findOrFail($id);
+        // Không cho thay đổi trạng thái chính mình
+        if (Auth::id() == $id) {
+            return back()->with('error', 'Bạn không thể thay đổi trạng thái của chính mình.');
+        }
 
+        $user = User::findOrFail($id);
         $user->status = $user->status === 'online' ? 'offline' : 'online';
         $user->save();
 

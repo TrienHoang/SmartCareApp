@@ -40,7 +40,7 @@ class Doctor extends Model
     {
         return $this->belongsTo(Department::class);
     }
-     public function appointments()
+    public function appointments()
     {
         return $this->hasMany(Appointment::class);
     }
@@ -49,5 +49,30 @@ class Doctor extends Model
     {
         return $this->hasMany(Review::class);
     }
-}
+    public function file_uploads()
+    {
+        return $this->hasMany(FileUpload::class);
+    }
+        public function treatmentPlans()
+    {
+        return $this->hasMany(TreatmentPlan::class);
+    }
+    
 
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'doctor_service');
+    }
+
+    public function workingSchedules()
+    {
+        return $this->hasMany(WorkingSchedule::class);
+    }
+
+    public function leaves()
+    {
+        return $this->hasMany(DoctorLeave::class)
+            ->where('approved', true)
+            ->whereNull('deleted_at');
+    }
+}

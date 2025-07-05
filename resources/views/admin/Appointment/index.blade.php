@@ -102,17 +102,6 @@
                 </div>
 
                 <div class="col-md-2">
-                    <label class="form-label">Thanh toán</label>
-                    <select class="form-control" name="payment_status">
-                        <option value="">Tất cả</option>
-                        <option value="completed" {{ request('payment_status') == 'completed' ? 'selected' : '' }}>Hoàn tất
-                        </option>
-                        <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Chưa thanh
-                            toán</option>
-                    </select>
-                </div>
-
-                <div class="col-md-2">
                     <label class="form-label">Từ ngày</label>
                     <input type="date" class="form-control" name="date_from"
                         value="{{ old('date_from', request('date_from')) }}">
@@ -289,11 +278,18 @@
                                         @endif
 
                                         @if (optional($appointment->payment)->status !== 'paid')
-                                            <form action="{{ route('admin.appointments.pay', $appointment->id) }}"
-                                                method="POST" class="d-inline">
-                                                @csrf
-                                                <button class="btn btn-sm btn-outline-success">Thanh toán</button>
-                                            </form>
+                                            @if ($appointment->status === 'confirmed')
+                                                <form action="{{ route('admin.appointments.pay', $appointment->id) }}"
+                                                    method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button class="btn btn-sm btn-outline-success">Thanh toán</button>
+                                                </form>
+                                            @elseif ($appointment->status === 'pending')
+                                                <button class="btn btn-sm btn-outline-secondary" disabled
+                                                    onclick="alert('Vui lòng xác nhận trước khi thanh toán.')">
+                                                    Thanh toán
+                                                </button>
+                                            @endif
                                         @endif
 
                                         @if (in_array($appointment->status, ['pending', 'confirmed']))
