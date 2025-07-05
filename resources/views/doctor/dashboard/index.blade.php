@@ -195,7 +195,7 @@
 
                         <div>
                             <button type="submit" class="btn btn-primary btn-sm" style="font-size: 13px; height: 31px; padding: 0 16px;">
-                                <i class="fas fa-filter me-1"></i> Lọc
+                                <i class="fas fa-filter me-1"></i>
                             </button>
                         </div>
                     </form>
