@@ -8,12 +8,36 @@ use App\Models\DoctorLeave;
 use App\Models\Room;
 use App\Notifications\DoctorLeaveApproved;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class DoctorLeaveController extends Controller
 {
+
+
     public function index(Request $request)
     {
         $query = DoctorLeave::with(['doctor.user'])->orderBy('id', 'desc');
+
+        // Validate ngày bắt đầu <= ngày kết thúc
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            if ($request->start_date > $request->end_date) {
+                return back()->withInput()->withErrors([
+                    'start_date' => 'Ngày bắt đầu không được lớn hơn ngày kết thúc.',
+                    'end_date' => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.'
+                ]);
+            }
+
+            // Tính số ngày nghỉ
+            $start = Carbon::parse($request->start_date);
+            $end = Carbon::parse($request->end_date);
+            $days = $start->diffInDays($end) + 1;
+
+            if ($days > 3) {
+                return back()->withInput()->withErrors([
+                    'end_date' => 'Bác sĩ chỉ được nghỉ tối đa 3 ngày. Khoảng bạn chọn là ' . $days . ' ngày.'
+                ]);
+            }
+        }
 
         // Lọc theo tên bác sĩ
         if ($request->filled('keyword')) {
@@ -39,11 +63,9 @@ class DoctorLeaveController extends Controller
         }
 
         $doctorLeaves = $query->paginate(10)->withQueryString();
+
         return view('admin.doctor_leaves.index', compact('doctorLeaves'));
     }
-
-
-
     public function edit($id)
     {
         // Kiểm tra quyền truy cập

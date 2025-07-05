@@ -21,6 +21,7 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\WorkingSchedule;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -60,17 +61,6 @@ class AppointmentController extends Controller
             $query->where('service_id', $request->service_id);
         }
 
-        // Lọc theo trạng thái thanh toán (order)
-        // Lọc theo trạng thái thanh toán
-        if ($request->filled('payment_status')) {
-            if ($request->payment_status === 'completed') {
-                // Chỉ lấy lịch hẹn có ÍT NHẤT 1 payment = paid
-                $query->whereHas('payment', fn($q) => $q->where('status', 'paid'));
-            } elseif ($request->payment_status === 'unpaid') {
-                // Lấy lịch hẹn KHÔNG có bất kỳ payment = paid
-                $query->whereDoesntHave('payment', fn($q) => $q->where('status', 'paid'));
-            }
-        }
 
 
         // Lọc theo ngày
@@ -159,7 +149,7 @@ class AppointmentController extends Controller
         $timeOnly = $appointmentDate->format('H:i');
         $day = $appointmentDate->format('Y-m-d');
 
-        $doctor   = Doctor::with('department')->findOrFail($request->doctor_id);
+        $doctor = Doctor::with(['department', 'user'])->findOrFail($request->doctor_id);
         $service  = Service::with('department')->findOrFail($request->service_id);
 
         if ((int) $doctor->department_id !== (int) $service->department_id) {
@@ -175,6 +165,11 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
+        if ($doctor->user->status !== 'online') {
+            return back()->withErrors([
+                'doctor_id' => 'Bác sĩ hiện không hoạt động, vui lòng chọn bác sĩ khác.'
+            ])->withInput();
+        }
 
         // Kiểm tra xem bác sĩ có lịch hẹn trùng không
         $conflict = AppointmentHelper::isConflict(
@@ -281,7 +276,7 @@ class AppointmentController extends Controller
             'user_id' => $request->patient_id,
             'appointment_id' => $appointment->id,
             'total_amount' => $price,
-            'status' => 'pending',
+            'status' => 'completed',
             'ordered_at' => now(),
         ]);
 
@@ -293,11 +288,21 @@ class AppointmentController extends Controller
             'price' => $price,
         ]);
 
-        // Tạo payment
-        Payment::updateOrCreate([
+        // Tạo payment đã thanh toán
+        $payment = Payment::create([
             'appointment_id' => $appointment->id,
             'amount' => $price,
-            'status' => 'unpaid',
+            'status' => 'paid',
+            'payment_method' => 'cash',  // hoặc mặc định phương thức khác nếu cần
+            'paid_at' => now(),
+        ]);
+
+        // Ghi log thanh toán
+        PaymentHistory::create([
+            'payment_id' => $payment->id,
+            'amount' => $payment->amount,
+            'payment_method' => 'cash',
+            'payment_date' => now(),
         ]);
 
         // Appointment::create($requestData);
@@ -343,7 +348,7 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        $doctor = Doctor::with('department')->findOrFail($request->doctor_id);
+        $doctor = Doctor::with(['department', 'user'])->findOrFail($request->doctor_id);
         $service = Service::with('department')->findOrFail($request->service_id);
 
         if ((int) $doctor->department_id !== (int) $service->department_id) {
@@ -356,6 +361,12 @@ class AppointmentController extends Controller
                 'service_id' => 'Dịch vụ bạn chọn thuộc chuyên khoa: ' . ($service->department->name ?? 'Không xác định') .
                     ', nhưng bác sĩ được chỉ định hiện thuộc chuyên khoa: ' . ($doctor->department->name ?? 'Không xác định') . '.' .
                     ' Bạn có thể chọn một trong các dịch vụ phù hợp: ' . $recommendedList . '.'
+            ])->withInput();
+        }
+
+        if ($doctor->user->status !== 'online') {
+            return back()->withErrors([
+                'doctor_id' => 'Bác sĩ hiện không hoạt động, vui lòng chọn bác sĩ khác.'
             ])->withInput();
         }
 
@@ -657,5 +668,69 @@ class AppointmentController extends Controller
         }
 
         return back()->with('success', 'Thanh toán thành công!');
+    }
+
+    public function getDoctorServices(Doctor $doctor)
+    {
+        $services = $doctor->services()->with('department')->get();
+        return response()->json($services);
+    }
+
+    public function getDoctorWorkingDays(Doctor $doctor)
+    {
+        $dayMap = [
+            'Sunday' => 0,
+            'Chủ nhật' => 0,
+            'Monday' => 1,
+            'Thứ hai' => 1,
+            'Tuesday' => 2,
+            'Thứ ba' => 2,
+            'Wednesday' => 3,
+            'Thứ tư' => 3,
+            'Thursday' => 4,
+            'Thứ năm' => 4,
+            'Friday' => 5,
+            'Thứ sáu' => 5,
+            'Saturday' => 6,
+            'Thứ bảy' => 6,
+        ];
+
+        // Ngày làm việc theo thứ (0-6)
+        $daysOfWeek = $doctor->workingSchedules()
+            ->whereNotNull('day_of_week')
+            ->pluck('day_of_week')
+            ->map(fn($d) => $dayMap[$d] ?? null)
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        // Ngày làm việc cụ thể (YYYY-MM-DD)
+        $specificDates = $doctor->workingSchedules()
+            ->whereNotNull('day')
+            ->where('day', '>=', now()->toDateString())
+            ->pluck('day')
+            ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
+            ->unique()
+            ->values()
+            ->toArray();
+
+        // Ngày nghỉ (đã duyệt)
+        $vacationDates = $doctor->leaves()
+            ->where('end_date', '>=', now())
+            ->get()
+            ->flatMap(function ($leave) {
+                $period = CarbonPeriod::create($leave->start_date, $leave->end_date);
+                return collect($period)->map(fn($date) => $date->format('Y-m-d'));
+            })
+            ->unique()
+            ->values()
+            ->toArray();
+
+        return response()->json([
+            'daysOfWeek' => $daysOfWeek,
+            'specificDates' => $specificDates,
+            'vacationDates' => $vacationDates,
+        ]);
     }
 }

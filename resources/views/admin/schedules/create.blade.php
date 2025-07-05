@@ -37,22 +37,6 @@
                     @enderror
                 </div>
 
-                {{-- Phòng làm việc --}}
-                <div class="mb-3">
-                    <label for="room_id" class="form-label">Phòng làm việc <span class="text-danger">*</span></label>
-                    <select class="form-select" name="room_id" id="room_id">
-                        <option value="">-- Chọn phòng --</option>
-                        @foreach($rooms as $room)
-                            <option value="{{ $room->id }}" {{ old('room_id') == $room->id ? 'selected' : '' }}>
-                                {{ $room->name ?? 'Phòng #' . $room->id }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('room_id')
-                        <small class="text-danger">{{ $message }}</small>
-                    @enderror
-                </div>
-
                 {{-- Ngày làm việc --}}
                 <div class="mb-3">
                     <label for="day" class="form-label">Ngày làm việc <span class="text-danger">*</span></label>
@@ -133,6 +117,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const dayInput = document.getElementById('day');
     const dayOfWeekInput = document.getElementById('day_of_week');
     const dayDisplay = document.getElementById('thu_hien_thi');
+    const doctorInput = document.getElementById('doctor_id');
     const startInput = document.getElementById('start_time');
     const endInput = document.getElementById('end_time');
 
@@ -146,6 +131,8 @@ document.addEventListener('DOMContentLoaded', function () {
         6: 'Thứ bảy'
     };
 
+    const existingSchedules = @json($existingSchedules);
+
     function setDayOfWeek(dateStr) {
         const date = new Date(dateStr);
         if (!isNaN(date)) {
@@ -155,27 +142,46 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    if (dayInput.value) setDayOfWeek(dayInput.value);
+    function validateDay() {
+        const selectedDoctor = doctorInput.value;
+        const selectedDay = dayInput.value;
 
-    dayInput.addEventListener('change', function () {
-        const d = new Date(this.value);
-        setDayOfWeek(this.value);
+        if (!selectedDoctor || !selectedDay) return;
 
         const today = new Date();
+        const selectedDate = new Date(selectedDay);
         today.setHours(0, 0, 0, 0);
 
-        if (d < today) {
+        if (selectedDate < today) {
             alert("Không thể chọn ngày trong quá khứ.");
-            this.value = '';
-            dayOfWeekInput.value = '';
-            dayDisplay.value = '';
-        } else if (d.getDay() === 0) {
-            alert("Không thể chọn Chủ Nhật.");
-            this.value = '';
-            dayOfWeekInput.value = '';
-            dayDisplay.value = '';
+            resetDay();
+            return;
         }
-    });
+
+        if (selectedDate.getDay() === 0) {
+            alert("Không thể chọn Chủ Nhật.");
+            resetDay();
+            return;
+        }
+
+        const existingDays = existingSchedules[selectedDoctor] || [];
+        if (existingDays.includes(selectedDay)) {
+            alert("Bác sĩ đã có lịch làm việc vào ngày này.");
+            resetDay();
+            return;
+        }
+
+        setDayOfWeek(selectedDay);
+    }
+
+    function resetDay() {
+        dayInput.value = '';
+        dayOfWeekInput.value = '';
+        dayDisplay.value = '';
+    }
+
+    dayInput.addEventListener('change', validateDay);
+    doctorInput.addEventListener('change', validateDay);
 
     document.getElementById('formLichLamViec').addEventListener('submit', function (e) {
         const [h1, m1] = startInput.value.split(':');
@@ -188,6 +194,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
+
+    if (dayInput.value) setDayOfWeek(dayInput.value);
 });
 </script>
 @endsection

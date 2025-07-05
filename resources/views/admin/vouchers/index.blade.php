@@ -15,7 +15,13 @@
             <i class="bx bx-plus"></i> Thêm mới
         </a>
     </div>
-
+    @if(session('message'))
+    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        <i class="bx bx-check-circle me-1"></i>
+        {{ session('message') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+    </div>
+@endif
     <!-- Statistics Cards -->
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6 col-12">
@@ -28,7 +34,7 @@
                             </div>
                         </div>
                         <div>
-                            <h4 class="text-white mb-0">{{ $stats['total'] ?? $vouchers->total() }}</h4>
+                            <h4 class="text-white mb-0">{{ $stats['total'] ?? $promotions->total() }}</h4>
                             <small class="text-white">Tổng voucher</small>
                         </div>
                     </div>
@@ -45,7 +51,7 @@
                             </div>
                         </div>
                         <div>
-                            <h4 class="text-white mb-0">{{ $stats['active'] ?? ($vouchers->where('quantity', '>', 0)->count()) }}</h4>
+                            <h4 class="text-white mb-0">{{ $stats['active'] ?? $promotions->where('valid_until', '>', now())->count() }}</h4>
                             <small class="text-white">Còn hiệu lực</small>
                         </div>
                     </div>
@@ -79,7 +85,7 @@
                             </div>
                         </div>
                         <div>
-                            <h4 class="text-white mb-0">{{ $stats['expired'] ?? 0 }}</h4>
+                            <h4 class="text-white mb-0">{{ $stats['expired'] ?? $promotions->where('valid_until', '<', now())->count() }}</h4>
                             <small class="text-white">Hết hạn</small>
                         </div>
                     </div>
@@ -87,6 +93,7 @@
             </div>
         </div>
     </div>
+
     <!-- Filter Form -->
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body">
@@ -96,8 +103,15 @@
                     <input type="text" name="code" class="form-control" placeholder="Tìm theo mã voucher..." value="{{ request('code') }}">
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label font-weight-semibold"><i class="bx bx-sort mr-1 text-info"></i>Số lượng tối thiểu</label>
-                    <input type="number" name="quantity" class="form-control" placeholder="Số lượng tối thiểu..." value="{{ request('quantity') }}">
+                    <label class="form-label font-weight-semibold"><i class="bx bx-sort mr-1 text-info"></i>Phần trăm giảm giá</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="number" name="discount_percentage_min" class="form-control" placeholder="Tối thiểu" value="{{ request('discount_percentage_min') }}" min="1">
+                        </div>
+                        <div class="col-6">
+                            <input type="number" name="discount_percentage_max" class="form-control" placeholder="Tối đa" value="{{ request('discount_percentage_max') }}" min="1">
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-2 d-grid">
                     <button type="submit" class="btn btn-primary">
@@ -117,7 +131,7 @@
                     <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách Voucher</h4>
                 </div>
                 <div class="card-tools">
-                    <span class="badge badge-light">{{ $vouchers->total() }} voucher</span>
+                    <span class="badge badge-light">{{ $promotions->total() }} voucher</span>
                 </div>
             </div>
         </div>
@@ -129,37 +143,42 @@
                             <th>ID</th>
                             <th>Mã</th>
                             <th>Giảm giá</th>
-                            <th>Số lượng</th>
-                            <th>Giá tối thiểu</th>
-                            <th>Ngày tạo</th>
+                            <th>Ngày bắt đầu</th>
+                            <th>Ngày kết thúc</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($vouchers as $voucher)
+                        @forelse($promotions as $promotion)
                             <tr class="align-middle text-center">
-                                <td class="fw-bold text-primary">#{{ $voucher->id }}</td>
-                                <td class="fw-bold text-primary">{{ $voucher->code }}</td>
+                                <td class="fw-bold text-primary">#{{ $promotion->id }}</td>
+                                <td class="fw-bold text-primary">{{ $promotion->code }}</td>
                                 <td>
-                                    <span class="badge bg-success">{{ $voucher->discount }}%</span>
+                                    <span class="badge bg-success">{{ $promotion->discount_percentage }}%</span>
                                 </td>
-                                <td>{{ number_format($voucher->quantity) }}</td>
-                                <td>{{ number_format($voucher->min_price) }} đ</td>
-                                <td>{{ $voucher->created_at->format('d/m/Y') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($promotion->valid_from)->format('d/m/Y') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($promotion->valid_until)->format('d/m/Y') }}</td>
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ route('admin.vouchers.show', $voucher->id) }}" class="btn btn-outline-info" data-toggle="tooltip" title="Xem">
+                                        <a href="{{ route('admin.vouchers.show', $promotion->id) }}" class="btn btn-outline-info" data-toggle="tooltip" title="Xem">
                                             <i class="bx bx-show-alt"></i>
                                         </a>
-                                        <a href="{{ route('admin.vouchers.edit', $voucher->id) }}" class="btn btn-outline-warning" data-toggle="tooltip" title="Sửa">
+                                        <a href="{{ route('admin.vouchers.edit', $promotion->id) }}" class="btn btn-outline-warning" data-toggle="tooltip" title="Sửa">
                                             <i class="bx bx-edit"></i>
                                         </a>
                                     </div>
+                                    <form action="{{ route('admin.vouchers.destroy', $promotion->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger" data-toggle="tooltip" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa voucher này không?')">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-5">
+                                <td colspan="6" class="text-center text-muted py-5">
                                     <div class="empty-state">
                                         <i class="bx bx-gift text-muted" style="font-size: 48px;"></i>
                                         <h5 class="mt-3 text-muted">Không tìm thấy voucher nào.</h5>
@@ -171,17 +190,17 @@
                 </table>
             </div>
             <!-- Pagination -->
-            @if ($vouchers->hasPages())
+            @if ($promotions->hasPages())
                 <div class="pagination-wrapper bg-light p-3 border-top">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="pagination-info">
                             <small class="text-muted">
-                                Hiển thị {{ $vouchers->firstItem() }} - {{ $vouchers->lastItem() }}
-                                trong tổng số {{ $vouchers->total() }} voucher
+                                Hiển thị {{ $promotions->firstItem() }} - {{ $promotions->lastItem() }}
+                                trong tổng số {{ $promotions->total() }} voucher
                             </small>
                         </div>
                         <div class="pagination-links">
-                            {{ $vouchers->links('pagination::bootstrap-5') }}
+                            {{ $promotions->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
                 </div>
