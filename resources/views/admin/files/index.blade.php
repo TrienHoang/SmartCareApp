@@ -18,16 +18,6 @@
                                 </h2>
                                 <p class="text-muted mb-0">Theo dõi và quản lý tất cả tài liệu y tế trong hệ thống</p>
                             </div>
-                            <form id="export-form" action="{{ route('admin.files.export') }}" method="GET">
-                                @csrf
-                                <input type="hidden" name="ids" id="export-ids">
-                                <input type="hidden" name="keyword" value="{{ request('keyword') }}">
-                                <input type="hidden" name="uploader_type" value="{{ request('uploader_type') }}">
-                                <input type="hidden" name="date_from" value="{{ request('date_from') }}">
-                                <input type="hidden" name="date_to" value="{{ request('date_to') }}">
-                                <input type="hidden" name="file_category" value="{{ request('file_category') }}">
-                                <button type="submit" class="btn btn-success">Xuất Excel (theo chọn)</button>
-                            </form>
                         </div>
                         <div class="breadcrumb-wrapper col-12">
                             <nav aria-label="breadcrumb">
@@ -54,6 +44,16 @@
                         Thùng rác
                     </a>
                 </div>
+                <form id="export-form" action="{{ route('admin.files.export') }}" method="GET">
+                    @csrf
+                    <input type="hidden" name="ids" id="export-ids">
+                    <input type="hidden" name="keyword" value="{{ request('keyword') }}">
+                    <input type="hidden" name="uploader_type" value="{{ request('uploader_type') }}">
+                    <input type="hidden" name="date_from" value="{{ request('date_from') }}">
+                    <input type="hidden" name="date_to" value="{{ request('date_to') }}">
+                    <input type="hidden" name="file_category" value="{{ request('file_category') }}">
+                    <button type="submit" class="btn btn-success">Xuất Excel (theo chọn)</button>
+                </form>
             </div>
         </div>
 

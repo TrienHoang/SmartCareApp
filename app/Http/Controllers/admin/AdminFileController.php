@@ -264,8 +264,10 @@ class AdminFileController extends Controller
             }
         }
 
-        $files = $query->orderBy('uploaded_at', 'desc')
-            ->get(['id', 'file_name', 'file_category', 'size', 'uploaded_at']);
+        $files = $query
+            ->with(['user.doctor', 'appointment'])
+            ->orderBy('uploaded_at', 'desc')
+            ->get(['id', 'file_name', 'user_id', 'file_category', 'size', 'uploaded_at', 'appointment_id', 'note']);
 
         // Tạo file
         $writer = WriterEntityFactory::createXLSXWriter();
@@ -275,10 +277,14 @@ class AdminFileController extends Controller
 
         $headerRow = WriterEntityFactory::createRowFromArray([
             'ID',
-            'Thông tin file',
+            'Tên file',
+            'Người tải lên',
+            'Loại người tải',
             'Danh mục',
             'Kích thước (KB)',
-            'Ngày tạo'
+            'Ngày tạo',
+            'Lịch hẹn',
+            'Ghi chú'
         ], $headerStyle);
         $writer->addRow($headerRow);
 
@@ -286,9 +292,15 @@ class AdminFileController extends Controller
             $writer->addRow(WriterEntityFactory::createRowFromArray([
                 $file->id,
                 $file->file_name,
+                optional($file->user)->full_name ?? 'Không xác định',
+                $file->user && $file->user->doctor ? 'Bác sĩ' : 'Bệnh nhân',
                 $file->file_category,
-                round($file->size / 1024, 2),
-                optional($file->uploaded_at)->format('Y-m-d H:i:s')
+                number_format(round($file->size / 1024, 2), 2, '.', ''), // đảm bảo là số
+                optional($file->uploaded_at)->format('Y-m-d H:i:s') ?? '-', // fix ngày
+                $file->appointment_id && $file->appointment?->appointment_time
+                    ? sprintf('#%s - %s', $file->appointment_id, $file->appointment->appointment_time->format('Y-m-d H:i'))
+                    : '-',
+                $file->note ?? '-'
             ]));
         }
 
