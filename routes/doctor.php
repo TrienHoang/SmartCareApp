@@ -2,27 +2,20 @@
 
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Http\Controllers\Doctor\DoctorLeaveController;
-use App\Http\Controllers\doctor\FileUploadController;
+use App\Http\Controllers\Doctor\FileUploadController;
 use App\Http\Controllers\Doctor\PrescriptionController;
-use App\Http\Controllers\doctor\TreatmentPlanController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-
-// ✅ Redirect khi truy cập /doctor/dashboard
-Route::middleware(['auth', 'checkRole:doctor'])
-    ->name('doctor.')
-    ->group(function () {
-        Route::get('/doctor/dashboard', function (Request $request) {
-            $doctor = Auth::user();
-            return redirect()->route('doctor.dashboard', ['doctor' => $doctor->id]);
-        })->name('dashboard');
-    });
+use App\Http\Controllers\Doctor\DoctorReviewController;
+use App\Http\Controllers\Doctor\DoctorAppointmentController;
+use App\Http\Controllers\doctor\DoctorController;
+use App\Http\Controllers\doctor\TreatmentPlanController;
 
 // ✅ Dashboard và thống kê
 Route::prefix('doctor')
     ->middleware(['auth', 'checkRole:doctor'])
-    ->name('doctor.dashboard.')
+    ->name('doctor.')
     ->group(function () {
         Route::get('dashboard', function (Request $request) {
             $user = Auth::user();
@@ -30,10 +23,9 @@ Route::prefix('doctor')
 
             abort_if(!$doctorId, 403, 'Không tìm thấy bác sĩ');
             return app(DoctorDashboardController::class)->index($request, $doctorId);
-        })->name('index');
+        })->name('dashboard');
     });
 
-// ✅ Export Excel & PDF
 Route::get('doctor/{doctor}/dashboard/export-excel', [DoctorDashboardController::class, 'exportExcel'])->name('doctor.dashboard.stats-excel');
 Route::get('doctor/{doctor}/dashboard/export-pdf', [DoctorDashboardController::class, 'exportPDF'])->name('doctor.dashboard.stats-pdf');
 
@@ -43,10 +35,7 @@ Route::prefix('doctor')
     ->middleware(['auth', 'checkRole:doctor'])
     ->group(function () {
 
-        // 🟩 Dashboard
-        Route::get('/dashboard', [DoctorDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/{doctor}/dashboard/export-excel', [DoctorDashboardController::class, 'exportExcel'])->name('dashboard.stats-excel');
-        Route::get('/{doctor}/dashboard/export-pdf', [DoctorDashboardController::class, 'exportPDF'])->name('dashboard.stats-pdf');
+
 
         // 🟦 Prescriptions (Đơn thuốc)
         Route::prefix('prescriptions')->name('prescriptions.')->group(function () {
@@ -88,7 +77,12 @@ Route::prefix('doctor')
             Route::delete('/{id}', [DoctorLeaveController::class, 'destroy'])->name('destroy');
         });
 
-        
+        // 🟧 Reviews
+        Route::get('/reviews', [DoctorReviewController::class, 'index'])->name('reviews.index');
+
+        // 🟪 Appointments
+        Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
+
         // Treatment Plans (Kế hoạch điều trị)
         Route::prefix('treatment-plans')
             ->name('treatment-plans.')
@@ -98,13 +92,20 @@ Route::prefix('doctor')
                 Route::get('', [TreatmentPlanController::class, 'index'])->name('index');
                 Route::get('/create', [TreatmentPlanController::class, 'create'])->name('create');
                 Route::post('', [TreatmentPlanController::class, 'store'])->name('store');
-        
+
                 // Các route chứa {treatmentPlan} phải nằm SAU
                 Route::get('/{treatmentPlan}', [TreatmentPlanController::class, 'show'])->name('show');
                 Route::get('/{treatmentPlan}/edit', [TreatmentPlanController::class, 'edit'])->name('edit');
                 Route::put('/{treatmentPlan}', [TreatmentPlanController::class, 'update'])->name('update');
                 Route::delete('/{treatmentPlan}', [TreatmentPlanController::class, 'destroy'])->name('destroy');
-        
+
                 Route::patch('treatment-plan-items/{itemId}/update-status', [TreatmentPlanController::class, 'updateItemStatus'])->name('treatment-plan-items.update-status');
+            });
+        // Danh sách bác sĩ - URL: /doctor
+        Route::get('/', [DoctorController::class, 'index'])->name('index');
+
+        // Chi tiết bác sĩ - URL: /doctor/list/{id}
+        Route::get('/list/{id}', [DoctorController::class, 'show'])->name('show');
+        Route::get('/doctor/history', [DoctorController::class, 'history'])->name('history');
+        Route::get('/doctor/history/{appointment}', [DoctorController::class, 'historyShow'])->name('history.show');
     });
-});

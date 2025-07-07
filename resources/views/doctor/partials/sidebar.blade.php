@@ -38,7 +38,7 @@
             <li class="menu-header small text-uppercase"><span class="menu-header-text">Bác sĩ</span></li>
 
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="{{ route('doctor.appointments.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-calendar"></i>
                     <div>Lịch hẹn của tôi</div>
                 </a>
@@ -70,6 +70,11 @@
                     <div>Đơn thuốc</div>
                 </a>
             </li>
+            <li class="menu-item">
+                <a href="{{ route('doctor.reviews.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-star"></i>
+                    <div>Đánh giá từ bệnh nhân</div>
+                </a>
 
             <li class="menu-item">
                 <a href="#" class="menu-link">
@@ -78,11 +83,30 @@
                 </a>
             </li>
             <li class="menu-item">
-                <a href="{{ route('doctor.leaves.index') }}" class="menu-link">
-             <i class="menu-icon tf-icons bx bx-calendar-x"></i>
-            <div>Lịch nghỉ phép</div>
-</a>
+                <a href="{{ route('doctor.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-user"></i>
+                    <div>Bác Sĩ</div>
+                </a>
             </li>
+
+            <li class="menu-item">
+                <a href="{{ route('doctor.reviews.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-star"></i>
+                    <div>Đánh giá của bệnh nhân</div>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{{ route('doctor.history') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-history"></i>
+                    <span>Xem lịch sử khám</span>
+                </a>
+            </li>
+
+
+
+
+
         @endif
 
     </ul>

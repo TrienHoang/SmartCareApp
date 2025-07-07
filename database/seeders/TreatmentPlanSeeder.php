@@ -18,7 +18,7 @@ class TreatmentPlanSeeder extends Seeder
         $doctors = User::where('role_id', $doctorRoleId)->get();
         $patients = User::where('role_id', $patientRoleId)->get();
 
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             $plan = TreatmentPlan::factory()->create([
                 'doctor_id' => $doctors->random()->id,
                 'patient_id' => $patients->random()->id,
