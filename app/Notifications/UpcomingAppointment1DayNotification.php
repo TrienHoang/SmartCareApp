@@ -5,10 +5,9 @@ namespace App\Notifications;
 use App\Models\Appointment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class UpcomingAppointment1DayNotification extends Notification implements ShouldQueue
+class UpcomingAppointment1DayNotification extends Notification
 {
     use Queueable;
 

@@ -52,7 +52,7 @@
                     <input type="hidden" name="date_from" value="{{ request('date_from') }}">
                     <input type="hidden" name="date_to" value="{{ request('date_to') }}">
                     <input type="hidden" name="file_category" value="{{ request('file_category') }}">
-                    <button type="submit" class="btn btn-success">Xuất Excel (theo chọn)</button>
+                    <button type="submit" class="btn btn-success">Xuất Excel</button>
                 </form>
             </div>
         </div>
@@ -248,7 +248,7 @@
                                             <label class="custom-control-label" for="select-all"></label>
                                         </div>
                                     </th>
-                                    <th class="border-top-0">#ID</th>
+                                    <th class="border-top-0">STT</th>
                                     <th class="border-top-0">
                                         <i class="bx bx-file mr-1"></i>Thông tin file
                                     </th>
@@ -284,7 +284,7 @@
                                             </div>
                                         </td>
                                         <td class="font-weight-bold text-primary">
-                                            #{{ $loop->iteration + ($files->currentPage() - 1) * $files->perPage() }}</td>
+                                            {{ $loop->iteration + ($files->currentPage() - 1) * $files->perPage() }}</td>
                                         <td>
                                             <div class="file-info d-flex align-items-center">
                                                 <div class="file-icon-modern bg-gradient-primary text-white mr-3">
@@ -369,7 +369,7 @@
                                                 </a>
                                                 <button type="button" class="btn btn-outline-danger"
                                                     data-toggle="tooltip" title="Xóa file"
-                                                    onclick="deleteFile({{ $file->id }})">
+                                                    onclick="deleteFile({{ $file->id }}, '{{ addslashes($file->file_name) }}')">
                                                     <i class="bx bx-trash"></i>
                                                 </button>
                                             </div>
@@ -701,10 +701,10 @@
 
 
         // Delete file function
-        function deleteFile(id) {
+        function deleteFile(id, fileName) {
             Swal.fire({
                 title: 'Xác nhận xóa',
-                text: 'Bạn có chắc chắn muốn xóa tài liệu này không? Hành động này không thể hoàn tác!',
+                html: `Bạn có chắc chắn muốn xóa tài liệu <strong>${fileName}</strong> không?<br>Hành động này không thể hoàn tác!`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
