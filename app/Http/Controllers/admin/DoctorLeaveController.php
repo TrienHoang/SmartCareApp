@@ -84,35 +84,26 @@ class DoctorLeaveController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Validate input
         $request->validate([
             'approved' => 'required|in:0,1',
         ]);
 
-        // Lấy bản ghi lịch nghỉ
         $leave = DoctorLeave::findOrFail($id);
 
-        // Nếu đã duyệt (approved = 1), không cho thay đổi nữa
+        // Nếu đã duyệt thì không được chỉnh sửa nữa
         if ($leave->approved == 1) {
-            // Gửi notification nếu muốn (hoặc có thể gửi khi duyệt thành công ở nơi khác)
-            $leave->doctor->user->notify(new DoctorLeaveApproved($leave));
-
             return redirect()->route('admin.doctor_leaves.index')
                 ->with('error', 'Lịch nghỉ đã được duyệt và không thể chỉnh sửa.');
         }
 
-        // Kiểm tra có thay đổi trạng thái approved không
-        if ($leave->approved == $request->approved) {
-            return redirect()->route('admin.doctor_leaves.index')
-                ->with('info', 'Không có thay đổi nào được thực hiện.');
-        }
+        $oldApproved = $leave->approved;
 
-        // Cập nhật trạng thái approved
+        // Cập nhật trạng thái
         $leave->approved = $request->approved;
         $leave->save();
 
-        // Nếu trạng thái chuyển sang duyệt, gửi notification
-        if ($leave->approved == 1) {
+        // Chỉ gửi thông báo nếu vừa chuyển sang trạng thái được duyệt
+        if ($oldApproved == 0 && $leave->approved == 1) {
             $leave->doctor->user->notify(new DoctorLeaveApproved($leave));
         }
 
