@@ -18,6 +18,7 @@ use App\Models\OrderService;
 use App\Models\Payment;
 use App\Models\PaymentHistory;
 use App\Models\Service;
+use App\Models\TreatmentPlan;
 use App\Models\User;
 use App\Models\WorkingSchedule;
 use Carbon\Carbon;
@@ -139,6 +140,7 @@ class AppointmentController extends Controller
             'patients' => User::where('role_id', 3)->get(),
             'doctors' => Doctor::with('user')->get(),
             'services' => Service::all(),
+            'treatmentPlans' => TreatmentPlan::whereIn('status', ['chua_tien_hanh', 'dang_tien_hanh'])->get(),
         ]);
     }
 
@@ -260,7 +262,8 @@ class AppointmentController extends Controller
             'service_id',
             'appointment_time',
             'status',
-            'reason'
+            'reason',
+            'treatment_plan_id',
         ]);
 
         $requestData['end_time'] = $endTime;
@@ -742,5 +745,34 @@ class AppointmentController extends Controller
             'specificDates' => $specificDates,
             'vacationDates' => $vacationDates,
         ]);
+    }
+
+    public function getTreatmentPlanDetails($id)
+    {
+        $plan = TreatmentPlan::with(['doctor', 'treatmentPlanItems' => function ($q) {
+            $q->orderBy('expected_start_date');
+        }])->findOrFail($id);
+
+        return response()->json([
+            'doctor_id' => $plan->doctor_id,
+            'service_id' => $plan->treatmentPlanItems->first()->service_id ?? null,
+            'expected_start_date' => $plan->treatmentPlanItems->first()->expected_start_date ?? null,
+        ]);
+    }
+
+    public function getTreatmentPlansByPatient($patientId)
+    {
+        $plans = TreatmentPlan::with('doctor.user')
+            ->where('patient_id', $patientId)
+            ->get()
+            ->map(function ($plan) {
+                return [
+                    'id' => $plan->id,
+                    'plan_title' => $plan->plan_title,
+                    'doctor_name' => $plan->doctor->user->full_name ?? 'Không rõ'
+                ];
+            });
+
+        return response()->json($plans);
     }
 }

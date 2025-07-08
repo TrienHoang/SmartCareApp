@@ -33,7 +33,7 @@
                                 </div>
                                 <span class="progress-description text-sm text-secondary mt-2">
                                     <i class="fas fa-user-md mr-1 text-info"></i>Bác sĩ:
-                                    <strong class="text-primary">{{ $plan->doctor->full_name ?? 'N/A' }}</strong> |
+                                    <strong class="text-primary">{{ $plan->doctor->user->full_name ?? 'N/A' }}</strong> |
                                     <i class="fas fa-user-injured mr-1 text-info"></i>Bệnh nhân:
                                     <strong class="text-primary">{{ $plan->patient->full_name ?? 'N/A' }}</strong>
                                 </span>

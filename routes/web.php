@@ -267,6 +267,12 @@ Route::group([
 
         Route::get('/doctor/{doctor}/working-days', [AppointmentController::class, 'getDoctorWorkingDays'])
             ->name('doctor.working-days');
+
+        Route::get('/treatment-plans/{id}/details', [AppointmentController::class, 'getTreatmentPlanDetails'])
+            ->name('treatment-plan.details');
+
+        Route::get('/treatment-plans/by-patient/{patient}', [AppointmentController::class, 'getTreatmentPlansByPatient'])
+            ->name('treatment-plans.by-patient');
     });
     // quản lý đơn thuốc
     Route::group([

@@ -347,7 +347,7 @@
                         @if ($plan->doctor)
                             <div class="info-item">
                                 <div class="info-label">Tên đầy đủ:</div>
-                                <div class="info-value">{{ $plan->doctor->full_name ?? 'N/A' }}</div>
+                                <div class="info-value">{{ $plan->doctor->user->full_name ?? 'N/A' }}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Chuyên khoa:</div>
@@ -355,15 +355,15 @@
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Số điện thoại:</div>
-                                <div class="info-value">{{ $plan->doctor->phone ?? 'N/A' }}</div>
+                                <div class="info-value">{{ $plan->doctor->user->phone ?? 'N/A' }}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Email:</div>
-                                <div class="info-value">{{ $plan->doctor->email ?? 'N/A' }}</div>
+                                <div class="info-value">{{ $plan->doctor->user->email ?? 'N/A' }}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Địa chỉ:</div>
-                                <div class="info-value">{{ $plan->doctor->address ?? 'N/A' }}</div>
+                                <div class="info-value">{{ $plan->doctor->user->address ?? 'N/A' }}</div>
                             </div>
                         @else
                             <div class="no-data">Không có thông tin bác sĩ</div>
