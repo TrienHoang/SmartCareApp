@@ -17,6 +17,7 @@ class SchedulesController extends Controller
     {
         $query = WorkingSchedule::with(['doctor.user', 'room']);
 
+        // Lọc theo từ khóa (tên bác sĩ)
         if ($request->filled('keyword')) {
             $keyword = $request->get('keyword');
             $query->whereHas('doctor.user', function ($q) use ($keyword) {
@@ -24,17 +25,28 @@ class SchedulesController extends Controller
             });
         }
 
+        // Lọc theo ngày trong tuần
         if ($request->filled('day_of_week')) {
             $query->where('day_of_week', $request->get('day_of_week'));
         }
 
-        $sortField = $request->get('field', 'id');
-        $sortDirection = $request->get('sort', 'asc');
+        // Lọc theo phòng
+        if ($request->filled('room_id')) {
+            $query->where('room_id', $request->get('room_id'));
+        }
+
+        // Sắp xếp
+        $sortField = $request->get('field', 'day');
+        $sortDirection = $request->get('sort', 'desc'); // Mặc định mới nhất lên đầu
 
         if ($sortField === 'doctor_name') {
             $query->join('doctors', 'working_schedules.doctor_id', '=', 'doctors.id')
                 ->join('users', 'doctors.user_id', '=', 'users.id')
                 ->orderBy('users.full_name', $sortDirection)
+                ->select('working_schedules.*');
+        } elseif ($sortField === 'room_name') {
+            $query->join('rooms', 'working_schedules.room_id', '=', 'rooms.id')
+                ->orderBy('rooms.name', $sortDirection)
                 ->select('working_schedules.*');
         } else {
             $allowedSorts = ['id', 'day', 'day_of_week', 'start_time', 'end_time'];
@@ -45,22 +57,48 @@ class SchedulesController extends Controller
 
         $schedules = $query->paginate(10)->withQueryString();
         $doctors = Doctor::all();
+        $rooms = Room::all();
 
-        return view('admin.schedules.index', compact('schedules', 'doctors'));
+        // Thống kê
+        $stats = [
+            'total_doctors' => Doctor::count(),
+            'total_schedules' => WorkingSchedule::count(),
+            'today_schedules' => WorkingSchedule::where('day', date('Y-m-d'))->count(),
+            'no_schedule_doctors' => Doctor::count() - $schedules->pluck('doctor_id')->unique()->count(),
+        ];
+
+        return view('admin.schedules.index', compact('schedules', 'doctors', 'rooms', 'stats'));
     }
+
 
     public function create()
     {
-        $doctors = Doctor::with('user')->get();
-        $rooms = Room::all();
-        return view("admin.schedules.create", compact("doctors", "rooms"));
+        $doctors = Doctor::with('user')
+            ->whereHas('user', function ($q) {
+                $q->where('role_id', 2)
+                    ->where('status', 'online'); // Chỉ lấy user có trạng thái online
+            })
+            ->get();
+
+        $existingSchedules = WorkingSchedule::select('doctor_id', 'day')
+            ->get()
+            ->groupBy('doctor_id')
+            ->map(fn($items) => $items->pluck('day')->map(fn($d) => \Carbon\Carbon::parse($d)->format('Y-m-d')));
+
+        return view("admin.schedules.create", compact("doctors", "existingSchedules"));
     }
 
     public function store(Request $request)
     {
         $this->validateSchedule($request);
 
-        WorkingSchedule::create($request->all());
+        WorkingSchedule::create($request->only([
+            'doctor_id',
+            'day',
+            'day_of_week',
+            'start_time',
+            'end_time'
+        ]));
 
         return redirect()->route('admin.schedules.index')->with('success', 'Tạo lịch làm việc thành công.');
     }
@@ -68,9 +106,20 @@ class SchedulesController extends Controller
     public function edit($id)
     {
         $schedule = WorkingSchedule::findOrFail($id);
-        $doctors = Doctor::with('user')->get();
-        $rooms = Room::all();
-        return view("admin.schedules.edit", compact("schedule", "doctors", "rooms"));
+
+        $doctors = Doctor::with('user')
+            ->whereHas('user', function ($q) {
+                $q->where('role_id', 2)
+                    ->where('status', 'online'); // Chỉ lấy user có trạng thái online
+            })
+            ->get();
+
+        $existingSchedules = WorkingSchedule::select('doctor_id', 'day')
+            ->get()
+            ->groupBy('doctor_id')
+            ->map(fn($items) => $items->pluck('day')->map(fn($d) => \Carbon\Carbon::parse($d)->format('Y-m-d')));
+
+        return view("admin.schedules.edit", compact("schedule", "doctors", "existingSchedules"));
     }
 
     public function update(Request $request, $id)
@@ -79,11 +128,16 @@ class SchedulesController extends Controller
 
         $this->validateSchedule($request, $schedule->id);
 
-        $schedule->update($request->all());
+        $schedule->update($request->only([
+            'doctor_id',
+            'day',
+            'day_of_week',
+            'start_time',
+            'end_time'
+        ]));
 
         return redirect()->route('admin.schedules.index')->with('success', 'Cập nhật lịch thành công.');
     }
-
     public function destroy($id)
     {
         $schedule = WorkingSchedule::findOrFail($id);
@@ -101,14 +155,12 @@ class SchedulesController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'doctor_id' => 'required|exists:doctors,id',
-            'room_id' => 'required|exists:rooms,id',
             'day' => 'required|date|after:' . now()->format('Y-m-d'),
             'day_of_week' => 'required|string|max:255',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
         ], [
             'doctor_id.required' => 'Vui lòng chọn bác sĩ.',
-            'room_id.required' => 'Vui lòng chọn phòng.',
             'day.required' => 'Vui lòng chọn ngày làm việc.',
             'day.after' => 'Ngày làm việc phải sau hôm nay.',
             'day_of_week.required' => 'Vui lòng chọn thứ.',
@@ -150,6 +202,27 @@ class SchedulesController extends Controller
         if ($hasPendingLeave) {
             throw ValidationException::withMessages([
                 'day' => 'Bác sĩ này có đơn xin nghỉ phép vào thời gian này, xin mời liên hệ lại với bác sĩ.'
+            ]);
+        }
+
+        // Kiểm tra trạng thái "offline" dựa trên last_login
+        $ninetyDaysAgo = now()->subDays(90);
+        $doctorUser = Doctor::with('user')->find($doctorId)->user;
+        if ($doctorUser && $doctorUser->last_login && $doctorUser->last_login < $ninetyDaysAgo && $doctorUser->status == 'online') {
+            throw ValidationException::withMessages([
+                'doctor_id' => 'Bác sĩ này chưa hoạt động trong 90 ngày và đã bị chuyển sang trạng thái offline.'
+            ]);
+        }
+
+        // Check trùng ngày với bác sĩ (bất kể giờ)
+        $dateConflict = WorkingSchedule::where('doctor_id', $doctorId)
+            ->whereDate('day', $day)
+            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+            ->exists();
+
+        if ($dateConflict) {
+            throw ValidationException::withMessages([
+                'day' => 'Bác sĩ đã có lịch làm việc vào ngày này.'
             ]);
         }
 

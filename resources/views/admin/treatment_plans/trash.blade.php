@@ -447,7 +447,11 @@
                             <td><input type="checkbox" class="checkbox item-checkbox" data-id="{{ $plan->id }}"></td>
                             <td><strong>#{{ $plan->id }}</strong></td>
                             <td><a href="#" class="patient-name">{{ $plan->patient->full_name ?? 'N/A' }}</a></td>
-                            <td><span class="doctor-name">{{ $plan->doctor->full_name ?? 'N/A' }}</span></td>
+                            <td>
+                                <span class="doctor-name">
+                                    {{ optional($plan->doctor?->user)->full_name ?? 'N/A' }}
+                                </span>
+                            </td>
                             <td><span class="description">{{ Str::limit($plan->description, 50) }}</span></td>
                             {{-- Giới hạn mô tả --}}
                             <td><span

@@ -78,6 +78,11 @@
                 <div>Quản lý phòng ban</div>
             </a>
             <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('admin.departments.index') }}" class="menu-link">
+                        <div>Danh sách phòng ban</div>
+                    </a>
+                </li>
                 <li class="menu-item"><a href="{{ route('admin.departments.index') }}" class="menu-link">
                         <div>Danh sách</div>
                     </a></li>
@@ -123,12 +128,7 @@
                         <div>Lịch làm việc</div>
                     </a>
                 </li>
-                <li class="menu-item"><a href="{{ route('admin.appointments.index') }}" class="menu-link">
-                        <div>Danh sách</div>
-                    </a></li>
-                <li class="menu-item"><a href="{{ route('admin.appointments.create') }}" class="menu-link">
-                        <div>Thêm mới</div>
-                    </a></li>
+
             </ul>
         </li>
 
@@ -228,6 +228,14 @@
                 <div>lịch sử thanh toán</div>
             </a>
             <ul class="menu-sub">
+<<<<<<< HEAD
+                <li class="menu-item">
+                    <a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
+                        <div>Danh Sách</div>
+                    </a>
+                </li>
+=======
+>>>>>>> ba8eb736a12449628663b19bded48fef6f322a97
                 <li class="menu-item"><a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
                         <div>Danh sách</div>
                     </a></li>

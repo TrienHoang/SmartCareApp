@@ -20,7 +20,7 @@ class PaymentHistory extends Model
 
     public $timestamps = false;
 
-    
+
 
     // 👉 Thêm dòng này để fix lỗi format()
     protected $casts = [
@@ -33,5 +33,21 @@ class PaymentHistory extends Model
     public function payment()
     {
         return $this->belongsTo(Payment::class);
+    }
+    public function appointment()
+    {
+        return $this->belongsTo(Appointment::class, 'appointment_id');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class, 'doctor_id');
+    }
+    public function room()
+    {
+        return $this->belongsTo(Room::class, 'room_id');
     }
 }

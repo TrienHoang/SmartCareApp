@@ -25,10 +25,10 @@ class TreatmentPlanController extends Controller
      */
     public function index(Request $request)
     {
-        $query = TreatmentPlan::with(['doctor:id,full_name', 'patient:id,full_name'])->latest();
+        $query = TreatmentPlan::with(['doctor.user:id,full_name', 'patient:id,full_name']);
 
         if ($request->filled('doctor')) {
-            $query->whereHas('doctor', function ($q) use ($request) {
+            $query->whereHas('doctor.user', function ($q) use ($request) {
                 $q->where('full_name', 'like', '%' . $request->doctor . '%');
             });
         }
@@ -69,7 +69,7 @@ class TreatmentPlanController extends Controller
     {
         $plan = TreatmentPlan::with([
             'patient',
-            'doctor.doctor', // This is the crucial part for accessing doctor's specialization
+            'doctor.user', // This is the crucial part for accessing doctor's specialization
             'items',
             'histories'
         ])->findOrFail($id);
@@ -81,7 +81,7 @@ class TreatmentPlanController extends Controller
      */
     public function edit($id)
     {
-        $plan = TreatmentPlan::with('items')->findOrFail($id);
+        $plan = TreatmentPlan::with(['items', 'doctor.user', 'patient'])->findOrFail($id);
         return view('admin.treatment_plans.edit', compact('plan'));
     }
 
@@ -257,7 +257,7 @@ class TreatmentPlanController extends Controller
 
     public function exportPdf($id)
     {
-        $plan = TreatmentPlan::with(['doctor', 'patient', 'items'])->findOrFail($id);
+        $plan = TreatmentPlan::with(['doctor.user', 'patient', 'items'])->findOrFail($id);
 
         return PDF::loadView('admin.treatment_plans.exportPdf', compact('plan'))
             ->setPaper('a4')
@@ -265,7 +265,7 @@ class TreatmentPlanController extends Controller
     }
     public function exportExcel($id)
     {
-        $plan = TreatmentPlan::with(['doctor.doctor', 'patient', 'items'])->findOrFail($id);
+        $plan = TreatmentPlan::with(['doctor.user', 'patient', 'items'])->findOrFail($id);
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -283,19 +283,19 @@ class TreatmentPlanController extends Controller
         $sheet->getStyle("A{$row}")->getFont()->setBold(true);
         $row++;
         $sheet->setCellValue("A{$row}", 'Họ tên');
-        $sheet->setCellValue("B{$row}", $plan->doctor->full_name ?? 'N/A');
+        $sheet->setCellValue("B{$row}", $plan->doctor->user->full_name ?? 'N/A');
         $row++;
         $sheet->setCellValue("A{$row}", 'Chuyên khoa');
-        $sheet->setCellValue("B{$row}", $plan->doctor->doctor->specialization ?? 'N/A');
+        $sheet->setCellValue("B{$row}", $plan->doctor->specialization ?? 'N/A');
         $row++;
         $sheet->setCellValue("A{$row}", 'SĐT');
-        $sheet->setCellValue("B{$row}", $plan->doctor->phone ?? 'N/A');
+        $sheet->setCellValue("B{$row}", $plan->doctor->user->phone ?? 'N/A');
         $row++;
         $sheet->setCellValue("A{$row}", 'Email');
-        $sheet->setCellValue("B{$row}", $plan->doctor->email ?? 'N/A');
+        $sheet->setCellValue("B{$row}", $plan->doctor->user->email ?? 'N/A');
         $row++;
         $sheet->setCellValue("A{$row}", 'Địa chỉ');
-        $sheet->setCellValue("B{$row}", $plan->doctor->address ?? 'N/A');
+        $sheet->setCellValue("B{$row}", $plan->doctor->user->address ?? 'N/A');
         $row += 2;
 
         // Thông tin bệnh nhân
@@ -411,12 +411,13 @@ class TreatmentPlanController extends Controller
     // Hiển thị danh sách kế hoạch trong thùng rác
     public function trash(Request $request)
     {
-        $query = TreatmentPlan::onlyTrashed()->with(['doctor:id,full_name', 'patient:id,full_name']);
+        $query = TreatmentPlan::onlyTrashed()->with(['doctor.user:id,full_name', 'patient:id,full_name']);
+
 
         // Lọc theo bác sĩ
         if ($request->filled('doctor')) {
-            $query->whereHas('doctor', function ($q) use ($request) {
-                $q->where('full_name', $request->doctor);
+            $query->whereHas('doctor.user', function ($q) use ($request) {
+                $q->where('full_name', 'like', '%' . $request->doctor . '%');
             });
         }
 
@@ -430,7 +431,7 @@ class TreatmentPlanController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->whereHas('patient', fn($sub) => $sub->where('full_name', 'like', "%{$search}%"))
-                    ->orWhereHas('doctor', fn($sub) => $sub->where('full_name', 'like', "%{$search}%"));
+                    ->orWhereHas('doctor.user', fn($sub) => $sub->where('full_name', 'like', "%{$search}%"));
             });
         }
 

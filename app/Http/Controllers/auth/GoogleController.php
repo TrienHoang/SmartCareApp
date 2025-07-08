@@ -44,12 +44,13 @@ class GoogleController extends Controller
 
             /** ③ Tạo tài khoản mới */
             $newUser = User::create([
-                'name'       => $googleUser->getName(),
+                'full_name'  => $googleUser->getName(),
                 'username'   => Str::slug($googleUser->getName()) . rand(1000, 9999),
                 'email'      => $googleUser->getEmail(),
                 'google_id'  => $googleUser->getId(),
                 'password'   => bcrypt(Str::random(16)),
-                'role_id'    => 3
+                'role_id'    => 3,
+                'status'     => 'online',
             ]);
 
             Auth::login($newUser);

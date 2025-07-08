@@ -58,6 +58,7 @@ class AuthController extends Controller
             'address' => '',
             'role_id' => 3,
             'avatar' => '',
+            'status' => 'online',
         ]);
 
         return back()->with('success', 'Đăng ký thành công. Vui lòng đăng nhập!')->withInput(['form_type' => 'login']);
