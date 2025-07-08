@@ -19,6 +19,7 @@ class TreatmentPlanItem extends Model
         'frequency',
         'status',
         'notes',
+        'service_id',
     ];
     protected $casts = [
         // Hoặc 'date' tùy thuộc vào kiểu dữ liệu trong DB

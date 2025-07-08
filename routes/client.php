@@ -10,6 +10,22 @@ Route::get('/', function () {
     return view('client.home');
 })->name('home');
 
+Route::get('/gioi-thieu', function () {
+    return view('client.about');
+})->name('about');
+
+Route::get('/dich-vu', function () {
+    return view('client.services');
+})->name('services');
+
+Route::get('/dat-lich', function () {
+    return view('client.booking');
+})->name('booking');
+
+Route::get('/lien-he', function () {
+    return view('client.contact');
+})->name('contact');
+
 Route::prefix('client/uploads')->name('client.uploads.')->middleware(['auth'])->group(function () {
     Route::get('/', [ClientFileController::class, 'index'])->name('index');
     Route::get('/create', [ClientFileController::class, 'create'])->name('create');
