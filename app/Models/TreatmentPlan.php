@@ -24,7 +24,7 @@ class TreatmentPlan extends Model
         'end_date',
         'status',
     ];
-       protected $casts = [
+    protected $casts = [
         'start_date' => 'datetime', // Hoặc 'date' nếu bạn chỉ quan tâm đến ngày
         'end_date' => 'datetime',   // Hoặc 'date' nếu bạn chỉ quan tâm đến ngày
         // created_at và updated_at đã được Laravel tự động cast, không cần thêm ở đây
@@ -43,7 +43,7 @@ class TreatmentPlan extends Model
      */
     public function doctor()
     {
-        return $this->belongsTo(User::class, 'doctor_id');
+        return $this->belongsTo(Doctor::class, 'doctor_id');
     }
 
     /**
@@ -60,5 +60,10 @@ class TreatmentPlan extends Model
     public function histories()
     {
         return $this->hasMany(TreatmentPlanHistory::class)->latest('changed_at');
+    }
+
+    public function treatmentPlanItems()
+    {
+        return $this->hasMany(TreatmentPlanItem::class);
     }
 }

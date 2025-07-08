@@ -245,7 +245,7 @@
                                         <td>
                                             <div class="doctor-info">
                                                 <h6 class="mb-0 font-weight-semibold text-info">
-                                                    {{ $plan->doctor->full_name ?? 'N/A' }}</h6>
+                                                    {{ $plan->doctor->user->full_name ?? 'N/A' }}</h6>
                                             </div>
                                         </td>
 

@@ -3,138 +3,133 @@
 @section('title', 'Lịch sử thanh toán')
 
 @push('styles')
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <style>
-        table.dataTable tbody tr:hover {
-            background-color: #e6f2ff !important;
-            cursor: pointer;
-        }
-        @media (max-width: 768px) {
-            h2 { font-size: 1.4rem; }
-            .table-responsive { font-size: 0.9rem; }
-        }
-    </style>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+    body {
+        background-color: #f0f8ff;
+    }
+
+    .table-container {
+        background-color: #ffffff;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.5rem 1rem rgba(13, 110, 253, 0.1);
+        padding: 2rem;
+    }
+
+    h2 {
+        font-weight: 700;
+        color: #0d6efd;
+    }
+
+    th {
+        background-color: #e8f0fe !important;
+        color: #0d6efd;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.45rem 0.75rem;
+        border-radius: 0.5rem;
+    }
+
+    .btn-outline-info {
+        border-color: #0d6efd;
+        color: #0d6efd;
+    }
+
+    .btn-outline-info:hover {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #0d6efd;
+    }
+
+    @media (max-width: 768px) {
+        h2 { font-size: 1.4rem; }
+        .table-responsive { font-size: 0.9rem; }
+    }
+</style>
 @endpush
 
 @section('content')
 <div class="container py-4">
-    <h2 class="mb-4 text-primary">💳 Lịch sử thanh toán đã hoàn thành</h2>
+    <h2 class="mb-4"><i class="fas fa-credit-card me-2"></i>Lịch sử thanh toán</h2>
 
-    {{-- Form lọc --}}
-    <form id="filterForm" method="GET" action="{{ route('client.payment_history.index') }}" class="row g-3 mb-4">
+    {{-- Bộ lọc --}}
+    <form method="GET" action="{{ route('client.payment_history.index') }}" class="row g-3 mb-4">
         <div class="col-md-4">
-            <input type="date" name="payment_date" value="{{ request('payment_date') }}" class="form-control" placeholder="Lọc theo ngày">
+            <label for="payment_date" class="form-label filter-label">Lọc theo ngày thanh toán</label>
+            <input type="date" id="payment_date" name="payment_date"
+                   class="form-control" value="{{ request('payment_date') }}">
         </div>
-        <div class="col-md-4 d-grid gap-2 d-md-flex justify-content-md-end">
-            <button type="submit" class="btn btn-outline-primary">
+        <div class="col-md-8 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary">
                 <i class="fas fa-filter me-1"></i> Lọc
             </button>
-            <a href="{{ route('client.payment_history.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-undo me-1"></i> Đặt lại
+            <a href="{{ route('client.payment_history.index') }}" class="btn btn-secondary">
+                <i class="fas fa-sync me-1"></i> Đặt lại
             </a>
         </div>
     </form>
 
-    {{-- Bảng dữ liệu --}}
-    <div class="table-responsive">
-        <table id="paymentTable" class="table table-hover table-bordered align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>#</th>
-                    <th>Phương thức</th>
-                    <th>Ngày thanh toán</th>
-                    <th>Số tiền</th>
-                    <th>Trạng thái</th>
-                    <th>Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($paymentHistories as $payment)
-                    <tr>
-                        <td>{{ $payment->id }}</td>
-                        <td>
-                            <span class="badge
-                                {{ $payment->payment_method === 'cash' ? 'bg-secondary' :
-                                   ($payment->payment_method === 'card' ? 'bg-info text-dark' : 'bg-primary') }}">
-                                {{ ucfirst($payment->payment_method) }}
-                            </span>
-                        </td>
-                        <td>{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y H:i') }}</td>
-                        <td>{{ number_format($payment->amount, 0, ',', '.') }} VNĐ</td>
-                        <td>
-                            <span class="badge bg-success">Thành công</span>
-                        </td>
-                        <td>
-                            <a href="{{ route('client.payment_history.show', $payment->id) }}"
-                               class="btn btn-sm btn-outline-info"
-                               data-bs-toggle="tooltip"
-                               data-bs-placement="top"
-                               title="Xem chi tiết">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                        </td>
+    <div class="table-container">
+        {{-- Bảng dữ liệu --}}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr class="text-center">
+                        <th>📅 Ngày thanh toán</th>
+                        <th>💳 Phương thức</th>
+                        <th>💰 Số tiền</th>
+                        <th>✅ Trạng thái</th>
+                        <th>🔍 Chi tiết</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="text-center text-muted">Không có thanh toán nào được ghi nhận.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @forelse ($paymentHistories as $payment)
+                        <tr>
+                            <td class="text-center">{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y H:i') }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-{{ $payment->payment_method === 'cash' ? 'secondary' : ($payment->payment_method === 'card' ? 'info text-dark' : 'primary') }}">
+                                    {{ ucfirst($payment->payment_method) }}
+                                </span>
+                            </td>
+                            <td class="text-end text-success">{{ number_format($payment->amount, 0, ',', '.') }} VNĐ</td>
+                            <td class="text-center">
+                                <span class="badge bg-success">Thành công</span>
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ route('client.payment_history.show', $payment->id) }}"
+                                   class="btn btn-sm btn-outline-info" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-3">
+                                <i class="fas fa-money-bill-wave-slash me-1"></i>
+                                Không có dữ liệu thanh toán nào.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-    {{-- Phân trang --}}
-    <div class="mt-4">
-        {{ $paymentHistories->withQueryString()->links() }}
+        {{-- Phân trang --}}
+        <div class="mt-4 d-flex justify-content-center">
+            {{ $paymentHistories->withQueryString()->links('pagination::bootstrap-5') }}
+        </div>
     </div>
 </div>
 @endsection
 
 @push('scripts')
-    <script src="https://kit.fontawesome.com/a2d9d6a06d.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-    <script>
-        $(document).ready(function () {
-            // Tooltip Bootstrap
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-
-            // DataTable init
-            $('#paymentTable').DataTable({
-                paging: false,
-                searching: false,
-                info: false,
-                ordering: true,
-                columnDefs: [
-                    { orderable: false, targets: 5 }
-                ]
-            });
-
-            // SweetAlert loading khi submit
-            $('#filterForm').on('submit', function () {
-                Swal.fire({
-                    title: 'Đang lọc dữ liệu...',
-                    didOpen: () => Swal.showLoading(),
-                    allowOutsideClick: false
-                });
-            });
-
-            // Fade-in từng hàng
-            $('#paymentTable tbody tr').each(function (i) {
-                $(this).css('opacity', 0);
-                setTimeout(() => {
-                    $(this).css({ transition: 'opacity 0.5s ease-in', opacity: 1 });
-                }, 100 * i);
-            });
-        });
-    </script>
+<script src="https://kit.fontawesome.com/a2d9d6a06d.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 @endpush

@@ -210,16 +210,16 @@
                             <h6 class="card-title mb-0 font-weight-bold">Thông tin Bác sĩ</h6>
                         </div>
                         <div class="card-body p-3">
-                            @if ($plan->doctor)
+                            @if ($plan->doctor->user)
                                 <div class="mb-2">
                                     <div class="d-flex align-items-center mb-1">
                                         <i class="fas fa-user text-info mr-2" style="width: 16px;"></i>
                                         <strong class="text-muted small">Tên đầy đủ:</strong>
                                     </div>
                                     <div class="ml-4">
-                                        <a href="{{ route('admin.users.show', $plan->doctor->id) }}"
+                                        <a href="{{ route('admin.users.show', $plan->doctor->user->id) }}"
                                             class="text-primary font-weight-semibold text-decoration-none">
-                                            {{ $plan->doctor->full_name ?? 'N/A' }}
+                                            {{ $plan->doctor->user->full_name ?? 'N/A' }}
                                         </a>
                                     </div>
                                 </div>
@@ -229,7 +229,7 @@
                                         <i class="fas fa-stethoscope text-info mr-2" style="width: 16px;"></i>
                                         <strong class="text-muted small">Chuyên khoa:</strong>
                                     </div>
-                                    <div class="ml-4">{{ $plan->doctor->doctor->specialization ?? 'N/A' }}</div>
+                                    <div class="ml-4">{{ $plan->doctor->specialization ?? 'N/A' }}</div>
                                 </div>
 
                                 <div class="mb-2">
@@ -237,7 +237,7 @@
                                         <i class="fas fa-phone text-info mr-2" style="width: 16px;"></i>
                                         <strong class="text-muted small">Số điện thoại:</strong>
                                     </div>
-                                    <div class="ml-4">{{ $plan->doctor->phone ?? 'N/A' }}</div>
+                                    <div class="ml-4">{{ $plan->doctor->user->phone ?? 'N/A' }}</div>
                                 </div>
 
                                 <div class="mb-2">
@@ -245,7 +245,7 @@
                                         <i class="fas fa-envelope text-info mr-2" style="width: 16px;"></i>
                                         <strong class="text-muted small">Email:</strong>
                                     </div>
-                                    <div class="ml-4">{{ $plan->doctor->email ?? 'N/A' }}</div>
+                                    <div class="ml-4">{{ $plan->doctor->user->email ?? 'N/A' }}</div>
                                 </div>
 
                                 <div class="mb-0">
@@ -253,7 +253,7 @@
                                         <i class="fas fa-map-marker-alt text-info mr-2" style="width: 16px;"></i>
                                         <strong class="text-muted small">Địa chỉ:</strong>
                                     </div>
-                                    <div class="ml-4">{{ $plan->doctor->address ?? 'N/A' }}</div>
+                                    <div class="ml-4">{{ $plan->doctor->user->address ?? 'N/A' }}</div>
                                 </div>
                             @else
                                 <div class="alert alert-warning text-center py-3 mb-0">
@@ -610,7 +610,7 @@
                         <p><strong>Ngày kết thúc:</strong> {{ optional($plan->end_date)->format('d/m/Y') }}</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Bác sĩ:</strong> {{ $plan->doctor->full_name ?? 'Không có' }}</p>
+                        <p><strong>Bác sĩ:</strong> {{ $plan->doctor->user->full_name ?? 'Không có' }}</p>
                         <p><strong>Bệnh nhân:</strong> {{ $plan->patient->full_name ?? 'Không có' }}</p>
                         <p><strong>Trạng thái:</strong> {{ ucfirst(str_replace('_', ' ', $plan->status)) }}</p>
                     </div>

@@ -20,6 +20,7 @@ class UpdateAppointmentRequest extends FormRequest
             'appointment_time' => ['required', 'date'],
             'status'           => ['nullable', Rule::in(['pending', 'confirmed', 'completed', 'cancelled'])],
             'reason'           => ['nullable', 'string', 'max:255'],
+            'treatment_plan_id' => ['nullable', 'exists:treatment_plans,id'],
         ];
 
         $status = $this->input('status', 'pending');  
@@ -50,6 +51,10 @@ class UpdateAppointmentRequest extends FormRequest
             'status.in'   => 'Trạng thái hẹn không hợp lệ.',
             'reason.max'  => 'Lý do không được vượt quá 255 ký tự.',
             'reason.string' => 'Lý do phải là chuỗi ký tự.',
+
+            'treatment_plan_id.exists' => 'Kế hoạch khám chưa tạo.',
+            'treatment_plan_id.required' => 'Vui lòng chọn kế hoạch khám.',
+            'treatment_plan_id.integer' => 'ID kế hoạch khám không hợp lệ.',
         ];
     }
 }

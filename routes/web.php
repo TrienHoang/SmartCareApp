@@ -267,6 +267,12 @@ Route::group([
 
         Route::get('/doctor/{doctor}/working-days', [AppointmentController::class, 'getDoctorWorkingDays'])
             ->name('doctor.working-days');
+
+        Route::get('/treatment-plans/{id}/details', [AppointmentController::class, 'getTreatmentPlanDetails'])
+            ->name('treatment-plan.details');
+
+        Route::get('/treatment-plans/by-patient/{patient}', [AppointmentController::class, 'getTreatmentPlansByPatient'])
+            ->name('treatment-plans.by-patient');
     });
     // quản lý đơn thuốc
     Route::group([
@@ -608,6 +614,7 @@ Route::group([
         'middleware' => 'check_permission:view_medical_documents'
     ], function () {
         Route::get('/', [AdminFileController::class, 'index'])->name('index');
+        Route::get('/export', [AdminFileController::class, 'export'])->name('export');
 
         Route::get('/trash', [AdminFileController::class, 'trash'])->name('trash');
 
