@@ -84,23 +84,23 @@ Route::prefix('doctor')
         Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
 
         // Treatment Plans (Kế hoạch điều trị)
-        // Route::prefix('treatment-plans')
-        //     ->name('treatment-plans.')
-        //     ->group(function () {
-        //         Route::get('/searchPatient', [TreatmentPlanController::class, 'searchPatient'])->name('searchPatient');
+        Route::prefix('treatment-plans')
+            ->name('treatment-plans.')
+            ->group(function () {
+                Route::get('/searchPatient', [TreatmentPlanController::class, 'searchPatient'])->name('searchPatient');
 
-        //         Route::get('', [TreatmentPlanController::class, 'index'])->name('index');
-        //         Route::get('/create', [TreatmentPlanController::class, 'create'])->name('create');
-        //         Route::post('', [TreatmentPlanController::class, 'store'])->name('store');
+                Route::get('', [TreatmentPlanController::class, 'index'])->name('index');
+                Route::get('/create', [TreatmentPlanController::class, 'create'])->name('create');
+                Route::post('', [TreatmentPlanController::class, 'store'])->name('store');
 
-        //         // Các route chứa {treatmentPlan} phải nằm SAU
-        //         Route::get('/{treatmentPlan}', [TreatmentPlanController::class, 'show'])->name('show');
-        //         Route::get('/{treatmentPlan}/edit', [TreatmentPlanController::class, 'edit'])->name('edit');
-        //         Route::put('/{treatmentPlan}', [TreatmentPlanController::class, 'update'])->name('update');
-        //         Route::delete('/{treatmentPlan}', [TreatmentPlanController::class, 'destroy'])->name('destroy');
+                // Các route chứa {treatmentPlan} phải nằm SAU
+                Route::get('/{treatmentPlan}', [TreatmentPlanController::class, 'show'])->name('show');
+                Route::get('/{treatmentPlan}/edit', [TreatmentPlanController::class, 'edit'])->name('edit');
+                Route::put('/{treatmentPlan}', [TreatmentPlanController::class, 'update'])->name('update');
+                Route::delete('/{treatmentPlan}', [TreatmentPlanController::class, 'destroy'])->name('destroy');
 
-        //         Route::patch('treatment-plan-items/{itemId}/update-status', [TreatmentPlanController::class, 'updateItemStatus'])->name('treatment-plan-items.update-status');
-        //     });
+                Route::patch('treatment-plan-items/{itemId}/update-status', [TreatmentPlanController::class, 'updateItemStatus'])->name('treatment-plan-items.update-status');
+            });
         // Danh sách bác sĩ - URL: /doctor
         Route::get('/', [DoctorController::class, 'index'])->name('index');
 

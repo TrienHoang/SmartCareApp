@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
             ServiceCategorySeeder::class,
             ServiceSeeder::class,
 
-            AppointmentSeeder::class,           // 👈 phải chạy trước log/statistics
+            AppointmentSeeder::class,           
             AppointmentLogSeeder::class,
             StatisticSeeder::class,
 
@@ -47,7 +47,7 @@ class DatabaseSeeder extends Seeder
             MedicalRecordSeeder::class,
             PrescriptionSeeder::class,
             PrescriptionItemSeeder::class,
-            TreatmentPlanSeeder::class,
+            // TreatmentPlanSeeder::class,
 
             FileUploadSeeder::class,
             UploadHistorySeeder::class,
