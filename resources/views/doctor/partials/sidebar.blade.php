@@ -58,6 +58,13 @@
             </li>
 
             <li class="menu-item">
+                <a href="{{ route('doctor.treatment-plans.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-capsule"></i>
+                    <div>Kế hoạch điều trị</div>
+                </a>
+            </li>
+
+            <li class="menu-item">
                 <a href="{{ route('doctor.prescriptions.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-capsule"></i>
                     <div>Đơn thuốc</div>
@@ -90,7 +97,7 @@
             </li>
 
             <li class="menu-item">
-                <a href="{{ route('doctor.history.index') }}" class="menu-link">
+                <a href="{{ route('doctor.history') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-history"></i>
                     <span>Xem lịch sử khám</span>
                 </a>
