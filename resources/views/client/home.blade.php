@@ -34,25 +34,30 @@
                         <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8">
                             <h3 class="text-2xl font-bold mb-6">Đặt Lịch Nhanh</h3>
                             <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm mb-2">Chọn Chuyên Khoa</label>
-                                    <select
-                                        class="w-full p-3 rounded-lg bg-white/10 border border-white/30 text-white focus:bg-white/20 focus:text-white"
-                                        style="background-color:rgba(255,255,255,0.1); color:#fff;">
-                                        <option class="text-black bg-white">Nội Khoa</option>
-                                        <option class="text-black bg-white">Ngoại Khoa</option>
-                                        <option class="text-black bg-white">Sản Phụ Khoa</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm mb-2">Chọn Ngày</label>
-                                    <input type="date"
-                                        class="w-full p-3 rounded-lg bg-white/20 border border-white/30 text-white" />
-                                </div>
-                                <a href="{{ url('/dat-lich') }}"
-                                    class="w-full bg-white text-blue-600 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors text-center block">
-                                    Tìm Lịch Trống
-                                </a>
+                                <form method="GET" action="{{ url('/dat-lich') }}" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm mb-2">Chọn Chuyên Khoa</label>
+                                        <select name="department_id"
+                                            class="w-full p-3 rounded-lg bg-white/10 border border-white/30 text-white focus:bg-white/20 focus:text-white"
+                                            style="background-color:rgba(255,255,255,0.1); color:#fff;" required>
+                                            @foreach ($departments as $dept)
+                                                <option value="{{ $dept->id }}" class="text-black bg-white">
+                                                    {{ $dept->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-2">Chọn Ngày</label>
+                                        <input type="date" name="appointment_date"
+                                            class="w-full p-3 rounded-lg bg-white/20 border border-white/30 text-white"
+                                            required />
+                                    </div>
+                                    <button type="submit"
+                                        class="w-full bg-white text-blue-600 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors text-center block">
+                                        Tìm Lịch Trống
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -125,7 +130,7 @@
             </div>
         </section>
 
-        {{-- Services Section --}}
+        {{-- Testimonials Section --}}
         <section class="py-20 bg-gray-50">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-16">
@@ -133,86 +138,54 @@
                     <p class="text-xl text-gray-600">Những chia sẻ chân thực từ bệnh nhân</p>
                 </div>
 
-                {{-- Splide Slider --}}
                 <div id="testimonial-slider" class="splide">
                     <div class="splide__track">
                         <ul class="splide__list">
-                            {{-- Slide 1 --}}
-                            <li class="splide__slide">
-                                <div class="bg-white p-8 rounded-xl shadow-lg hover:scale-105 transition">
-                                    <div class="flex items-center mb-4">
-                                        @for ($i = 0; $i < 5; $i++)
-                                            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
-                                        @endfor
-                                    </div>
-                                    <p class="text-gray-600 mb-6 italic">
-                                        "Dịch vụ rất tốt, bác sĩ tận tâm. Đặt lịch online rất tiện lợi!"
-                                    </p>
-                                    <div>
-                                        <div class="font-semibold">Nguyễn Thị Lan</div>
-                                        <div class="text-sm text-gray-500">Bệnh nhân</div>
-                                    </div>
-                                </div>
-                            </li>
+                            @forelse ($testimonials as $testimonial)
+                                <li class="splide__slide">
+                                    <div class="bg-white p-8 rounded-xl shadow-lg hover:scale-105 transition">
+                                        {{-- Stars --}}
+                                        <div class="flex items-center mb-4">
+                                            @for ($i = 0; $i < $testimonial->rating; $i++)
+                                                <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+                                            @endfor
+                                        </div>
 
-                            {{-- Slide 2 --}}
-                            <li class="splide__slide">
-                                <div class="bg-white p-8 rounded-xl shadow-lg hover:scale-105 transition">
-                                    <div class="flex items-center mb-4">
-                                        @for ($i = 0; $i < 5; $i++)
-                                            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
-                                        @endfor
-                                    </div>
-                                    <p class="text-gray-600 mb-6 italic">
-                                        "Cơ sở vật chất hiện đại, nhân viên nhiệt tình. Rất hài lòng!"
-                                    </p>
-                                    <div>
-                                        <div class="font-semibold">Trần Văn Nam</div>
-                                        <div class="text-sm text-gray-500">Bệnh nhân</div>
-                                    </div>
-                                </div>
-                            </li>
+                                        {{-- Nội dung đánh giá --}}
+                                        <p class="text-gray-600 mb-6 italic">
+                                            "{{ $testimonial->comment }}"
+                                        </p>
 
-                            {{-- Slide 3 --}}
-                            <li class="splide__slide">
-                                <div class="bg-white p-8 rounded-xl shadow-lg hover:scale-105 transition">
-                                    <div class="flex items-center mb-4">
-                                        @for ($i = 0; $i < 5; $i++)
-                                            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
-                                        @endfor
-                                    </div>
-                                    <p class="text-gray-600 mb-6 italic">
-                                        "Đặt lịch dễ dàng, không phải chờ đợi lâu. Sẽ quay lại!"
-                                    </p>
-                                    <div>
-                                        <div class="font-semibold">Lê Thị Hoa</div>
-                                        <div class="text-sm text-gray-500">Bệnh nhân</div>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="splide__slide">
-                                <div class="bg-white p-8 rounded-xl shadow-lg hover:scale-105 transition">
-                                    <div class="flex items-center mb-4">
-                                        @for ($i = 0; $i < 5; $i++)
-                                            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
-                                        @endfor
-                                    </div>
-                                    <p class="text-gray-600 mb-6 italic">
-                                        "Đặt lịch dễ dàng, không phải chờ đợi lâu. Sẽ quay lại!"
-                                    </p>
-                                    <div>
-                                        <div class="font-semibold">Lê Thị Hoa 1</div>
-                                        <div class="text-sm text-gray-500">Bệnh nhân</div>
-                                    </div>
-                                </div>
-                            </li>
+                                        <div>
+                                            {{-- Bệnh nhân (ẩn danh) --}}
+                                            <div class="font-semibold">
+                                                @if ($testimonial->patient && $testimonial->patient->full_name)
+                                                    {{ Str::substr($testimonial->patient->full_name, 0, 1) . '.***' }}
+                                                @else
+                                                    Bệnh nhân
+                                                @endif
+                                            </div>
 
-                            {{-- … thêm slides nếu muốn --}}
+                                            {{-- Bác sĩ --}}
+                                            <div class="text-sm text-gray-500">
+                                                @if ($testimonial->doctor && $testimonial->doctor->user->full_name)
+                                                    Bác sĩ: {{ $testimonial->doctor->user->full_name }}
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            @empty
+                                <li class="splide__slide">
+                                    <div class="text-gray-500">Chưa có đánh giá nào.</div>
+                                </li>
+                            @endforelse
                         </ul>
                     </div>
                 </div>
             </div>
         </section>
+
 
         {{-- CTA Section --}}
         <section class="py-20 gradient-bg text-white">
