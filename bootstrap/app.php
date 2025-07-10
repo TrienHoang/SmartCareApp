@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'checkAdmin' => CheckAdminMiddleware::class,
             'check_permission' => CheckPermission::class,
             'checkRole' => CheckRole::class,
+
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

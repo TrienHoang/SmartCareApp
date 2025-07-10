@@ -58,6 +58,13 @@
             </li>
 
             <li class="menu-item">
+                <a href="{{ route('doctor.treatment-plans.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-capsule"></i>
+                    <div>Kế hoạch điều trị</div>
+                </a>
+            </li>
+
+            <li class="menu-item">
                 <a href="{{ route('doctor.prescriptions.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-capsule"></i>
                     <div>Đơn thuốc</div>
@@ -76,11 +83,30 @@
                 </a>
             </li>
             <li class="menu-item">
-                <a href="{{ route('doctor.leaves.index') }}" class="menu-link">
-             <i class="menu-icon tf-icons bx bx-calendar-x"></i>
-            <div>Lịch nghỉ phép</div>
-</a>
+                <a href="{{ route('doctor.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-user"></i>
+                    <div>Bác Sĩ</div>
+                </a>
             </li>
+
+            <li class="menu-item">
+                <a href="{{ route('doctor.reviews.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-star"></i>
+                    <div>Đánh giá của bệnh nhân</div>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{{ route('doctor.history') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-history"></i>
+                    <span>Xem lịch sử khám</span>
+                </a>
+            </li>
+
+
+
+
+
         @endif
 
     </ul>

@@ -177,4 +177,5 @@
     @yield('scripts')
 </body>
 @stack('modals')
+
 </html>

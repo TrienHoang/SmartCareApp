@@ -1,7 +1,7 @@
 {{-- resources/views/about.blade.php --}}
 @extends('client.layouts.app')
 
-@section('title', 'Về Chúng Tôi')
+@section('title', 'Giới thiệu')
 
 @section('content')
     <div class="min-h-screen bg-gray-50 py-12">
@@ -10,7 +10,7 @@
             <div class="text-center mb-16">
                 <h1 class="text-4xl md:text-5xl font-bold mb-6 gradient-text">Về Chúng Tôi</h1>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    MedCare - Đơn vị tiên phong trong việc ứng dụng công nghệ vào chăm sóc sức khỏe,
+                    SmartCare - Đơn vị tiên phong trong việc ứng dụng công nghệ vào chăm sóc sức khỏe,
                     mang đến dịch vụ y tế chất lượng cao và tiện lợi cho cộng đồng.
                 </p>
             </div>
