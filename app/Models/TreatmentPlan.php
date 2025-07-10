@@ -29,7 +29,7 @@ class TreatmentPlan extends Model
         // created_at và updated_at đã được Laravel tự động cast, không cần thêm ở đây
     ];
 
-    public $timestamps = false;
+    // public $timestamps = false;
 
     // Quan hệ với Patient
     public function patient()

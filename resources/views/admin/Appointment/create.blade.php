@@ -84,7 +84,7 @@
                             <label for="appointment_time" class="form-label">Thời gian hẹn</label>
                             <input type="text" id="appointment_time" name="appointment_time"
                                 class="form-control @error('appointment_time') is-invalid @enderror"
-                                value="{{ old('appointment_time') }}" data-old="{{ old('appointment_time') }}"
+                                value="{{ old('appointment_time', isset($appointment) ? Carbon::parse($appointment->appointment_time)->format('Y-m-d H:i') : '') }}"
                                 placeholder="Chọn ngày và giờ" readonly>
                             @error('appointment_time')
                                 <div class="invalid-feedback">{{ $message }}</div>
