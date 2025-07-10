@@ -9,8 +9,9 @@ class TreatmentPlanHistory extends Model
 {
     use HasFactory;
 
-    // Tắt timestamps (created_at, updated_at) vì đã có changed_at
+    // Tắt timestamps nếu bạn không dùng created_at/updated_at tự động của Laravel
     public $timestamps = false;
+    protected $dateFormat = 'Y-m-d H:i:s'; // Định dạng ngày giờ nếu cần
 
     protected $fillable = [
         'treatment_plan_id',
@@ -21,11 +22,21 @@ class TreatmentPlanHistory extends Model
         'changed_at',
     ];
 
-    /**
-     * Lấy người đã thực hiện thay đổi.
-     */
+    protected $casts = [
+        'old_data' => 'array', // Cast JSON sang array
+        'new_data' => 'array', // Cast JSON sang array
+        'changed_at' => 'datetime',
+    ];
+
+    // Quan hệ với TreatmentPlan (Many-to-One)
+    public function treatmentPlan()
+    {
+        return $this->belongsTo(TreatmentPlan::class);
+    }
+
+    // Quan hệ với User (người thay đổi)
     public function changedBy()
     {
-        return $this->belongsTo(User::class, 'changed_by_id');
+        return $this->belongsTo(Doctor::class, 'changed_by_id'); // Giả sử người thay đổi là User
     }
 }
