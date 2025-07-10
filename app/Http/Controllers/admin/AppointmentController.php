@@ -597,7 +597,15 @@ class AppointmentController extends Controller
     }
     public function show($id)
     {
-        $appointment = Appointment::findOrFail($id);
+        $appointment = Appointment::with([
+            'patient',
+            'doctor.user',
+            'doctor.room',
+            'service',
+            'logs',
+            'treatmentPlan.treatmentPlanItems',
+            'treatmentPlan.doctor.user'
+        ])->findOrFail($id);
         // $appointment = Appointment::with(['patient', 'doctor.user', 'doctor.room', 'service', 'logs'])->findOrFail($id);
         return view('admin.Appointment.show', compact('appointment'));
     }

@@ -42,8 +42,11 @@
         </h4>
 
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>Chỉnh sửa lịch hẹn</h5>
+                <a href="{{ route('admin.appointments.show', $appointment->id) }}" class="btn btn-info btn-sm">
+                    <i class="fas fa-eye me-1"></i> Xem chi tiết
+                </a>
             </div>
 
             @if (session('error'))
