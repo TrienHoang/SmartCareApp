@@ -26,6 +26,14 @@ Route::get('/lien-he', function () {
     return view('client.contact');
 })->name('contact');
 
+Route::get('/tin-tuc', function () {
+    return view('client.news');
+})->name('news');
+
+Route::get('/chi-tiet-tin-tuc/{id}', function ($id) {
+    return view('client.news_detail', ['id' => $id]);
+})->name('news_detail');
+
 Route::prefix('client/uploads')->name('client.uploads.')->middleware(['auth'])->group(function () {
     Route::get('/', [ClientFileController::class, 'index'])->name('index');
     Route::get('/create', [ClientFileController::class, 'create'])->name('create');

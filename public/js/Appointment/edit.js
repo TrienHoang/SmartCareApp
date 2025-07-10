@@ -11,8 +11,14 @@ $(document).ready(function () {
 
     loadTreatmentPlans(patientId, selectedPlanId);
 
-
     let flatpickrInstance;
+
+    function destroyFlatpickr() {
+        if (flatpickrInstance && typeof flatpickrInstance.destroy === 'function') {
+            flatpickrInstance.destroy();
+        }
+        flatpickrInstance = null;
+    }
 
     function formatDateRange(dates) {
         if (!dates || dates.length === 0) return '';
@@ -41,10 +47,8 @@ $(document).ready(function () {
         }).join(', ');
     }
 
-    // Apply select2
     $('#doctor_id, #service_id, #status, #treatment_plan_id').select2({ width: '100%' });
 
-    // Load dịch vụ theo bác sĩ
     function loadServices(doctorId) {
         $.ajax({
             url: doctorServicesUrl.replace(':id', doctorId),
@@ -59,22 +63,17 @@ $(document).ready(function () {
                 $serviceSelect.html(options).trigger('change.select2');
             },
             error: () => {
-                console.error('Lỗi khi tải dịch vụ');
                 toastr.error('Không thể tải danh sách dịch vụ');
             }
         });
     }
 
-    // Load ngày làm việc + nghỉ phép
     function loadWorkingDays(doctorId) {
         $.ajax({
             url: doctorWorkingDaysUrl.replace(':id', doctorId),
             method: 'GET',
             success: function ({ daysOfWeek, specificDates, vacationDates }) {
-                if (flatpickrInstance) {
-                    flatpickrInstance.destroy();
-                    flatpickrInstance = null;
-                }
+                destroyFlatpickr();
 
                 const currentValue = $timeInput.val();
                 if (!currentValue && !$timeInput.data('old')) $timeInput.val('');
@@ -134,13 +133,9 @@ $(document).ready(function () {
                 }
             },
             error: () => {
-                console.error('Lỗi khi tải lịch làm việc');
                 toastr.error('Không thể tải lịch làm việc bác sĩ');
                 $timeInput.prop('disabled', true);
-                if (flatpickrInstance) {
-                    flatpickrInstance.destroy();
-                    flatpickrInstance = null;
-                }
+                destroyFlatpickr();
             }
         });
     }
@@ -163,10 +158,8 @@ $(document).ready(function () {
         });
     }
 
-
-    // Khi chọn kế hoạch điều trị
     $treatmentPlan.on('change', function () {
-        if ($treatmentPlan.prop('disabled')) return; // KHÔNG xử lý nếu bị disable
+        if ($treatmentPlan.prop('disabled')) return;
 
         const planId = $(this).val();
         if (!planId) {
@@ -174,6 +167,8 @@ $(document).ready(function () {
                 $(this).prop('disabled', false).show();
             });
             $doctor.prop('disabled', false).val('').trigger('change.select2');
+
+            $('input[name="doctor_id"]').remove();
             return;
         }
 
@@ -183,7 +178,6 @@ $(document).ready(function () {
             success: function (response) {
                 const selectedDoctorId = response.doctor_id;
 
-                // Ẩn toàn bộ bác sĩ khác
                 $('#doctor_id option').each(function () {
                     const val = $(this).val();
                     if (val === '') return;
@@ -194,16 +188,19 @@ $(document).ready(function () {
                     }
                 });
 
-                // Gán và disable bác sĩ
-                $doctor.val(selectedDoctorId).trigger('change');
+                $doctor.val(selectedDoctorId).trigger('change.select2');
                 $doctor.prop('disabled', true);
 
-                // Gán service nếu có
+                let hiddenDoctor = $('input[name="doctor_id"]');
+                if (hiddenDoctor.length === 0) {
+                    hiddenDoctor = $('<input type="hidden" name="doctor_id" />').appendTo('form');
+                }
+                hiddenDoctor.val(selectedDoctorId);
+
                 if (response.service_id) {
                     $serviceSelect.val(response.service_id).trigger('change.select2');
                 }
 
-                // Gán thời gian dự kiến nếu có
                 if (response.expected_start_date) {
                     const dt = new Date(response.expected_start_date);
                     const formatted = dt.toISOString().slice(0, 16);
@@ -216,27 +213,25 @@ $(document).ready(function () {
         });
     });
 
-    // Khi chọn bác sĩ thủ công
     $doctor.on('change', function () {
         const id = $(this).val();
+        console.log('doctor_id changed to:', id);
         if (id) {
             loadServices(id);
             loadWorkingDays(id);
         } else {
             $serviceSelect.html('<option value="">Chọn dịch vụ</option>').trigger('change.select2');
             $timeInput.prop('disabled', true).val('');
-            if (flatpickrInstance) flatpickrInstance.destroy();
+            destroyFlatpickr();
             $('#vacation-notice').addClass('d-none');
         }
     });
 
-    // Khởi tạo ban đầu
     if ($timeInput.val()) $timeInput.data('old', $timeInput.val());
     if ($serviceSelect.val()) $serviceSelect.data('old', $serviceSelect.val());
     if ($doctor.val()) $doctor.trigger('change');
     if ($treatmentPlan.val()) $treatmentPlan.trigger('change');
 
-    // Đảm bảo giữ lại thời gian khi submit
     $('form').on('submit', function () {
         const timeVal = $timeInput.val();
         if (timeVal && flatpickrInstance) {
