@@ -20,7 +20,8 @@ class Appointment extends Model
         'cancel_reason',
         'end_time',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'treatment_plan_id'
     ];
 
     protected $casts = [
