@@ -15,6 +15,7 @@ use App\Http\Controllers\Doctor\DoctorAppointmentController;
 use App\Http\Controllers\Doctor\DoctorController;
 use App\Http\Controllers\Doctor\ReviewController;
 use App\Http\Controllers\Doctor\TaskController;
+use App\Notifications\LateNotification;
 
 // ✅ Dashboard và thống kê
 Route::prefix('doctor')
@@ -136,3 +137,11 @@ Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'
     Route::get('/tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
     Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
 });
+
+
+
+
+
+
+
+
