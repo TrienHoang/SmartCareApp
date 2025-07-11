@@ -10,6 +10,7 @@ return new class extends Migration {
             $table->id()->comment('ID phòng ban');
             $table->string('name', 100)->nullable()->comment('Tên phòng ban');
             $table->text('description')->nullable()->comment('Mô tả phòng ban');
+            $table->string('slug')->unique()->comment('Slug phòng ban');
             $table->timestamps();
         });
     }
