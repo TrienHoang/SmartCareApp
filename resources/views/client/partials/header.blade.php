@@ -57,6 +57,10 @@
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Đăng xuất
                             </a>
+                           <a href="{{ route('client.payment_history.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Lịch sử thanh toán
+                            </a>
                         </div>
                     </div>
                 @else
