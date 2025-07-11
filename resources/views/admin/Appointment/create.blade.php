@@ -35,6 +35,19 @@
                             @enderror
                         </div>
 
+                        <!-- Kế hoạch điều trị -->
+                        <div class="col-12 col-md-6" id="treatment-plan-wrapper" style="display: none;">
+                            <label for="treatment_plan_id" class="form-label">Kế hoạch điều trị (nếu có)</label>
+                            <select name="treatment_plan_id" id="treatment_plan_id"
+                                class="form-select @error('treatment_plan_id') is-invalid @enderror">
+                                <option value="">-- Không chọn --</option>
+                                {{-- các option được load động bằng JS --}}
+                            </select>
+                            @error('treatment_plan_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <!-- Bác sĩ -->
                         <div class="col-12 col-md-6">
                             <label for="doctor_id" class="form-label">Bác sĩ</label>
@@ -71,7 +84,7 @@
                             <label for="appointment_time" class="form-label">Thời gian hẹn</label>
                             <input type="text" id="appointment_time" name="appointment_time"
                                 class="form-control @error('appointment_time') is-invalid @enderror"
-                                value="{{ old('appointment_time') }}" data-old="{{ old('appointment_time') }}"
+                                value="{{ old('appointment_time', isset($appointment) ? Carbon::parse($appointment->appointment_time)->format('Y-m-d H:i') : '') }}"
                                 placeholder="Chọn ngày và giờ" readonly>
                             @error('appointment_time')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -117,6 +130,9 @@
     <script>
         window.doctorServicesUrl = '{{ url('admin/appointments/doctor') }}/:id/services';
         window.doctorWorkingDaysUrl = '{{ url('admin/appointments/doctor') }}/:id/working-days';
+        window.treatmentPlanDetailsUrl = '{{ route('admin.appointments.treatment-plan.details', ['id' => '__ID__']) }}';
+
+        window.treatmentPlansByPatientUrl = '{{ route('admin.appointments.treatment-plans.by-patient', ':id') }}';
     </script>
 
     {{-- Flatpickr Vietnamese --}}
@@ -128,7 +144,7 @@
     {{-- Khởi tạo Select2 --}}
     <script>
         $(document).ready(function() {
-            $('#doctor_id, #service_id, #status').select2({
+            $('#doctor_id, #service_id, #status, #treatment_plan_id').select2({
                 width: '100%',
                 placeholder: 'Chọn mục...',
                 allowClear: true

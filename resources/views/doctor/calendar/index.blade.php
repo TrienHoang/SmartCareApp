@@ -165,6 +165,9 @@
         </div>
     </div>
 </div>
+
+
+
 @endsection
 
 @push('scripts')
@@ -232,4 +235,3 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
-```

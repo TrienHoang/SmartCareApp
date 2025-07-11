@@ -19,6 +19,7 @@ class TreatmentPlanItem extends Model
         'frequency',
         'status',
         'notes',
+        'service_id',
     ];
     protected $casts = [
         // Hoặc 'date' tùy thuộc vào kiểu dữ liệu trong DB
@@ -31,6 +32,19 @@ class TreatmentPlanItem extends Model
      */
     public function plan()
     {
-        return $this->belongsTo(TreatmentPlan::class, 'treatment_plan_id');
+        return $this->belongsTo(TreatmentPlan::class);
+    }
+
+    public function getBadgeClassForStatus($status = null)
+    {
+        $statusToUse = $status ?? $this->status;
+        switch ($statusToUse) {
+            case 'draft': return 'bg-dark';
+            case 'active': return 'bg-info';
+            case 'completed': return 'bg-success';
+            case 'paused': return 'bg-warning';
+            case 'cancelled': return 'bg-danger';
+            default: return 'bg-secondary'; // Fallback
+        }
     }
 }

@@ -74,10 +74,12 @@ class SchedulesController extends Controller
     public function create()
     {
         $doctors = Doctor::with('user')
-            ->whereHas('user', fn($q) => $q->where('role_id', 2))
+            ->whereHas('user', function ($q) {
+                $q->where('role_id', 2)
+                    ->where('status', 'online'); // Chỉ lấy user có trạng thái online
+            })
             ->get();
 
-        // Lấy toàn bộ lịch đã có theo bác sĩ
         $existingSchedules = WorkingSchedule::select('doctor_id', 'day')
             ->get()
             ->groupBy('doctor_id')
@@ -104,11 +106,14 @@ class SchedulesController extends Controller
     public function edit($id)
     {
         $schedule = WorkingSchedule::findOrFail($id);
+
         $doctors = Doctor::with('user')
-            ->whereHas('user', fn($q) => $q->where('role_id', 2))
+            ->whereHas('user', function ($q) {
+                $q->where('role_id', 2)
+                    ->where('status', 'online'); // Chỉ lấy user có trạng thái online
+            })
             ->get();
 
-        // Lấy toàn bộ lịch đã có theo bác sĩ
         $existingSchedules = WorkingSchedule::select('doctor_id', 'day')
             ->get()
             ->groupBy('doctor_id')

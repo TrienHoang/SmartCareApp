@@ -18,6 +18,7 @@ use App\Models\OrderService;
 use App\Models\Payment;
 use App\Models\PaymentHistory;
 use App\Models\Service;
+use App\Models\TreatmentPlan;
 use App\Models\User;
 use App\Models\WorkingSchedule;
 use Carbon\Carbon;
@@ -139,6 +140,7 @@ class AppointmentController extends Controller
             'patients' => User::where('role_id', 3)->get(),
             'doctors' => Doctor::with('user')->get(),
             'services' => Service::all(),
+            'treatmentPlans' => TreatmentPlan::whereIn('status', ['chua_tien_hanh', 'dang_tien_hanh'])->get(),
         ]);
     }
 
@@ -260,7 +262,8 @@ class AppointmentController extends Controller
             'service_id',
             'appointment_time',
             'status',
-            'reason'
+            'reason',
+            'treatment_plan_id',
         ]);
 
         $requestData['end_time'] = $endTime;
@@ -318,6 +321,12 @@ class AppointmentController extends Controller
             'patients' => User::where('role_id', 3)->get(),
             'doctors' => Doctor::with('user')->get(),
             'services' => Service::all(),
+            // 'treatmentPlans' => TreatmentPlan::where('patient_id', $appointment->patient_id)
+            //     ->where(function ($q) use ($appointment) {
+            //         $q->whereIn('status', ['chua_tien_hanh', 'dang_tien_hanh'])
+            //             ->orWhere('id', $appointment->treatment_plan_id);
+            //     })
+            //     ->get(),
         ]);
     }
 
@@ -367,6 +376,16 @@ class AppointmentController extends Controller
         if ($doctor->user->status !== 'online') {
             return back()->withErrors([
                 'doctor_id' => 'Bác sĩ hiện không hoạt động, vui lòng chọn bác sĩ khác.'
+            ])->withInput();
+        }
+
+        if (
+            $request->status === 'confirmed' &&
+            $appointmentDate->isPast() &&
+            $appointment->status === 'pending'
+        ) {
+            return back()->withErrors([
+                'status' => 'Không thể xác nhận lịch hẹn đã quá ngày.'
             ])->withInput();
         }
 
@@ -482,7 +501,19 @@ class AppointmentController extends Controller
             'end_time'         => $endTime,
             'status'           => $request->status,
             'reason'           => $request->reason,
+            'treatment_plan_id' => $request->treatment_plan_id,
         ];
+
+        if ($request->status === 'completed' && !$appointment->treatment_plan_id) {
+            $plan = TreatmentPlan::where('patient_id', $appointment->patient_id)
+                ->whereDate('start_date', '<=', $appointmentDate)
+                ->whereDate('end_date', '>=', $appointmentDate)
+                ->first();
+
+            if ($plan) {
+                $updateData['treatment_plan_id'] = $plan->id;
+            }
+        }
 
         // Ghi log thay đổi
         $changes = [];
@@ -506,6 +537,12 @@ class AppointmentController extends Controller
 
         if ($oldStatus != $request->status) {
             $changes[] = 'Trạng thái: ' . $oldStatus . ' → ' . $request->status;
+        }
+
+        if ($appointment->treatment_plan_id != $request->treatment_plan_id) {
+            $oldPlan = TreatmentPlan::find($appointment->treatment_plan_id)?->title ?? 'Không có';
+            $newPlan = TreatmentPlan::find($request->treatment_plan_id)?->title ?? 'Không có';
+            $changes[] = 'Kế hoạch điều trị: ' . $oldPlan . ' → ' . $newPlan;
         }
 
         DB::beginTransaction();
@@ -560,7 +597,15 @@ class AppointmentController extends Controller
     }
     public function show($id)
     {
-        $appointment = Appointment::findOrFail($id);
+        $appointment = Appointment::with([
+            'patient',
+            'doctor.user',
+            'doctor.room',
+            'service',
+            'logs',
+            'treatmentPlan.treatmentPlanItems',
+            'treatmentPlan.doctor.user'
+        ])->findOrFail($id);
         // $appointment = Appointment::with(['patient', 'doctor.user', 'doctor.room', 'service', 'logs'])->findOrFail($id);
         return view('admin.Appointment.show', compact('appointment'));
     }
@@ -732,5 +777,34 @@ class AppointmentController extends Controller
             'specificDates' => $specificDates,
             'vacationDates' => $vacationDates,
         ]);
+    }
+
+    public function getTreatmentPlanDetails($id)
+    {
+        $plan = TreatmentPlan::with(['doctor', 'treatmentPlanItems' => function ($q) {
+            $q->orderBy('expected_start_date');
+        }])->findOrFail($id);
+
+        return response()->json([
+            'doctor_id' => $plan->doctor_id,
+            'service_id' => $plan->treatmentPlanItems->first()->service_id ?? null,
+            'expected_start_date' => $plan->treatmentPlanItems->first()->expected_start_date ?? null,
+        ]);
+    }
+
+    public function getTreatmentPlansByPatient($patientId)
+    {
+        $plans = TreatmentPlan::with('doctor.user')
+            ->where('patient_id', $patientId)
+            ->get()
+            ->map(function ($plan) {
+                return [
+                    'id' => $plan->id,
+                    'plan_title' => $plan->plan_title,
+                    'doctor_name' => $plan->doctor->user->full_name ?? 'Không rõ'
+                ];
+            });
+
+        return response()->json($plans);
     }
 }

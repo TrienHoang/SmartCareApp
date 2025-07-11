@@ -11,7 +11,6 @@ class TreatmentPlan extends Model
     use HasFactory, SoftDeletes;
 
 
-    // Cho phép mass assignment cho các trường này
     protected $fillable = [
         'patient_id',
         'doctor_id',
@@ -24,41 +23,54 @@ class TreatmentPlan extends Model
         'end_date',
         'status',
     ];
-       protected $casts = [
+    protected $casts = [
         'start_date' => 'datetime', // Hoặc 'date' nếu bạn chỉ quan tâm đến ngày
         'end_date' => 'datetime',   // Hoặc 'date' nếu bạn chỉ quan tâm đến ngày
         // created_at và updated_at đã được Laravel tự động cast, không cần thêm ở đây
     ];
 
-    /**
-     * Lấy thông tin bệnh nhân của kế hoạch này.
-     */
+    // public $timestamps = false;
+
+    // Quan hệ với Patient
     public function patient()
     {
-        return $this->belongsTo(User::class, 'patient_id');
+        return $this->belongsTo(User::class); // Giả sử bạn có Patient model
     }
 
-    /**
-     * Lấy thông tin bác sĩ của kế hoạch này.
-     */
+    // Quan hệ với Doctor (User)
     public function doctor()
     {
-        return $this->belongsTo(User::class, 'doctor_id');
+        return $this->belongsTo(Doctor::class, 'doctor_id');
     }
 
-    /**
-     * Lấy tất cả các bước điều trị của kế hoạch này.
-     */
+    // Quan hệ với TreatmentPlanItems (One-to-Many)
     public function items()
     {
         return $this->hasMany(TreatmentPlanItem::class);
     }
 
-    /**
-     * Lấy lịch sử thay đổi của kế hoạch này.
-     */
+    // Quan hệ với TreatmentPlanHistories (One-to-Many)
     public function histories()
     {
         return $this->hasMany(TreatmentPlanHistory::class)->latest('changed_at');
+    }
+
+    public function treatmentPlanItems()
+    {
+        return $this->hasMany(TreatmentPlanItem::class);
+    }
+
+    
+    public function getBadgeClassForStatus($status = null)
+    {
+        $statusToUse = $status ?? $this->status;
+        switch ($statusToUse) {
+            case 'draft': return 'bg-dark';
+            case 'active': return 'bg-info';
+            case 'completed': return 'bg-success';
+            case 'paused': return 'bg-warning';
+            case 'cancelled': return 'bg-danger';
+            default: return 'bg-secondary'; // Fallback
+        }
     }
 }

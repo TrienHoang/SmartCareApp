@@ -11,11 +11,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Doctor\DoctorReviewController;
 use App\Http\Controllers\Doctor\DoctorAppointmentController;
-
-use App\Http\Controllers\Doctor\DoctorController;
+use App\Http\Controllers\doctor\DoctorController;
 use App\Http\Controllers\Doctor\ReviewController;
 use App\Http\Controllers\Doctor\TaskController;
-use App\Notifications\LateNotification;
+use App\Http\Controllers\doctor\TreatmentPlanController;
 
 // ✅ Dashboard và thống kê
 Route::prefix('doctor')
@@ -89,29 +88,27 @@ Route::prefix('doctor')
         Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
 
         // Treatment Plans (Kế hoạch điều trị)
-        // Route::prefix('treatment-plans')
-        //     ->name('treatment-plans.')
-        //     ->group(function () {
-        //         Route::get('/searchPatient', [TreatmentPlanController::class, 'searchPatient'])->name('searchPatient');
+        Route::prefix('treatment-plans')
+            ->name('treatment-plans.')
+            ->group(function () {
+                Route::get('/searchPatient', [TreatmentPlanController::class, 'searchPatient'])->name('searchPatient');
 
-        //         Route::get('', [TreatmentPlanController::class, 'index'])->name('index');
-        //         Route::get('/create', [TreatmentPlanController::class, 'create'])->name('create');
-        //         Route::post('', [TreatmentPlanController::class, 'store'])->name('store');
+                Route::get('', [TreatmentPlanController::class, 'index'])->name('index');
+                Route::get('/create', [TreatmentPlanController::class, 'create'])->name('create');
+                Route::post('', [TreatmentPlanController::class, 'store'])->name('store');
 
-        //         // Các route chứa {treatmentPlan} phải nằm SAU
-        //         Route::get('/{treatmentPlan}', [TreatmentPlanController::class, 'show'])->name('show');
-        //         Route::get('/{treatmentPlan}/edit', [TreatmentPlanController::class, 'edit'])->name('edit');
-        //         Route::put('/{treatmentPlan}', [TreatmentPlanController::class, 'update'])->name('update');
+                // Các route chứa {treatmentPlan} phải nằm SAU
+                Route::get('/{treatmentPlan}', [TreatmentPlanController::class, 'show'])->name('show');
+                Route::get('/{treatmentPlan}/edit', [TreatmentPlanController::class, 'edit'])->name('edit');
+                Route::put('/{treatmentPlan}', [TreatmentPlanController::class, 'update'])->name('update');
+                Route::delete('/{treatmentPlan}', [TreatmentPlanController::class, 'destroy'])->name('destroy');
 
-        //         Route::delete('/{treatmentPlan}', [TreatmentPlanController::class, 'destroy'])->name('destroy');
+                Route::patch('treatment-plan-items/{itemId}/update-status', [TreatmentPlanController::class, 'updateItemStatus'])->name('treatment-plan-items.update-status');
+            });
 
-        //         Route::patch('treatment-plan-items/{itemId}/update-status', [TreatmentPlanController::class, 'updateItemStatus'])->name('treatment-plan-items.update-status');
-        //     });
-        // Danh sách bác sĩ - URL: /doctor
-        Route::get('/', [DoctorController::class, 'index'])->name('index');
     });
 
-// Nhóm route dành riêng cho bác sĩ
+    // Nhóm route dành riêng cho bác sĩ
 Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
 
     Route::get('/', [DoctorController::class, 'index'])->name('index');
@@ -137,11 +134,3 @@ Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'
     Route::get('/tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
     Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
 });
-
-
-
-
-
-
-
-

@@ -39,11 +39,21 @@
             <div class="content-header-right col-md-4 col-12 text-md-right">
                 <div class="form-group breadcrum-right">
                     <a href="{{ route('admin.files.trash') }}"
-                        class="btn btn-gradient-primary btn-lg waves-effect waves-light shadow-lg text-white">
+                        class="btn btn-danger btn-lg waves-effect waves-light shadow-lg text-white">
                         <i class="bx bx-trash mr-2"></i>
-                        Thùng rác
+                        Đã xóa
                     </a>
                 </div>
+                <form id="export-form" action="{{ route('admin.files.export') }}" method="GET">
+                    @csrf
+                    <input type="hidden" name="ids" id="export-ids">
+                    <input type="hidden" name="keyword" value="{{ request('keyword') }}">
+                    <input type="hidden" name="uploader_type" value="{{ request('uploader_type') }}">
+                    <input type="hidden" name="date_from" value="{{ request('date_from') }}">
+                    <input type="hidden" name="date_to" value="{{ request('date_to') }}">
+                    <input type="hidden" name="file_category" value="{{ request('file_category') }}">
+                    <button type="submit" class="btn btn-success">Xuất Excel</button>
+                </form>
             </div>
         </div>
 
@@ -238,7 +248,7 @@
                                             <label class="custom-control-label" for="select-all"></label>
                                         </div>
                                     </th>
-                                    <th class="border-top-0">#ID</th>
+                                    <th class="border-top-0">STT</th>
                                     <th class="border-top-0">
                                         <i class="bx bx-file mr-1"></i>Thông tin file
                                     </th>
@@ -273,7 +283,8 @@
                                                     for="file-{{ $file->id }}"></label>
                                             </div>
                                         </td>
-                                        <td class="font-weight-bold text-primary">#{{ $file->id }}</td>
+                                        <td class="font-weight-bold text-primary">
+                                            {{ $loop->iteration + ($files->currentPage() - 1) * $files->perPage() }}</td>
                                         <td>
                                             <div class="file-info d-flex align-items-center">
                                                 <div class="file-icon-modern bg-gradient-primary text-white mr-3">
@@ -358,7 +369,7 @@
                                                 </a>
                                                 <button type="button" class="btn btn-outline-danger"
                                                     data-toggle="tooltip" title="Xóa file"
-                                                    onclick="deleteFile({{ $file->id }})">
+                                                    onclick="deleteFile({{ $file->id }}, '{{ addslashes($file->file_name) }}')">
                                                     <i class="bx bx-trash"></i>
                                                 </button>
                                             </div>
@@ -681,11 +692,19 @@
             });
         });
 
+        document.getElementById('export-form').addEventListener('submit', function(e) {
+            const checked = Array.from(document.querySelectorAll('.file-checkbox:checked'))
+                .map(cb => cb.value);
+
+            document.getElementById('export-ids').value = checked.join(',');
+        });
+
+
         // Delete file function
-        function deleteFile(id) {
+        function deleteFile(id, fileName) {
             Swal.fire({
                 title: 'Xác nhận xóa',
-                text: 'Bạn có chắc chắn muốn xóa tài liệu này không? Hành động này không thể hoàn tác!',
+                html: `Bạn có chắc chắn muốn xóa tài liệu <strong>${fileName}</strong> không?<br>Hành động này không thể hoàn tác!`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
