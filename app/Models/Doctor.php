@@ -60,7 +60,7 @@ class Doctor extends Model
     {
         return $this->hasMany(TreatmentPlan::class);
     }
-    
+
 
     public function services()
     {
@@ -77,5 +77,13 @@ class Doctor extends Model
         return $this->hasMany(DoctorLeave::class)
             ->where('approved', true)
             ->whereNull('deleted_at');
+    }
+
+    public function isOnLeaveToday()
+    {
+        return $this->leaves()
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->exists();
     }
 }

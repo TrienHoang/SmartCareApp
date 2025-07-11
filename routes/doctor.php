@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Doctor\AppointmentController;
+use App\Http\Controllers\Doctor\CalendarController;
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Http\Controllers\Doctor\DoctorLeaveController;
 use App\Http\Controllers\Doctor\FileUploadController;
@@ -10,6 +12,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Doctor\DoctorReviewController;
 use App\Http\Controllers\Doctor\DoctorAppointmentController;
 use App\Http\Controllers\doctor\DoctorController;
+use App\Http\Controllers\Doctor\ReviewController;
+use App\Http\Controllers\Doctor\TaskController;
 use App\Http\Controllers\doctor\TreatmentPlanController;
 
 // ✅ Dashboard và thống kê
@@ -101,11 +105,32 @@ Route::prefix('doctor')
 
                 Route::patch('treatment-plan-items/{itemId}/update-status', [TreatmentPlanController::class, 'updateItemStatus'])->name('treatment-plan-items.update-status');
             });
-        // Danh sách bác sĩ - URL: /doctor
-        Route::get('/', [DoctorController::class, 'index'])->name('index');
 
-        // Chi tiết bác sĩ - URL: /doctor/list/{id}
-        Route::get('/list/{id}', [DoctorController::class, 'show'])->name('show');
-        Route::get('/doctor/history', [DoctorController::class, 'history'])->name('history');
-        Route::get('/doctor/history/{appointment}', [DoctorController::class, 'historyShow'])->name('history.show');
     });
+
+    // Nhóm route dành riêng cho bác sĩ
+Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
+
+    Route::get('/', [DoctorController::class, 'index'])->name('index');
+    Route::get('/list/{id}', [DoctorController::class, 'show'])->name('list.show');
+    Route::get('/history', [DoctorController::class, 'history'])->name('history.index');
+    Route::get('/history/{appointment}', [DoctorController::class, 'historyShow'])->name('history.show');
+    Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+    Route::patch('/reviews/{review}/toggle-visibility', [ReviewController::class, 'toggleVisibility'])->name('reviews.toggle');
+});
+
+Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
+    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
+    Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
+    Route::get('/calendar/test-database', [CalendarController::class, 'testDatabase'])->name('calendar.testDatabase');
+
+
+});
+
+Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
+    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
+    Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
+    Route::get('/calendar/test-database', [CalendarController::class, 'testDatabase'])->name('calendar.testDatabase');
+    Route::get('/tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
+    Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
+});

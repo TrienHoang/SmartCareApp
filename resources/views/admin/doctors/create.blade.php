@@ -22,7 +22,7 @@
                                 <option value="">-- Chọn người dùng --</option>
                                 @foreach($availableUsers as $user)
                                     <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                                        {{ $user->full_name }} (ID: {{ $user->id }})
+                                        {{ $user->doctor->full_name }} (ID: {{ $user->id }})
                                     </option>
                                 @endforeach
                             </select>
