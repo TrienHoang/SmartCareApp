@@ -321,12 +321,12 @@ class AppointmentController extends Controller
             'patients' => User::where('role_id', 3)->get(),
             'doctors' => Doctor::with('user')->get(),
             'services' => Service::all(),
-            // 'treatmentPlans' => TreatmentPlan::where('patient_id', $appointment->patient_id)
-            //     ->where(function ($q) use ($appointment) {
-            //         $q->whereIn('status', ['chua_tien_hanh', 'dang_tien_hanh'])
-            //             ->orWhere('id', $appointment->treatment_plan_id);
-            //     })
-            //     ->get(),
+            'treatmentPlans' => TreatmentPlan::where('patient_id', $appointment->patient_id)
+                ->where(function ($q) use ($appointment) {
+                    $q->whereIn('status', ['chua_tien_hanh', 'dang_tien_hanh'])
+                        ->orWhere('id', $appointment->treatment_plan_id);
+                })
+                ->get(),
         ]);
     }
 

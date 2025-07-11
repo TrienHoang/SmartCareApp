@@ -7,7 +7,7 @@ $(document).ready(function () {
     const doctorServicesUrl = $('#doctorServicesUrl').val();
     const doctorWorkingDaysUrl = $('#doctorWorkingDaysUrl').val();
     const patientId = $('#patient_id').val();
-    const selectedPlanId = '{{ $appointment->treatment_plan_id }}';
+    const selectedPlanId = window.selectedPlanId;
 
     loadTreatmentPlans(patientId, selectedPlanId);
 
