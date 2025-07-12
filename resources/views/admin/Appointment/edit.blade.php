@@ -44,9 +44,6 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>Chỉnh sửa lịch hẹn</h5>
-                <a href="{{ route('admin.appointments.show', $appointment->id) }}" class="btn btn-info btn-sm">
-                    <i class="fas fa-eye me-1"></i> Xem chi tiết
-                </a>
             </div>
 
             @if (session('error'))
@@ -111,6 +108,11 @@
 
                             <small class="text-muted d-block mt-1">
                                 Khi chọn kế hoạch điều trị, bác sĩ tương ứng sẽ tự động được chọn và không thể thay đổi.
+                            </small>
+
+                            <small class="text-info d-block mt-1">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Kế hoạch điều trị sẽ tự động chuyển sang <strong>Hoàn thành</strong> khi tất cả lịch hẹn thuộc kế hoạch đã hoàn tất.
                             </small>
                         </div>
 

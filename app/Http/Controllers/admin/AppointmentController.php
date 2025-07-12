@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Helpers\AppointmentHelper;
+use App\Helpers\TreatmentPlanHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
@@ -560,6 +561,8 @@ class AppointmentController extends Controller
                     'note'           => implode("\n", $changes),
                 ]);
             }
+            // Cập nhật trạng thái của kế hoạch điều trị 
+            TreatmentPlanHelper::updatePlanStatus($appointment->treatment_plan_id);
 
             DB::commit();
             return redirect()->route('admin.appointments.index')
@@ -661,6 +664,7 @@ class AppointmentController extends Controller
         $query = $request->get('q', '');
 
         $patients = User::where('role_id', 3)
+            ->where('status', 'online')
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($sub) use ($query) {
                     $sub->where('full_name', 'like', "%$query%")
@@ -682,6 +686,11 @@ class AppointmentController extends Controller
         if ($appointment->status === 'cancelled') {
             return back()->with('error', 'Không thể thanh toán cho lịch hẹn đã bị hủy.');
         }
+
+        if ($appointment->status === 'completed') {
+            return back()->with('error', 'Lịch hẹn đã hoàn thành, không thể thanh toán.');
+        }
+
         $payment = $appointment->payment;
         if (!$payment) {
             $payment = Payment::create([
