@@ -16,6 +16,7 @@
                         ['name' => 'Giới Thiệu', 'path' => '/gioi-thieu'],
                         ['name' => 'Dịch Vụ', 'path' => '/dich-vu'],
                         ['name' => 'Đặt Lịch', 'path' => '/dat-lich'],
+                        ['name' => 'Tin Tức', 'path' => '/tin-tuc'],
                         ['name' => 'Liên Hệ', 'path' => '/lien-he'],
                     ];
                 @endphp
@@ -30,15 +31,48 @@
 
             {{-- Desktop Contact & Button --}}
             <div class="hidden md:flex items-center space-x-4">
-                <div class="flex items-center space-x-2 text-gray-600">
-                    <i data-lucide="phone" class="w-4 h-4"></i>
-                    <span class="text-sm">0123.456.789</span>
-                </div>
-                <a href="{{ url('/appointment') }}"
-                    class="gradient-bg text-white px-6 py-2 rounded-full hover:opacity-90 transition-opacity">
-                    Đặt Lịch Ngay
-                </a>
+                @if (Auth::check())
+                    {{-- Nếu đã đăng nhập --}}
+                    <div class="relative group">
+                        <button class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors">
+                            <img src="{{ Auth::user()->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
+                                alt="Avatar" class="w-8 h-8 rounded-full border">
+                            <span class="text-sm">{{ Auth::user()->name }}</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+
+                        {{-- Dropdown menu --}}
+                        <div
+                            class="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg invisible opacity-0 group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition-all z-50">
+                            <a href="{{ url('/thong-tin-ca-nhan') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Trang cá nhân
+                            </a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Lịch hẹn của tôi
+                            </a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Cài đặt
+                            </a>
+                            <a href="{{ route('logout') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Đăng xuất
+                            </a>
+                           <a href="{{ route('client.payment_history.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Lịch sử thanh toán
+                            </a>
+                        </div>
+                    </div>
+                @else
+                    {{-- Nếu chưa đăng nhập --}}
+                    <a href="{{ route('login') }}"
+                        class="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors">
+                        <i data-lucide="log-in" class="w-5 h-5"></i>
+                        <span class="text-sm">Đăng Nhập</span>
+                    </a>
+                @endif
             </div>
+
 
             {{-- Mobile Toggle Button --}}
             <button class="md:hidden" @click="menuOpen = !menuOpen">

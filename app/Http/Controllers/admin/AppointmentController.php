@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Helpers\AppointmentHelper;
+use App\Helpers\TreatmentPlanHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
@@ -321,6 +322,12 @@ class AppointmentController extends Controller
             'patients' => User::where('role_id', 3)->get(),
             'doctors' => Doctor::with('user')->get(),
             'services' => Service::all(),
+            'treatmentPlans' => TreatmentPlan::where('patient_id', $appointment->patient_id)
+                ->where(function ($q) use ($appointment) {
+                    $q->whereIn('status', ['chua_tien_hanh', 'dang_tien_hanh'])
+                        ->orWhere('id', $appointment->treatment_plan_id);
+                })
+                ->get(),
         ]);
     }
 
@@ -495,7 +502,19 @@ class AppointmentController extends Controller
             'end_time'         => $endTime,
             'status'           => $request->status,
             'reason'           => $request->reason,
+            'treatment_plan_id' => $request->treatment_plan_id,
         ];
+
+        if ($request->status === 'completed' && !$appointment->treatment_plan_id) {
+            $plan = TreatmentPlan::where('patient_id', $appointment->patient_id)
+                ->whereDate('start_date', '<=', $appointmentDate)
+                ->whereDate('end_date', '>=', $appointmentDate)
+                ->first();
+
+            if ($plan) {
+                $updateData['treatment_plan_id'] = $plan->id;
+            }
+        }
 
         // Ghi log thay đổi
         $changes = [];
@@ -521,6 +540,12 @@ class AppointmentController extends Controller
             $changes[] = 'Trạng thái: ' . $oldStatus . ' → ' . $request->status;
         }
 
+        if ($appointment->treatment_plan_id != $request->treatment_plan_id) {
+            $oldPlan = TreatmentPlan::find($appointment->treatment_plan_id)?->title ?? 'Không có';
+            $newPlan = TreatmentPlan::find($request->treatment_plan_id)?->title ?? 'Không có';
+            $changes[] = 'Kế hoạch điều trị: ' . $oldPlan . ' → ' . $newPlan;
+        }
+
         DB::beginTransaction();
 
         try {
@@ -536,6 +561,8 @@ class AppointmentController extends Controller
                     'note'           => implode("\n", $changes),
                 ]);
             }
+            // Cập nhật trạng thái của kế hoạch điều trị 
+            TreatmentPlanHelper::updatePlanStatus($appointment->treatment_plan_id);
 
             DB::commit();
             return redirect()->route('admin.appointments.index')
@@ -573,7 +600,15 @@ class AppointmentController extends Controller
     }
     public function show($id)
     {
-        $appointment = Appointment::findOrFail($id);
+        $appointment = Appointment::with([
+            'patient',
+            'doctor.user',
+            'doctor.room',
+            'service',
+            'logs',
+            'treatmentPlan.treatmentPlanItems',
+            'treatmentPlan.doctor.user'
+        ])->findOrFail($id);
         // $appointment = Appointment::with(['patient', 'doctor.user', 'doctor.room', 'service', 'logs'])->findOrFail($id);
         return view('admin.Appointment.show', compact('appointment'));
     }
@@ -629,6 +664,7 @@ class AppointmentController extends Controller
         $query = $request->get('q', '');
 
         $patients = User::where('role_id', 3)
+            ->where('status', 'online')
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($sub) use ($query) {
                     $sub->where('full_name', 'like', "%$query%")
@@ -650,6 +686,11 @@ class AppointmentController extends Controller
         if ($appointment->status === 'cancelled') {
             return back()->with('error', 'Không thể thanh toán cho lịch hẹn đã bị hủy.');
         }
+
+        if ($appointment->status === 'completed') {
+            return back()->with('error', 'Lịch hẹn đã hoàn thành, không thể thanh toán.');
+        }
+
         $payment = $appointment->payment;
         if (!$payment) {
             $payment = Payment::create([

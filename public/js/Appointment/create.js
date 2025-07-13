@@ -6,6 +6,8 @@ $(document).ready(function () {
     const $timeInput = $('#appointment_time');
     const $treatmentPlan = $('#treatment_plan_id');
     const $treatmentWrapper = $('#treatment-plan-wrapper');
+    const $vacationNotice = $('#vacation-notice');
+    const $vacationText = $('#vacation-text');
     let flatpickrInstance;
 
     function formatDateRange(dates) {
@@ -31,18 +33,15 @@ $(document).ready(function () {
         }).join(', ');
     }
 
-    // Ẩn treatment plan ban đầu nếu chưa có bệnh nhân
-    if (!$hidden.val()) {
-        $treatmentWrapper.hide();
-    }
+    if (!$hidden.val()) $treatmentWrapper.hide();
 
     // Autocomplete bệnh nhân
     $input.autocomplete({
-        source: function (request, response) {
+        source(request, response) {
             $.ajax({
                 url: '/admin/appointments/patients/search',
                 data: { q: request.term },
-                success: function (data) {
+                success(data) {
                     response(data.map(p => ({
                         label: p.full_name,
                         value: p.id
@@ -52,19 +51,24 @@ $(document).ready(function () {
         },
         minLength: 1,
         delay: 250,
-        select: function (event, ui) {
+        select(event, ui) {
             $input.val(ui.item.label);
             $hidden.val(ui.item.value);
 
-            // Load kế hoạch điều trị
+            // Reset tất cả khi chọn bệnh nhân mới
+            $treatmentPlan.val('').trigger('change');
+            $doctor.val('').trigger('change.select2');
+            $serviceSelect.html('<option value="">Chọn dịch vụ</option>').trigger('change.select2');
+            $timeInput.val('').prop('disabled', true);
+            if (flatpickrInstance) flatpickrInstance.destroy();
+            $vacationNotice.addClass('d-none');
+
             loadTreatmentPlans(ui.item.value);
             $treatmentWrapper.show();
-
             return false;
         }
     });
 
-    // Load danh sách kế hoạch điều trị của bệnh nhân
     function loadTreatmentPlans(patientId) {
         const url = window.treatmentPlansByPatientUrl.replace(':id', patientId);
         $.get(url, function (plans) {
@@ -76,95 +80,73 @@ $(document).ready(function () {
             plans.forEach(plan => {
                 $treatmentPlan.append(`<option value="${plan.id}">${plan.plan_title} - ${plan.doctor_name ?? ''}</option>`);
             });
-        }).fail(() => {
-            toastr.error('Không thể tải kế hoạch điều trị');
-        });
+        }).fail(() => toastr.error('Không thể tải kế hoạch điều trị'));
     }
 
-    // Chọn treatment plan → load doctor, service, thời gian
     $treatmentPlan.on('change', function () {
         const planId = $(this).val();
+
         if (!planId) {
             $doctor.val('').trigger('change.select2');
-
-            // Bật lại tất cả các bác sĩ
-            $('#doctor_id option').each(function () {
-                $(this).prop('disabled', false);
-            });
-
-            // Refresh lại Select2
+            $('#doctor_id option').prop('disabled', false);
             $doctor.select2('destroy').select2({
                 width: '100%',
                 placeholder: 'Chọn mục...',
                 allowClear: true
             });
-
             return;
         }
 
         const planUrl = window.treatmentPlanDetailsUrl.replace('__ID__', planId);
         $.get(planUrl, function (data) {
-            const doctorId = data.doctor_id;
-            const serviceId = data.service_id;
-            const expected = data.expected_start_date;
+            const { doctor_id, service_id, expected_start_date } = data;
 
-            if (!serviceId && !expected) {
+            if (!service_id && !expected_start_date) {
                 toastr.warning('Kế hoạch điều trị chưa có bước điều trị nào!');
                 return;
             }
 
-            // Set bác sĩ
-            $doctor.val(doctorId).trigger('change');
+            $doctor.val(doctor_id).trigger('change');
 
-            // Chỉ hiển thị đúng bác sĩ này
             $('#doctor_id option').each(function () {
                 const val = $(this).val();
-                if (val != doctorId && val !== "") {
-                    $(this).prop('disabled', true); // ✅ Disable
-                } else {
-                    $(this).prop('disabled', false); // ✅ Enable lại bác sĩ đúng
-                }
+                $(this).prop('disabled', val != doctor_id && val !== "");
             });
 
-            // Gợi ý dịch vụ
-            if (serviceId) $serviceSelect.data('old', serviceId);
-
-            // Gợi ý thời gian
-            if (expected) $timeInput.data('old', expected);
-        }).fail(() => {
-            toastr.error('Không thể tải thông tin kế hoạch điều trị');
-        });
+            if (service_id) $serviceSelect.data('old', service_id);
+            if (expected_start_date) {
+                const formatted = new Date(expected_start_date).toISOString().slice(0, 16).replace('T', ' ');
+                $timeInput.data('old', formatted);
+            }
+        }).fail(() => toastr.error('Không thể tải thông tin kế hoạch điều trị'));
     });
 
-    // Khi chọn bác sĩ
     $doctor.on('change', function () {
         const doctorId = $(this).val();
+
         $serviceSelect.html('<option value="">Đang tải dịch vụ...</option>');
 
         if (!doctorId) {
             $serviceSelect.html('<option value="">Chọn dịch vụ</option>').trigger('change.select2');
-            $timeInput.prop('disabled', true).val('');
+            $timeInput.val('').prop('disabled', true);
             if (flatpickrInstance) flatpickrInstance.destroy();
-            $('#vacation-notice').addClass('d-none');
+            $vacationNotice.addClass('d-none');
             return;
         }
 
         // Load dịch vụ
         $.get(window.doctorServicesUrl.replace(':id', doctorId), function (services) {
-            let html = '<option value="">Chọn dịch vụ</option>';
             const oldServiceId = $serviceSelect.data('old');
-            services.forEach(service => {
-                html += `<option value="${service.id}" ${oldServiceId == service.id ? 'selected' : ''}>
+            const html = services.map(service =>
+                `<option value="${service.id}" ${oldServiceId == service.id ? 'selected' : ''}>
                     ${service.name} (${service.department?.name ?? 'Không rõ khoa'})
-                </option>`;
-            });
-            $serviceSelect.html(html).trigger('change.select2');
+                </option>`).join('');
+            $serviceSelect.html('<option value="">Chọn dịch vụ</option>' + html).trigger('change.select2');
         }).fail(() => toastr.error('Không thể tải danh sách dịch vụ'));
 
-        // Load lịch làm việc
+        // Load lịch làm việc và khởi tạo Flatpickr
         $.get(window.doctorWorkingDaysUrl.replace(':id', doctorId), function ({ daysOfWeek, specificDates, vacationDates }) {
             if (flatpickrInstance) flatpickrInstance.destroy();
-
             const oldTime = $timeInput.data('old') || $timeInput.val();
             if (!oldTime) $timeInput.val('');
 
@@ -181,22 +163,17 @@ $(document).ready(function () {
                     if (vacationDates.includes(str)) return false;
                     return daysOfWeek.includes(day);
                 },
-                onReady: function (_, __, instance) {
+                onReady(_, __, instance) {
                     if (oldTime) {
-                        const oldDate = new Date(oldTime);
-                        const oldStr = oldDate.toISOString().split('T')[0];
-                        const oldDay = oldDate.getDay();
-                        let valid = specificDates.length > 0
-                            ? specificDates.includes(oldStr)
-                            : daysOfWeek.includes(oldDay);
-
-                        if (valid && !vacationDates.includes(oldStr)) {
+                        const d = new Date(oldTime);
+                        const str = d.toISOString().split('T')[0];
+                        if ((specificDates.includes(str) || daysOfWeek.includes(d.getDay())) && !vacationDates.includes(str)) {
                             instance.setDate(oldTime, true);
                             $timeInput.val(oldTime);
                         }
                     }
                 },
-                onChange: function (dates, _, instance) {
+                onChange(dates, _, instance) {
                     if (dates.length > 0) {
                         const dateStr = dates[0].toISOString().split('T')[0];
                         if (vacationDates.includes(dateStr)) {
@@ -209,15 +186,13 @@ $(document).ready(function () {
 
             $timeInput.prop('disabled', false);
 
-            const $notice = $('#vacation-notice');
-            const $text = $('#vacation-text');
             if (vacationDates.length > 0) {
                 const info = formatDateRange(vacationDates);
-                $text.text(`Bác sĩ nghỉ phép: ${info}`);
-                $notice.removeClass('d-none');
+                $vacationText.text(`Bác sĩ nghỉ phép: ${info}`);
+                $vacationNotice.removeClass('d-none');
                 toastr.info(`Bác sĩ nghỉ phép: ${info}`, 'Thông báo');
             } else {
-                $notice.addClass('d-none');
+                $vacationNotice.addClass('d-none');
             }
         }).fail(() => {
             toastr.error('Không thể tải lịch làm việc');
@@ -226,7 +201,7 @@ $(document).ready(function () {
         });
     });
 
-    // Reload lại form khi có dữ liệu cũ
+    // Khởi tạo lại dữ liệu cũ khi reload
     const oldDoctorId = $doctor.val();
     const oldServiceId = $serviceSelect.val();
     const oldTime = $timeInput.val();
@@ -234,18 +209,9 @@ $(document).ready(function () {
     if (oldTime) $timeInput.data('old', oldTime);
     if (oldDoctorId) $doctor.trigger('change');
 
+    // Đảm bảo giữ lại thời gian khi submit form
     $('form').on('submit', function () {
         const val = $timeInput.val();
         if (val && flatpickrInstance) $timeInput.val(val);
-    });
-    // Ẩn/hiện dropdown kế hoạch điều trị theo bệnh nhân
-    $input.on('autocompleteselect', function (event, ui) {
-        const patientId = ui.item.value;
-        if (patientId) {
-            $('#treatment-plan-wrapper').show();
-            loadTreatmentPlans(patientId); // function riêng để load kế hoạch từ route
-        } else {
-            $('#treatment-plan-wrapper').hide();
-        }
     });
 });
