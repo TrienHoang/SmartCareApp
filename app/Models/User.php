@@ -10,7 +10,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable;
 
     protected $fillable = [
         'username',
@@ -46,11 +46,6 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function hasRole($roleName)
-    {
-        return optional($this->role)->name === $roleName;
-    }
-
     // 🔐 Dùng khi không dùng trực tiếp từ Spatie
     public function permissions()
     {
@@ -75,12 +70,7 @@ class User extends Authenticatable
     }
 
     public function patient()
-    {
-        return $this->belongsTo(User::class, 'patient_id');
-    }
-
-    public function tasks()
-    {
-        return $this->belongsToMany(Task::class, 'task_user');
-    }
+{
+    return $this->belongsTo(User::class, 'patient_id');
+}
 }
