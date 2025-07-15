@@ -70,11 +70,11 @@
                     <div>Đơn thuốc</div>
                 </a>
             </li>
-            <li class="menu-item">
+            {{-- <li class="menu-item">
                 <a href="{{ route('doctor.reviews.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-star"></i>
                     <div>Đánh giá từ bệnh nhân</div>
-                </a>
+                </a> --}}
 
             <li class="menu-item">
                 <a href="#" class="menu-link">
@@ -102,11 +102,6 @@
                     <span>Xem lịch sử khám</span>
                 </a>
             </li>
-
-
-
-
-
         @endif
 
     </ul>
