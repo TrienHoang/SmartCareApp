@@ -44,7 +44,7 @@
                         {{-- Dropdown menu --}}
                         <div
                             class="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg invisible opacity-0 group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition-all z-50">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <a href="{{ url('/thong-tin-ca-nhan') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Trang cá nhân
                             </a>
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
