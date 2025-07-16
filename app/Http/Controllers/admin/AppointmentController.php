@@ -204,18 +204,15 @@ class AppointmentController extends Controller
         }
 
         if (!$working) {
-            $workingDays = WorkingSchedule::where('doctor_id', $request->doctor_id)
-                ->pluck('day_of_week')
-                ->map(function ($day) {
-                    return __('days.' . strtolower($day));
-                })
-                ->toArray();
-
-            $daysText = implode(', ', $workingDays);
-
-            return back()->withErrors([
-                'doctor_id' => 'Bác sĩ không làm việc vào ngày bạn chọn. Các ngày làm việc là: ' . $daysText . '.'
-            ])->withInput();
+            if (!in_array($dayOfWeek, ['Sunday'])) {
+                $working = new \stdClass();
+                $working->start_time = '08:00';
+                $working->end_time = '17:00';
+            } else {
+                return back()->withErrors([
+                    'doctor_id' => 'Bác sĩ không làm việc vào Chủ nhật. Vui lòng chọn Thứ 2 - Thứ 7.'
+                ])->withInput();
+            }
         }
 
         // Kiểm tra giờ làm việc
@@ -422,14 +419,15 @@ class AppointmentController extends Controller
         }
 
         if (!$working) {
-            $workingDays = WorkingSchedule::where('doctor_id', $request->doctor_id)
-                ->pluck('day_of_week')
-                ->map(fn($day) => __('days.' . strtolower($day)))
-                ->toArray();
-
-            return back()->withErrors([
-                'appointment_time' => 'Bác sĩ không làm việc ngày này. Các ngày làm việc: ' . implode(', ', $workingDays) . '.'
-            ])->withInput();
+            if (!in_array($dayOfWeek, ['Sunday'])) {
+                $working = new \stdClass();
+                $working->start_time = '08:00';
+                $working->end_time = '17:00';
+            } else {
+                return back()->withErrors([
+                    'appointment_time' => 'Bác sĩ không làm việc vào Chủ nhật. Vui lòng chọn Thứ 2 - Thứ 7.'
+                ])->withInput();
+            }
         }
 
         // Kiểm tra giờ hợp lệ
@@ -759,6 +757,11 @@ class AppointmentController extends Controller
             ->values()
             ->toArray();
 
+        // ⚡ Nếu không có dữ liệu, mặc định Thứ 2–Thứ 7
+        if (empty($daysOfWeek)) {
+            $daysOfWeek = [1, 2, 3, 4, 5, 6];
+        }
+
         // Ngày làm việc cụ thể (YYYY-MM-DD)
         $specificDates = $doctor->workingSchedules()
             ->whereNotNull('day')
@@ -769,7 +772,7 @@ class AppointmentController extends Controller
             ->values()
             ->toArray();
 
-        // Ngày nghỉ (đã duyệt)
+        // Ngày nghỉ phép (đã duyệt)
         $vacationDates = $doctor->leaves()
             ->where('end_date', '>=', now())
             ->get()
