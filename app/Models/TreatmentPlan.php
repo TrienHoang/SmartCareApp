@@ -3,15 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class TreatmentPlan extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
-        'patient_id', 'doctor_id', 'plan_title',
-        'total_estimated_cost', 'notes', 'created_at'
-    ];
+    protected $fillable = ['patient_id', 'doctor_id', 'plan_title', 'total_estimated_cost', 'notes', 'created_at'];
     public $timestamps = false;
+
+    public function patient() {
+        return $this->belongsTo(User::class, 'patient_id');
+    }
+
+    public function doctor() {
+        return $this->belongsTo(Doctor::class, 'doctor_id');
+    }
+
+    public function histories() {
+        return $this->hasMany(TreatmentHistory::class);
+    }
 }
 

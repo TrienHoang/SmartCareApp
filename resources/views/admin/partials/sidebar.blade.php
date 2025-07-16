@@ -191,6 +191,14 @@
         </li>
 
         <li class="menu-item">
+            <a href="{{ route('admin.posts.index') }}" class="menu-link">
+                <i class="menu-icon fas fa-newspaper"></i>
+                <div> Quản lý tin tức</div>
+            </a>
+        </li>
+
+
+        <li class="menu-item">
             <a href="{{ route('admin.faqs.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-help-circle"></i>
                 <div>Quản lý FAQ</div>

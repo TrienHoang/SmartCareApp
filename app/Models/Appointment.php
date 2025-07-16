@@ -139,4 +139,6 @@ class Appointment extends Model
     {
         return $this->hasOne(Order::class, 'appointment_id');
     }
+   
+
 }

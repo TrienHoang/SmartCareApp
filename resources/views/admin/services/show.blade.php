@@ -1,231 +1,230 @@
 @extends('admin.dashboard')
-@section('title', 'Chi tiết Dịch vụ')
 
 @section('content')
-    <div class="content-wrapper">
-        <!-- Header Section -->
-        <div class="content-header row">
-            <div class="content-header-left col-md-9 col-12 mb-2">
-                <div class="row breadcrumbs-top">
-                    <div class="col-12">
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="bx bx-cog me-2 text-primary" style="font-size: 24px;"></i>
-                            <h2 class="content-header-title mb-0">Chi tiết Dịch vụ</h2>
-                        </div>
-                        <div class="breadcrumb-wrapper">
-                            <nav aria-label="breadcrumb">
-                                <ol class="breadcrumb">
-                                    <li class="">
-                                        <a href="{{ route('admin.dashboard.index') }}" class="text-decoration-none">
-                                            Trang chủ > 
-                                        </a>
-                                    </li>
-                                    <li class="">
-                                        <a href="{{ route('admin.services.index') }}" class="text-decoration-none">
-                                            Dịch vụ > 
-                                        </a>
-                                    </li>
-                                    <li class="breadcrumb-item active">Chi tiết</li>
-                                </ol>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="container-fluid px-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-eye me-2 text-primary"></i>
+                Chi tiết dịch vụ
+            </h1>
+            <p class="text-muted mb-0">Xem thông tin chi tiết của dịch vụ</p>
         </div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ route('admin.services.index') }}">Dịch vụ</a></li>
+                <li class="breadcrumb-item active">Chi tiết</li>
+            </ol>
+        </nav>
+    </div>
 
-        <!-- Main Content -->
-        <div class="content-body">
-            <div class="row">
-                <div class="col-12">
-                    <!-- Service Card -->
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-light border-bottom">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar-wrapper me-3">
-                                        <div class="avatar avatar-lg bg-primary">
-                                            <i class="bx bx-cog text-white" style="font-size: 20px;"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h4 class="card-title text-xl mb-1">{{ $service->name }}</h4>
-                                        <small class="text-muted">Dịch vụ #{{ $service->id }}</small>
-                                    </div>
-                                </div>
-                                <div class="status-badge">
-                                    <span class="badge
-                                        @if ($service->status == 'active') bg-success
-                                        @else bg-danger @endif
-                                        rounded-pill px-3 py-2">
-                                        <i class="bx 
-                                            @if ($service->status == 'active') bx-check-circle
-                                            @else bx-x-circle @endif
-                                            me-1"></i>
-                                        {{ $service->status == 'active' ? 'Hoạt động' : 'Tạm ngừng' }}
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Left Column - Service Details -->
+        <div class="col-lg-8">
+            <!-- Basic Information Card -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Thông tin cơ bản
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <!-- Service Name -->
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="info-label">
+                                    <i class="fas fa-tag me-2 text-primary"></i>
+                                    Tên dịch vụ
+                                </label>
+                                <div class="info-value">{{ $service->name }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="info-label">
+                                    <i class="fas fa-folder me-2 text-warning"></i>
+                                    Danh mục
+                                </label>
+                                <div class="info-value">
+                                    <span class="badge bg-warning text-dark fs-6">
+                                        {{ $service->category->name ?? 'Không xác định' }}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="card-body p-4">
-                            <div class="row g-4">
-                                <!-- Left Column -->
-                                <div class="col-lg-8">
-                                    <!-- Service Information Section -->
-                                    <div class="mb-4">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <i class="bx bx-info-circle text-primary me-2" style="font-size: 18px;"></i>
-                                            <h5 class="mb-0">Thông tin dịch vụ</h5>
-                                        </div>
-                                        <div class="rounded p-3 bg-light">
-                                            <div class="row g-3">
-                                                <div class="col-md-6">
-                                                    <div class="info-item">
-                                                        <small class="text-muted d-block">Tên dịch vụ</small>
-                                                        <strong class="text-dark">{{ $service->name }}</strong>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="info-item">
-                                                        <small class="text-muted d-block">Loại dịch vụ</small>
-                                                        <strong class="text-dark">{{ $service->category->name ?? '---' }}</strong>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="info-item">
-                                                        <small class="text-muted d-block">Giá dịch vụ</small>
-                                                        <strong class="text-success">{{ number_format($service->price) }} đ</strong>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="info-item">
-                                                        <small class="text-muted d-block">Thời lượng</small>
-                                                        <strong class="text-info">{{ $service->duration }} phút</strong>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Description Section -->
-                                    <div class="mb-4">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <i class="bx bx-file-blank text-primary me-2" style="font-size: 18px;"></i>
-                                            <h5 class="mb-0">Mô tả dịch vụ</h5>
-                                        </div>
-                                        <div class="rounded p-3 bg-light">
-                                            <div class="service-description">
-                                                {{ $service->description ?? 'Không có mô tả' }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Right Column -->
-                                <div class="col-lg-4">
-                                    <!-- Information Cards -->
-                                    <div class="row g-3">
-                                        <!-- Status Card -->
-                                        <div class="col-12">
-                                            <div class="card border-left-{{ $service->status == 'active' ? 'success' : 'danger' }}">
-                                                <div class="card-body p-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="bx bx-{{ $service->status == 'active' ? 'check-circle' : 'x-circle' }} text-{{ $service->status == 'active' ? 'success' : 'danger' }} me-2"></i>
-                                                        <div>
-                                                            <small class="text-muted d-block">Trạng thái</small>
-                                                            <strong>{{ $service->status == 'active' ? 'Hoạt động' : 'Tạm ngừng' }}</strong>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Category Card -->
-                                        <div class="col-12">
-                                            <div class="card border-left-info">
-                                                <div class="card-body p-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="bx bx-category text-info me-2"></i>
-                                                        <div>
-                                                            <small class="text-muted d-block">Danh mục</small>
-                                                            <strong>{{ $service->category->name ?? 'Không xác định' }}</strong>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Price Card -->
-                                        <div class="col-12">
-                                            <div class="card border-left-success">
-                                                <div class="card-body p-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="bx bx-money text-success me-2"></i>
-                                                        <div>
-                                                            <small class="text-muted d-block">Giá dịch vụ</small>
-                                                            <strong>{{ number_format($service->price) }} đ</strong>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Duration Card -->
-                                        <div class="col-12">
-                                            <div class="card border-left-warning">
-                                                <div class="card-body p-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="bx bx-time text-warning me-2"></i>
-                                                        <div>
-                                                            <small class="text-muted d-block">Thời lượng</small>
-                                                            <strong>{{ $service->duration }} phút</strong>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Timestamps -->
-                                    <div class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">
-                                                <i class="bx bx-time me-2"></i>Thông tin thời gian
-                                            </h6>
-                                        </div>
-                                        <div class="card-body p-3">
-                                            <div class="timeline-item mb-2">
-                                                <small class="text-muted d-block">Ngày tạo</small>
-                                                <span class="fw-medium">{{ $service->created_at->format('d/m/Y H:i') }}</span>
-                                            </div>
-                                            <div class="timeline-item">
-                                                <small class="text-muted d-block">Cập nhật cuối</small>
-                                                <span class="fw-medium">{{ $service->updated_at->format('d/m/Y H:i') }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                        <!-- Price -->
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="info-label">
+                                    <i class="fas fa-money-bill-wave me-2 text-success"></i>
+                                    Giá dịch vụ
+                                </label>
+                                <div class="info-value text-success fw-bold fs-5">
+                                    {{ number_format($service->price) }} VNĐ
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Action Buttons -->
-                            <div class="row mt-4">
-                                <div class="col-12">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <a href="{{ route('admin.services.index') }}" 
-                                           class="btn btn-outline-secondary waves-effect">
-                                            <i class="bx bx-arrow-back me-1"></i>Quay lại danh sách
-                                        </a>
-                                        <div class="btn-group" role="group">
-                                            <a class="btn btn-outline-primary" href="{{ route('admin.services.edit', $service) }}">
-                                                <i class="bx bx-edit-alt me-1"></i>Chỉnh sửa
-                                            </a>
-                                            <button type="button" class="btn btn-outline-info">
-                                                <i class="bx bx-copy me-1"></i>Sao chép
-                                            </button>
-                                        </div>
-                                    </div>
+                        <!-- Duration -->
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="info-label">
+                                    <i class="fas fa-clock me-2 text-info"></i>
+                                    Thời gian thực hiện
+                                </label>
+                                <div class="info-value text-info fw-bold fs-5">
+                                    {{ $service->duration }} phút
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="info-label">
+                                    <i class="fas fa-toggle-on me-2 text-secondary"></i>
+                                    Trạng thái
+                                </label>
+                                <div class="info-value">
+                                    @if ($service->status == 'active')
+                                        <span class="badge bg-success fs-6 px-3 py-2">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Hoạt động
+                                        </span>
+                                    @else
+                                        <span class="badge bg-secondary fs-6 px-3 py-2">
+                                            <i class="fas fa-times-circle me-1"></i>
+                                            Không hoạt động
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description Card -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-gradient-info text-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-align-left me-2"></i>
+                        Mô tả dịch vụ
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="description-content">
+                        @if($service->description)
+                            <p class="mb-0 lh-lg">{{ $service->description }}</p>
+                        @else
+                            <div class="text-muted text-center py-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Không có mô tả
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Additional Info -->
+        <div class="col-lg-4">
+            <!-- Service Stats -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Thống kê
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <div class="stat-number text-primary">
+                                    <i class="fas fa-hashtag"></i>
+                                    {{ $service->id }}
+                                </div>
+                                <div class="stat-label">ID Dịch vụ</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <div class="stat-number text-success">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    {{ number_format($service->price / 1000) }}K
+                                </div>
+                                <div class="stat-label">Giá (K VNĐ)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-gradient-success text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>
+                        Thao tác nhanh
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ route('admin.services.edit', $service->id) }}" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>
+                            Chỉnh sửa
+                        </a>
+                        <a href="{{ route('admin.services.index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Quay lại danh sách
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Info -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-gradient-warning text-dark">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Thông tin thêm
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="info-list">
+                        <div class="info-row">
+                            <span class="info-icon">
+                                <i class="fas fa-calendar-alt text-primary"></i>
+                            </span>
+                            <div class="info-content">
+                                <div class="info-title">Thời gian</div>
+                                <div class="info-desc">{{ $service->duration }} phút thực hiện</div>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon">
+                                <i class="fas fa-star text-warning"></i>
+                            </span>
+                            <div class="info-content">
+                                <div class="info-title">Chất lượng</div>
+                                <div class="info-desc">Dịch vụ chuyên nghiệp</div>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon">
+                                <i class="fas fa-shield-alt text-success"></i>
+                            </span>
+                            <div class="info-content">
+                                <div class="info-title">Bảo hành</div>
+                                <div class="info-desc">Đảm bảo chất lượng</div>
                             </div>
                         </div>
                     </div>
@@ -234,79 +233,156 @@
         </div>
     </div>
 
-    <!-- Custom Styles -->
-    <style>
-        .border-left-primary {
-            border-left: 4px solid var(--bs-primary) !important;
-        }
-        .border-left-info {
-            border-left: 4px solid var(--bs-info) !important;
-        }
-        .border-left-warning {
-            border-left: 4px solid var(--bs-warning) !important;
-        }
-        .border-left-success {
-            border-left: 4px solid var(--bs-success) !important;
-        }
-        .border-left-danger {
-            border-left: 4px solid var(--bs-danger) !important;
-        }
-        
-        .service-description {
-            line-height: 1.6;
-            font-size: 0.95rem;
-        }
-        
-        .avatar {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-        
-        .info-item {
-            padding: 8px 0;
-        }
-        
-        .card {
-            border: 1px solid #e3e6f0;
-            border-radius: 0.35rem;
-        }
-        
-        .card-header {
-            background-color: #f8f9fc;
-            border-bottom: 1px solid #e3e6f0;
-        }
-        
-        .timeline-item:not(:last-child) {
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
-        }
-        
-        .btn-group .btn {
-            border-radius: 0.375rem;
-            margin-left: 0.25rem;
-        }
-        
-        .timeline-item {
-            border-left: none !important;
-        }
-        
-        @media (max-width: 768px) {
-            .d-flex.justify-content-between {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .btn-group {
-                width: 100%;
-            }
-            
-            .btn-group .btn {
-                flex: 1;
-            }
-        }
-    </style>
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ route('admin.services.index') }}" class="btn btn-outline-secondary btn-lg px-4">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Quay lại
+                </a>
+                <a href="{{ route('admin.services.edit', $service->id) }}" class="btn btn-primary btn-lg px-4">
+                    <i class="fas fa-edit me-2"></i>
+                    Chỉnh sửa
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #54a3ff 0%, #006fe6 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.info-item {
+    padding: 1rem;
+    border-radius: 10px;
+    background: #f8f9fc;
+    border: 1px solid #e3e6f0;
+    transition: all 0.3s ease;
+}
+
+.info-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.info-label {
+    font-weight: 600;
+    color: #5a5c69;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.description-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #495057;
+}
+
+.stat-item {
+    padding: 1rem 0;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-list {
+    space-y: 1rem;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f8f9fc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-title {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.info-desc {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.card {
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+
+.btn {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: #667eea;
+}
+
+.text-primary {
+    color: #667eea !important;
+}
+</style>
 @endsection

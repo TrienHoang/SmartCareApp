@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\admin\RoleController;
 use App\Http\Controllers\admin\AppointmentController;
 use App\Http\Controllers\Admin\CalendarController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DoctorController;
@@ -26,6 +27,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\admin\FaqController;
+use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Models\Admin_notification;
 use App\Models\Role;
@@ -373,12 +375,11 @@ Route::patch('admin/categories/toggle-status/{id}', [ServiceCategoryController::
 // quản lý dịch vụ
 Route::get('admin/services', [ServiceController::class, 'index'])->name('admin.services.index');
 Route::get('admin/services/create', [ServiceController::class, 'create'])->name('admin.services.create');
-Route::post('admin/services/store', [ServiceController::class, 'store'])->name('admin.services.store');
-Route::get('admin/services/edit/{id}', [ServiceController::class, 'edit'])->name('admin.services.edit');
-Route::put('admin/services/edit/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
-Route::delete('admin/services/destroy/{id}', [ServiceController::class, 'destroy'])->name('admin.services.destroy');
-Route::get('admin/services/show/{id}', [ServiceController::class, 'show'])->name('admin.services.show');
-
+Route::post('admin/services', [ServiceController::class, 'store'])->name('admin.services.store'); // Sửa ở đây
+Route::get('admin/services/{id}', [ServiceController::class, 'show'])->name('admin.services.show');
+Route::get('admin/services/{id}/edit', [ServiceController::class, 'edit'])->name('admin.services.edit');
+Route::put('admin/services/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
+Route::delete('admin/services/{id}', [ServiceController::class, 'destroy'])->name('admin.services.destroy');
 
 
 // Quản lý đơn hàng
@@ -612,6 +613,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // API lấy dữ liệu sự kiện (task, appointment)
     Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
 });
+
+Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+    Route::resource('posts', PostController::class);
+});
+
 // Trong routes/web.php hoặc routes/doctor.php
 
 require __DIR__ . '/doctor.php';
