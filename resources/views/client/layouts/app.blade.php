@@ -83,6 +83,36 @@
                 }
             }).mount();
 
+            // doctor slider
+            new Splide('#doctor-slider', {
+                type: 'loop',
+                perPage: 4,
+                autoplay: true,
+                interval: 3000,
+                pauseOnHover: true,
+                pauseOnFocus: true,
+                gap: '1rem',
+                breakpoints: {
+                    1024: {
+                        perPage: 2
+                    },
+                    640: {
+                        perPage: 1
+                    },
+                }
+            }).mount();
+
+            // banner slider
+            new Splide('#hero-slider', {
+                type: 'fade',
+                rewind: true,
+                autoplay: true,
+                interval: 5000,
+                pauseOnHover: false,
+                arrows: false,
+                pagination: true,
+            }).mount();
+
             if (window.lucide) {
                 lucide.createIcons();
             }

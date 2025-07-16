@@ -16,6 +16,7 @@ class Doctor extends Model
         'room_id',
         'specialization',
         'biography',
+        'status', // Thêm trường status
     ];
 
     // --------------------
@@ -60,7 +61,7 @@ class Doctor extends Model
     {
         return $this->hasMany(TreatmentPlan::class);
     }
-    
+
 
     public function services()
     {

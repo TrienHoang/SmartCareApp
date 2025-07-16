@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Helpers\AppointmentHelper;
+use App\Helpers\TreatmentPlanHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
@@ -203,18 +204,15 @@ class AppointmentController extends Controller
         }
 
         if (!$working) {
-            $workingDays = WorkingSchedule::where('doctor_id', $request->doctor_id)
-                ->pluck('day_of_week')
-                ->map(function ($day) {
-                    return __('days.' . strtolower($day));
-                })
-                ->toArray();
-
-            $daysText = implode(', ', $workingDays);
-
-            return back()->withErrors([
-                'doctor_id' => 'Bác sĩ không làm việc vào ngày bạn chọn. Các ngày làm việc là: ' . $daysText . '.'
-            ])->withInput();
+            if (!in_array($dayOfWeek, ['Sunday'])) {
+                $working = new \stdClass();
+                $working->start_time = '08:00';
+                $working->end_time = '17:00';
+            } else {
+                return back()->withErrors([
+                    'doctor_id' => 'Bác sĩ không làm việc vào Chủ nhật. Vui lòng chọn Thứ 2 - Thứ 7.'
+                ])->withInput();
+            }
         }
 
         // Kiểm tra giờ làm việc
@@ -321,12 +319,12 @@ class AppointmentController extends Controller
             'patients' => User::where('role_id', 3)->get(),
             'doctors' => Doctor::with('user')->get(),
             'services' => Service::all(),
-            // 'treatmentPlans' => TreatmentPlan::where('patient_id', $appointment->patient_id)
-            //     ->where(function ($q) use ($appointment) {
-            //         $q->whereIn('status', ['chua_tien_hanh', 'dang_tien_hanh'])
-            //             ->orWhere('id', $appointment->treatment_plan_id);
-            //     })
-            //     ->get(),
+            'treatmentPlans' => TreatmentPlan::where('patient_id', $appointment->patient_id)
+                ->where(function ($q) use ($appointment) {
+                    $q->whereIn('status', ['chua_tien_hanh', 'dang_tien_hanh'])
+                        ->orWhere('id', $appointment->treatment_plan_id);
+                })
+                ->get(),
         ]);
     }
 
@@ -421,14 +419,15 @@ class AppointmentController extends Controller
         }
 
         if (!$working) {
-            $workingDays = WorkingSchedule::where('doctor_id', $request->doctor_id)
-                ->pluck('day_of_week')
-                ->map(fn($day) => __('days.' . strtolower($day)))
-                ->toArray();
-
-            return back()->withErrors([
-                'appointment_time' => 'Bác sĩ không làm việc ngày này. Các ngày làm việc: ' . implode(', ', $workingDays) . '.'
-            ])->withInput();
+            if (!in_array($dayOfWeek, ['Sunday'])) {
+                $working = new \stdClass();
+                $working->start_time = '08:00';
+                $working->end_time = '17:00';
+            } else {
+                return back()->withErrors([
+                    'appointment_time' => 'Bác sĩ không làm việc vào Chủ nhật. Vui lòng chọn Thứ 2 - Thứ 7.'
+                ])->withInput();
+            }
         }
 
         // Kiểm tra giờ hợp lệ
@@ -560,6 +559,8 @@ class AppointmentController extends Controller
                     'note'           => implode("\n", $changes),
                 ]);
             }
+            // Cập nhật trạng thái của kế hoạch điều trị 
+            TreatmentPlanHelper::updatePlanStatus($appointment->treatment_plan_id);
 
             DB::commit();
             return redirect()->route('admin.appointments.index')
@@ -661,6 +662,7 @@ class AppointmentController extends Controller
         $query = $request->get('q', '');
 
         $patients = User::where('role_id', 3)
+            ->where('status', 'online')
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($sub) use ($query) {
                     $sub->where('full_name', 'like', "%$query%")
@@ -682,6 +684,11 @@ class AppointmentController extends Controller
         if ($appointment->status === 'cancelled') {
             return back()->with('error', 'Không thể thanh toán cho lịch hẹn đã bị hủy.');
         }
+
+        if ($appointment->status === 'completed') {
+            return back()->with('error', 'Lịch hẹn đã hoàn thành, không thể thanh toán.');
+        }
+
         $payment = $appointment->payment;
         if (!$payment) {
             $payment = Payment::create([
@@ -750,6 +757,11 @@ class AppointmentController extends Controller
             ->values()
             ->toArray();
 
+        // ⚡ Nếu không có dữ liệu, mặc định Thứ 2–Thứ 7
+        if (empty($daysOfWeek)) {
+            $daysOfWeek = [1, 2, 3, 4, 5, 6];
+        }
+
         // Ngày làm việc cụ thể (YYYY-MM-DD)
         $specificDates = $doctor->workingSchedules()
             ->whereNotNull('day')
@@ -760,7 +772,7 @@ class AppointmentController extends Controller
             ->values()
             ->toArray();
 
-        // Ngày nghỉ (đã duyệt)
+        // Ngày nghỉ phép (đã duyệt)
         $vacationDates = $doctor->leaves()
             ->where('end_date', '>=', now())
             ->get()
