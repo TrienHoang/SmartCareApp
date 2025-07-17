@@ -19,8 +19,11 @@ class HomeController extends Controller
 
         $departments = Department::all();
 
-        $doctors = Doctor::with(['user', 'department'])->get();
-
+        $doctors = Doctor::whereHas('user', function ($query) {
+            $query->where('role_id', 2);
+        })
+            ->with(['user', 'department'])
+            ->get();
         return view('client.home', compact('testimonials', 'departments', 'doctors'));
     }
 }

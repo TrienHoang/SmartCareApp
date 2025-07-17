@@ -9,37 +9,50 @@
         <section class="gradient-bg text-white py-12">
             <div class="container mx-auto px-4">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                    {{-- thông tin bác sĩ chỉnh lần 1 --}}
                     <div class="lg:col-span-2 fade-in">
                         <div
                             class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
-                            <img src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=200&h=200&fit=crop&crop=face"
-                                alt="BS. Nguyễn Văn An"
-                                class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
+                            @if ($doctor->user && $doctor->user->avatar)
+                                <img src="{{ asset('storage/' . $doctor->user->avatar) }}" alt="{{ $doctor->user->full_name }}"
+                                    class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
+                            @else
+                                <img src="{{ asset('images/default-doctor.png') }}" alt="{{ $doctor->user->full_name }}"
+                                    class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
+                            @endif
+
                             <div class="flex-1">
-                                <h1 class="text-4xl font-bold mb-2">BS. Nguyễn Văn An</h1>
-                                <p class="text-xl text-blue-100 mb-4">Chuyên Khoa Tim Mạch</p>
+                                <h1 class="text-4xl font-bold mb-2">BS. {{ $doctor->user->full_name }}</h1>
+                                <p class="text-xl text-blue-100 mb-4">{{ $doctor->department->name ?? 'Chuyên khoa' }}</p>
+
                                 <div class="flex items-center space-x-4 mb-4">
                                     <div class="flex items-center">
                                         <div class="flex text-yellow-400 mr-2">
-                                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                            @for ($i = 0; $i < round($doctor->average_rating ?? 5); $i++)
+                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                            @endfor
                                         </div>
-                                        <span class="text-blue-100">4.9/5 (127 đánh giá)</span>
+                                        <span class="text-blue-100">{{ $doctor->average_rating ?? '5.0' }}/5
+                                            ({{ $doctor->review_count ?? 0 }} đánh giá)</span>
                                     </div>
                                     <span class="text-blue-200">•</span>
-                                    <span class="text-blue-100">15+ năm kinh nghiệm</span>
+                                    <span class="text-blue-100">{{ $doctor->experience_years ?? 'Nhiều' }} năm kinh
+                                        nghiệm</span>
                                 </div>
+
                                 <div class="flex flex-wrap gap-2">
-                                    <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Tim mạch</span>
-                                    <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Siêu âm tim</span>
-                                    <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Điện tâm đồ</span>
+                                    @if (!empty($doctor->specialties))
+                                        @foreach ($doctor->specialties as $specialty)
+                                            <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $specialty }}</span>
+                                        @endforeach
+                                    @else
+                                        <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Đa khoa</span>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     </div>
+
                     <div class="fade-in">
                         <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                             <h3 class="text-xl font-bold mb-4">Đặt Lịch Nhanh</h3>
@@ -101,14 +114,10 @@
                     <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 card-hover">
                         <h2 class="text-2xl font-bold mb-6 gradient-text">Về Bác Sĩ</h2>
                         <p class="text-gray-700 leading-relaxed mb-6">
-                            Bác sĩ Nguyễn Văn An là một chuyên gia tim mạch hàng đầu với hơn 15 năm kinh nghiệm trong
-                            lĩnh vực chẩn đoán và điều trị các bệnh lý tim mạch. Ông đã thực hiện hơn 5,000 ca khám và
-                            điều trị thành công, được bệnh nhân tin tưởng và đồng nghiệp kính trọng.
+                            {{ $doctor->about ?? 'Thông tin về bác sĩ đang được cập nhật.' }}
                         </p>
                         <p class="text-gray-700 leading-relaxed">
-                            Với phương châm "Lấy bệnh nhân làm trung tâm", bác sĩ An luôn tận tâm lắng nghe và đưa ra
-                            phương pháp điều trị phù hợp nhất cho từng bệnh nhân. Ông thường xuyên cập nhật những kiến
-                            thức y khoa mới nhất để mang lại dịch vụ chăm sóc sức khỏe tốt nhất.
+                            {{ $doctor->user->bio ?? 'Bác sĩ tận tâm với nhiều năm kinh nghiệm trong nghề.' }}
                         </p>
                     </div>
 
@@ -772,4 +781,4 @@
                 window.addEventListener('load', animateOnScroll);
             </script>
         @endpush
-    @endsection
+@endsection

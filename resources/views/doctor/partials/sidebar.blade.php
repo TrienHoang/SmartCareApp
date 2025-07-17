@@ -15,26 +15,24 @@
 
     <ul class="menu-inner py-1">
 
-
-
-        {{-- Nếu là User --}}
-
         {{-- Nếu là Admin --}}
         @if ($user->role->name === 'admin')
-            @include('admin.partials.sidebar') {{-- Bạn có thể tách phần menu admin ra file riêng --}}
+            @include('admin.partials.sidebar')
         @endif
 
         {{-- Nếu là Doctor --}}
         @if ($user->role->name === 'doctor')
             @php
-                $doctorId = $user->doctor->id; // Giả sử bạn đã có ID của bác sĩ từ user
+                $doctorId = $user->doctor->id;
             @endphp
+
             <li class="menu-item">
                 <a href="{{ route('doctor.dashboard') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-bar-chart-alt"></i>
                     <div>Thống kê</div>
                 </a>
             </li>
+
             <li class="menu-header small text-uppercase"><span class="menu-header-text">Bác sĩ</span></li>
 
             <li class="menu-item">
@@ -45,12 +43,6 @@
             </li>
 
             <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-file"></i>
-                    <div>Hồ sơ bệnh án</div>
-                </a>
-            </li>
-            <li class="menu-item">
                 <a href="{{ route('doctor.files.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-file"></i>
                     <div>Quản lý file tải lên</div>
@@ -59,8 +51,15 @@
 
             <li class="menu-item">
                 <a href="{{ route('doctor.treatment-plans.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-capsule"></i>
+                    <i class="menu-icon tf-icons bx bx-notepad"></i>
                     <div>Kế hoạch điều trị</div>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{{ route('doctor.leaves.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-calendar-minus"></i>
+                    <div>Lịch nghỉ của bác sĩ</div>
                 </a>
             </li>
 
@@ -70,36 +69,32 @@
                     <div>Đơn thuốc</div>
                 </a>
             </li>
-            <li class="menu-item">
-                <a href="{{ route('doctor.reviews.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-star"></i>
-                    <div>Đánh giá từ bệnh nhân</div>
-                </a>
 
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-user"></i>
-                    <div>Tài khoản</div>
-                </a>
-            </li>
             <li class="menu-item">
                 <a href="{{ route('doctor.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-user"></i>
-                    <div>Bác Sĩ</div>
+                    <span>Danh sách bác sĩ</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{{ route('doctor.history.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-history"></i>
+                    <span>Lịch sử khám</span>
                 </a>
             </li>
 
             <li class="menu-item">
                 <a href="{{ route('doctor.reviews.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-star"></i>
-                    <div>Đánh giá của bệnh nhân</div>
+                    <span>Đánh giá từ bệnh nhân</span>
                 </a>
             </li>
 
             <li class="menu-item">
-                <a href="{{ route('doctor.history') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-history"></i>
-                    <span>Xem lịch sử khám</span>
+                <a href="{{ route('doctor.calendar.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-calendar"></i>
+                    <span>Lịch bác sĩ</span>
                 </a>
             </li>
             <li class="menu-item">

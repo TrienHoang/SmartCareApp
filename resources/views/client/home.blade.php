@@ -110,6 +110,7 @@
             </div>
         </section>
 
+        {{-- hiển thị bác sĩ lên home ____ nhinhi => --}}
         {{-- Doctor Section --}}
         <section class="py-20 bg-white">
             <div class="container mx-auto px-4">
@@ -125,15 +126,16 @@
                                 <li class="splide__slide">
                                     <div
                                         class="bg-gray-50 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow hover-scale text-center">
-                                        <img src="{{ $doctor->user->avatar ?? asset('images/default-doctor.png') }}"
+                                        <img src="{{ $doctor->user->avatar ? asset('storage/' . $doctor->user->avatar) : asset('images/default-doctor.png') }}"
                                             alt="{{ $doctor->user->full_name }}"
                                             class="w-24 h-24 mx-auto rounded-full mb-4 object-cover">
+
                                         <h3 class="text-xl font-semibold mb-2">{{ $doctor->user->full_name }}</h3>
                                         <div class="text-blue-600 mb-2">{{ $doctor->department->name ?? 'Chuyên khoa' }}
                                         </div>
                                         <p class="text-gray-600 mb-4">
                                             {{ $doctor->biography ?? 'Bác sĩ tận tâm, giàu kinh nghiệm.' }}</p>
-                                        <a href="{{ url('/thong-tin-bac-si/') }}"
+                                        <a href="{{ route('doctor.show', $doctor->id) }}"
                                             class="inline-block bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition-colors">
                                             Xem Hồ Sơ
                                         </a>
@@ -149,6 +151,8 @@
                 </div>
             </div>
         </section>
+
+        
 
         {{-- Stats Section --}}
         <section class="py-20 gradient-bg text-white">

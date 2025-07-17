@@ -79,4 +79,12 @@ class Doctor extends Model
             ->where('approved', true)
             ->whereNull('deleted_at');
     }
+
+    public function isOnLeaveToday()
+    {
+        return $this->leaves()
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->exists();
+    }
 }

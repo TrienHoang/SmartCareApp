@@ -1,15 +1,95 @@
 @extends('doctor.dashboard')
 
-
+@section('title', 'Đánh giá từ bệnh nhân')
 
 @section('content')
-<div class="container mt-4">
-    <div class="mb-4">
-        <h2 class="text-primary font-weight-bold">Đánh giá từ bệnh nhân</h2>
-        <p class="text-muted">Xem và quản lý đánh giá liên quan đến bạn.</p>
+    <div class="container mt-4">
+        <div class="mb-4">
+            <h1 class="text-primary font-weight-bold">Đánh giá từ bệnh nhân</h1>
+            <p class="text-muted">Xem và quản lý các đánh giá liên quan đến bạn.</p>
+        </div>
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <!-- Hiển thị -->
+            <div class="col-lg-3 col-md-6 col-12">
+                <div class="card gradient-card bg-gradient-success">
+                    <div class="card-body text-white">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar bg-rgba-white mr-2">
+                                <div class="avatar-content">
+                                    <i class="bx bx-like font-medium-5"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-white mb-0">{{ $statusCounts['visible'] ?? 0 }}</h4>
+                                <small class="text-white">Hiển thị</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Đã ẩn -->
+            <div class="col-lg-3 col-md-6 col-12">
+                <div class="card gradient-card bg-gradient-danger">
+                    <div class="card-body text-white">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar bg-rgba-white mr-2">
+                                <div class="avatar-content">
+                                    <i class="bx bx-hide font-medium-5"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-white mb-0">{{ $statusCounts['hidden'] ?? 0 }}</h4>
+                                <small class="text-white">Đã ẩn</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tổng -->
+            <div class="col-lg-3 col-md-6 col-12">
+                <div class="card gradient-card bg-gradient-warning">
+                    <div class="card-body text-white">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar bg-rgba-white mr-2">
+                                <div class="avatar-content">
+                                    <i class="bx bx-star font-medium-5"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-white mb-0">{{ $statusCounts['total'] ?? 0 }}</h4>
+                                <small class="text-white">Tổng đánh giá</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tổng số dịch vụ có đánh giá -->
+            <div class="col-lg-3 col-md-6 col-12">
+                <div class="card gradient-card bg-gradient-info">
+                    <div class="card-body text-white">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar bg-rgba-white mr-2">
+                                <div class="avatar-content">
+                                    <i class="bx bx-bar-chart-alt font-medium-5"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-white mb-0">{{ $serviceStats->count() }}</h4>
+                                <small class="text-white">Dịch vụ có đánh giá</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <!-- Alert -->
+    {{-- Thông báo --}}
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
             <strong>Thành công!</strong> {{ session('success') }}
@@ -21,7 +101,7 @@
         </div>
     @endif
 
-    <!-- Filter -->
+    {{-- Bộ lọc --}}
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body bg-light">
             <form action="{{ route('doctor.reviews.index') }}" method="GET">
@@ -41,7 +121,8 @@
                         <select name="rating" class="form-control custom-select">
                             <option value="">Tất cả</option>
                             @for ($i = 1; $i <= 5; $i++)
-                                <option value="{{ $i }}" {{ request('rating') == $i ? 'selected' : '' }}>{{ $i }} sao</option>
+                                <option value="{{ $i }}" {{ request('rating') == $i ? 'selected' : '' }}>
+                                    {{ $i }} sao</option>
                             @endfor
                         </select>
                     </div>
@@ -52,7 +133,8 @@
                         </label>
                         <select name="is_visible" class="form-control custom-select">
                             <option value="">Tất cả</option>
-                            <option value="1" {{ request('is_visible') === '1' ? 'selected' : '' }}>Hiển thị</option>
+                            <option value="1" {{ request('is_visible') === '1' ? 'selected' : '' }}>Hiển thị
+                            </option>
                             <option value="0" {{ request('is_visible') === '0' ? 'selected' : '' }}>Đã ẩn</option>
                         </select>
                     </div>
@@ -70,7 +152,7 @@
         </div>
     </div>
 
-    <!-- Table -->
+    {{-- Danh sách đánh giá --}}
     @if ($reviews->isEmpty())
         <div class="alert alert-info shadow-sm">Chưa có đánh giá nào.</div>
     @else
@@ -112,7 +194,9 @@
                                 <form method="POST" action="{{ route('doctor.reviews.toggle', $review->id) }}">
                                     @csrf
                                     @method('PATCH')
-                                    <button class="btn btn-sm btn-outline-{{ $review->is_visible ? 'secondary' : 'success' }}" title="Toggle trạng thái" data-toggle="tooltip">
+                                    <button
+                                        class="btn btn-sm btn-outline-{{ $review->is_visible ? 'secondary' : 'success' }}"
+                                        title="Toggle trạng thái" data-toggle="tooltip">
                                         <i class="bx {{ $review->is_visible ? 'bx-hide' : 'bx-show' }}"></i>
                                     </button>
                                 </form>
@@ -123,38 +207,52 @@
             </table>
         </div>
 
-        <!-- Pagination -->
+        {{-- Phân trang --}}
         <div class="mt-3 d-flex justify-content-between align-items-center">
-            <div>
-                <small class="text-muted">
-                    Hiển thị {{ $reviews->firstItem() }} - {{ $reviews->lastItem() }} trên {{ $reviews->total() }} đánh giá
-                </small>
-            </div>
+            <small class="text-muted">
+                Hiển thị {{ $reviews->firstItem() }} - {{ $reviews->lastItem() }} trên {{ $reviews->total() }} đánh
+                giá
+            </small>
             <div>
                 {{ $reviews->links('pagination::bootstrap-5') }}
             </div>
         </div>
     @endif
-</div>
+    </div>
 @endsection
 
 @push('styles')
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <style>
-        .badge-success { background-color: #39DA8A; color: #fff; }
-        .badge-warning { background-color: #FDAC41; color: #212529; }
-        .badge-secondary { background-color: #6c757d; color: #fff; }
+        .badge-success {
+            background-color: #39DA8A;
+            color: #fff;
+        }
+
+        .badge-warning {
+            background-color: #FDAC41;
+            color: #212529;
+        }
+
+        .badge-secondary {
+            background-color: #6c757d;
+            color: #fff;
+        }
+
         .badge {
             font-size: 0.85rem;
             padding: 0.4em 0.7em;
             border-radius: 10rem;
         }
+
         .form-label {
             font-weight: 600;
         }
+
         .border-left-primary {
             border-left: 3px solid #7367f0 !important;
         }
+
         .gap-2 {
             gap: 0.5rem;
         }
@@ -163,7 +261,7 @@
 
 @push('scripts')
     <script>
-        $(function () {
+        $(function() {
             $('[data-toggle="tooltip"]').tooltip();
             setTimeout(() => $('.alert').fadeOut('slow'), 4000);
         });
