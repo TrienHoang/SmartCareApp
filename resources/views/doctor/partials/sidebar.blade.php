@@ -44,12 +44,7 @@
                 </a>
             </li>
 
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-file"></i>
-                    <div>Hồ sơ bệnh án</div>
-                </a>
-            </li>
+
             <li class="menu-item">
                 <a href="{{ route('doctor.files.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-file"></i>
@@ -77,11 +72,6 @@
                     <div>Đơn thuốc</div>
                 </a>
             </li>
-            <li class="menu-item">
-                <a href="{{ route('doctor.reviews.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-star"></i>
-                    <div>Đánh giá từ bệnh nhân</div>
-                </a>
 
             <li class="menu-item">
                 <a href="#" class="menu-link">
@@ -89,12 +79,7 @@
                     <div>Tài khoản</div>
                 </a>
             </li>
-            <li class="menu-item">
-                <a href="{{ route('doctor.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-user"></i>
-                    <div>Bác Sĩ</div>
-                </a>
-            </li>
+
 
             <li class="menu-item">
                 <a href="{{ route('doctor.reviews.index') }}" class="menu-link">

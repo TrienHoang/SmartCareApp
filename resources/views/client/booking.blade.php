@@ -223,18 +223,18 @@
         }
 
         /*
-            .guide-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 999;
-                opacity: 0;
-                visibility: hidden;
-                transition: all 0.3s ease;
-            } */
+                                                                                .guide-overlay {
+                                                                                    position: fixed;
+                                                                                    top: 0;
+                                                                                    left: 0;
+                                                                                    width: 100%;
+                                                                                    height: 100%;
+                                                                                    background: rgba(0, 0, 0, 0.5);
+                                                                                    z-index: 999;
+                                                                                    opacity: 0;
+                                                                                    visibility: hidden;
+                                                                                    transition: all 0.3s ease;
+                                                                                } */
 
         .guide-overlay.show {
             opacity: 1;
@@ -615,48 +615,100 @@
             </button>
         </div>
 
-        <div class="guide-section">
-            <h3 class="text-lg font-semibold mb-3 flex items-center">
-                <div class="guide-icon mr-3">
-                    <i class="fas fa-info-circle"></i>
-                </div>
+        <div class="guide-section p-5 bg-blue-50 rounded-lg shadow-sm">
+            <h3 class="text-base font-semibold mb-3 flex items-center text-blue-900">
+                <i class="fas fa-info-circle text-blue-500 mr-2"></i>
                 <span>Hướng dẫn sử dụng</span>
             </h3>
-            <p class="text-gray-600 mb-4">Để đặt lịch khám bệnh, bạn cần thực hiện các bước sau:</p>
-            <ol class="list-decimal list-inside text-gray-600 mb-4">
-                <li>Điền đầy đủ thông tin cá nhân trong bước 1.</li>
-                <li>Chọn chuyên khoa, bác sĩ, ngày và giờ khám trong bước 2.</li>
-                <li>Xác nhận thông tin trong bước 3.</li>
+            <p class="text-gray-700 text-sm mb-4">
+                Để đặt lịch khám bệnh nhanh chóng và chính xác, vui lòng thực hiện theo các bước sau:
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-gray-800 text-sm">
+                <li>
+                    <strong>Nhập thông tin cá nhân:</strong> Bao gồm họ tên, số điện thoại, email, ngày sinh, giới tính và
+                    địa chỉ.
+                    Các trường có dấu <span class="text-red-500">*</span> là bắt buộc.
+                </li>
+                <li>
+                    <strong>Chọn dịch vụ và thời gian:</strong> Lựa chọn chuyên khoa, bác sĩ, ngày và giờ khám phù hợp.
+                    Nhập mô tả triệu chứng hoặc lý do khám để bác sĩ tư vấn hiệu quả hơn.
+                </li>
+                <li>
+                    <strong>Xác nhận đặt lịch:</strong> Kiểm tra lại toàn bộ thông tin đã nhập và nhấn
+                    <span class="font-semibold">"Xác nhận đặt lịch"</span> để hoàn tất quá trình.
+                </li>
             </ol>
         </div>
 
-        <div class="guide-section">
-            <h3 class="text-lg font-semibold mb-3 flex items-center">
-                <div class="guide-icon mr-3">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <span>Lưu ý khi đặt lịch</span>
-            </h3>
-            <ul class="requirement-list mb-4">
-                <li>Thông tin có dấu <span class="text-red-500">*</span> là bắt buộc.</li>
-                <li>Chỉ chọn ngày khám từ hôm nay trở đi.</li>
-                <li>Đảm bảo số điện thoại chính xác để nhận xác nhận.</li>
-            </ul>
-        </div>
 
-        <div class="guide-section">
-            <h3 class="text-lg font-semibold mb-3 flex items-center">
-                <div class="guide-icon mr-3">
-                    <i class="fas fa-lightbulb"></i>
-                </div>
-                <span>Mẹo sử dụng</span>
+        <div class="guide-section p-4 bg-blue-50 rounded-lg">
+            <h3 class="text-base font-semibold mb-4 flex items-center text-blue-900">
+                <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+                Lưu ý khi đặt lịch
             </h3>
-            <div class="tip-box">
-                <p class="text-gray-700 text-sm">
-                    Nếu không thấy bác sĩ mong muốn, hãy thử chọn chuyên khoa khác hoặc đổi ngày khám.
-                </p>
+
+            <div class="space-y-3 text-sm text-gray-700">
+                <div class="flex items-start gap-2 bg-white p-3 rounded-md shadow-sm">
+                    <i class="fas fa-check text-green-500 mt-1"></i>
+                    <span>
+                        Nhập đầy đủ thông tin cá nhân bao gồm họ tên, số điện thoại, email, ngày sinh, giới tính và địa chỉ.
+                        Các trường có dấu <span class="text-red-500">*</span> là bắt buộc.
+                    </span>
+                </div>
+
+                <div class="flex items-start gap-2 bg-white p-3 rounded-md shadow-sm">
+                    <i class="fas fa-check text-green-500 mt-1"></i>
+                    <span>
+                        Chọn chuyên khoa, bác sĩ, ngày khám và giờ khám phù hợp.
+                        Vui lòng mô tả triệu chứng hoặc lý do khám để bác sĩ chuẩn bị và tư vấn chính xác hơn.
+                    </span>
+                </div>
+
+                <div class="flex items-start gap-2 bg-white p-3 rounded-md shadow-sm">
+                    <i class="fas fa-check text-green-500 mt-1"></i>
+                    <span>
+                        Kiểm tra lại toàn bộ thông tin đã nhập và nhấn
+                        <strong>"Xác nhận đặt lịch"</strong> để hoàn tất quy trình.
+                    </span>
+                </div>
             </div>
         </div>
+
+
+
+        <div class="guide-section p-5 bg-yellow-50 rounded-lg shadow-sm">
+            <h3 class="text-base font-semibold mb-4 flex items-center text-yellow-800">
+                <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                <span>Mẹo sử dụng</span>
+            </h3>
+
+            <div class="text-sm text-gray-800 space-y-3">
+                <div class="flex items-start gap-2">
+                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                    <p>
+                        <strong>Bước 1:</strong> Nhập đầy đủ thông tin cá nhân bao gồm họ tên, số điện thoại, email, ngày
+                        sinh, giới tính và địa chỉ.
+                    </p>
+                </div>
+
+                <div class="flex items-start gap-2">
+                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                    <p>
+                        <strong>Bước 2:</strong> Chọn chuyên khoa, bác sĩ, ngày và giờ khám phù hợp. Nhập triệu chứng hoặc
+                        lý do khám để bác sĩ chuẩn bị tốt hơn.
+                    </p>
+                </div>
+
+                <div class="flex items-start gap-2">
+                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                    <p>
+                        <strong>Bước 3:</strong> Kiểm tra kỹ thông tin đã nhập và nhấn <strong>"Xác nhận đặt lịch"</strong>
+                        để hoàn tất quy trình.
+                    </p>
+                </div>
+            </div>
+        </div>
+
     </div>
     <div id="successModal" class="modal-overlay">
         <div class="modal-content">
