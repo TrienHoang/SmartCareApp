@@ -15,9 +15,24 @@ class DoctorController extends Controller
             'educations',
             'experiences',
             'achievements',
-            'specialties'
+            'specialties',
+            'reviews.patient'
         ])->findOrFail($id);
 
-        return view('client.doctors_detail', compact('doctor'));
+        $visibleReviews = $doctor->reviews->where('is_visible', true);
+
+        $averageRating = round($visibleReviews->avg('rating'), 1);
+        $reviewCount = $visibleReviews->count();
+
+        $ratingBreakdown = collect([5, 4, 3, 2, 1])->mapWithKeys(function ($star) use ($visibleReviews) {
+            return [$star => $visibleReviews->where('rating', $star)->count()];
+        });
+
+        return view('client.doctors_detail', compact(
+            'doctor',
+            'averageRating',
+            'reviewCount',
+            'ratingBreakdown'
+        ));
     }
 }

@@ -330,53 +330,30 @@
                         <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl mb-6">
                             <div class="flex flex-col md:flex-row items-center justify-between">
                                 <div class="text-center">
-                                    <div class="text-4xl font-bold text-blue-600 mb-2">4.9</div>
+                                    <div class="text-4xl font-bold text-blue-600 mb-2">{{ $averageRating ?? '5.0' }}</div>
                                     <div class="flex text-yellow-400 mb-2">
-                                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                                        @for ($i = 0; $i < round($averageRating); $i++)
+                                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                                        @endfor
                                     </div>
-                                    <div class="text-sm text-gray-600">127 đánh giá</div>
+                                    <div class="text-sm text-gray-600">{{ $reviewCount }} đánh giá</div>
                                 </div>
                                 <div class="flex-1 md:ml-8 w-full">
                                     <div class="space-y-2">
-                                        <div class="flex items-center">
-                                            <span class="text-sm w-8">5★</span>
-                                            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-2">
-                                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 78%"></div>
+                                        @foreach ([5, 4, 3, 2, 1] as $star)
+                                            @php
+                                                $count = $ratingBreakdown[$star];
+                                                $percent = $reviewCount ? ($count / $reviewCount) * 100 : 0;
+                                            @endphp
+                                            <div class="flex items-center">
+                                                <span class="text-sm w-8">{{ $star }}★</span>
+                                                <div class="flex-1 bg-gray-200 rounded-full h-2 mx-2">
+                                                    <div class="bg-yellow-400 h-2 rounded-full" style="width: {{ $percent }}%">
+                                                    </div>
+                                                </div>
+                                                <span class="text-sm w-8">{{ $count }}</span>
                                             </div>
-                                            <span class="text-sm w-8">98</span>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <span class="text-sm w-8">4★</span>
-                                            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-2">
-                                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 18%"></div>
-                                            </div>
-                                            <span class="text-sm w-8">23</span>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <span class="text-sm w-8">3★</span>
-                                            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-2">
-                                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 3%"></div>
-                                            </div>
-                                            <span class="text-sm w-8">4</span>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <span class="text-sm w-8">2★</span>
-                                            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-2">
-                                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 1%"></div>
-                                            </div>
-                                            <span class="text-sm w-8">1</span>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <span class="text-sm w-8">1★</span>
-                                            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-2">
-                                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 0%"></div>
-                                            </div>
-                                            <span class="text-sm w-8">1</span>
-                                        </div>
+                                        @endforeach
                                     </div>
                                 </div>
                             </div>
@@ -384,116 +361,56 @@
 
                         <!-- Individual Reviews -->
                         <div class="space-y-6">
-                            <div class="border-b border-gray-200 pb-6">
-                                <div class="flex items-start space-x-4">
-                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <span class="text-blue-600 font-semibold">L***</span>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="flex items-center space-x-2 mb-2">
-                                            <div class="flex text-yellow-400">
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                            </div>
-                                            <span class="text-sm text-gray-500">3 ngày trước</span>
+                            @forelse ($doctor->reviews->where('is_visible', true)->sortByDesc('created_at') as $review)
+                                <div class="border-b border-gray-200 pb-6">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <span class="text-blue-600 font-semibold">
+                                                {{ $review->patient ? strtoupper(Str::substr($review->patient->full_name, 0, 1)) . '***' : 'Ẩn danh' }}
+                                            </span>
                                         </div>
-                                        <p class="text-gray-700 mb-2">
-                                            Bác sĩ An rất tận tâm và chuyên nghiệp. Khám rất kỹ và giải thích rõ ràng về
-                                            tình trạng bệnh. Tôi cảm thấy rất an tâm khi khám với bác sĩ.
-                                        </p>
-                                        <div class="flex items-center space-x-4 text-sm text-gray-500">
-                                            <button class="flex items-center space-x-1 hover:text-blue-600">
-                                                <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                                                <span>Hữu ích (12)</span>
-                                            </button>
-                                            <button class="flex items-center space-x-1 hover:text-blue-600">
-                                                <i data-lucide="message-circle" class="w-4 h-4"></i>
-                                                <span>Trả lời</span>
-                                            </button>
+                                        <div class="flex-1">
+                                            <div class="flex items-center space-x-2 mb-2">
+                                                <div class="flex text-yellow-400">
+                                                    @for ($i = 1; $i <= 5; $i++)
+                                                        <i data-lucide="star"
+                                                            class="w-4 h-4 {{ $i <= $review->rating ? 'fill-current' : '' }}"></i>
+                                                    @endfor
+                                                </div>
+                                                <span
+                                                    class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
+                                            </div>
+                                            <p class="text-gray-700 mb-2">
+                                                {{ $review->comment }}
+                                            </p>
+                                            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                                <button class="flex items-center space-x-1 hover:text-blue-600">
+                                                    <i data-lucide="thumbs-up" class="w-4 h-4"></i>
+                                                    <span>Hữu ích</span>
+                                                </button>
+                                                <button class="flex items-center space-x-1 hover:text-blue-600">
+                                                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                                    <span>Trả lời</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="border-b border-gray-200 pb-6">
-                                <div class="flex items-start space-x-4">
-                                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                        <span class="text-green-600 font-semibold">N***</span>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="flex items-center space-x-2 mb-2">
-                                            <div class="flex text-yellow-400">
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                            </div>
-                                            <span class="text-sm text-gray-500">1 tuần trước</span>
-                                        </div>
-                                        <p class="text-gray-700 mb-2">
-                                            Đặt lịch qua SmartCare rất tiện lợi. Bác sĩ An khám rất tỉ mỉ, đúng giờ hẹn.
-                                            Tôi sẽ quay lại lần sau và giới thiệu cho bạn bè.
-                                        </p>
-                                        <div class="flex items-center space-x-4 text-sm text-gray-500">
-                                            <button class="flex items-center space-x-1 hover:text-blue-600">
-                                                <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                                                <span>Hữu ích (8)</span>
-                                            </button>
-                                            <button class="flex items-center space-x-1 hover:text-blue-600">
-                                                <i data-lucide="message-circle" class="w-4 h-4"></i>
-                                                <span>Trả lời</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="border-b border-gray-200 pb-6">
-                                <div class="flex items-start space-x-4">
-                                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                        <span class="text-purple-600 font-semibold">T***</span>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="flex items-center space-x-2 mb-2">
-                                            <div class="flex text-yellow-400">
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4"></i>
-                                            </div>
-                                            <span class="text-sm text-gray-500">2 tuần trước</span>
-                                        </div>
-                                        <p class="text-gray-700 mb-2">
-                                            Bác sĩ giải thích rất dễ hiểu về tình trạng tim mạch của tôi. Nhân viên y tế
-                                            cũng rất thân thiện. Chỉ có điều phòng khám hơi nhỏ.
-                                        </p>
-                                        <div class="flex items-center space-x-4 text-sm text-gray-500">
-                                            <button class="flex items-center space-x-1 hover:text-blue-600">
-                                                <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                                                <span>Hữu ích (5)</span>
-                                            </button>
-                                            <button class="flex items-center space-x-1 hover:text-blue-600">
-                                                <i data-lucide="message-circle" class="w-4 h-4"></i>
-                                                <span>Trả lời</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            @empty
+                                <p class="text-gray-500">Chưa có đánh giá nào.</p>
+                            @endforelse
                         </div>
 
-                        <div class="text-center mt-8">
-                            <button class="text-blue-600 hover:text-blue-800 font-semibold">
-                                Xem thêm đánh giá
-                            </button>
-                        </div>
+                        @if ($reviewCount > 5)
+                            <div class="text-center mt-8">
+                                <button class="text-blue-600 hover:text-blue-800 font-semibold">
+                                    Xem thêm đánh giá
+                                </button>
+                            </div>
+                        @endif
                     </div>
                 </div>
+
 
                 <!-- Location Tab -->
                 <div id="content-location" class="tab-content hidden">
