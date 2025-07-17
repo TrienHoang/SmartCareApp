@@ -41,9 +41,9 @@
                                 </div>
 
                                 <div class="flex flex-wrap gap-2">
-                                    @if (!empty($doctor->specialties))
+                                    @if ($doctor->specialties && $doctor->specialties->count())
                                         @foreach ($doctor->specialties as $specialty)
-                                            <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $specialty }}</span>
+                                            <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $specialty->name }}</span>
                                         @endforeach
                                     @else
                                         <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Đa khoa</span>
@@ -52,6 +52,7 @@
                             </div>
                         </div>
                     </div>
+
 
                     <div class="fade-in">
                         <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
@@ -121,97 +122,76 @@
                         </p>
                     </div>
 
-                    <!-- Education & Experience -->
+                    <!-- Education & Experience  học vấn cc-->
                     <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 card-hover">
                         <h2 class="text-2xl font-bold mb-6 gradient-text">Học Vấn & Kinh Nghiệm</h2>
                         <div class="space-y-6">
-                            <div class="timeline-item">
-                                <div class="font-semibold text-gray-800">2010 - Hiện tại</div>
-                                <div class="text-blue-600 font-medium">Bác sĩ Chuyên khoa Tim Mạch</div>
-                                <div class="text-gray-600">Bệnh viện Đa khoa Trung ương</div>
-                            </div>
-                            <div class="timeline-item">
-                                <div class="font-semibold text-gray-800">2008 - 2010</div>
-                                <div class="text-blue-600 font-medium">Thạc sĩ Y học</div>
-                                <div class="text-gray-600">Đại học Y Hà Nội</div>
-                            </div>
-                            <div class="timeline-item">
-                                <div class="font-semibold text-gray-800">2002 - 2008</div>
-                                <div class="text-blue-600 font-medium">Bác sĩ Y khoa</div>
-                                <div class="text-gray-600">Đại học Y Hà Nội</div>
-                            </div>
+
+                            {{-- Hiển thị Kinh Nghiệm Làm Việc --}}
+                            @foreach ($doctor->experiences as $experience)
+                                <div class="timeline-item">
+                                    <div class="font-semibold text-gray-800">
+                                        {{ $experience->start_year }} - {{ $experience->end_year ?? 'Hiện tại' }}
+                                    </div>
+                                    <div class="text-blue-600 font-medium">{{ $experience->position }}</div>
+                                    <div class="text-gray-600">{{ $experience->institution }}</div>
+                                </div>
+                            @endforeach
+
+                            {{-- Hiển thị Học Vấn --}}
+                            @foreach ($doctor->educations as $education)
+                                <div class="timeline-item">
+                                    <div class="font-semibold text-gray-800">
+                                        {{ $education->start_year }} - {{ $education->end_year }}
+                                    </div>
+                                    <div class="text-blue-600 font-medium">{{ $education->degree }}</div>
+                                    <div class="text-gray-600">{{ $education->school }}</div>
+                                </div>
+                            @endforeach
+
                         </div>
                     </div>
 
+
+                    <!-- Specialties đã xong phần này như cc -->
                     <!-- Specialties -->
-                    <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 card-hover">
-                        <h2 class="text-2xl font-bold mb-6 gradient-text">Chuyên Môn</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="skill-tag p-4 rounded-lg">
-                                <i data-lucide="heart" class="w-5 h-5 text-blue-600 mb-2"></i>
-                                <h3 class="font-semibold mb-1">Bệnh Tim Mạch</h3>
-                                <p class="text-sm text-gray-600">Chẩn đoán và điều trị các bệnh lý tim mạch</p>
-                            </div>
-                            <div class="skill-tag p-4 rounded-lg">
-                                <i data-lucide="activity" class="w-5 h-5 text-blue-600 mb-2"></i>
-                                <h3 class="font-semibold mb-1">Điện Tâm Đồ</h3>
-                                <p class="text-sm text-gray-600">Đọc và phân tích kết quả điện tâm đồ</p>
-                            </div>
-                            <div class="skill-tag p-4 rounded-lg">
-                                <i data-lucide="radio" class="w-5 h-5 text-blue-600 mb-2"></i>
-                                <h3 class="font-semibold mb-1">Siêu Âm Tim</h3>
-                                <p class="text-sm text-gray-600">Chẩn đoán hình ảnh tim mạch</p>
-                            </div>
-                            <div class="skill-tag p-4 rounded-lg">
-                                <i data-lucide="stethoscope" class="w-5 h-5 text-blue-600 mb-2"></i>
-                                <h3 class="font-semibold mb-1">Khám Tổng Quát</h3>
-                                <p class="text-sm text-gray-600">Khám sức khỏe định kỳ và tư vấn</p>
+                    @if ($doctor->specialties && $doctor->specialties->count())
+                        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 card-hover">
+                            <h2 class="text-2xl font-bold mb-6 gradient-text">Chuyên Môn</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                @foreach ($doctor->specialties as $specialty)
+                                    <div class="skill-tag p-4 rounded-lg">
+                                        <i data-lucide="heart" class="w-5 h-5 text-blue-600 mb-2"></i>
+                                        <h3 class="font-semibold mb-1">{{ $specialty->name }}</h3>
+                                        <p class="text-sm text-gray-600">{{ $specialty->description }}</p>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
-                    </div>
+                    @endif
+
 
                     <!-- Achievements -->
                     <div class="bg-white rounded-2xl shadow-lg p-8 card-hover">
                         <h2 class="text-2xl font-bold mb-6 gradient-text">Thành Tích & Chứng Chỉ</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="flex items-start space-x-3">
-                                <div class="bg-blue-100 p-2 rounded-lg">
-                                    <i data-lucide="award" class="w-6 h-6 text-blue-600"></i>
+                            @foreach ($doctor->achievements as $achievement)
+                                <div class="flex items-start space-x-3">
+                                    <div class="bg-blue-100 p-2 rounded-lg">
+                                        <i data-lucide="award" class="w-6 h-6 text-blue-600"></i> {{-- icon có thể tuỳ chỉnh nếu
+                                        bạn lưu trong DB --}}
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold">{{ $achievement->title }}</h3>
+                                        <p class="text-gray-600 text-sm">
+                                            {{ $achievement->description ?? 'Thông tin chưa cập nhật' }}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 class="font-semibold">Bác sĩ xuất sắc năm 2023</h3>
-                                    <p class="text-gray-600 text-sm">Bệnh viện Đa khoa Trung ương</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="bg-blue-100 p-2 rounded-lg">
-                                    <i data-lucide="book" class="w-6 h-6 text-blue-600"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold">20+ bài báo khoa học</h3>
-                                    <p class="text-gray-600 text-sm">Tạp chí Y học Việt Nam</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="bg-blue-100 p-2 rounded-lg">
-                                    <i data-lucide="users" class="w-6 h-6 text-blue-600"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold">5,000+ bệnh nhân</h3>
-                                    <p class="text-gray-600 text-sm">Được điều trị thành công</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="bg-blue-100 p-2 rounded-lg">
-                                    <i data-lucide="graduation-cap" class="w-6 h-6 text-blue-600"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold">Đào tạo 50+ bác sĩ trẻ</h3>
-                                    <p class="text-gray-600 text-sm">Chương trình thực tập</p>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
                     </div>
+
                 </div>
 
                 <!-- Schedule Tab -->
