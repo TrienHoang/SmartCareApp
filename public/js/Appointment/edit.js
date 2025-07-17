@@ -7,7 +7,7 @@ $(document).ready(function () {
     const doctorServicesUrl = $('#doctorServicesUrl').val();
     const doctorWorkingDaysUrl = $('#doctorWorkingDaysUrl').val();
     const patientId = $('#patient_id').val();
-    const selectedPlanId = '{{ $appointment->treatment_plan_id }}';
+    const selectedPlanId = window.selectedPlanId;
 
     loadTreatmentPlans(patientId, selectedPlanId);
 
@@ -78,6 +78,20 @@ $(document).ready(function () {
                 const currentValue = $timeInput.val();
                 if (!currentValue && !$timeInput.data('old')) $timeInput.val('');
 
+                const sundays = [];
+                const today = new Date();
+                const nextYear = new Date();
+                nextYear.setFullYear(today.getFullYear() + 1);
+
+                for (let d = new Date(today); d <= nextYear; d.setDate(d.getDate() + 1)) {
+                    if (d.getDay() === 0) {
+                        sundays.push(d.toISOString().split('T')[0]);
+                    }
+                }
+
+                // Ghép thêm vacationDates
+                const disabledDates = sundays.concat(vacationDates);
+
                 flatpickrInstance = flatpickr("#appointment_time", {
                     enableTime: true,
                     dateFormat: "Y-m-d H:i",
@@ -85,12 +99,16 @@ $(document).ready(function () {
                     minDate: "today",
                     disableMobile: true,
                     locale: 'vi',
-                    enable: specificDates.length > 0 ? specificDates : function (date) {
-                        const day = date.getDay();
-                        const dateStr = date.toISOString().split('T')[0];
-                        if (vacationDates.includes(dateStr)) return false;
-                        return daysOfWeek.includes(day);
-                    },
+                    disable: [
+                        function (date) {
+                            const day = date.getDay();
+                            const str = date.toISOString().split('T')[0];
+                            // Disable nếu là Chủ nhật hoặc trong ngày nghỉ
+                            if (day === 0) return true; // Chủ nhật
+                            if (vacationDates.includes(str)) return true; // ngày nghỉ
+                            return false;
+                        }
+                    ],
                     onReady: function () {
                         const oldTime = $timeInput.data('old') || $timeInput.val();
                         if (oldTime) {

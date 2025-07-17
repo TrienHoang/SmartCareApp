@@ -358,13 +358,29 @@ class AdminNotificationController extends Controller
         }
     }
 
+    public function getUsers (Request $request){
+        $search = $request->query('search');
+        $users = User::when($search, function ($query, $search) {
+            return $query->where('full_name', 'like', '%' . $search . '%')
+                ->orWhere('email', 'like', '%' . $search . '%');
+        })
+            ->limit(20) // Giới hạn số lượng trả về
+            ->get(['id', 'full_name', 'email']);
 
+        $results = $users->map(function ($user) {
+            return ['id' => $user->id, 'text' => $user->full_name . ' (' . $user->email . ')'];
+        });
 
+        return response()->json(['results' => $results]);
+    }
 
-    
-
-
-
-
+    public function getRoles (Request $request){
+        $search = $request->query('search');
+        $roles = Role::when($search, function ($query, $search) {
+            return $query->where('name', 'like', '%' . $search . '%');
+        })->limit(20)->get(['id', 'name as text']);
+        
+        return response()->json(['results' => $roles]);
+    }
 
 }

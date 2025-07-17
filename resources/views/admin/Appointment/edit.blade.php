@@ -44,9 +44,6 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>Chỉnh sửa lịch hẹn</h5>
-                <a href="{{ route('admin.appointments.show', $appointment->id) }}" class="btn btn-info btn-sm">
-                    <i class="fas fa-eye me-1"></i> Xem chi tiết
-                </a>
             </div>
 
             @if (session('error'))
@@ -98,6 +95,11 @@
                                 <option value="">-- Không chọn --</option>
                             </select>
 
+                            @if ($appointment->treatment_plan_id)
+                                <input type="hidden" name="treatment_plan_id"
+                                    value="{{ $appointment->treatment_plan_id }}">
+                            @endif
+
                             <input type="hidden" id="patient_id" value="{{ $appointment->patient_id }}">
                             <input type="hidden" id="selected_treatment_plan_id"
                                 value="{{ $appointment->treatment_plan_id }}">
@@ -106,6 +108,11 @@
 
                             <small class="text-muted d-block mt-1">
                                 Khi chọn kế hoạch điều trị, bác sĩ tương ứng sẽ tự động được chọn và không thể thay đổi.
+                            </small>
+
+                            <small class="text-info d-block mt-1">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Kế hoạch điều trị sẽ tự động chuyển sang <strong>Hoàn thành</strong> khi tất cả lịch hẹn thuộc kế hoạch đã hoàn tất.
                             </small>
                         </div>
 
@@ -166,7 +173,8 @@
                         {{-- Trạng thái --}}
                         <div class="col-12 col-md-6">
                             <label for="status" class="form-label">Trạng thái</label>
-                            <select name="status" id="status" class="form-select @error('status') is-invalid @enderror">
+                            <select name="status" id="status"
+                                class="form-select @error('status') is-invalid @enderror">
                                 <option value="pending" {{ $appointment->status === 'pending' ? 'selected' : '' }}
                                     disabled>Chờ xác nhận</option>
                                 <option value="confirmed" {{ $appointment->status === 'confirmed' ? 'selected' : '' }}
@@ -215,4 +223,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ asset('js/Appointment/edit.js') }}"></script>
+    <script>
+        window.selectedPlanId = '{{ $appointment->treatment_plan_id }}';
+    </script>
 @endpush
