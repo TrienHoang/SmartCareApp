@@ -16,6 +16,7 @@ class Doctor extends Model
         'room_id',
         'specialization',
         'biography',
+        'status', // Thêm trường status
     ];
 
     // --------------------
