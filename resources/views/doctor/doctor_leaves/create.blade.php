@@ -54,10 +54,18 @@
         </div>
 
         {{-- Checkbox nghỉ đột xuất --}}
-        <div class="form-check mb-4">
+        <div class="form-check mb-3">
             <input class="form-check-input" type="checkbox" name="is_emergency" id="is_emergency" value="1" {{ old('is_emergency') ? 'checked' : '' }}>
             <label class="form-check-label text-danger" for="is_emergency">
                 Đây là đơn nghỉ đột xuất (nghỉ gấp không cần báo trước)
+            </label>
+        </div>
+
+        {{-- Checkbox nghỉ đi du lịch --}}
+        <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" name="is_vacation" id="is_vacation" value="1" {{ old('is_vacation') ? 'checked' : '' }}>
+            <label class="form-check-label text-info" for="is_vacation">
+                Đây là đơn nghỉ đi du lịch (phải đăng ký trước ít nhất 15 ngày, tối đa 3 ngày)
             </label>
         </div>
 

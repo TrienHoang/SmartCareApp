@@ -33,6 +33,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Doctor\DoctorDashboardController;
+use App\Notifications\LateNotification;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
@@ -695,6 +696,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     });
 });
 
+
+
 // phân quyền bác sĩ
 // Route::get('/doctor/dashboard', function () {
 //     return view('doctor.dashboard');
@@ -704,6 +707,13 @@ Route::prefix('doctor')->name('doctor.')->middleware('auth')->group(function () 
     Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
     // Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
 });
+
+Route::middleware(['auth', 'checkAdmin'])->group(function () {
+    Route::get('/admin/system-notifications', [AdminNotificationController::class, 'index'])
+        ->name('admin.system_notifications.index');
+});
+
+
 require __DIR__ . '/client.php';
 
 

@@ -123,6 +123,8 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    // 'timezone' => env('APP_TIMEZONE', 'Asia/Ho_Chi_Minh'),
+
     'Excel' => Maatwebsite\Excel\Facades\Excel::class,
 
 ];

@@ -38,9 +38,12 @@ Route::get('/thong-tin-ca-nhan', function () {
     return view('client.profile');
 })->name('profile');
 
-Route::get('/thong-tin-bac-si', function () {
-    return view('client.doctors_detail');
-})->name('doctors_detail');
+// Route::get('/thong-tin-bac-si', function () {
+//     return view('client.doctors_detail');
+// })->name('doctors_detail');
+
+Route::get('/thong-tin-bac-si/{id}', [DoctorController::class, 'show'])->name('doctor.show');
+
 
 Route::prefix('client/uploads')->name('client.uploads.')->middleware(['auth'])->group(function () {
     Route::get('/', [ClientFileController::class, 'index'])->name('index');

@@ -71,50 +71,46 @@
         <section class="py-20 bg-gray-50">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-4 text-blue-700">Tại Sao Chọn SmartCare?</h2>
+                    <h2 class="text-4xl font-bold mb-4 gradient-text">Tại Sao Chọn SmartCare?</h2>
                     <p class="text-xl text-gray-600">Chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe tốt nhất</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     @php
                         $features = [
                             [
-                                'icon' => 'fas fa-calendar-check',
+                                'icon' => 'calendar',
                                 'title' => 'Đặt Lịch Dễ Dàng',
                                 'desc' => 'Đặt lịch khám chỉ với vài thao tác đơn giản trên website',
                             ],
                             [
-                                'icon' => 'fas fa-user-doctor',
+                                'icon' => 'users',
                                 'title' => 'Đội Ngũ Chuyên Nghiệp',
                                 'desc' => 'Bác sĩ giàu kinh nghiệm, tận tâm với nghề',
                             ],
                             [
-                                'icon' => 'fas fa-stethoscope',
+                                'icon' => 'award',
                                 'title' => 'Chất Lượng Cao',
                                 'desc' => 'Trang thiết bị hiện đại, dịch vụ chất lượng quốc tế',
                             ],
                             [
-                                'icon' => 'fas fa-clock',
+                                'icon' => 'clock',
                                 'title' => 'Tiết Kiệm Thời Gian',
                                 'desc' => 'Không cần xếp hàng, đúng giờ hẹn đã có',
                             ],
                         ];
                     @endphp
                     @foreach ($features as $feature)
-                        <div
-                            class="bg-white p-8 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-1 transition duration-300 text-center border border-blue-100">
-                            <div
-                                class="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 shadow-sm">
-                                <i class="{{ $feature['icon'] }} text-2xl"></i>
-                            </div>
-                            <h3 class="text-lg font-semibold text-blue-800 mb-2">{{ $feature['title'] }}</h3>
-                            <p class="text-gray-600 text-sm">{{ $feature['desc'] }}</p>
+                        <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow hover-scale">
+                            <i data-lucide="{{ $feature['icon'] }}" class="w-8 h-8 text-blue-600 mb-4"></i>
+                            <h3 class="text-xl font-semibold mb-3">{{ $feature['title'] }}</h3>
+                            <p class="text-gray-600">{{ $feature['desc'] }}</p>
                         </div>
                     @endforeach
                 </div>
             </div>
         </section>
 
-
+        {{-- hiển thị bác sĩ lên home ____ nhinhi => --}}
         {{-- Doctor Section --}}
         <section class="py-20 bg-white">
             <div class="container mx-auto px-4">
@@ -130,15 +126,16 @@
                                 <li class="splide__slide">
                                     <div
                                         class="bg-gray-50 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow hover-scale text-center">
-                                        <img src="{{ $doctor->user->avatar ?? asset('images/default-doctor.png') }}"
+                                        <img src="{{ $doctor->user->avatar ? asset('storage/' . $doctor->user->avatar) : asset('images/default-doctor.png') }}"
                                             alt="{{ $doctor->user->full_name }}"
                                             class="w-24 h-24 mx-auto rounded-full mb-4 object-cover">
+
                                         <h3 class="text-xl font-semibold mb-2">{{ $doctor->user->full_name }}</h3>
                                         <div class="text-blue-600 mb-2">{{ $doctor->department->name ?? 'Chuyên khoa' }}
                                         </div>
                                         <p class="text-gray-600 mb-4">
                                             {{ $doctor->biography ?? 'Bác sĩ tận tâm, giàu kinh nghiệm.' }}</p>
-                                        <a href="{{ url('/thong-tin-bac-si/') }}"
+                                        <a href="{{ route('doctor.show', $doctor->id) }}"
                                             class="inline-block bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition-colors">
                                             Xem Hồ Sơ
                                         </a>
@@ -154,6 +151,8 @@
                 </div>
             </div>
         </section>
+
+        
 
         {{-- Stats Section --}}
         <section class="py-20 gradient-bg text-white">
