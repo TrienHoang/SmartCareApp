@@ -65,6 +65,16 @@ Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeRe
 // Route hiển thị chi tiết bác sĩ (không yêu cầu đăng nhập)
 Route::get('/doctors/{doctor}', [DoctorController::class, 'show'])->name('doctors.show');
 
+Route::middleware(['auth'])->prefix('client')->name('client.')->group(function () {
+    // Danh sách lịch sử khám
+    Route::get('/appointment-history', [AppointmentHistoryController::class, 'index'])
+        ->name('appointments.history');
+
+    // Xem chi tiết từng cuộc khám
+    Route::get('/appointment-history/{id}', [AppointmentHistoryController::class, 'show'])
+        ->name('appointments.detail');
+});
+
 
 Route::prefix('client/uploads')->name('client.uploads.')->middleware(['auth'])->group(function () {
     Route::get('/', [ClientFileController::class, 'index'])->name('index');
