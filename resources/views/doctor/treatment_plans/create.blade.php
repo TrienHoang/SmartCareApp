@@ -2,387 +2,553 @@
 @section('title', 'Lập kế hoạch điều trị')
 
 @section('content')
-    <div class="content-wrapper">
-        <!-- Enhanced Header Section -->
-        <div class="content-header row">
-            <div class="content-header-left col-md-9 col-12 mb-2">
-                <div class="row breadcrumbs-top">
-                    <div class="col-12">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="icon-circle bg-primary mr-3">
-                                <i class="menu-icon tf-icons bx bx-clipboard text-white"></i>
-                            </div>
-                            <div>
-                                <h2 class="mb-0 text-primary font-weight-bold">Lập kế hoạch điều trị</h2>
-                                <p class="text-muted mb-0">Tạo kế hoạch điều trị cho bệnh nhân</p>
-                            </div>
-                        </div>
-                        <div class="breadcrumb-wrapper col-12">
-                            <nav aria-label="breadcrumb">
-                                <ol class="breadcrumb bg-transparent p-0">
-                                    <li class="">
-                                        <a href="{{ route('doctor.treatment-plans.index') }}" class="text-decoration-none">
-                                            <i class="feather icon-home mr-1"></i>Trang chủ >
-                                        </a>
-                                    </li>
-                                    <li class="breadcrumb-item active text-primary font-weight-semibold">Lập kế hoạch</li>
-                                </ol>
-                            </nav>
-                        </div>
+    <div class="container-fluid py-4">
+        <!-- Header với breadcrumb -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('doctor.dashboard') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('doctor.treatment-plans.index') }}">Kế hoạch điều
+                                trị</a></li>
+                        <li class="breadcrumb-item active">Tạo mới</li>
+                    </ol>
+                </nav>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1 class="h3 mb-0 text-gray-800">
+                        Tạo Kế Hoạch Điều Trị Mới
+                    </h1>
+                    <div class="text-muted">
+                        <small><i class="fas fa-info-circle me-1"></i>Các trường có dấu * là bắt buộc</small>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="content-body">
-            <!-- Enhanced Alert Messages -->
-            @if ($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
-                    <div class="d-flex align-items-center">
-                        <i class="feather icon-alert-circle mr-2"></i>
-                        <strong>Có lỗi xảy ra!</strong>
+        <!-- Alert Messages -->
+        @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle"></i>
                     </div>
-                    <ul class="mb-0 mt-2 pl-3">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
-                    <div class="d-flex align-items-center">
-                        <i class="feather icon-x-circle mr-2"></i>
-                        {{ session('error') }}
+                    <div class="flex-grow-1 ms-3">
+                        <strong>Vui lòng kiểm tra lại:</strong>
+                        <ul class="mb-0 mt-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
-            @endif
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
 
-            <!-- Enhanced Main Card -->
-            <div class="card border-0 shadow-lg">
-                <div class="card-header bg-gradient-primary text-white border-0">
-                    <div class="d-flex align-items-center">
-                        <i class="feather icon-edit-3 mr-2"></i>
-                        <h4 class="card-title mb-0 text-white font-weight-bold">Thông tin Kế hoạch Điều trị</h4>
-                    </div>
-                </div>
+        <!-- Main Form -->
+        <form action="{{ route('doctor.treatment-plans.store') }}" method="POST" id="treatment-plan-form">
+            @csrf
 
-                <div class="card-body p-4">
-                    <form action="{{ route('doctor.treatment-plans.store') }}" method="POST" class="needs-validation"
-                        novalidate>
-                        @csrf
-
-                        <!-- Patient Field -->
-                        <div class="form-group mb-4">
-                            <label for="patient_id" class="form-label font-weight-semibold d-flex align-items-center">
-                                <i class="feather icon-user mr-2 text-primary"></i>
-                                Bệnh nhân <span class="text-danger ml-1">*</span>
-                            </label>
-                            <div class="input-group">
-                                <select name="patient_id" id="patient_id" class="form-control select2 border-left-0"
-                                    required>
-                                    <option value="">Tìm kiếm bệnh nhân...</option>
-                                    @php
-                                    $selectedPatientId = old('patient_id', $treatmentPlan->patient_id ?? null);
-                                @endphp
-                                
-                                @if($selectedPatientId)
-                                    @php
-                                        $selectedPatient = \App\Models\User::select('id', 'full_name', 'email')->find($selectedPatientId);
-                                    @endphp
-                                
-                                    @if($selectedPatient)
-                                        <option value="{{ $selectedPatient->id }}" selected>
-                                            {{ $selectedPatient->full_name }} ({{ $selectedPatient->email }})
-                                        </option>
-                                    @endif
-                                @endif
-                                </select>
-                            </div>
-                            <small class="form-text text-muted mt-1">
-                                <i class="feather icon-info mr-1"></i>Gõ tên hoặc email để tìm kiếm bệnh nhân
-                            </small>
-                        </div>
-
-                        <!-- Plan Title Field -->
-                        <div class="form-group mb-4">
-                            <label for="plan_title" class="form-label font-weight-semibold d-flex align-items-center">
-                                <i class="feather icon-type mr-2 text-primary"></i>
-                                Tiêu đề kế hoạch <span class="text-danger ml-1">*</span>
-                            </label>
-                            <div class="input-group">
-                                <input type="text" class="form-control form-control-lg border-left-0" id="plan_title"
-                                    name="plan_title" value="{{ old('plan_title', $treatmentPlan->plan_title ?? '') }}"
-                                    placeholder="Nhập tiêu đề kế hoạch..." required>
-                            </div>
-                            <small class="form-text text-muted mt-1">
-                                <i class="feather icon-info mr-1"></i>Tiêu đề ngắn gọn, mô tả rõ ràng
-                            </small>
-                        </div>
-
-                        <!-- Total Estimated Cost Field -->
-                        <div class="form-group mb-4">
-                            <label for="total_estimated_cost"
-                                class="form-label font-weight-semibold d-flex align-items-center">
-                                <i class="feather icon-dollar-sign mr-2 text-primary"></i>
-                                Chi phí ước tính <span class="text-danger ml-1">*</span>
-                            </label>
-                            <div class="input-group">
-                                <input type="number" step="0.01" class="form-control form-control-lg border-left-0"
-                                    id="total_estimated_cost" name="total_estimated_cost"
-                                    value="{{ old('total_estimated_cost', $treatmentPlan->total_estimated_cost ?? '') }}"
-                                    placeholder="Nhập chi phí ước tính..." required>
-                            </div>
-                            <small class="form-text text-muted mt-1">
-                                <i class="feather icon-help-circle mr-1"></i>Nhập số tiền dự kiến (đơn vị: VND)
-                            </small>
-                        </div>
-
-                        <!-- Notes Field -->
-                        <div class="form-group mb-4">
-                            <label for="notes" class="form-label font-weight-semibold d-flex align-items-center">
-                                <i class="feather icon-edit mr-2 text-primary"></i>
-                                Ghi chú
-                            </label>
-                            <div class="content-editor-wrapper">
-                                <textarea class="form-control" id="notes" name="notes" rows="4" placeholder="Nhập ghi chú...">{{ old('notes', $treatmentPlan->notes ?? '') }}</textarea>
-                            </div>
-                            <small class="form-text text-muted mt-1">
-                                <i class="feather icon-edit-2 mr-1"></i>Ghi chú bổ sung nếu cần
-                            </small>
-                        </div>
-
-                        <!-- Diagnosis Field -->
-                        <div class="form-group mb-4">
-                            <label for="diagnosis" class="form-label font-weight-semibold d-flex align-items-center">
-                                <i class="feather icon-clipboard mr-2 text-primary"></i>
-                                Chẩn đoán
-                            </label>
-                            <div class="content-editor-wrapper">
-                                <textarea class="form-control" id="diagnosis" name="diagnosis" rows="4" placeholder="Nhập chẩn đoán...">{{ old('diagnosis', $treatmentPlan->diagnosis ?? '') }}</textarea>
-                            </div>
-                            <small class="form-text text-muted mt-1">
-                                <i class="feather icon-edit-2 mr-1"></i>Chi tiết chẩn đoán nếu có
-                            </small>
-                        </div>
-
-                        <!-- Goal Field -->
-                        <div class="form-group mb-4">
-                            <label for="goal" class="form-label font-weight-semibold d-flex align-items-center">
-                                <i class="feather icon-target mr-2 text-primary"></i>
-                                Mục tiêu
-                            </label>
-                            <div class="content-editor-wrapper">
-                                <textarea class="form-control" id="goal" name="goal" rows="4" placeholder="Nhập mục tiêu...">{{ old('goal', $treatmentPlan->goal ?? '') }}</textarea>
-                            </div>
-                            <small class="form-text text-muted mt-1">
-                                <i class="feather icon-edit-2 mr-1"></i>Mục tiêu điều trị mong muốn
-                            </small>
-                        </div>
-
-                        <!-- Start Date Field -->
-                        <div class="form-group mb-4">
-                            <label for="start_date" class="form-label font-weight-semibold d-flex align-items-center">
-                                <i class="feather icon-calendar mr-2 text-primary"></i>
-                                Ngày bắt đầu <span class="text-danger ml-1">*</span>
-                            </label>
-                            <div class="input-group">
-                                <input type="text" class="form-control pickatime-format border-left-0" id="start_date"
-                                    name="start_date" placeholder="Chọn ngày bắt đầu..."
-                                    value="{{ old('start_date', isset($treatmentPlan->start_date) ? $treatmentPlan->start_date->format('Y-m-d') : '') }}"
-                                    required>
-                            </div>
-                            @error('start_date')
-                                <span class="text-danger small mt-1"><i
-                                        class="feather icon-alert-circle mr-1"></i>{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <!-- End Date Field -->
-                        <div class="form-group mb-4">
-                            <label for="end_date" class="form-label font-weight-semibold d-flex align-items-center">
-                                <i class="feather icon-calendar mr-2 text-primary"></i>
-                                Ngày kết thúc
-                            </label>
-                            <div class="input-group">
-                                <input type="text" class="form-control pickatime-format border-left-0" id="end_date"
-                                    name="end_date" placeholder="Chọn ngày kết thúc..."
-                                    value="{{ old('end_date', isset($treatmentPlan->end_date) ? $treatmentPlan->end_date->format('Y-m-d') : '') }}">
-                            </div>
-                            @error('end_date')
-                                <span class="text-danger small mt-1"><i
-                                        class="feather icon-alert-circle mr-1"></i>{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <!-- Status Field (Hidden with Default Value) -->
-                        <input type="hidden" name="status" value="draft">
-
-                        <!-- Treatment Items Section -->
-                        <div class="recipient-section bg-light p-4 rounded mb-4">
-                            <h5 class="mb-3 text-primary font-weight-bold">
-                                <i class="feather icon-list mr-2"></i>Các Bước Điều trị
+            <div class="row">
+                <!-- Left Column - Main Form -->
+                <div class="col-lg-8">
+                    <!-- Patient & Basic Info Section -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white mb-3">
+                            <h5 class="mb-0 text-white">
+                                <i class="fas fa-user-injured me-2"></i>
+                                Thông tin cơ bản
                             </h5>
-                            <div id="treatment-items-container"></div>
-                            <button type="button" class="btn btn-primary waves-effect waves-light mt-3"
-                                id="add-item-btn">
-                                <i class="feather icon-plus mr-1"></i>Thêm Bước Điều trị
-                            </button>
                         </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="patient_id" class="form-label fw-bold">
+                                        <i class="fas fa-user me-1"></i>
+                                        Chọn Bệnh nhân <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" id="patient_id" name="patient_id" required>
+                                        @if (old('patient_id'))
+                                            <?php
+                                            $oldPatientId = old('patient_id');
+                                            $oldPatientName = '';
+                                            $oldPatientEmail = '';
+                                            try {
+                                                $patientData = DB::table('users')->where('id', $oldPatientId)->first();
+                                                if ($patientData) {
+                                                    $oldPatientName = $patientData->full_name;
+                                                    $oldPatientEmail = $patientData->email;
+                                                }
+                                            } catch (\Exception $e) {
+                                                // Handle exception
+                                            }
+                                            ?>
+                                            <option value="{{ $oldPatientId }}" selected>{{ $oldPatientName }}
+                                                ({{ $oldPatientEmail }})</option>
+                                        @endif
+                                    </select>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Chỉ hiển thị bệnh nhân đã có lịch hẹn hoàn thành
+                                    </div>
+                                </div>
 
-                        <!-- Action Buttons -->
-                        <div class="form-actions d-flex justify-content-between align-items-center pt-3 border-top">
-                            <div class="text-muted">
-                                <i class="feather icon-info mr-1"></i>
-                                <small>Các trường có dấu <span class="text-danger">*</span> là bắt buộc</small>
+                                <div class="col-md-6 mb-3">
+                                    <label for="plan_title" class="form-label fw-bold">
+                                        <i class="fas fa-file-medical me-1"></i>
+                                        Tiêu đề Kế hoạch <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="plan_title" name="plan_title"
+                                        value="{{ old('plan_title') }}" required
+                                        placeholder="Ví dụ: Điều trị nha chu giai đoạn 1">
+                                </div>
                             </div>
-                            <div class="btn-group">
-                                <a href="{{ route('doctor.treatment-plans.index') }}"
-                                    class="btn btn-outline-secondary waves-effect mr-2">
-                                    <i class="feather icon-x mr-1"></i>Hủy bỏ
-                                </a>
-                                <button type="submit" class="btn btn-primary btn-lg waves-effect waves-light px-4">
-                                    <i class="feather icon-save mr-2"></i>Lưu kế hoạch
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="start_date" class="form-label fw-bold">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        Ngày bắt đầu <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="date" class="form-control" id="start_date" name="start_date"
+                                        value="{{ old('start_date', date('Y-m-d')) }}" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="end_date" class="form-label fw-bold">
+                                        <i class="fas fa-calendar-check me-1"></i>
+                                        Ngày kết thúc (ước tính)
+                                    </label>
+                                    <input type="date" class="form-control" id="end_date" name="end_date"
+                                        value="{{ old('end_date') }}">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="diagnosis" class="form-label fw-bold">
+                                    <i class="fas fa-stethoscope me-1"></i>
+                                    Chẩn đoán
+                                </label>
+                                <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3" placeholder="Mô tả chẩn đoán chi tiết...">{{ old('diagnosis') }}</textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="goal" class="form-label fw-bold">
+                                    <i class="fas fa-bullseye me-1"></i>
+                                    Mục tiêu Điều trị
+                                </label>
+                                <textarea class="form-control" id="goal" name="goal" rows="3" placeholder="Mô tả mục tiêu điều trị...">{{ old('goal') }}</textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="notes" class="form-label fw-bold">
+                                    <i class="fas fa-sticky-note me-1"></i>
+                                    Ghi chú
+                                </label>
+                                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Ghi chú thêm...">{{ old('notes') }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Treatment Steps Section -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-success text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 text-white">
+                                    <i class="fas fa-list-ol me-2"></i>
+                                    Các Bước Điều Trị
+                                </h5>
+                                <button type="button" class="btn btn-light btn-sm" id="add-item">
+                                    <i class="fas fa-plus me-1"></i>
+                                    Thêm Bước
                                 </button>
                             </div>
                         </div>
-                    </form>
+                        <div class="card-body" id="card-body">
+                            <div id="treatment-items-container">
+                                @if (old('items'))
+                                    @foreach (old('items') as $index => $item)
+                                        @php
+                                            $item = is_array($item) ? (object) $item : $item;
+                                            $itemType = old("items.$index.item_type", isset($item->service_id) && $item->service_id ? 'service' : 'custom');
+                                            $itemNeedsAppointment = old("items.$index.needs_appointment", isset($item->needs_appointment) ? $item->needs_appointment : 0);
+                                        @endphp
+                                        @include('doctor.treatment_plans._item_template', [
+                                            'index' => $index,
+                                            'item' => $item,
+                                            'services' => $services,
+                                            'isOld' => true,
+                                            'itemType' => $itemType,
+                                            'itemNeedsAppointment' => $itemNeedsAppointment,
+                                        ])
+                                    @endforeach
+                                @endif
+                            </div>
+
+                            <div id="empty-state" class="text-center py-5 {{ old('items') ? 'd-none' : '' }}">
+                                <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Chưa có bước điều trị nào</h5>
+                                <p class="text-muted">Nhấn "Thêm Bước" để bắt đầu tạo kế hoạch điều trị</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Summary & Actions -->
+                <div class="col-lg-4">
+                    <!-- Cost Summary -->
+                    <div class="card shadow-sm mb-4 sticky-top" style="top: 20px;">
+                        <div class="card-header bg-warning text-dark mb-3">
+                            <h5 class="mb-0 text-white">
+                                <i class="fas fa-calculator me-2"></i>
+                                Tổng Quan Chi Phí
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="total_estimated_cost" class="form-label fw-bold">
+                                    <i class="fas fa-money-bill-wave me-1"></i>
+                                    Tổng chi phí ước tính
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" min="0" class="form-control" id="total_estimated_cost"
+                                        name="total_estimated_cost" value="{{ old('total_estimated_cost', 0) }}"
+                                        placeholder="0">
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Sẽ tự động tính từ các dịch vụ đã chọn
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="status" name="status"
+                                        value="active" {{ old('status') == 'active' ? 'checked' : '' }}>
+                                    <label class="form-check-label fw-bold" for="status">
+                                        <i class="fas fa-power-off me-1"></i>
+                                        Kích hoạt kế hoạch
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    Kế hoạch sẽ có hiệu lực ngay sau khi lưu
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-info text-white mb-3">
+                            <h5 class="mb-0 text-white">
+                                <i class="fas fa-bolt me-2"></i>
+                                Thao Tác Nhanh
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="save-draft">
+                                    <i class="fas fa-save me-1"></i>
+                                    Lưu Nháp
+                                </button>
+                                <button type="button" class="btn btn-outline-success btn-sm" id="preview-plan">
+                                    <i class="fas fa-eye me-1"></i>
+                                    Xem Trước
+                                </button>
+                                <button type="button" class="btn btn-outline-warning btn-sm" id="reset-form">
+                                    <i class="fas fa-undo me-1"></i>
+                                    Đặt Lại
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Form Actions -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                                        <i class="fas fa-arrow-left me-1"></i>
+                                        Quay Lại
+                                    </button>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-primary btn-lg px-4">
+                                        <i class="fas fa-save me-2"></i>
+                                        Lưu Kế Hoạch Điều Trị
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
 
+    <!-- Template for treatment items -->
     <template id="treatment-item-template">
-        <div class="treatment-item-card card mb-3 p-3 border">
-            <button type="button" class="btn btn-sm btn-danger float-end remove-item-btn">Xóa</button>
-            <h5 class="card-title">Bước Điều trị Mới</h5>
-
-            <div class="form-group mb-2">
-                <label for="item_index_title">Tên/Mô tả bước:</label>
-                <input type="text" name="items[index][title]" id="item_index_title" class="form-control" required>
-            </div>
-            <div class="form-group mb-2">
-                <label for="item_index_description">Mô tả chi tiết:</label>
-                <textarea name="items[index][description]" id="item_index_description" class="form-control" rows="2"></textarea>
-            </div>
-            <div class="form-group mb-2">
-                <label for="item_index_expected_start_date">Ngày bắt đầu dự kiến:</label>
-                <input type="text" name="items[index][expected_start_date]" id="item_index_expected_start_date"
-                    class="form-control pickatime-format">
-            </div>
-            <div class="form-group mb-2">
-                <label for="item_index_expected_end_date">Ngày kết thúc dự kiến:</label>
-                <input type="text" name="items[index][expected_end_date]" id="item_index_expected_end_date"
-                    class="form-control pickatime-format">
-            </div>
-            <div class="form-group mb-2">
-                <label for="item_index_frequency">Tần suất:</label>
-                <input type="text" name="items[index][frequency]" id="item_index_frequency" class="form-control"
-                    placeholder="Ví dụ: 2 lần/ngày, 1 lần/tuần">
-            </div>
-            <div class="form-group mb-2">
-                <label for="item_index_notes">Ghi chú cho bước:</label>
-                <textarea name="items[index][notes]" id="item_index_notes" class="form-control" rows="2"></textarea>
-            </div>
-        </div>
+        @include('doctor.treatment_plans._item_template', [
+            'index' => '__INDEX__',
+            'item' => (object) [],
+            'services' => $services,
+        ])
     </template>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="d-none">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+        </div>
+    </div>
 @endsection
 
 @push('styles')
-    <!-- Custom Styles -->
     <style>
-        .icon-circle {
-            width: 50px;
-            height: 50px;
+        /* Modern Card Styles */
+        .card {
+            border: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .card-header {
+            border-radius: 12px 12px 0 0 !important;
+            border-bottom: none;
+            padding: 1.25rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        #card-body {
+            padding: 0;
+        }
+
+        /* Form Improvements */
+        .form-control,
+        .form-select {
+            border-radius: 8px;
+            border: 1px solid #e3e6f0;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            height: auto;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #4e73df;
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+
+        .form-label {
+            color: #5a5c69;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Treatment Item Cards */
+        .item-card {
+            border: 1px solid #e3e6f0;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fc 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            padding: 0px 15px;
+        }
+
+        .item-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(45deg, #4e73df, #1cc88a);
+        }
+
+        .item-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-card .card-header {
+            background: linear-gradient(135deg, #f8f9fc 0%, #eaecf4 100%);
+            border-bottom: 1px solid #e3e6f0;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-number {
+            background: linear-gradient(45deg, #4e73df, #1cc88a);
+            color: white;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
         }
 
-        .icon-circle i {
-            margin: 0 auto;
-        }
-
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-
-        .custom-control-input:checked~.custom-control-label::before {
-            background-color: #667eea;
-            border-color: #667eea;
-        }
-
-        .recipient-section,
-        .scheduling-section {
-            border-left: 4px solid #667eea;
+        /* Button Styles */
+        .btn {
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(45deg, #4e73df, #1cc88a);
             border: none;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .btn-primary:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 15px rgba(78, 115, 223, 0.3);
         }
 
-        .card {
-            transition: all 0.3s ease;
+        .btn-outline-danger {
+            border-color: #e74a3b;
+            color: #e74a3b;
         }
 
-        .input-group-text {
-            border-right: none;
+        .btn-outline-danger:hover {
+            background: #e74a3b;
+            border-color: #e74a3b;
         }
 
-        .form-control.border-left-0 {
-            border-left: none;
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
         }
 
-        .content-editor-wrapper {
-            border: 2px dashed #e3ebf0;
-            border-radius: 8px;
-            padding: 10px;
-            transition: border-color 0.3s ease;
-        }
-
-        .content-editor-wrapper:hover {
-            border-color: #667eea;
-        }
-
-        .alert {
-            border-radius: 10px;
-        }
-
-        .breadcrumb-item.active {
-            color: #667eea !important;
-        }
-
+        /* Responsive */
         @media (max-width: 768px) {
-            .form-actions {
-                flex-direction: column;
-                gap: 1rem;
+            .container-fluid {
+                padding: 1rem;
             }
 
-            .btn-group {
-                width: 100%;
-                display: flex;
+            .card-body {
+                padding: 1rem;
             }
 
-            .btn-group .btn {
-                flex: 1;
+            .btn-lg {
+                padding: 0.75rem 1.5rem;
             }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .item-card {
+            animation: fadeInUp 0.3s ease;
+        }
+
+        /* Switch Styles */
+        .form-check-input:checked {
+            background-color: #1cc88a;
+            border-color: #1cc88a;
+        }
+
+        /* Empty State */
+        #empty-state {
+            border: 2px dashed #e3e6f0;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+
+        /* Sticky sidebar */
+        .sticky-top {
+            position: sticky;
+            top: 20px;
+            z-index: 1020;
+        }
+
+        /* Service selection and custom step fields */
+        .service-selection,
+        .custom-step-fields {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #e3e6f0;
+        }
+
+        /* Radio button improvements */
+        .form-check-input[type="radio"] {
+            border-radius: 50%;
+            padding-left: 0px;
+
+        }
+
+        .form-check {
+            padding-left: 2.5em;
+        }
+
+        .form-check-input[type="radio"]:checked {
+            background-color: #4e73df;
+            border-color: #4e73df;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumb-item a {
+            color: #5a5c69;
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            color: #4e73df;
+        }
+
+        /* Alert improvements */
+        .alert {
+            border-radius: 12px;
+            border: none;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffeaea 100%);
+            color: #e74a3b;
         }
     </style>
 @endpush
@@ -390,141 +556,364 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            // Khởi tạo Select2 cho patient_id
+            let itemIndex = {{ old('items') ? count(old('items')) : 0 }};
+
+            // Show loading overlay
+            function showLoading() {
+                $('#loading-overlay').removeClass('d-none');
+            }
+
+            // Hide loading overlay
+            function hideLoading() {
+                $('#loading-overlay').addClass('d-none');
+            }
+
+            // Initialize Select2 for patient search
             $('#patient_id').select2({
-                placeholder: "Tìm kiếm bệnh nhân theo tên hoặc email",
+                placeholder: "Tìm kiếm bệnh nhân theo tên hoặc email...",
+                minimumInputLength: 2,
                 allowClear: true,
                 ajax: {
                     url: "{{ route('doctor.treatment-plans.searchPatient') }}",
                     dataType: 'json',
                     delay: 250,
                     data: function(params) {
-                        console.log('Search term:', params.term);
                         return {
                             query: params.term
                         };
                     },
                     processResults: function(data) {
-                        console.log('Ajax response:', data);
                         return {
-                            results: data.map(function(patient) {
+                            results: $.map(data, function(item) {
                                 return {
-                                    id: patient.id,
-                                    text: patient.full_name + ' (' + patient.email + ')'
+                                    id: item.id,
+                                    text: item.full_name + ' (' + item.email + ')'
                                 };
                             })
                         };
                     },
                     cache: true
-                },
-                minimumInputLength: 2
+                }
             });
 
-            let itemIndex = 0;
+            // Update empty state
+            function updateEmptyState() {
+                const container = $('#treatment-items-container');
+                const emptyState = $('#empty-state');
 
-            // Hàm thêm bước điều trị
-            function addTreatmentItem(itemData = {}) {
-                console.log('Adding treatment item, index:', itemIndex); // Debug
-                const container = document.getElementById('treatment-items-container');
-                const template = document.getElementById('treatment-item-template');
-                const clone = template.content.cloneNode(true);
-
-                const html = clone.firstElementChild.outerHTML
-                    .replace(/\[index\]/g, '[' + itemIndex + ']')
-                    .replace(/index_/g, 'item_' + itemIndex + '_');
-
-                const newDiv = document.createElement('div');
-                newDiv.innerHTML = html;
-                newDiv.classList.add('treatment-item-card', 'card', 'mb-3', 'p-3');
-
-                if (Object.keys(itemData).length > 0) {
-                    newDiv.querySelector(`[name="items[${itemIndex}][title]"]`).value = itemData.title || '';
-                    newDiv.querySelector(`[name="items[${itemIndex}][description]"]`).value = itemData
-                        .description || '';
-                    newDiv.querySelector(`[name="items[${itemIndex}][expected_start_date]"]`).value = itemData
-                        .expected_start_date ? new Date(itemData.expected_start_date).toISOString().split('T')[0] :
-                        '';
-                    newDiv.querySelector(`[name="items[${itemIndex}][expected_end_date]"]`).value = itemData
-                        .expected_end_date ? new Date(itemData.expected_end_date).toISOString().split('T')[0] : '';
-                    newDiv.querySelector(`[name="items[${itemIndex}][frequency]"]`).value = itemData.frequency ||
-                    '';
-                    newDiv.querySelector(`[name="items[${itemIndex}][notes]"]`).value = itemData.notes || '';
+                if (container.children('.item-card').length === 0) {
+                    emptyState.removeClass('d-none');
+                } else {
+                    emptyState.addClass('d-none');
                 }
-
-                container.appendChild(newDiv);
-
-                newDiv.querySelector('.remove-item-btn').addEventListener('click', function() {
-                    newDiv.remove();
-                });
-
-                // Khởi tạo Flatpickr cho ngày trong item
-                const startDateInput = newDiv.querySelector(`[name="items[${itemIndex}][expected_start_date]"]`);
-                const endDateInput = newDiv.querySelector(`[name="items[${itemIndex}][expected_end_date]"]`);
-                $(startDateInput).flatpickr({
-                    enableTime: false,
-                    dateFormat: 'Y-m-d',
-                    minDate: 'today',
-                    onChange: function(selectedDates, dateStr) {
-                        $(endDateInput).flatpickr().set('minDate', dateStr);
-                    }
-                });
-                $(endDateInput).flatpickr({
-                    enableTime: false,
-                    dateFormat: 'Y-m-d'
-                });
-
-                itemIndex++;
             }
 
-            // Gắn sự kiện cho nút thêm, xóa sự kiện cũ trước
-            $('#add-item-btn').off('click').on('click', function() {
-                addTreatmentItem();
-            });
+            // Update item numbers and re-index inputs
+            function updateItemNumbers() {
+                $('#treatment-items-container .item-card').each(function(idx) {
+                    const oldIndex = $(this).attr('data-index');
+                    $(this).attr('data-index', idx);
+                    $(this).find('.item-number').text(idx + 1);
 
-            // Thêm các bước điều trị cũ nếu có
-            @if (old('items'))
-                @foreach (old('items') as $oldItem)
-                    addTreatmentItem(@json($oldItem));
-                @endforeach
-            @endif
+                    // Update names and IDs of inputs
+                    $(this).find('[name^="items[' + oldIndex + ']"]').each(function() {
+                        const oldName = $(this).attr('name');
+                        const newName = oldName.replace('items[' + oldIndex + ']', 'items[' + idx +
+                            ']');
+                        $(this).attr('name', newName);
 
-            // Khởi tạo Flatpickr cho start_date và end_date
-            $('#start_date').flatpickr({
-                enableTime: false,
-                dateFormat: 'Y-m-d',
-                minDate: 'today',
-                onChange: function(selectedDates, dateStr) {
-                    $('#end_date').flatpickr().set('minDate', dateStr);
-                }
-            });
-            $('#end_date').flatpickr({
-                enableTime: false,
-                dateFormat: 'Y-m-d'
-            });
-
-            // Validation phía client trước khi submit
-            $('form').on('submit', function(e) {
-                const startDate = $('#start_date').val();
-                const endDate = $('#end_date').val();
-                if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Lỗi thời gian!',
-                        text: 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
-                        confirmButtonColor: '#667eea'
+                        const oldId = $(this).attr('id');
+                        if (oldId) {
+                            const newId = oldId.replace(oldIndex, idx);
+                            $(this).attr('id', newId);
+                        }
                     });
-                    $('#end_date').focus();
-                }
+
+                    // Update 'for' attributes of labels
+                    $(this).find('label[for^="items_' + oldIndex + '_"]').each(function() {
+                        const oldFor = $(this).attr('for');
+                        const newFor = oldFor.replace(oldIndex, idx);
+                        $(this).attr('for', newFor);
+                    });
+
+                    // Update IDs and names for radio buttons
+                    $(this).find('.item-type-radio').each(function() {
+                        const oldId = $(this).attr('id');
+                        const newId = oldId.replace(oldIndex, idx);
+                        $(this).attr('id', newId);
+                        $(this).attr('name', `items[${idx}][item_type]`);
+                    });
+                });
+
+                updateEmptyState();
+            }
+
+            // Add new treatment item
+            $('#add-item').on('click', function() {
+                const template = $('#treatment-item-template').html();
+                const newItemHtml = template.replace(/__INDEX__/g, itemIndex).replace(/__ITEM_NUMBER__/g,
+                    itemIndex + 1);
+                $('#treatment-items-container').append(newItemHtml);
+                itemIndex++;
+                updateItemNumbers();
+
+                // Animate the new item
+                $('#treatment-items-container .item-card').last().hide().fadeIn(300);
             });
 
-            // Smooth scrolling cho form validation
-            $('.form-control').on('invalid', function() {
-                this.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
+            // Handle remove item button
+            $(document).on('click', '.remove-item', function() {
+                const itemCard = $(this).closest('.item-card');
+                itemCard.fadeOut(300, function() {
+                    $(this).remove();
+                    updateItemNumbers();
+                    updateTotalCost();
                 });
             });
+
+            // Handle "Needs Appointment" checkbox
+            $(document).on('change', '.needs-appointment-checkbox', function() {
+                const appointmentFields = $(this).closest('.item-card').find('.appointment-fields');
+                if ($(this).is(':checked')) {
+                    appointmentFields.slideDown();
+                    appointmentFields.find('input, textarea').prop('required', true);
+                } else {
+                    appointmentFields.slideUp();
+                    appointmentFields.find('input, textarea').prop('required', false).val('');
+                }
+            });
+
+            // Handle Service/Custom step radio buttons
+            $(document).on('change', '.item-type-radio', function() {
+                const itemCard = $(this).closest('.item-card');
+                const serviceSelection = itemCard.find('.service-selection');
+                const customStepFields = itemCard.find('.custom-step-fields');
+                const serviceSelect = itemCard.find('.service-select');
+                const customTitle = itemCard.find('[name$="[title]"]');
+                const customDescription = itemCard.find('[name$="[description]"]');
+
+                if ($(this).val() === 'service') {
+                    serviceSelection.slideDown();
+                    customStepFields.slideUp();
+                    serviceSelect.prop('required', true);
+                    customTitle.prop('required', false).val('');
+                    customDescription.prop('required', false).val('');
+                } else {
+                    serviceSelection.slideUp();
+                    customStepFields.slideDown();
+                    serviceSelect.prop('required', false).val('');
+                    customTitle.prop('required', true);
+                    customDescription.prop('required', true);
+                }
+                updateTotalCost();
+            });
+
+            // Auto-fill title and description when service is selected
+            $(document).on('change', '.service-select', function() {
+                const selectedOption = $(this).find('option:selected');
+                const itemCard = $(this).closest('.item-card');
+                const customTitle = itemCard.find('[name$="[title]"]');
+                const customDescription = itemCard.find('[name$="[description]"]');
+
+                if (selectedOption.val()) {
+                    customTitle.val(selectedOption.text().split(' (')[0]);
+                    customDescription.val(selectedOption.data('description'));
+                } else {
+                    customTitle.val('');
+                    customDescription.val('');
+                }
+                updateTotalCost();
+            });
+
+            // Update total estimated cost
+            function updateTotalCost() {
+                let total = 0;
+                $('.service-select').each(function() {
+                    const price = parseFloat($(this).find('option:selected').text().match(/(\d+\.?\d*)/)?.[
+                        0
+                    ]) || 0;
+                    total += price;
+                });
+                $('#total_estimated_cost').val(total.toFixed(2));
+            }
+
+            // Save as draft
+            $('#save-draft').on('click', function() {
+                showLoading();
+                const form = $('#treatment-plan-form');
+                form.append('<input type="hidden" name="status" value="draft">');
+
+                // Remove required attributes for draft
+                $('.needs-appointment-checkbox:checked').each(function() {
+                    $(this).closest('.item-card').find(
+                        '.appointment-fields input, .appointment-fields textarea').prop(
+                        'required', false);
+                });
+
+                form.submit();
+            });
+
+            // Preview plan
+            $('#preview-plan').on('click', function() {
+                const formData = $('#treatment-plan-form').serializeArray();
+                let previewHtml = `
+                    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title" id="previewModalLabel">
+                                        <i class="fas fa-eye me-2"></i>
+                                        Xem trước Kế hoạch Điều trị
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <h5>Thông tin cơ bản</h5>
+                                    <p><strong>Tiêu đề:</strong> ${formData.find(item => item.name === 'plan_title')?.value || ''}</p>
+                                    <p><strong>Bệnh nhân:</strong> ${$('#patient_id option:selected').text() || 'Chưa chọn'}</p>
+                                    <p><strong>Ngày bắt đầu:</strong> ${formData.find(item => item.name === 'start_date')?.value || ''}</p>
+                                    <p><strong>Ngày kết thúc:</strong> ${formData.find(item => item.name === 'end_date')?.value || ''}</p>
+                                    <p><strong>Chẩn đoán:</strong> ${formData.find(item => item.name === 'diagnosis')?.value || ''}</p>
+                                    <p><strong>Mục tiêu:</strong> ${formData.find(item => item.name === 'goal')?.value || ''}</p>
+                                    <p><strong>Ghi chú:</strong> ${formData.find(item => item.name === 'notes')?.value || ''}</p>
+                                    <p><strong>Tổng chi phí:</strong> ${formData.find(item => item.name === 'total_estimated_cost')?.value || 0} VNĐ</p>
+                                    <p><strong>Trạng thái:</strong> ${formData.find(item => item.name === 'status')?.value === 'active' ? 'Kích hoạt' : 'Nháp'}</p>
+
+                                    <h5 class="mt-4">Các bước điều trị</h5>
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Tiêu đề</th>
+                                                <th>Loại</th>
+                                                <th>Ngày bắt đầu</th>
+                                                <th>Ngày kết thúc</th>
+                                                <th>Lịch hẹn</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                `;
+
+                $('.item-card').each(function(idx) {
+                    const serviceId = $(this).find('.service-select').val();
+                    const title = serviceId ?
+                        $(this).find('.service-select option:selected').text().split(' (')[0] :
+                        $(this).find('[name$="[title]"]').val();
+                    const type = $(this).find('.item-type-radio:checked').val() === 'service' ?
+                        'Dịch vụ' : 'Tùy chỉnh';
+                    const startDate = $(this).find('[name$="[expected_start_date]"]').val();
+                    const endDate = $(this).find('[name$="[expected_end_date]"]').val();
+                    const appointment = $(this).find('.needs-appointment-checkbox').is(':checked') ?
+                        $(this).find('[name$="[appointment_time]"]').val() || 'Chưa đặt' :
+                        'Không cần';
+
+                    previewHtml += `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td>${title || 'Chưa nhập'}</td>
+                            <td>${type}</td>
+                            <td>${startDate || 'Chưa nhập'}</td>
+                            <td>${endDate || 'Chưa nhập'}</td>
+                            <td>${appointment}</td>
+                        </tr>
+                    `;
+                });
+
+                previewHtml += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                $('body').append(previewHtml);
+                $('#previewModal').modal('show');
+                $('#previewModal').on('hidden.bs.modal', function() {
+                    $(this).remove();
+                });
+            });
+
+            // Reset form
+            $('#reset-form').on('click', function() {
+                if (confirm('Bạn có chắc muốn đặt lại form? Tất cả dữ liệu sẽ bị mất.')) {
+                    const form = document.getElementById('treatment-plan-form');
+                    form.reset();
+                    $('#patient_id').val(null).trigger('change');
+                    $('#treatment-items-container').empty();
+                    $('#total_estimated_cost').val('0.00');
+                    itemIndex = 0;
+                    updateEmptyState();
+                }
+            });
+
+            // Form validation
+            $('#treatment-plan-form').on('submit', function(e) {
+                showLoading();
+
+                let isValid = true;
+                const requiredFields = $(this).find('[required]');
+
+                requiredFields.each(function() {
+                    if (!$(this).val()) {
+                        isValid = false;
+                        $(this).addClass('is-invalid');
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+
+                // Validate dates
+                const startDate = $('#start_date').val();
+                const endDate = $('#end_date').val();
+                if (endDate && new Date(endDate) < new Date(startDate)) {
+                    isValid = false;
+                    $('#end_date').addClass('is-invalid');
+                    $('#end_date').after(
+                        '<div class="invalid-feedback">Ngày kết thúc phải sau ngày bắt đầu.</div>');
+                }
+
+                $('.item-card').each(function() {
+                    const expectedStartDate = $(this).find('[name$="[expected_start_date]"]').val();
+                    const expectedEndDate = $(this).find('[name$="[expected_end_date]"]').val();
+                    if (expectedEndDate && new Date(expectedEndDate) < new Date(
+                            expectedStartDate)) {
+                        isValid = false;
+                        $(this).find('[name$="[expected_end_date]"]').addClass('is-invalid');
+                        $(this).find('[name$="[expected_end_date]"]').after(
+                            '<div class="invalid-feedback">Ngày kết thúc dự kiến phải sau ngày bắt đầu dự kiến.</div>'
+                        );
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    hideLoading();
+
+                    const errorAlert = `
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Vui lòng điền đầy đủ và kiểm tra các trường bắt buộc.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `;
+
+                    $('body').scrollTop(0);
+                    $('.container-fluid').prepend(errorAlert);
+
+                    setTimeout(function() {
+                        $('.alert').fadeOut();
+                    }, 5000);
+                }
+            });
+
+            // Initialize total cost calculation
+            $(document).on('change', '.service-select, .item-type-radio, .remove-item', updateTotalCost);
+            updateTotalCost();
         });
     </script>
 @endpush

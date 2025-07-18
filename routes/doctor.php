@@ -101,6 +101,9 @@ Route::prefix('doctor')
 
                 Route::patch('treatment-plan-items/{itemId}/update-status', [TreatmentPlanController::class, 'updateItemStatus'])->name('treatment-plan-items.update-status');
             });
+
+        Route::post('/check-appointment', [DoctorAppointmentController::class, 'checkAppointmentAvailability'])
+            ->name('check-appointment');
         // Danh sách bác sĩ - URL: /doctor
         Route::get('/', [DoctorController::class, 'index'])->name('index');
 

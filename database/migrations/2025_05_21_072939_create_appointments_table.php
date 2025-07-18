@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->id()->comment('ID lịch hẹn');
             $table->foreignId('patient_id')->constrained('users')->onDelete('cascade')->comment('Người đặt lịch');
             $table->foreignId('doctor_id')->constrained('doctors')->onDelete('cascade')->comment('Bác sĩ thực hiện khám');
-            $table->foreignId('service_id')->constrained('services')->onDelete('cascade')->comment('Dịch vụ khám được chọn');
+            $table->foreignId('service_id')->nullable()->constrained('services')->onDelete('cascade')->comment('Dịch vụ khám được chọn');
             $table->dateTime('appointment_time')->nullable()->comment('Thời gian khám');
             $table->enum('status', ['pending', 'confirmed', 'completed', 'cancelled'])->nullable()->comment('Trạng thái lịch hẹn');
             $table->text('reason')->nullable()->comment('Lý do đặt lịch');

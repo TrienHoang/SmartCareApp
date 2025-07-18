@@ -23,7 +23,7 @@ class TreatmentPlanItem extends Model
     ];
     protected $casts = [
         // Hoặc 'date' tùy thuộc vào kiểu dữ liệu trong DB
-         'expected_start_date' => 'datetime',
+        'expected_start_date' => 'datetime',
         'expected_end_date' => 'datetime',
         'actual_end_date' => 'datetime',
     ];
@@ -35,16 +35,32 @@ class TreatmentPlanItem extends Model
         return $this->belongsTo(TreatmentPlan::class);
     }
 
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
+    }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
     public function getBadgeClassForStatus($status = null)
     {
         $statusToUse = $status ?? $this->status;
         switch ($statusToUse) {
-            case 'draft': return 'bg-dark';
-            case 'active': return 'bg-info';
-            case 'completed': return 'bg-success';
-            case 'paused': return 'bg-warning';
-            case 'cancelled': return 'bg-danger';
-            default: return 'bg-secondary'; // Fallback
+            case 'draft':
+                return 'bg-dark';
+            case 'active':
+                return 'bg-info';
+            case 'completed':
+                return 'bg-success';
+            case 'paused':
+                return 'bg-warning';
+            case 'cancelled':
+                return 'bg-danger';
+            default:
+                return 'bg-secondary'; // Fallback
         }
     }
 }
