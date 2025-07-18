@@ -62,9 +62,11 @@ class DatabaseSeeder extends Seeder
             // DoctorServiceSeeder::class,
             // DoctorDetailSeeder::class,
 
-        SpecialtySeeder::class,
-        DoctorSeeder::class,
-        DoctorDetailSeeder::class,
+        // SpecialtySeeder::class,
+        // DoctorSeeder::class,
+        // DoctorDetailSeeder::class,
+
+        ReviewReplySeeder::class
 
 
         ]);
