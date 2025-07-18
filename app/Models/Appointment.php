@@ -166,9 +166,8 @@ class Appointment extends Model
     } // long bổ xung mỗi lịch hẹn chỉ có một đơn thuốc
 
 
-
     public function review()
     {
-        return $this->hasOne(\App\Models\Review::class);
+        return $this->hasOne(Review::class);
     }
 }
