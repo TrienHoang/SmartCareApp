@@ -11,69 +11,78 @@ use App\Models\Appointment;
 
 class DoctorController extends Controller
 {
-public function show($id)
-{
-    // ✅ Lấy thông tin bác sĩ và các quan hệ liên quan
-    $doctor = Doctor::with([
-        'user',
-        'department',
-        'educations',
-        'experiences',
-        'achievements',
-        'specialties',
-        'reviews' => function ($query) {
-            $query->where('is_visible', true)
-                ->latest()
-                ->with(['patient', 'replies.user']);
-        },
-    ])->findOrFail($id);
+    public function show($id)
+    {
+        // ✅ Lấy thông tin bác sĩ và các quan hệ liên quan
+        $doctor = Doctor::with([
+            'user',
+            'department',
+            'educations',
+            'experiences',
+            'achievements',
+            'specialties',
+            'reviews' => function ($query) {
+                $query->where('is_visible', true)
+                    ->latest()
+                    ->with(['patient', 'replies.user']);
+            },
+        ])->findOrFail($id);
 
-    // ✅ Tính toán đánh giá
-    $visibleReviews = $doctor->reviews;
-    $averageRating = round($visibleReviews->avg('rating'), 1);
-    $reviewCount = $visibleReviews->count();
+        // ✅ Tính số năm kinh nghiệm (theo khoảng dài nhất)
+        $startYear = $doctor->experiences->min('start_year');
+        $endYear = $doctor->experiences->max('end_year') ?? now()->year;
 
-    $ratingBreakdown = collect([5, 4, 3, 2, 1])->mapWithKeys(function ($star) use ($visibleReviews) {
-        return [$star => $visibleReviews->where('rating', $star)->count()];
-    });
+        $experienceYears = 0;
+        if ($startYear) {
+            $experienceYears = ($endYear ?? now()->year) - $startYear;
+        }
+        $doctor->experience_years = $experienceYears > 0 ? $experienceYears : null;
 
-    // ✅ Kiểm tra xem user đã có cuộc hẹn hoàn tất chưa
-    $appointment = null;
-    $alreadyReviewed = false;
-    $userReview = null;
+        // ✅ Tính trung bình đánh giá và tổng số đánh giá
+        $visibleReviews = $doctor->reviews;
+        $averageRating = round($visibleReviews->avg('rating'), 1);
+        $reviewCount = $visibleReviews->count();
 
-    if (Auth::check()) {
-        $appointment = Appointment::where('doctor_id', $doctor->id)
-            ->where('patient_id', Auth::id())
-            ->where('status', 'completed')
-            ->latest()
-            ->first();
+        // ✅ Phân tích số sao
+        $ratingBreakdown = collect([5, 4, 3, 2, 1])->mapWithKeys(function ($star) use ($visibleReviews) {
+            return [$star => $visibleReviews->where('rating', $star)->count()];
+        });
 
-        // ✅ Nếu có cuộc hẹn => kiểm tra đã đánh giá chưa
-        if ($appointment) {
-            $alreadyReviewed = Review::where('appointment_id', $appointment->id)
+        // ✅ Kiểm tra người dùng đã có cuộc hẹn và đã đánh giá chưa
+        $appointment = null;
+        $alreadyReviewed = false;
+        $userReview = null;
+
+        if (Auth::check()) {
+            $appointment = Appointment::where('doctor_id', $doctor->id)
                 ->where('patient_id', Auth::id())
-                ->exists();
+                ->where('status', 'completed')
+                ->latest()
+                ->first();
 
-            if ($alreadyReviewed) {
-                $userReview = Review::where('appointment_id', $appointment->id)
+            if ($appointment) {
+                $alreadyReviewed = Review::where('appointment_id', $appointment->id)
                     ->where('patient_id', Auth::id())
-                    ->with('replies.user') // nếu có phản hồi
-                    ->first();
+                    ->exists();
+
+                if ($alreadyReviewed) {
+                    $userReview = Review::where('appointment_id', $appointment->id)
+                        ->where('patient_id', Auth::id())
+                        ->with('replies.user')
+                        ->first();
+                }
             }
         }
+
+        // ✅ Truyền tất cả dữ liệu sang view
+        return view('client.doctors_detail', compact(
+            'doctor',
+            'averageRating',
+            'reviewCount',
+            'ratingBreakdown',
+            'appointment',
+            'alreadyReviewed',
+            'userReview'
+        ));
     }
-
-    // ✅ Truyền tất cả sang view
-    return view('client.doctors_detail', compact(
-        'doctor',
-        'averageRating',
-        'reviewCount',
-        'ratingBreakdown',
-        'appointment',
-        'alreadyReviewed',
-        'userReview'
-    ));
-}
-
 }
