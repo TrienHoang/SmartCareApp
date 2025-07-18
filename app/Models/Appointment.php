@@ -159,4 +159,15 @@ class Appointment extends Model
         return $query->whereMonth('appointment_time', Carbon::now()->month)
             ->whereYear('appointment_time', Carbon::now()->year);
     }
+
+    public function prescription()
+    {
+        return $this->hasOne(Prescription::class);
+    } // long bổ xung mỗi lịch hẹn chỉ có một đơn thuốc
+
+
+    public function review()
+    {
+        return $this->hasOne(Review::class);
+    }
 }

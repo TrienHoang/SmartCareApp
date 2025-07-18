@@ -259,9 +259,7 @@
                                                     <h6 class="mb-0 font-weight-semibold text-primary">
                                                         {{ $doctor->user->full_name ?? 'Không có thông tin' }}
                                                     </h6>
-                                                    <small class="text-muted">
-                                                        {{ $doctor->user->username ?? 'N/A' }}
-                                                    </small>
+
                                                 </div>
                                             </div>
                                         </td>

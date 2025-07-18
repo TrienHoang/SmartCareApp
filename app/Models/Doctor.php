@@ -87,4 +87,30 @@ class Doctor extends Model
             ->whereDate('end_date', '>=', now())
             ->exists();
     }
+
+    public function educations()
+    {
+        return $this->hasMany(Education::class);
+    }
+
+    public function experiences()
+    {
+        return $this->hasMany(Experience::class);
+    }
+
+    public function achievements()
+    {
+        return $this->hasMany(Achievement::class);
+    }
+
+    public function specialties()
+    {
+        return $this->belongsToMany(Specialty::class, 'doctor_specialty');
+    }
+
+    
+
+    
+
+    
 }
