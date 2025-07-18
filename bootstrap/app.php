@@ -7,6 +7,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\CheckAdminMiddleware;
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\ReceptionistMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -19,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'checkAdmin' => CheckAdminMiddleware::class,
             'check_permission' => CheckPermission::class,
             'checkRole' => CheckRole::class,
-
+            'receptionist' => ReceptionistMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

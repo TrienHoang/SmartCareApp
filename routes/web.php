@@ -710,3 +710,8 @@ require __DIR__ . '/client.php';
 
 // Trong routes/web.php hoặc routes/doctor.php
 require __DIR__ . '/doctor.php';
+
+
+
+// Route phần lễ tân
+require __DIR__ . '/reception.php';
