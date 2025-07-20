@@ -18,6 +18,7 @@
         "laravel/socialite": "^5.21",
         "laravel/tinker": "^2.10.1",
         "maatwebsite/excel": "^3.1",
+        "nesbot/carbon": "^3.10",
         "spatie/laravel-permission": "*"
     },
     "require-dev": {
@@ -36,7 +37,9 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Helpers/PermissionHelper.php"
+            "app/Helpers/PermissionHelper.php",
+                    "app/Helpers/TimeHelper.php"
+
         ]
     },
     "autoload-dev": {
