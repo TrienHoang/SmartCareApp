@@ -4,10 +4,11 @@ namespace App\Http\Controllers\reception;
 
 use App\Helpers\AppointmentHelper;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreAppointmentRequest;
 use App\Models\Appointment;
+use App\Models\AppointmentLog;
 use App\Models\Doctor;
 use App\Models\DoctorLeave;
+use App\Models\MedicalRecord;
 use App\Models\Order;
 use App\Models\OrderService;
 use App\Models\Payment;
@@ -167,6 +168,7 @@ class ReceptionAppointmentController extends Controller
     {
         $date = $request->input('date', now()->toDateString());
         $serviceId = $request->input('service_id');
+        $currentAppointmentId = $request->input('current_appointment_id');
 
         if (!$serviceId) {
             return response()->json(['error' => 'Service ID is required'], 400);
@@ -186,6 +188,7 @@ class ReceptionAppointmentController extends Controller
         $appointments = Appointment::where('doctor_id', $doctorId)
             ->whereDate('appointment_time', $date)
             ->whereNotIn('status', ['cancelled'])
+            ->when($currentAppointmentId, fn($q) => $q->where('id', '<>', $currentAppointmentId))
             ->get()
             ->map(function ($a) {
                 return [
@@ -467,5 +470,196 @@ class ReceptionAppointmentController extends Controller
         $service = $appointment->service;
 
         return view('reception.appointments.show', compact('appointment', 'doctor', 'service'));
+    }
+
+    public function edit($id)
+    {
+        $appointment = Appointment::with([
+            'patient',
+            'doctor.user',
+            'service',
+            'payment'
+        ])->findOrFail($id);
+
+        if (in_array($appointment->status, ['completed', 'cancelled'])) {
+            return redirect()->route('receptionist.appointments.index')
+                ->withErrors(['error' => 'Không thể sửa lịch hẹn đã hoàn tất hoặc đã huỷ.']);
+        }
+
+        $patients = User::where('role_id', 4)->get();
+        $doctors = Doctor::with('user')->get();
+        $services = Service::where('status', 'active')->get();
+
+        return view('reception.appointments.edit', compact(
+            'appointment',
+            'patients',
+            'doctors',
+            'services'
+        ));
+    }
+
+
+    public function update(Request $request, $id)
+    {
+
+        $appointment = Appointment::with(['service'])->findOrFail($id);
+
+        if (in_array($appointment->status, ['completed', 'cancelled'])) {
+            return back()->withErrors(['error' => 'Không thể sửa lịch hẹn đã hoàn tất hoặc đã huỷ.'])->withInput();
+        }
+
+        $validated = $request->validate([
+            'patient_id' => ['required', 'exists:users,id'],
+            'doctor_id' => ['required', 'exists:doctors,id'],
+            'service_id' => ['required', 'exists:services,id'],
+            'appointment_time' => ['required', 'date', 'after:now'],
+            'reason' => ['nullable', 'string', 'max:255'],
+            'payment_method' => ['required', Rule::in(['cash', 'card', 'bank'])],
+            'status' => ['required', Rule::in(['pending', 'confirmed', 'completed', 'cancelled'])],
+        ], [
+            'patient_id.required' => 'Vui lòng chọn bệnh nhân.',
+            'doctor_id.required' => 'Vui lòng chọn bác sĩ.',
+            'service_id.required' => 'Vui lòng chọn dịch vụ khám.',
+            'appointment_time.required' => 'Vui lòng chọn thời gian hẹn.',
+            'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
+            'status.required' => 'Vui lòng chọn trạng thái lịch hẹn.',
+        ]);
+
+        $appointmentDate = Carbon::parse($validated['appointment_time']);
+        $timeOnly = $appointmentDate->format('H:i');
+        $day = $appointmentDate->format('Y-m-d');
+        $dayOfWeek = $appointmentDate->format('l');
+
+        $doctor = Doctor::with(['department', 'user'])->findOrFail($validated['doctor_id']);
+        $service = Service::with('department')->findOrFail($validated['service_id']);
+
+        // Kiểm tra chuyên khoa
+        if ($doctor->department_id !== $service->department_id) {
+            $recommendedList = Service::where('department_id', $doctor->department_id)
+                ->limit(5)
+                ->pluck('name')
+                ->implode(', ');
+
+            return back()->withErrors([
+                'service_id' => 'Dịch vụ bạn chọn thuộc chuyên khoa: ' . ($service->department->name ?? 'Không xác định') .
+                    ', nhưng bác sĩ thuộc chuyên khoa: ' . ($doctor->department->name ?? 'Không xác định') . '.' .
+                    ' Bạn có thể chọn: ' . $recommendedList . '.'
+            ])->withInput();
+        }
+
+        // Kiểm tra trạng thái bác sĩ
+        if ($doctor->user->status !== 'online') {
+            return back()->withErrors(['doctor_id' => 'Bác sĩ hiện không hoạt động, vui lòng chọn bác sĩ khác.'])->withInput();
+        }
+
+        // Kiểm tra xung đột lịch
+        $conflict = AppointmentHelper::isConflict(
+            $validated['doctor_id'],
+            $validated['appointment_time'],
+            $validated['service_id'],
+            $appointment->id
+        );
+
+        if ($conflict['doctor_conflict']) {
+            return back()->withErrors(['appointment_time' => 'Bác sĩ đã có lịch hẹn thời gian này.'])->withInput();
+        }
+
+        if ($conflict['room_conflict']) {
+            return back()->withErrors(['appointment_time' => 'Phòng khám đã có lịch hẹn thời gian này.'])->withInput();
+        }
+
+        // Kiểm tra lịch làm việc
+        $working = WorkingSchedule::where('doctor_id', $validated['doctor_id'])
+            ->whereDate('day', $day)
+            ->first()
+            ?? WorkingSchedule::where('doctor_id', $validated['doctor_id'])
+            ->where('day_of_week', $dayOfWeek)
+            ->first();
+
+        if (!$working) {
+            if ($dayOfWeek === 'Sunday') {
+                return back()->withErrors(['doctor_id' => 'Bác sĩ không làm việc Chủ nhật.'])->withInput();
+            }
+            $working = (object) ['start_time' => '08:00', 'end_time' => '17:00'];
+        }
+
+        if ($timeOnly < $working->start_time || $timeOnly >= $working->end_time) {
+            return back()->withErrors(['appointment_time' => 'Giờ hẹn ngoài khung giờ làm việc (' . $working->start_time . ' - ' . $working->end_time . ').'])->withInput();
+        }
+
+        // Kiểm tra nghỉ phép
+        $onLeave = DoctorLeave::where('doctor_id', $validated['doctor_id'])
+            ->where('start_date', '<=', $appointmentDate)
+            ->where('end_date', '>=', $appointmentDate)
+            ->where('approved', true)
+            ->exists();
+
+        if ($onLeave) {
+            return back()->withErrors(['doctor_id' => 'Bác sĩ đang nghỉ phép ngày này.'])->withInput();
+        }
+
+        // Kiểm tra trùng lịch bệnh nhân
+        $appointmentTime = $appointmentDate;
+        $endTime = $appointmentTime->copy()->addMinutes($service->duration);
+
+        $patientConflict = Appointment::where('patient_id', $validated['patient_id'])
+            ->where('id', '!=', $appointment->id) // loại chính nó ra
+            ->where(function ($q) use ($appointmentTime, $endTime) {
+                $q->where('appointment_time', '<', $endTime)
+                    ->where('end_time', '>', $appointmentTime);
+            })
+            ->exists();
+
+
+        DB::beginTransaction();
+
+        try {
+            $endTime = $appointmentDate->copy()->addMinutes($service->duration);
+
+            // $appointmentStatus = $validated['payment_method'] === 'cash' ? 'confirmed' : 'pending';
+            $paymentStatus = $validated['payment_method'] === 'cash' ? 'paid' : 'pending';
+            $orderStatus = $validated['payment_method'] === 'cash' ? 'completed' : 'pending';
+
+            $appointment->update([
+                'patient_id' => $validated['patient_id'],
+                'doctor_id' => $validated['doctor_id'],
+                'service_id' => $validated['service_id'],
+                'appointment_time' => $validated['appointment_time'],
+                'end_time' => $endTime,
+                'status' => $validated['status'],
+                'reason' => $validated['reason'] ?? null,
+                'updated_by' => auth()->id(),
+            ]);
+
+            $appointment->order->update([
+                'total_amount' => $service->price,
+                'status' => $orderStatus,
+            ]);
+
+            DB::table('order_service')
+                ->where('order_id', $appointment->order->id)
+                ->update([
+                    'service_id' => $service->id,
+                    'price' => $service->price,
+                    'updated_at' => now(),
+                ]);
+
+
+            $appointment->payment->update([
+                'amount' => $service->price,
+                'status' => $paymentStatus,
+                'payment_method' => $validated['payment_method'],
+                'paid_at' => $paymentStatus === 'paid' ? now() : null,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('receptionist.appointments.index')
+                ->with('success', 'Cập nhật lịch hẹn thành công.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+            return back()->withErrors(['error' => 'Có lỗi khi cập nhật lịch hẹn: ' . $e->getMessage()])->withInput();
+        }
     }
 }
