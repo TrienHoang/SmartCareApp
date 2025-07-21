@@ -3,6 +3,7 @@ $(document).ready(function () {
     const $hidden = $('#patient_id_hidden');
     const $doctor = $('#doctor_id');
     const $serviceSelect = $('#service_id');
+    const $servicePrice = $('#service_price');
     const $dateInput = $('#appointment_date');
     const $slotSelect = $('#appointment_slot');
     const $vacationNotice = $('#vacation-notice');
@@ -10,26 +11,14 @@ $(document).ready(function () {
 
     let flatpickrDate;
 
-    function formatDateRange(dates) {
-        if (!dates?.length) return '';
-        const sorted = [...dates].sort();
-        const groups = [];
-        let group = [sorted[0]];
-        for (let i = 1; i < sorted.length; i++) {
-            const prev = new Date(sorted[i - 1]);
-            const curr = new Date(sorted[i]);
-            const diff = (curr - prev) / (1000 * 60 * 60 * 24);
-            if (diff === 1) group.push(sorted[i]);
-            else {
-                groups.push(group);
-                group = [sorted[i]];
-            }
-        }
-        groups.push(group);
-        return groups.map(group => {
-            if (group.length === 1) return group[0];
-            else return `${group[0]} đến ${group[group.length - 1]}`;
-        }).join(', ');
+    function resetForm() {
+        $doctor.val('').trigger('change.select2');
+        $serviceSelect.html('<option value="">Chọn dịch vụ</option>').trigger('change.select2');
+        $servicePrice.val('');
+        $slotSelect.html('<option value="">Chọn giờ</option>').prop('disabled', true);
+        $dateInput.val('').prop('disabled', true);
+        $vacationNotice.addClass('d-none');
+        if (flatpickrDate) flatpickrDate.destroy();
     }
 
     // 🔍 Autocomplete bệnh nhân
@@ -50,15 +39,6 @@ $(document).ready(function () {
         }
     });
 
-    function resetForm() {
-        $doctor.val('').trigger('change.select2');
-        $serviceSelect.html('<option value="">Chọn dịch vụ</option>').trigger('change.select2');
-        $slotSelect.html('<option value="">Chọn giờ</option>').prop('disabled', true);
-        $dateInput.val('').prop('disabled', true);
-        $vacationNotice.addClass('d-none');
-        if (flatpickrDate) flatpickrDate.destroy();
-    }
-
     $doctor.on('change', function () {
         const doctorId = $(this).val();
 
@@ -72,16 +52,19 @@ $(document).ready(function () {
     });
 
     $serviceSelect.on('change', function () {
+        const price = parseFloat($(this).find(':selected').data('price')) || 0;
+        $('#service_price').val(price.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ₫');
         loadAvailableSlots();
     });
 
     function loadServices(doctorId) {
         $.get(window.doctorServicesUrl.replace(':id', doctorId), data => {
             const html = data.map(service => `
-                <option value="${service.id}">
+                <option value="${service.id}" data-price="${service.price}">
                     ${service.name} (${service.department?.name ?? 'Không rõ khoa'})
                 </option>`).join('');
             $serviceSelect.html('<option value="">Chọn dịch vụ</option>' + html).trigger('change.select2');
+            $servicePrice.val('');
         }).fail(() => toastr.error('Không thể tải danh sách dịch vụ'));
     }
 
@@ -97,18 +80,14 @@ $(document).ready(function () {
                 disableMobile: true,
                 locale: 'vi',
                 disable: [
-                    // Disable vacation dates
                     ...vacationDates,
-                    // Disable Sundays
-                    function (date) {
-                        return date.getDay() === 0;
-                    }
+                    date => date.getDay() === 0
                 ],
                 onChange: loadAvailableSlots
             });
 
             if (vacationDates.length) {
-                const info = formatDateRange(vacationDates);
+                const info = vacationDates.join(', ');
                 $vacationText.text(`Bác sĩ nghỉ: ${info}`);
                 $vacationNotice.removeClass('d-none');
             } else {
@@ -144,6 +123,25 @@ $(document).ready(function () {
             $slotSelect.html('<option value="">Chọn giờ</option>').prop('disabled', true);
         });
     }
+
+    $('#payment_method').on('change', function () {
+        const val = $(this).val();
+        let note = '';
+        let status = '';
+
+        if (val === 'cash') {
+            note = 'Thanh toán sẽ được xử lý ngay.';
+            status = 'confirmed';
+        } else {
+            note = 'Cần xác nhận thanh toán sau khi nhận tiền.';
+            status = 'pending';
+        }
+
+        $('#payment_note').text(note);
+        $('#status_display').text(status === 'confirmed' ? 'Đã xác nhận' : 'Chờ xác nhận');
+        $('input[name="status"]').val(status);
+    }).trigger('change');
+
 
     // ⚡ Khởi tạo lại dữ liệu cũ
     if ($doctor.val()) {

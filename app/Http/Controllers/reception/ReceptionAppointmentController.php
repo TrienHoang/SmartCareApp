@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ReceptionAppointmentController extends Controller
 {
@@ -231,17 +232,34 @@ class ReceptionAppointmentController extends Controller
         return response()->json($availableSlots);
     }
 
-    public function store(StoreAppointmentRequest $request)
+    public function store(Request $request)
     {
-        $appointmentDate = Carbon::parse($request->appointment_time);
-        $dayOfWeek = $appointmentDate->format('l');
+        $validated = $request->validate([
+            'patient_id' => ['required', 'exists:users,id'],
+            'doctor_id' => ['required', 'exists:doctors,id'],
+            'service_id' => ['required', 'exists:services,id'],
+            'appointment_time' => ['required', 'date', 'after:now'],
+            'reason' => ['nullable', 'string', 'max:255'],
+            'treatment_plan_id' => ['nullable', 'exists:treatment_plans,id'],
+            'payment_method' => ['required', Rule::in(['cash', 'card', 'bank'])],
+        ], [
+            'patient_id.required' => 'Vui lòng chọn bệnh nhân.',
+            'doctor_id.required' => 'Vui lòng chọn bác sĩ.',
+            'service_id.required' => 'Vui lòng chọn dịch vụ khám.',
+            'appointment_time.required' => 'Vui lòng chọn thời gian hẹn.',
+            'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
+        ]);
+
+        $appointmentDate = Carbon::parse($validated['appointment_time']);
         $timeOnly = $appointmentDate->format('H:i');
         $day = $appointmentDate->format('Y-m-d');
+        $dayOfWeek = $appointmentDate->format('l');
 
-        $doctor = Doctor::with(['department', 'user'])->findOrFail($request->doctor_id);
-        $service  = Service::with('department')->findOrFail($request->service_id);
+        $doctor = Doctor::with(['department', 'user'])->findOrFail($validated['doctor_id']);
+        $service = Service::with('department')->findOrFail($validated['service_id']);
 
-        if ((int) $doctor->department_id !== (int) $service->department_id) {
+        // Kiểm tra chuyên khoa
+        if ($doctor->department_id !== $service->department_id) {
             $recommendedList = Service::where('department_id', $doctor->department_id)
                 ->limit(5)
                 ->pluck('name')
@@ -249,81 +267,66 @@ class ReceptionAppointmentController extends Controller
 
             return back()->withErrors([
                 'service_id' => 'Dịch vụ bạn chọn thuộc chuyên khoa: ' . ($service->department->name ?? 'Không xác định') .
-                    ', nhưng bác sĩ được chỉ định hiện thuộc chuyên khoa: ' . ($doctor->department->name ?? 'Không xác định') . '.' .
-                    ' Bạn có thể chọn một trong các dịch vụ phù hợp: ' . $recommendedList . '.'
+                    ', nhưng bác sĩ thuộc chuyên khoa: ' . ($doctor->department->name ?? 'Không xác định') . '.' .
+                    ' Bạn có thể chọn: ' . $recommendedList . '.'
             ])->withInput();
         }
 
+        // Kiểm tra trạng thái bác sĩ
         if ($doctor->user->status !== 'online') {
-            return back()->withErrors([
-                'doctor_id' => 'Bác sĩ hiện không hoạt động, vui lòng chọn bác sĩ khác.'
-            ])->withInput();
+            return back()->withErrors(['doctor_id' => 'Bác sĩ hiện không hoạt động, vui lòng chọn bác sĩ khác.'])->withInput();
         }
 
+        // Kiểm tra xung đột lịch
         $conflict = AppointmentHelper::isConflict(
-            $request->doctor_id,
-            $request->appointment_time,
-            $request->service_id
+            $validated['doctor_id'],
+            $validated['appointment_time'],
+            $validated['service_id']
         );
 
         if ($conflict['doctor_conflict']) {
-            return back()->withErrors([
-                'appointment_time' => 'Bác sĩ đã có lịch hẹn vào thời gian bạn chọn. Vui lòng chọn thời gian khác.'
-            ])->withInput();
+            return back()->withErrors(['appointment_time' => 'Bác sĩ đã có lịch hẹn thời gian này.'])->withInput();
         }
 
         if ($conflict['room_conflict']) {
-            return back()->withErrors([
-                'appointment_time' => 'Phòng khám đã có lịch hẹn vào thời gian bạn chọn. Vui lòng chọn thời gian khác.'
-            ])->withInput();
+            return back()->withErrors(['appointment_time' => 'Phòng khám đã có lịch hẹn thời gian này.'])->withInput();
         }
 
-        $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
+        // Kiểm tra lịch làm việc
+        $working = WorkingSchedule::where('doctor_id', $validated['doctor_id'])
             ->whereDate('day', $day)
+            ->first()
+            ?? WorkingSchedule::where('doctor_id', $validated['doctor_id'])
+            ->where('day_of_week', $dayOfWeek)
             ->first();
 
         if (!$working) {
-            $working = WorkingSchedule::where('doctor_id', $request->doctor_id)
-                ->where('day_of_week', $dayOfWeek)
-                ->first();
-        }
-
-        if (!$working) {
-            if (!in_array($dayOfWeek, ['Sunday'])) {
-                $working = new \stdClass();
-                $working->start_time = '08:00';
-                $working->end_time = '17:00';
-            } else {
-                return back()->withErrors([
-                    'doctor_id' => 'Bác sĩ không làm việc vào Chủ nhật. Vui lòng chọn Thứ 2 - Thứ 7.'
-                ])->withInput();
+            if ($dayOfWeek === 'Sunday') {
+                return back()->withErrors(['doctor_id' => 'Bác sĩ không làm việc Chủ nhật.'])->withInput();
             }
+            $working = (object) ['start_time' => '08:00', 'end_time' => '17:00'];
         }
 
         if ($timeOnly < $working->start_time || $timeOnly >= $working->end_time) {
-            return back()->withErrors([
-                'appointment_time' => 'Giờ hẹn không nằm trong khung giờ làm việc của bác sĩ. '
-                    . 'Khung giờ làm việc là từ ' . $working->start_time . ' đến ' . $working->end_time . '.'
-            ])->withInput();
+            return back()->withErrors(['appointment_time' => 'Giờ hẹn ngoài khung giờ làm việc (' . $working->start_time . ' - ' . $working->end_time . ').'])->withInput();
         }
 
-        $onLeave = DoctorLeave::where('doctor_id', $request->doctor_id)
+        // Kiểm tra nghỉ phép
+        $onLeave = DoctorLeave::where('doctor_id', $validated['doctor_id'])
             ->where('start_date', '<=', $appointmentDate)
             ->where('end_date', '>=', $appointmentDate)
             ->where('approved', true)
             ->exists();
 
         if ($onLeave) {
-            return back()->withErrors([
-                'doctor_id' => 'Bác sĩ đang trong thời gian nghỉ phép vào ngày bạn chọn. Vui lòng chọn ngày khác.'
-            ])->withInput();
+            return back()->withErrors(['doctor_id' => 'Bác sĩ đang nghỉ phép ngày này.'])->withInput();
         }
 
-        $appointmentTime = Carbon::parse($request->appointment_time);
-        $duration = $service->duration;
-        $endTime = $appointmentTime->copy()->addMinutes($duration);
+        // Kiểm tra trùng lịch bệnh nhân
+        $appointmentTime = $appointmentDate;
+        $endTime = $appointmentTime->copy()->addMinutes($service->duration);
 
-        $patientConflict = Appointment::where('patient_id', $request->patient_id)
+        $patientConflict = Appointment::where('patient_id', $validated['patient_id'])
             ->where(function ($q) use ($appointmentTime, $endTime) {
                 $q->where('appointment_time', '<', $endTime)
                     ->where('end_time', '>', $appointmentTime);
@@ -331,57 +334,138 @@ class ReceptionAppointmentController extends Controller
             ->exists();
 
         if ($patientConflict) {
-            return back()->withErrors([
-                'appointment_time' => 'Bệnh nhân đã có lịch hẹn khác bị trùng thời gian này!'
-            ])->withInput();
+            return back()->withErrors(['appointment_time' => 'Bệnh nhân đã có lịch hẹn trùng giờ này.'])->withInput();
         }
 
-        $requestData = $request->only([
-            'patient_id',
-            'doctor_id',
-            'service_id',
-            'appointment_time',
-            'status',
-            'reason',
-            'treatment_plan_id',
-        ]);
+        DB::beginTransaction();
 
-        $requestData['end_time'] = $endTime;
+        try {
+            $endTime = $appointmentDate->copy()->addMinutes($service->duration);
 
-        $appointment = Appointment::create($requestData);
+            // 🎯 Logic trạng thái dựa trên payment_method
+            $appointmentStatus = $validated['payment_method'] === 'cash' ? 'confirmed' : 'pending';
+            $paymentStatus = $validated['payment_method'] === 'cash' ? 'paid' : 'pending';
+            $orderStatus = $validated['payment_method'] === 'cash' ? 'completed' : 'pending';
 
-        $price = $service->price;
+            $appointment = Appointment::create([
+                'patient_id' => $validated['patient_id'],
+                'doctor_id' => $validated['doctor_id'],
+                'service_id' => $validated['service_id'],
+                'appointment_time' => $validated['appointment_time'],
+                'end_time' => $endTime,
+                'status' => $appointmentStatus,
+                'reason' => $validated['reason'] ?? null,
+                'treatment_plan_id' => $validated['treatment_plan_id'] ?? null,
+                'created_by' => auth()->id(),
+            ]);
 
-        $order = Order::create([
-            'user_id' => $request->patient_id,
-            'appointment_id' => $appointment->id,
-            'total_amount' => $price,
-            'status' => 'completed',
-            'ordered_at' => now(),
-        ]);
+            $price = $service->price;
 
-        OrderService::create([
-            'order_id' => $order->id,
-            'service_id' => $service->id,
-            'quantity' => 1,
-            'price' => $price,
-        ]);
+            $order = Order::create([
+                'user_id' => $validated['patient_id'],
+                'appointment_id' => $appointment->id,
+                'total_amount' => $price,
+                'status' => $orderStatus,
+                'ordered_at' => now(),
+                'created_by' => auth()->id(),
+            ]);
 
-        $payment = Payment::create([
-            'appointment_id' => $appointment->id,
-            'amount' => $price,
-            'status' => 'paid',
-            'payment_method' => 'cash',
-            'paid_at' => now(),
-        ]);
+            OrderService::create([
+                'order_id' => $order->id,
+                'service_id' => $service->id,
+                'quantity' => 1,
+                'price' => $price,
+            ]);
 
-        PaymentHistory::create([
-            'payment_id' => $payment->id,
-            'amount' => $payment->amount,
-            'payment_method' => 'cash',
-            'payment_date' => now(),
-        ]);
+            $payment = Payment::create([
+                'appointment_id' => $appointment->id,
+                'amount' => $price,
+                'status' => $paymentStatus,
+                'payment_method' => $validated['payment_method'],
+                'paid_at' => $paymentStatus === 'paid' ? now() : null,
+                'user_id' => auth()->id(),
+            ]);
 
-        return redirect()->route('receptionist.appointments.index')->with('success', 'Tạo lịch hẹn thành công');
+            // Chỉ ghi PaymentHistory nếu đã trả
+            if ($paymentStatus === 'paid') {
+                PaymentHistory::create([
+                    'payment_id' => $payment->id,
+                    'amount' => $payment->amount,
+                    'payment_method' => $payment->payment_method,
+                    'payment_date' => now(),
+                    'user_id' => auth()->id(),
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('receptionist.appointments.index')
+                ->with('success', 'Tạo lịch hẹn thành công.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+            return back()->withErrors(['error' => 'Có lỗi khi tạo lịch hẹn: ' . $e->getMessage()])->withInput();
+        }
+    }
+
+    public function pay($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+
+        DB::transaction(function () use ($appointment) {
+            $payment = $appointment->payment;
+            $payment->update([
+                'status' => 'paid',
+                'paid_at' => now(),
+            ]);
+
+            $appointment->update([
+                'status' => 'confirmed',
+            ]);
+        });
+
+        return back()->with('success', 'Đã xác nhận thanh toán & lịch hẹn.');
+    }
+
+
+    public function confirmPayment($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+
+        $payment = $appointment->payment;
+
+        if (!$payment || $payment->status === 'paid') {
+            return back()->with('error', 'Không tìm thấy khoản cần xác nhận hoặc đã thanh toán.');
+        }
+
+        DB::transaction(function () use ($appointment, $payment) {
+            $payment->update([
+                'status' => 'paid',
+                'paid_at' => now(),
+            ]);
+
+            $appointment->update([
+                'status' => 'confirmed',
+            ]);
+
+            PaymentHistory::create([
+                'payment_id' => $payment->id,
+                'amount' => $payment->amount,
+                'payment_method' => $payment->payment_method,
+                'payment_date' => now(),
+                'user_id' => auth()->id(),
+            ]);
+        });
+
+        return back()->with('success', 'Xác nhận thanh toán & cập nhật lịch hẹn thành công.');
+    }
+
+    public function show($id)
+    {
+        $appointment = Appointment::with(['patient', 'doctor.user', 'service'])->findOrFail($id);
+        $doctor = $appointment->doctor;
+        $service = $appointment->service;
+
+        return view('reception.appointments.show', compact('appointment', 'doctor', 'service'));
     }
 }

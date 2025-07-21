@@ -48,6 +48,8 @@ Route::prefix('receptionist')
 
             Route::post('/{id}/pay', [ReceptionAppointmentController::class, 'pay'])->name('pay');
 
+            Route::patch('/{id}/confirm-payment', [ReceptionAppointmentController::class, 'confirmPayment'])->name('confirm-payment');
+
             Route::get('/patients/search', [ReceptionAppointmentController::class, 'searchPatients'])->name('patients.search');
 
             Route::get('/doctor/{doctor}/services', [ReceptionAppointmentController::class, 'getDoctorServices'])->name('doctor.services');

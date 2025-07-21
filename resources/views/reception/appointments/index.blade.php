@@ -412,6 +412,17 @@
                                                     </button>
                                                 @endif
 
+                                                @if ($appointment->payment && $appointment->payment->status !== 'paid')
+                                                    <form method="POST"
+                                                        action="{{ route('receptionist.appointments.confirm-payment', $appointment->id) }}">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button class="btn btn-outline-success" data-toggle="tooltip" title="Xác nhận đã thanh toán">
+                                                            <i class="fas fa-money-check-alt"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+
                                                 @if ($appointment->status === 'confirmed')
                                                     <button type="button" class="btn btn-outline-success"
                                                         data-toggle="tooltip" title="Hoàn thành"

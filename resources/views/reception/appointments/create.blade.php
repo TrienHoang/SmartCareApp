@@ -72,6 +72,10 @@
                             @enderror
                         </div>
 
+                        <div class="col-12 col-md-6">
+                            <label for="service_price" class="form-label">Giá dịch vụ</label>
+                            <input type="text" id="service_price" class="form-control" readonly>
+                        </div>
 
                         <div class="col-12 col-md-6">
                             <label for="appointment_date" class="form-label">Ngày khám</label>
@@ -86,15 +90,23 @@
                             </select>
                         </div>
 
+                        <div class="col-12 col-md-6">
+                            <label for="payment_method">Phương thức thanh toán</label>
+                            <select name="payment_method" id="payment_method" class="form-control" required>
+                                <option value="cash">Tiền mặt</option>
+                                <option value="card">Thẻ</option>
+                                <option value="bank">Chuyển khoản</option>
+                            </select>
+                            <div id="payment_note" class="text-muted small mt-1">
+                                Thanh toán sẽ được xử lý ngay nếu là tiền mặt. Đối với thẻ/chuyển khoản, cần xác nhận thanh
+                                toán sau.
+                            </div>
+                        </div>
 
                         <!-- Trạng thái -->
                         <div class="col-12 col-md-6">
                             <label for="status" class="form-label">Trạng thái</label>
-                            <select name="status" id="status" class="form-select" disabled>
-                                <option value="pending" disabled>Chờ xác nhận</option>
-                                <option value="confirmed" selected>Đã xác nhận</option>
-                                <option value="cancelled" disabled>Đã hủy</option>
-                            </select>
+                            <div id="status_display" class="fw-bold">Đã xác nhận</div>
                             <input type="hidden" name="status" value="confirmed">
                         </div>
 
@@ -111,7 +123,8 @@
                         <!-- Buttons -->
                         <div class="col-12 d-flex flex-wrap justify-content-between mt-3">
                             <button type="submit" class="btn btn-primary mb-2">Tạo lịch hẹn</button>
-                            <a href="{{ route('receptionist.appointments.index') }}" class="btn btn-secondary mb-2">Hủy</a>
+                            <a href="{{ route('receptionist.appointments.index') }}"
+                                class="btn btn-secondary mb-2">Hủy</a>
                         </div>
                     </div>
                 </form>
