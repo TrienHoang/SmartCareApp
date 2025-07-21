@@ -263,6 +263,18 @@
                                             <i class="bx bx-time me-1"></i>
                                             {{ $appointment->payment->paid_at->format('d/m/Y H:i') }}
                                         </small>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="bx bx-credit-card me-1"></i>
+                                            Hình thức: 
+                                            @if ($appointment->payment->payment_method === 'cash')
+                                                Tiền mặt
+                                            @elseif ($appointment->payment->payment_method === 'bank')
+                                                Ngân hàng
+                                            @else
+                                                {{ ucfirst($appointment->payment->method ?? 'Không xác định') }}
+                                            @endif
+                                        </small>
                                     </div>
                                 @else
                                     <span class="badge bg-danger badge-lg">
