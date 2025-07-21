@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+@extends('reception.dashboard')
 @section('title', 'Chi tiết Lịch hẹn khám')
 
 @section('content')
@@ -10,7 +10,7 @@
                 <p class="text-muted mb-0">Mã lịch hẹn: #{{ $appointment->id }}</p>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('admin.appointments.index') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('receptionist.appointments.index') }}" class="btn btn-outline-secondary">
                     <i class="bx bx-arrow-back me-1"></i> Quay lại
                 </a>
             </div>
@@ -152,53 +152,6 @@
                                 </div>
                             @endif
                         @endif
-                    </div>
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-white border-bottom">
-                            <h5 class="card-title mb-0">
-                                <i class="bx bx-notepad text-primary me-2"></i>
-                                Kế hoạch điều trị
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            @if (isset($appointment->treatmentPlan))
-                                <h6 class="mb-2 text-dark">{{ $appointment->treatmentPlan->plan_title }}</h6>
-                                <p class="text-muted mb-1">
-                                    <strong>Bác sĩ phụ trách:</strong>
-                                    {{ $appointment->treatmentPlan->doctor->user->full_name ?? 'N/A' }}
-                                </p>
-                                <ul class="list-group">
-                                    @foreach ($appointment->treatmentPlan->treatmentPlanItems as $item)
-                                        <li class="list-group-item">
-                                            {{ $item->service->name ?? 'Dịch vụ' }} -
-                                            Bắt đầu:
-                                            {{ \Carbon\Carbon::parse($item->expected_start_date)->format('d/m/Y') }}
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @elseif(isset($treatmentPlans) && $treatmentPlans->count())
-                                <p>Có {{ $treatmentPlans->count() }} kế hoạch điều trị:</p>
-                                @foreach ($treatmentPlans as $plan)
-                                    <div class="mb-3">
-                                        <h6 class="mb-1 text-dark">{{ $plan->plan_title }}</h6>
-                                        <p class="text-muted mb-1">
-                                            <strong>Bác sĩ:</strong> {{ $plan->doctor->user->full_name ?? 'N/A' }}
-                                        </p>
-                                        <ul class="list-group">
-                                            @foreach ($plan->treatmentPlanItems as $item)
-                                                <li class="list-group-item">
-                                                    {{ $item->service->name ?? 'Dịch vụ' }} -
-                                                    Bắt đầu:
-                                                    {{ \Carbon\Carbon::parse($item->expected_start_date)->format('d/m/Y') }}
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                @endforeach
-                            @else
-                                <p class="text-muted">Chưa có kế hoạch điều trị.</p>
-                            @endif
-                        </div>
                     </div>
                 </div>
             </div>

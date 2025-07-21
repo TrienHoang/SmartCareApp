@@ -294,7 +294,7 @@ class AppointmentController extends Controller
             'appointment_id' => $appointment->id,
             'amount' => $price,
             'status' => 'paid',
-            'payment_method' => 'cash',  // hoặc mặc định phương thức khác nếu cần
+            'payment_method' => 'bank',  // hoặc mặc định phương thức khác nếu cần
             'paid_at' => now(),
         ]);
 
@@ -302,7 +302,7 @@ class AppointmentController extends Controller
         PaymentHistory::create([
             'payment_id' => $payment->id,
             'amount' => $payment->amount,
-            'payment_method' => 'cash',
+            'payment_method' => 'bank',
             'payment_date' => now(),
         ]);
 
@@ -704,14 +704,14 @@ class AppointmentController extends Controller
 
         $payment->update([
             'status'         => 'paid',
-            'payment_method' => 'cash',
+            'payment_method' => 'bank',
             'paid_at'        => now(),
         ]);
 
         PaymentHistory::create([
             'payment_id'     => $payment->id,
             'amount'         => $payment->amount,
-            'payment_method' => 'cash',
+            'payment_method' => 'bank',
             'payment_date'   => now(),
         ]);
 
