@@ -150,19 +150,38 @@ $(document).ready(function () {
             const oldTime = $timeInput.data('old') || $timeInput.val();
             if (!oldTime) $timeInput.val('');
 
+            const sundays = [];
+            const today = new Date();
+            const nextYear = new Date();
+            nextYear.setFullYear(today.getFullYear() + 1);
+
+            for (let d = new Date(today); d <= nextYear; d.setDate(d.getDate() + 1)) {
+                if (d.getDay() === 0) {
+                    sundays.push(d.toISOString().split('T')[0]);
+                }
+            }
+
+            // Ghép thêm vacationDates
+            const disabledDates = sundays.concat(vacationDates);
+
             flatpickrInstance = flatpickr("#appointment_time", {
                 enableTime: true,
-                dateFormat: "Y-m-d H:i",
+                dateFormat: "Y-m-d H:i",   // Format input
+                altFormat: "Y-m-d",        // Format so sánh
                 time_24hr: true,
                 minDate: "today",
                 disableMobile: true,
                 locale: 'vi',
-                enable: specificDates.length > 0 ? specificDates : function (date) {
-                    const day = date.getDay();
-                    const str = date.toISOString().split('T')[0];
-                    if (vacationDates.includes(str)) return false;
-                    return daysOfWeek.includes(day);
-                },
+                disable: [
+                    function (date) {
+                        const day = date.getDay();
+                        const str = date.toISOString().split('T')[0];
+                        // Disable nếu là Chủ nhật hoặc trong ngày nghỉ
+                        if (day === 0) return true; // Chủ nhật
+                        if (vacationDates.includes(str)) return true; // ngày nghỉ
+                        return false;
+                    }
+                ],
                 onReady(_, __, instance) {
                     if (oldTime) {
                         const d = new Date(oldTime);

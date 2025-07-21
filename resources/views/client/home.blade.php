@@ -6,59 +6,61 @@
 @section('content')
     <div class="min-h-screen">
         {{-- Hero Section --}}
-        <section class="gradient-bg text-white py-20">
-            <div class="container mx-auto px-4">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <section class="relative text-white py-24"
+            style="background: linear-gradient(120deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.25) 100%), url('{{ asset('admin/assets/img/banner1.jpg') }}') center/cover no-repeat;">
+            <div class="absolute inset-0 bg-gradient-to-br from-white/30 via-blue-200/10 to-blue-900/30"></div>
+
+            <div class="container relative z-10 mx-auto px-4">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                     <div class="fade-in">
-                        <h1 class="text-4xl md:text-6xl font-bold mb-6">
+                        <h1 class="text-4xl md:text-6xl font-extrabold mb-6 leading-tight drop-shadow-lg">
                             Đặt Lịch Khám
-                            <span class="block text-blue-200">Dễ Dàng & Nhanh Chóng</span>
+                            <span class="block text-white/80">Dễ Dàng &amp; Nhanh Chóng</span>
                         </h1>
-                        <p class="text-xl mb-8 text-blue-100">
+                        <p class="text-xl mb-8 text-white/80 max-w-lg">
                             Hệ thống đặt lịch khám bệnh trực tuyến hiện đại. Chăm sóc sức khỏe của bạn một cách tiện lợi và
                             chuyên nghiệp.
                         </p>
                         <div class="flex flex-col sm:flex-row gap-4">
                             <a href="{{ url('/dat-lich') }}"
-                                class="bg-white text-blue-600 px-8 py-4 rounded-full font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center hover-scale">
+                                class="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-8 py-4 rounded-full font-semibold shadow-lg hover:from-blue-600 hover:to-blue-800 transition-all flex items-center justify-center scale-100 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400">
                                 Đặt Lịch Ngay
                                 <i data-lucide="arrow-right" class="ml-2 w-5 h-5"></i>
                             </a>
                             <a href="{{ url('/dich-vu') }}"
-                                class="border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-colors hover-scale">
+                                class="border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-blue-700 transition-all scale-100 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white">
                                 Xem Dịch Vụ
                             </a>
                         </div>
                     </div>
                     <div class="fade-in">
-                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8">
-                            <h3 class="text-2xl font-bold mb-6">Đặt Lịch Nhanh</h3>
-                            <div class="space-y-4">
-                                <form method="GET" action="{{ url('/dat-lich') }}" class="space-y-4">
-                                    <div>
-                                        <label class="block text-sm mb-2">Chọn Chuyên Khoa</label>
-                                        <select name="department_id"
-                                            class="w-full p-3 rounded-lg bg-white/10 border border-white/30 text-white focus:bg-white/20 focus:text-white"
-                                            style="background-color:rgba(255,255,255,0.1); color:#fff;" required>
-                                            @foreach ($departments as $dept)
-                                                <option value="{{ $dept->id }}" class="text-black bg-white">
-                                                    {{ $dept->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm mb-2">Chọn Ngày</label>
-                                        <input type="date" name="appointment_date"
-                                            class="w-full p-3 rounded-lg bg-white/20 border border-white/30 text-white"
-                                            required />
-                                    </div>
-                                    <button type="submit"
-                                        class="w-full bg-white text-blue-600 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors text-center block">
-                                        Tìm Lịch Trống
-                                    </button>
-                                </form>
-                            </div>
+                        <div class="bg-white/40 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-white/20">
+                            <h3 class="text-2xl font-bold mb-6 text-blue-700">Đặt Lịch Nhanh</h3>
+                            <form method="GET" action="{{ url('/dat-lich') }}" class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2 text-blue-900">Chọn Chuyên Khoa</label>
+                                    <select name="department_id"
+                                        class="w-full p-3 rounded-lg bg-white/80 border border-blue-200 text-blue-900 focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all"
+                                        required>
+                                        <option value="" disabled selected>-- Chọn chuyên khoa --</option>
+                                        @foreach ($departments as $dept)
+                                            <option value="{{ $dept->id }}">
+                                                {{ $dept->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2 text-blue-900">Chọn Ngày</label>
+                                    <input type="date" name="appointment_date"
+                                        class="w-full p-3 rounded-lg bg-white/80 border border-blue-200 text-blue-900 focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all"
+                                        required />
+                                </div>
+                                <button type="submit"
+                                    class="w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:from-blue-600 hover:to-blue-800 transition-all scale-100 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                    Tìm Lịch Trống
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -107,6 +109,50 @@
                 </div>
             </div>
         </section>
+
+        {{-- hiển thị bác sĩ lên home ____ nhinhi => --}}
+        {{-- Doctor Section --}}
+        <section class="py-20 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold mb-4 gradient-text">Đội Ngũ Bác Sĩ</h2>
+                    <p class="text-xl text-gray-600">Gặp gỡ các bác sĩ chuyên khoa giàu kinh nghiệm của chúng tôi</p>
+                </div>
+
+                <div id="doctor-slider" class="splide">
+                    <div class="splide__track">
+                        <ul class="splide__list">
+                            @forelse ($doctors as $doctor)
+                                <li class="splide__slide">
+                                    <div
+                                        class="bg-gray-50 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow hover-scale text-center">
+                                        <img src="{{ $doctor->user->avatar ? asset('storage/' . $doctor->user->avatar) : asset('images/default-doctor.png') }}"
+                                            alt="{{ $doctor->user->full_name }}"
+                                            class="w-24 h-24 mx-auto rounded-full mb-4 object-cover">
+
+                                        <h3 class="text-xl font-semibold mb-2">{{ $doctor->user->full_name }}</h3>
+                                        <div class="text-blue-600 mb-2">{{ $doctor->department->name ?? 'Chuyên khoa' }}
+                                        </div>
+                                        <p class="text-gray-600 mb-4">
+                                            {{ $doctor->biography ?? 'Bác sĩ tận tâm, giàu kinh nghiệm.' }}</p>
+                                        <a href="{{ route('doctor.show', $doctor->id) }}"
+                                            class="inline-block bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition-colors">
+                                            Xem Hồ Sơ
+                                        </a>
+                                    </div>
+                                </li>
+                            @empty
+                                <li class="splide__slide">
+                                    <div class="text-gray-500 text-center">Chưa có thông tin bác sĩ.</div>
+                                </li>
+                            @endforelse
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
 
         {{-- Stats Section --}}
         <section class="py-20 gradient-bg text-white">

@@ -82,7 +82,12 @@ Route::prefix('doctor')
         });
 
         // 🟧 Reviews
-        Route::get('/reviews', [DoctorReviewController::class, 'index'])->name('reviews.index');
+        Route::prefix('reviews')->name('reviews.')->group(function () {
+            Route::get('/', [DoctorReviewController::class, 'index'])->name('index');
+            Route::patch('/{review}/toggle', [DoctorReviewController::class, 'toggleVisibility'])->name('toggle');
+        });
+
+
 
         // 🟪 Appointments
         Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');

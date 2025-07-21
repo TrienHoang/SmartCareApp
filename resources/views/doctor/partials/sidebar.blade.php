@@ -90,6 +90,20 @@
                     <span>Đánh giá từ bệnh nhân</span>
                 </a>
             </li>
+
+            <li class="menu-item">
+                <a href="{{ route('doctor.calendar.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-calendar"></i>
+                    <span>Lịch bác sĩ</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-user"></i>
+                    <div>Tài khoản</div>
+                </a>
+            </li>
         @endif
     </ul>
 </aside>

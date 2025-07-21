@@ -55,4 +55,11 @@ return [
     'rest_api_url' => env('ONESIGNAL_REST_API_URL', 'https://onesignal.com/api/v1'), // 👈 dòng mới cần có
 ],
 
+    'vnpay' => [
+        'tmn_code' => env('VNPAY_TMNCODE'),
+        'hash_secret' => env('VNPAY_HASH_SECRET'),
+        'url' => env('VNPAY_URL'),
+        'return_url' => env('VNPAY_RETURN_URL'),
+        'ipn_url' => env('VNPAY_IPN_URL'),
+    ],
 ];
