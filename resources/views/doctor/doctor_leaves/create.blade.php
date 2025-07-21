@@ -53,24 +53,57 @@
             @enderror
         </div>
 
-        {{-- Checkbox nghỉ đột xuất --}}
+        {{-- Chọn loại nghỉ --}}
         <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" name="is_emergency" id="is_emergency" value="1" {{ old('is_emergency') ? 'checked' : '' }}>
+            <input class="form-check-input" type="radio" name="leave_type" id="is_emergency" value="emergency" {{ old('leave_type') === 'emergency' ? 'checked' : '' }}>
             <label class="form-check-label text-danger" for="is_emergency">
-                Đây là đơn nghỉ đột xuất (nghỉ gấp không cần báo trước)
+                Đơn nghỉ đột xuất
             </label>
         </div>
 
-        {{-- Checkbox nghỉ đi du lịch --}}
-        <div class="form-check mb-4">
-            <input class="form-check-input" type="checkbox" name="is_vacation" id="is_vacation" value="1" {{ old('is_vacation') ? 'checked' : '' }}>
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="radio" name="leave_type" id="is_vacation" value="vacation" {{ old('leave_type') === 'vacation' ? 'checked' : '' }}>
             <label class="form-check-label text-info" for="is_vacation">
-                Đây là đơn nghỉ đi du lịch (phải đăng ký trước ít nhất 15 ngày, tối đa 3 ngày)
+                Đơn nghỉ đi du lịch (phải đăng ký trước ít nhất 15 ngày, tối đa 3 ngày)
             </label>
+        </div>
+
+        {{-- Chọn bác sĩ thay thế --}}
+        <div class="mb-3" id="replacement-doctor-group" style="display: none;">
+            <label for="replacement_doctor_id" class="form-label">Chọn bác sĩ thay thế</label>
+            <select name="replacement_doctor_id" id="replacement_doctor_id" class="form-select">
+                <option value="">-- Chọn bác sĩ --</option>
+                @foreach($doctors as $doctor)
+                    <option value="{{ $doctor->id }}">{{ $doctor->full_name }}</option>
+                @endforeach
+            </select>
         </div>
 
         <button type="submit" class="btn btn-success">Gửi đơn nghỉ</button>
         <a href="{{ route('doctor.leaves.index') }}" class="btn btn-secondary">Quay lại</a>
     </form>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const emergencyRadio = document.getElementById('is_emergency');
+        const vacationRadio = document.getElementById('is_vacation');
+        const doctorGroup = document.getElementById('replacement-doctor-group');
+
+        function toggleDoctorDropdown() {
+            if (emergencyRadio.checked) {
+                doctorGroup.style.display = 'block';
+            } else {
+                doctorGroup.style.display = 'none';
+            }
+        }
+
+        emergencyRadio.addEventListener('change', toggleDoctorDropdown);
+        vacationRadio.addEventListener('change', toggleDoctorDropdown);
+
+        toggleDoctorDropdown(); // Load lại khi trang mở
+    });
+</script>
 @endsection

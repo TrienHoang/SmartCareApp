@@ -28,22 +28,29 @@
                                 <div class="flex items-center space-x-4 mb-4">
                                     <div class="flex items-center">
                                         <div class="flex text-yellow-400 mr-2">
-                                            @for ($i = 0; $i < round($doctor->average_rating ?? 5); $i++)
+                                            @for ($i = 0; $i < floor($doctor->average_rating ?? 5); $i++)
                                                 <i data-lucide="star" class="w-4 h-4 fill-current"></i>
                                             @endfor
+                                            @for ($i = floor($doctor->average_rating ?? 5); $i < 5; $i++)
+                                                <i data-lucide="star" class="w-4 h-4 text-gray-300"></i>
+                                            @endfor
                                         </div>
-                                        <span class="text-blue-100">{{ $doctor->average_rating ?? '5.0' }}/5
-                                            ({{ $doctor->review_count ?? 0 }} đánh giá)</span>
+                                        <span class="text-blue-100">
+                                            {{ number_format($doctor->average_rating ?? 5, 1) }}/5
+                                            ({{ $doctor->review_count ?? 0 }} đánh giá)
+                                        </span>
                                     </div>
                                     <span class="text-blue-200">•</span>
-                                    <span class="text-blue-100">{{ $doctor->experience_years ?? 'Nhiều' }} năm kinh
-                                        nghiệm</span>
+                                    <span class="text-blue-100">
+                                        {{ $doctor->experience_years ?? 'Nhiều' }} năm kinh nghiệm
+                                    </span>
                                 </div>
 
+
                                 <div class="flex flex-wrap gap-2">
-                                    @if (!empty($doctor->specialties))
+                                    @if ($doctor->specialties && $doctor->specialties->count())
                                         @foreach ($doctor->specialties as $specialty)
-                                            <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $specialty }}</span>
+                                            <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $specialty->name }}</span>
                                         @endforeach
                                     @else
                                         <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Đa khoa</span>
@@ -52,6 +59,7 @@
                             </div>
                         </div>
                     </div>
+
 
                     <div class="fade-in">
                         <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
@@ -104,6 +112,7 @@
             </div>
         </section>
 
+
         <!-- Content -->
         <main class="container mx-auto px-4 py-8">
             <div class="max-w-4xl mx-auto">
@@ -121,98 +130,84 @@
                         </p>
                     </div>
 
-                    <!-- Education & Experience -->
+                    <!-- Education & Experience  học vấn cc-->
                     <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 card-hover">
                         <h2 class="text-2xl font-bold mb-6 gradient-text">Học Vấn & Kinh Nghiệm</h2>
                         <div class="space-y-6">
-                            <div class="timeline-item">
-                                <div class="font-semibold text-gray-800">2010 - Hiện tại</div>
-                                <div class="text-blue-600 font-medium">Bác sĩ Chuyên khoa Tim Mạch</div>
-                                <div class="text-gray-600">Bệnh viện Đa khoa Trung ương</div>
-                            </div>
-                            <div class="timeline-item">
-                                <div class="font-semibold text-gray-800">2008 - 2010</div>
-                                <div class="text-blue-600 font-medium">Thạc sĩ Y học</div>
-                                <div class="text-gray-600">Đại học Y Hà Nội</div>
-                            </div>
-                            <div class="timeline-item">
-                                <div class="font-semibold text-gray-800">2002 - 2008</div>
-                                <div class="text-blue-600 font-medium">Bác sĩ Y khoa</div>
-                                <div class="text-gray-600">Đại học Y Hà Nội</div>
-                            </div>
+
+                            {{-- Hiển thị Kinh Nghiệm Làm Việc --}}
+                            @foreach ($doctor->experiences as $experience)
+                                <div class="timeline-item">
+                                    <div class="font-semibold text-gray-800">
+                                        {{ $experience->start_year }} - {{ $experience->end_year ?? 'Hiện tại' }}
+                                    </div>
+                                    <div class="text-blue-600 font-medium">{{ $experience->position }}</div>
+                                    <div class="text-gray-600">{{ $experience->institution }}</div>
+                                </div>
+                            @endforeach
+
+                            {{-- Hiển thị Học Vấn --}}
+                            @foreach ($doctor->educations as $education)
+                                <div class="timeline-item">
+                                    <div class="font-semibold text-gray-800">
+                                        {{ $education->start_year }} - {{ $education->end_year }}
+                                    </div>
+                                    <div class="text-blue-600 font-medium">{{ $education->degree }}</div>
+                                    <div class="text-gray-600">{{ $education->school }}</div>
+                                </div>
+                            @endforeach
+
                         </div>
                     </div>
 
+
+                    <!-- Specialties đã xong phần này như cc -->
                     <!-- Specialties -->
-                    <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 card-hover">
-                        <h2 class="text-2xl font-bold mb-6 gradient-text">Chuyên Môn</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="skill-tag p-4 rounded-lg">
-                                <i data-lucide="heart" class="w-5 h-5 text-blue-600 mb-2"></i>
-                                <h3 class="font-semibold mb-1">Bệnh Tim Mạch</h3>
-                                <p class="text-sm text-gray-600">Chẩn đoán và điều trị các bệnh lý tim mạch</p>
-                            </div>
-                            <div class="skill-tag p-4 rounded-lg">
-                                <i data-lucide="activity" class="w-5 h-5 text-blue-600 mb-2"></i>
-                                <h3 class="font-semibold mb-1">Điện Tâm Đồ</h3>
-                                <p class="text-sm text-gray-600">Đọc và phân tích kết quả điện tâm đồ</p>
-                            </div>
-                            <div class="skill-tag p-4 rounded-lg">
-                                <i data-lucide="radio" class="w-5 h-5 text-blue-600 mb-2"></i>
-                                <h3 class="font-semibold mb-1">Siêu Âm Tim</h3>
-                                <p class="text-sm text-gray-600">Chẩn đoán hình ảnh tim mạch</p>
-                            </div>
-                            <div class="skill-tag p-4 rounded-lg">
-                                <i data-lucide="stethoscope" class="w-5 h-5 text-blue-600 mb-2"></i>
-                                <h3 class="font-semibold mb-1">Khám Tổng Quát</h3>
-                                <p class="text-sm text-gray-600">Khám sức khỏe định kỳ và tư vấn</p>
+                    @if ($doctor->specialties && $doctor->specialties->count())
+                        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 card-hover">
+                            <h2 class="text-2xl font-bold mb-6 gradient-text">Chuyên Môn</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                @foreach ($doctor->specialties as $specialty)
+                                    <div class="skill-tag p-4 rounded-lg">
+                                        <i data-lucide="heart" class="w-5 h-5 text-blue-600 mb-2"></i>
+                                        <h3 class="font-semibold mb-1">{{ $specialty->name }}</h3>
+                                        <p class="text-sm text-gray-600">{{ $specialty->description }}</p>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
-                    </div>
+                    @endif
+
 
                     <!-- Achievements -->
                     <div class="bg-white rounded-2xl shadow-lg p-8 card-hover">
                         <h2 class="text-2xl font-bold mb-6 gradient-text">Thành Tích & Chứng Chỉ</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="flex items-start space-x-3">
-                                <div class="bg-blue-100 p-2 rounded-lg">
-                                    <i data-lucide="award" class="w-6 h-6 text-blue-600"></i>
+                            @foreach ($doctor->achievements as $achievement)
+                                <div class="flex items-start space-x-3">
+                                    <div class="bg-blue-100 p-2 rounded-lg">
+                                        <i data-lucide="award" class="w-6 h-6 text-blue-600"></i> {{-- icon có thể tuỳ chỉnh nếu
+                                        bạn lưu trong DB --}}
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold">{{ $achievement->title }}</h3>
+                                        <p class="text-gray-600 text-sm">
+                                            {{ $achievement->description ?? 'Thông tin chưa cập nhật' }}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 class="font-semibold">Bác sĩ xuất sắc năm 2023</h3>
-                                    <p class="text-gray-600 text-sm">Bệnh viện Đa khoa Trung ương</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="bg-blue-100 p-2 rounded-lg">
-                                    <i data-lucide="book" class="w-6 h-6 text-blue-600"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold">20+ bài báo khoa học</h3>
-                                    <p class="text-gray-600 text-sm">Tạp chí Y học Việt Nam</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="bg-blue-100 p-2 rounded-lg">
-                                    <i data-lucide="users" class="w-6 h-6 text-blue-600"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold">5,000+ bệnh nhân</h3>
-                                    <p class="text-gray-600 text-sm">Được điều trị thành công</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="bg-blue-100 p-2 rounded-lg">
-                                    <i data-lucide="graduation-cap" class="w-6 h-6 text-blue-600"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold">Đào tạo 50+ bác sĩ trẻ</h3>
-                                    <p class="text-gray-600 text-sm">Chương trình thực tập</p>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
                     </div>
+
                 </div>
+
+
+
+
+
+
+
 
                 <!-- Schedule Tab -->
                 <div id="content-schedule" class="tab-content hidden">
@@ -343,176 +338,207 @@
 
                 <!-- Reviews Tab -->
                 <div id="content-reviews" class="tab-content hidden">
-                    <div class="bg-white rounded-2xl shadow-lg p-8 card-hover">
-                        <h2 class="text-2xl font-bold mb-6 gradient-text">Đánh Giá Từ Bệnh Nhân</h2>
+                    <!-- Review Section -->
+                    <div class="mt-10 space-y-8">
 
-                        <!-- Rating Summary -->
-                        <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl mb-6">
-                            <div class="flex flex-col md:flex-row items-center justify-between">
-                                <div class="text-center">
-                                    <div class="text-4xl font-bold text-blue-600 mb-2">4.9</div>
-                                    <div class="flex text-yellow-400 mb-2">
-                                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                                    </div>
-                                    <div class="text-sm text-gray-600">127 đánh giá</div>
-                                </div>
-                                <div class="flex-1 md:ml-8 w-full">
-                                    <div class="space-y-2">
-                                        <div class="flex items-center">
-                                            <span class="text-sm w-8">5★</span>
-                                            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-2">
-                                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 78%"></div>
-                                            </div>
-                                            <span class="text-sm w-8">98</span>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <span class="text-sm w-8">4★</span>
-                                            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-2">
-                                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 18%"></div>
-                                            </div>
-                                            <span class="text-sm w-8">23</span>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <span class="text-sm w-8">3★</span>
-                                            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-2">
-                                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 3%"></div>
-                                            </div>
-                                            <span class="text-sm w-8">4</span>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <span class="text-sm w-8">2★</span>
-                                            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-2">
-                                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 1%"></div>
-                                            </div>
-                                            <span class="text-sm w-8">1</span>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <span class="text-sm w-8">1★</span>
-                                            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-2">
-                                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 0%"></div>
-                                            </div>
-                                            <span class="text-sm w-8">1</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Individual Reviews -->
+                        <!-- Danh sách đánh giá -->
                         <div class="space-y-6">
-                            <div class="border-b border-gray-200 pb-6">
-                                <div class="flex items-start space-x-4">
-                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <span class="text-blue-600 font-semibold">L***</span>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="flex items-center space-x-2 mb-2">
-                                            <div class="flex text-yellow-400">
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                            </div>
-                                            <span class="text-sm text-gray-500">3 ngày trước</span>
-                                        </div>
-                                        <p class="text-gray-700 mb-2">
-                                            Bác sĩ An rất tận tâm và chuyên nghiệp. Khám rất kỹ và giải thích rõ ràng về
-                                            tình trạng bệnh. Tôi cảm thấy rất an tâm khi khám với bác sĩ.
-                                        </p>
-                                        <div class="flex items-center space-x-4 text-sm text-gray-500">
-                                            <button class="flex items-center space-x-1 hover:text-blue-600">
-                                                <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                                                <span>Hữu ích (12)</span>
-                                            </button>
-                                            <button class="flex items-center space-x-1 hover:text-blue-600">
-                                                <i data-lucide="message-circle" class="w-4 h-4"></i>
-                                                <span>Trả lời</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            @forelse ($doctor->reviews->sortByDesc('created_at') as $review)
+                                <div class="border-b pb-6">
+                                    <div class="flex items-start space-x-4">
 
-                            <div class="border-b border-gray-200 pb-6">
-                                <div class="flex items-start space-x-4">
-                                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                        <span class="text-green-600 font-semibold">N***</span>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="flex items-center space-x-2 mb-2">
-                                            <div class="flex text-yellow-400">
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                            </div>
-                                            <span class="text-sm text-gray-500">1 tuần trước</span>
+                                        <!-- Avatar -->
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">
+                                            {{ $review->patient ? strtoupper(Str::substr($review->patient->full_name, 0, 1)) . '***' : 'Ẩn danh' }}
                                         </div>
-                                        <p class="text-gray-700 mb-2">
-                                            Đặt lịch qua SmartCare rất tiện lợi. Bác sĩ An khám rất tỉ mỉ, đúng giờ hẹn.
-                                            Tôi sẽ quay lại lần sau và giới thiệu cho bạn bè.
-                                        </p>
-                                        <div class="flex items-center space-x-4 text-sm text-gray-500">
-                                            <button class="flex items-center space-x-1 hover:text-blue-600">
-                                                <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                                                <span>Hữu ích (8)</span>
-                                            </button>
-                                            <button class="flex items-center space-x-1 hover:text-blue-600">
-                                                <i data-lucide="message-circle" class="w-4 h-4"></i>
-                                                <span>Trả lời</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="border-b border-gray-200 pb-6">
-                                <div class="flex items-start space-x-4">
-                                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                        <span class="text-purple-600 font-semibold">T***</span>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="flex items-center space-x-2 mb-2">
-                                            <div class="flex text-yellow-400">
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                                <i data-lucide="star" class="w-4 h-4"></i>
+                                        <div class="flex-1">
+                                            <!-- Stars & Date -->
+                                            <div class="flex items-center justify-between mb-1">
+                                                <div class="flex text-yellow-400">
+                                                    @for ($i = 1; $i <= 5; $i++)
+                                                        <i data-lucide="star"
+                                                            class="w-4 h-4 {{ $i <= $review->rating ? 'fill-current' : '' }}"></i>
+                                                    @endfor
+                                                </div>
+                                                <div class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}
+                                                </div>
                                             </div>
-                                            <span class="text-sm text-gray-500">2 tuần trước</span>
-                                        </div>
-                                        <p class="text-gray-700 mb-2">
-                                            Bác sĩ giải thích rất dễ hiểu về tình trạng tim mạch của tôi. Nhân viên y tế
-                                            cũng rất thân thiện. Chỉ có điều phòng khám hơi nhỏ.
-                                        </p>
-                                        <div class="flex items-center space-x-4 text-sm text-gray-500">
-                                            <button class="flex items-center space-x-1 hover:text-blue-600">
-                                                <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                                                <span>Hữu ích (5)</span>
-                                            </button>
-                                            <button class="flex items-center space-x-1 hover:text-blue-600">
-                                                <i data-lucide="message-circle" class="w-4 h-4"></i>
-                                                <span>Trả lời</span>
-                                            </button>
+
+                                            <!-- Nội dung -->
+                                            <p class="text-gray-700 mb-2">{{ $review->comment }}</p>
+
+                                            <!-- Hữu ích + Trả lời -->
+                                            <div class="flex space-x-4 text-sm text-gray-500">
+                                                <form method="POST" action="{{ route('reviews.useful', $review->id) }}">
+                                                    @csrf
+                                                    <button class="flex items-center space-x-1 hover:text-blue-600">
+                                                        <i data-lucide="thumbs-up" class="w-4 h-4"></i>
+                                                        <span>Hữu ích ({{ $review->useful_count ?? 0 }})</span>
+                                                    </button>
+                                                </form>
+
+                                                @auth
+                                                    <button type="button" class="flex items-center space-x-1 hover:text-blue-600"
+                                                        onclick="toggleReplyForm({{ $review->id }})">
+                                                        <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                                        <span>Trả lời</span>
+                                                    </button>
+                                                @endauth
+                                            </div>
+
+                                            <!-- Phản hồi -->
+                                            @if ($review->replies->count())
+                                                <div class="mt-3 space-y-2 border-l pl-4 border-gray-200">
+                                                    @foreach ($review->replies as $reply)
+                                                        <div class="text-sm bg-gray-100 p-2 rounded">
+                                                            <strong>{{ $reply->user->name ?? 'Ẩn danh' }}</strong>:
+                                                            {{ $reply->content }}
+                                                            <div class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+
+                                            <!-- Form phản hồi -->
+                                            @auth
+                                                <form id="reply-form-{{ $review->id }}" class="mt-3 hidden" method="POST"
+                                                    action="{{ route('reviews.replies.store', $review->id) }}">
+                                                    @csrf
+                                                    <textarea name="content" rows="2" class="w-full border rounded p-2 text-sm"
+                                                        placeholder="Nhập phản hồi..."></textarea>
+                                                    <div class="text-right mt-2">
+                                                        <button type="submit"
+                                                            class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 text-sm">
+                                                            Gửi phản hồi
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            @endauth
+
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            @empty
+                                <p class="text-gray-500">Chưa có đánh giá nào.</p>
+                            @endforelse
                         </div>
 
-                        <div class="text-center mt-8">
-                            <button class="text-blue-600 hover:text-blue-800 font-semibold">
-                                Xem thêm đánh giá
-                            </button>
-                        </div>
+                        <!-- Gửi đánh giá hoặc phản hồi -->
+                        @auth
+                            <div class="bg-gray-50 p-6 rounded-lg border">
+                                <h3 class="text-lg font-semibold mb-4">Gửi đánh giá của bạn</h3>
+
+                                @if (session('success'))
+                                    <div class="mb-4 p-3 bg-green-100 text-green-800 rounded">
+                                        {{ session('success') }}
+                                    </div>
+                                @endif
+                                @if (session('error'))
+                                    <div class="mb-4 p-3 bg-red-100 text-red-800 rounded">
+                                        {{ session('error') }}
+                                    </div>
+                                @endif
+
+                                @if (!$appointment)
+                                    <p class="text-sm text-gray-500">Bạn cần hoàn tất một cuộc hẹn với bác sĩ để gửi đánh giá.</p>
+                                @elseif ($alreadyReviewed && $userReview)
+                                    <!-- Đã đánh giá => hiển thị lại và cho phép nhận xét thêm -->
+                                    <div class="mb-4 p-4 border rounded bg-gray-100">
+                                        <p class="text-sm mb-1 text-gray-700">Bạn đã đánh giá: <strong>{{ $userReview->rating }}
+                                                sao</strong></p>
+                                        <p class="text-sm text-gray-800 italic">"{{ $userReview->comment }}"</p>
+                                    </div>
+
+                                    <form method="POST" action="{{ route('reviews.replies.store', $userReview->id) }}">
+                                        @csrf
+                                        <div class="mb-2">
+                                            <label for="content" class="block text-sm font-medium mb-1">Bổ sung nhận xét:</label>
+                                            <textarea name="content" rows="2" class="w-full border rounded p-2 text-sm"
+                                                placeholder="Nhận xét thêm về trải nghiệm của bạn..."></textarea>
+                                        </div>
+                                        <div class="text-right">
+                                            <button type="submit"
+                                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium">
+                                                Gửi phản hồi bổ sung
+                                            </button>
+                                        </div>
+                                    </form>
+                                @else
+                                    <!-- Gửi đánh giá mới -->
+                                    <form action="{{ route('reviews.store', $doctor->id) }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="appointment_id" value="{{ $appointment->id }}">
+                                        @if ($appointment->service)
+                                            <input type="hidden" name="service_id" value="{{ $appointment->service->id }}">
+                                        @endif
+
+                                        <div class="flex items-center mb-4">
+                                            <label class="mr-4">Đánh giá:</label>
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <label class="cursor-pointer mr-2 flex items-center">
+                                                    <input type="radio" name="rating" value="{{ $i }}" class="hidden rating-input"
+                                                        required>
+                                                    <i data-lucide="star" class="w-6 h-6 text-gray-300 rating-star"
+                                                        data-index="{{ $i }}"></i>
+                                                </label>
+                                            @endfor
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="comment" class="block text-sm font-medium mb-1">Nhận xét:</label>
+                                            <textarea name="comment" id="comment" rows="3" class="w-full border rounded p-2 text-sm"
+                                                placeholder="Nhận xét của bạn..." required>{{ old('comment') }}</textarea>
+                                        </div>
+
+                                        <div class="text-right">
+                                            <button type="submit"
+                                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium">
+                                                Gửi đánh giá
+                                            </button>
+                                        </div>
+                                    </form>
+                                @endif
+                            </div>
+                        @endauth
                     </div>
+
+                    <!-- JS: Toggle Reply Form + Rating -->
+                    <script>
+                        function toggleReplyForm(id) {
+                            const form = document.getElementById(`reply-form-${id}`);
+                            if (form) {
+                                form.classList.toggle('hidden');
+                            }
+                        }
+
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const ratingInputs = document.querySelectorAll('input[name="rating"]');
+                            const stars = document.querySelectorAll('.rating-star');
+
+                            ratingInputs.forEach(input => {
+                                input.addEventListener('change', function () {
+                                    const selectedRating = parseInt(this.value);
+
+                                    stars.forEach((star, index) => {
+                                        if (index < selectedRating) {
+                                            star.classList.add('text-yellow-400');
+                                            star.classList.remove('text-gray-300');
+                                        } else {
+                                            star.classList.remove('text-yellow-400');
+                                            star.classList.add('text-gray-300');
+                                        }
+                                    });
+                                });
+                            });
+
+                            if (typeof lucide !== 'undefined') {
+                                lucide.createIcons();
+                            }
+                        });
+                    </script>
                 </div>
 
                 <!-- Location Tab -->
@@ -779,6 +805,16 @@
                 // Initialize animations
                 window.addEventListener('scroll', animateOnScroll);
                 window.addEventListener('load', animateOnScroll);
+            </script>
+
+            <script>
+                document.querySelectorAll('.reply-toggle').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const reviewId = this.getAttribute('data-review-id');
+                        const form = document.getElementById('reply-form-' + reviewId);
+                        form.classList.toggle('hidden');
+                    });
+                });
             </script>
         @endpush
 @endsection
