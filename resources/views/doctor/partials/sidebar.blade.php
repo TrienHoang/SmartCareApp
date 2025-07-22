@@ -97,12 +97,6 @@
                     <span>Lịch bác sĩ</span>
                 </a>
             </li>
-            <li class="menu-item">
-                <a href="{{ route('doctor.leaves.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-calendar"></i>
-                    <div>Đăng kí nghỉ phép</div>
-                </a>
-            </li>
         @endif
     </ul>
 </aside>

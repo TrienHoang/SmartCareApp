@@ -170,4 +170,8 @@ class Appointment extends Model
     {
         return $this->hasOne(Review::class);
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -110,10 +110,9 @@ Route::prefix('doctor')
 
                 Route::patch('treatment-plan-items/{itemId}/update-status', [TreatmentPlanController::class, 'updateItemStatus'])->name('treatment-plan-items.update-status');
             });
-
     });
 
-    // Nhóm route dành riêng cho bác sĩ
+// Nhóm route dành riêng cho bác sĩ
 Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
 
     Route::get('/', [DoctorController::class, 'index'])->name('index');
@@ -128,8 +127,6 @@ Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'
     Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
     Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
     Route::get('/calendar/test-database', [CalendarController::class, 'testDatabase'])->name('calendar.testDatabase');
-
-
 });
 
 Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {

@@ -2,43 +2,49 @@
 
 namespace App\Notifications;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
-use App\Models\Appointment;
 
 class AppointmentCancelledWithSuggestion extends Notification
 {
     use Queueable;
 
-    public $appointment;
+    protected $appointment;
 
-    public function __construct(Appointment $appointment)
+    public function __construct($appointment)
     {
         $this->appointment = $appointment;
     }
 
     public function via($notifiable)
     {
-        return ['mail', 'database']; // nếu dùng thông báo lưu vào DB
+        return ['mail']; // You can add other channels like 'database' or 'sms' if needed
     }
 
     public function toMail($notifiable)
     {
+        $appointmentTime = Carbon::parse($this->appointment->appointment_time)->format('d/m/Y H:i');
+
         return (new MailMessage)
-            ->subject('Cuộc hẹn bị hủy')
-            ->line('Cuộc hẹn của bạn đã bị hủy do bác sĩ nghỉ đột xuất.')
-            ->line('Hiện tại không có bác sĩ nào thay thế.')
-            ->line('Bạn có thể đặt lại lịch vào thời gian khác.')
-            ->action('Đặt lịch lại', url('/appointments/create')) // sửa lại URL nếu cần
-            ->line('Xin lỗi vì sự bất tiện!');
+            ->subject('Cuộc Hẹn Của Bạn Đã Bị Hủy')
+            ->greeting('Xin chào ' . $notifiable->name . ',')
+            ->line('Cuộc hẹn của bạn đã bị hủy do bác sĩ nghỉ đột xuất và không có bác sĩ thay thế.')
+            ->line("**Chi tiết cuộc hẹn bị hủy:**")
+            ->line("Thời gian: {$appointmentTime}")
+            ->line("Ghi chú: {$this->appointment->note}")
+            ->line('Vui lòng đặt lại lịch vào một ngày khác.')
+            ->action('Đặt Lịch Mới', url('/appointments/create'))
+            ->line('Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!');
     }
 
     public function toArray($notifiable)
     {
         return [
-            'message' => 'Cuộc hẹn bị hủy do bác sĩ nghỉ đột xuất. Vui lòng đặt lại lịch hẹn.',
             'appointment_id' => $this->appointment->id,
+            'message' => 'Cuộc hẹn của bạn đã bị hủy. Vui lòng đặt lịch vào ngày khác.',
+            'time' => Carbon::parse($this->appointment->appointment_time)->format('d/m/Y H:i'),
         ];
     }
 }
