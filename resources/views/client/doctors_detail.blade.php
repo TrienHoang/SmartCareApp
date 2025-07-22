@@ -337,209 +337,169 @@
                 </div>
 
                 <!-- Reviews Tab -->
-                <div id="content-reviews" class="tab-content hidden">
-                    <!-- Review Section -->
-                    <div class="mt-10 space-y-8">
+<!-- Import Lucide icons (put in <head> or before </body>) -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
-                        <!-- Danh sách đánh giá -->
-                        <div class="space-y-6">
-                            @forelse ($doctor->reviews->sortByDesc('created_at') as $review)
-                                <div class="border-b pb-6">
-                                    <div class="flex items-start space-x-4">
-
-                                        <!-- Avatar -->
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">
-                                            {{ $review->patient ? strtoupper(Str::substr($review->patient->full_name, 0, 1)) . '***' : 'Ẩn danh' }}
-                                        </div>
-
-                                        <div class="flex-1">
-                                            <!-- Stars & Date -->
-                                            <div class="flex items-center justify-between mb-1">
-                                                <div class="flex text-yellow-400">
-                                                    @for ($i = 1; $i <= 5; $i++)
-                                                        <i data-lucide="star"
-                                                            class="w-4 h-4 {{ $i <= $review->rating ? 'fill-current' : '' }}"></i>
-                                                    @endfor
-                                                </div>
-                                                <div class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}
-                                                </div>
-                                            </div>
-
-                                            <!-- Nội dung -->
-                                            <p class="text-gray-700 mb-2">{{ $review->comment }}</p>
-
-                                            <!-- Hữu ích + Trả lời -->
-                                            <div class="flex space-x-4 text-sm text-gray-500">
-                                                <form method="POST" action="{{ route('reviews.useful', $review->id) }}">
-                                                    @csrf
-                                                    <button class="flex items-center space-x-1 hover:text-blue-600">
-                                                        <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                                                        <span>Hữu ích ({{ $review->useful_count ?? 0 }})</span>
-                                                    </button>
-                                                </form>
-
-                                                @auth
-                                                    <button type="button" class="flex items-center space-x-1 hover:text-blue-600"
-                                                        onclick="toggleReplyForm({{ $review->id }})">
-                                                        <i data-lucide="message-circle" class="w-4 h-4"></i>
-                                                        <span>Trả lời</span>
-                                                    </button>
-                                                @endauth
-                                            </div>
-
-                                            <!-- Phản hồi -->
-                                            @if ($review->replies->count())
-                                                <div class="mt-3 space-y-2 border-l pl-4 border-gray-200">
-                                                    @foreach ($review->replies as $reply)
-                                                        <div class="text-sm bg-gray-100 p-2 rounded">
-                                                            <strong>{{ $reply->user->name ?? 'Ẩn danh' }}</strong>:
-                                                            {{ $reply->content }}
-                                                            <div class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            @endif
-
-                                            <!-- Form phản hồi -->
-                                            @auth
-                                                <form id="reply-form-{{ $review->id }}" class="mt-3 hidden" method="POST"
-                                                    action="{{ route('reviews.replies.store', $review->id) }}">
-                                                    @csrf
-                                                    <textarea name="content" rows="2" class="w-full border rounded p-2 text-sm"
-                                                        placeholder="Nhập phản hồi..."></textarea>
-                                                    <div class="text-right mt-2">
-                                                        <button type="submit"
-                                                            class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 text-sm">
-                                                            Gửi phản hồi
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            @endauth
-
-                                        </div>
-                                    </div>
-                                </div>
-                            @empty
-                                <p class="text-gray-500">Chưa có đánh giá nào.</p>
-                            @endforelse
+<!-- Reviews Section -->
+<div id="content-reviews" class="tab-content hidden">
+    <div class="mt-10 space-y-8">
+        <!-- Danh sách đánh giá -->
+        <div class="space-y-6">
+            @forelse ($doctor->reviews->sortByDesc('created_at') as $review)
+                <div class="border-b pb-6">
+                    <div class="flex items-start space-x-4">
+                        <!-- Avatar -->
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">
+                            {{ $review->patient ? strtoupper(Str::substr($review->patient->full_name, 0, 1)) . '***' : 'Ẩn danh' }}
                         </div>
 
-                        <!-- Gửi đánh giá hoặc phản hồi -->
-                        @auth
-                            <div class="bg-gray-50 p-6 rounded-lg border">
-                                <h3 class="text-lg font-semibold mb-4">Gửi đánh giá của bạn</h3>
-
-                                @if (session('success'))
-                                    <div class="mb-4 p-3 bg-green-100 text-green-800 rounded">
-                                        {{ session('success') }}
-                                    </div>
-                                @endif
-                                @if (session('error'))
-                                    <div class="mb-4 p-3 bg-red-100 text-red-800 rounded">
-                                        {{ session('error') }}
-                                    </div>
-                                @endif
-
-                                @if (!$appointment)
-                                    <p class="text-sm text-gray-500">Bạn cần hoàn tất một cuộc hẹn với bác sĩ để gửi đánh giá.</p>
-                                @elseif ($alreadyReviewed && $userReview)
-                                    <!-- Đã đánh giá => hiển thị lại và cho phép nhận xét thêm -->
-                                    <div class="mb-4 p-4 border rounded bg-gray-100">
-                                        <p class="text-sm mb-1 text-gray-700">Bạn đã đánh giá: <strong>{{ $userReview->rating }}
-                                                sao</strong></p>
-                                        <p class="text-sm text-gray-800 italic">"{{ $userReview->comment }}"</p>
-                                    </div>
-
-                                    <form method="POST" action="{{ route('reviews.replies.store', $userReview->id) }}">
-                                        @csrf
-                                        <div class="mb-2">
-                                            <label for="content" class="block text-sm font-medium mb-1">Bổ sung nhận xét:</label>
-                                            <textarea name="content" rows="2" class="w-full border rounded p-2 text-sm"
-                                                placeholder="Nhận xét thêm về trải nghiệm của bạn..."></textarea>
-                                        </div>
-                                        <div class="text-right">
-                                            <button type="submit"
-                                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium">
-                                                Gửi phản hồi bổ sung
-                                            </button>
-                                        </div>
-                                    </form>
-                                @else
-                                    <!-- Gửi đánh giá mới -->
-                                    <form action="{{ route('reviews.store', $doctor->id) }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="appointment_id" value="{{ $appointment->id }}">
-                                        @if ($appointment->service)
-                                            <input type="hidden" name="service_id" value="{{ $appointment->service->id }}">
-                                        @endif
-
-                                        <div class="flex items-center mb-4">
-                                            <label class="mr-4">Đánh giá:</label>
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                <label class="cursor-pointer mr-2 flex items-center">
-                                                    <input type="radio" name="rating" value="{{ $i }}" class="hidden rating-input"
-                                                        required>
-                                                    <i data-lucide="star" class="w-6 h-6 text-gray-300 rating-star"
-                                                        data-index="{{ $i }}"></i>
-                                                </label>
-                                            @endfor
-                                        </div>
-
-                                        <div class="mb-4">
-                                            <label for="comment" class="block text-sm font-medium mb-1">Nhận xét:</label>
-                                            <textarea name="comment" id="comment" rows="3" class="w-full border rounded p-2 text-sm"
-                                                placeholder="Nhận xét của bạn..." required>{{ old('comment') }}</textarea>
-                                        </div>
-
-                                        <div class="text-right">
-                                            <button type="submit"
-                                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium">
-                                                Gửi đánh giá
-                                            </button>
-                                        </div>
-                                    </form>
-                                @endif
+                        <div class="flex-1">
+                            <!-- Stars & Date -->
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="flex space-x-1">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <i data-lucide="star"
+                                           class="w-4 h-4 {{ $i <= $review->rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"></i>
+                                    @endfor
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    {{ $review->created_at->diffForHumans() }}
+                                </div>
                             </div>
-                        @endauth
+
+                            <!-- Nội dung -->
+                            <p class="text-gray-700 mb-2">{{ $review->comment }}</p>
+
+                            <!-- Hữu ích -->
+                            <div class="flex space-x-4 text-sm text-gray-500">
+                                <form method="POST" action="{{ route('reviews.useful', $review->id) }}">
+                                    @csrf
+                                    <button class="flex items-center space-x-1 hover:text-blue-600">
+                                        <i data-lucide="thumbs-up" class="w-4 h-4"></i>
+                                        <span>Hữu ích ({{ $review->useful_count ?? 0 }})</span>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Phản hồi -->
+                            @if ($review->replies->count())
+                                <div class="mt-3 space-y-2 border-l pl-4 border-gray-200">
+                                    @foreach ($review->replies as $reply)
+                                        <div class="text-sm bg-gray-100 p-2 rounded">
+                                            <strong>{{ $reply->user->name ?? 'Ẩn danh' }}</strong>:
+                                            {{ $reply->content }}
+                                            <div class="text-xs text-gray-500">
+                                                {{ $reply->created_at->diffForHumans() }}
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
                     </div>
-
-                    <!-- JS: Toggle Reply Form + Rating -->
-                    <script>
-                        function toggleReplyForm(id) {
-                            const form = document.getElementById(`reply-form-${id}`);
-                            if (form) {
-                                form.classList.toggle('hidden');
-                            }
-                        }
-
-                        document.addEventListener('DOMContentLoaded', function () {
-                            const ratingInputs = document.querySelectorAll('input[name="rating"]');
-                            const stars = document.querySelectorAll('.rating-star');
-
-                            ratingInputs.forEach(input => {
-                                input.addEventListener('change', function () {
-                                    const selectedRating = parseInt(this.value);
-
-                                    stars.forEach((star, index) => {
-                                        if (index < selectedRating) {
-                                            star.classList.add('text-yellow-400');
-                                            star.classList.remove('text-gray-300');
-                                        } else {
-                                            star.classList.remove('text-yellow-400');
-                                            star.classList.add('text-gray-300');
-                                        }
-                                    });
-                                });
-                            });
-
-                            if (typeof lucide !== 'undefined') {
-                                lucide.createIcons();
-                            }
-                        });
-                    </script>
                 </div>
+            @empty
+                <p class="text-gray-500">Chưa có đánh giá nào.</p>
+            @endforelse
+        </div>
+
+        <!-- Gửi đánh giá -->
+        @auth
+            <div class="bg-gray-50 p-6 rounded-lg border">
+                <h3 class="text-lg font-semibold mb-4">Gửi đánh giá của bạn</h3>
+
+                @if (session('success'))
+                    <div class="mb-4 p-3 bg-green-100 text-green-800 rounded">
+                        {{ session('success') }}
+                    </div>
+                @endif
+                @if (session('error'))
+                    <div class="mb-4 p-3 bg-red-100 text-red-800 rounded">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                @if (!$appointment)
+                    <p class="text-sm text-gray-500">Bạn cần hoàn tất một cuộc hẹn với bác sĩ để gửi đánh giá.</p>
+                @elseif ($alreadyReviewed && $userReview)
+                    <div class="mb-4 p-4 border rounded bg-gray-100">
+                        <p class="text-sm mb-1 text-gray-700">Bạn đã đánh giá: <strong>{{ $userReview->rating }} sao</strong></p>
+                        <p class="text-sm text-gray-800 italic">"{{ $userReview->comment }}"</p>
+                    </div>
+                @else
+                    <form action="{{ route('reviews.store', $doctor->id) }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="appointment_id" value="{{ $appointment->id }}">
+                        @if ($appointment->service)
+                            <input type="hidden" name="service_id" value="{{ $appointment->service->id }}">
+                        @endif
+
+                        <div class="flex items-center mb-4 space-x-2">
+                            <label class="text-sm">Đánh giá:</label>
+                            @for ($i = 1; $i <= 5; $i++)
+                                <label class="cursor-pointer flex items-center group">
+                                    <input type="radio" name="rating" value="{{ $i }}" class="hidden rating-input">
+                                    <i data-lucide="star"
+                                       class="w-6 h-6 rating-star text-gray-300 fill-none transition-colors"
+                                       data-value="{{ $i }}"></i>
+                                </label>
+                            @endfor
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="comment" class="block text-sm font-medium mb-1">Nhận xét:</label>
+                            <textarea name="comment" id="comment" rows="3"
+                                      class="w-full border rounded p-2 text-sm"
+                                      placeholder="Nhận xét của bạn..." required>{{ old('comment') }}</textarea>
+                        </div>
+
+                        <div class="text-right">
+                            <button type="submit"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium">
+                                Gửi đánh giá
+                            </button>
+                        </div>
+                    </form>
+                @endif
+            </div>
+        @endauth
+    </div>
+
+    <!-- JavaScript xử lý đánh giá -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Kích hoạt icon
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            const ratingInputs = document.querySelectorAll('.rating-input');
+            const ratingStars = document.querySelectorAll('.rating-star');
+
+            function updateStars(selectedValue) {
+                ratingStars.forEach(star => {
+                    const value = parseInt(star.getAttribute('data-value'));
+                    if (value <= selectedValue) {
+                        star.classList.add('text-yellow-400', 'fill-yellow-400');
+                        star.classList.remove('text-gray-300', 'fill-none');
+                    } else {
+                        star.classList.remove('text-yellow-400', 'fill-yellow-400');
+                        star.classList.add('text-gray-300', 'fill-none');
+                    }
+                });
+            }
+
+            ratingInputs.forEach(input => {
+                input.addEventListener('change', function () {
+                    const selected = parseInt(this.value);
+                    updateStars(selected);
+                });
+            });
+        });
+    </script>
+</div>
+
+
 
                 <!-- Location Tab -->
                 <div id="content-location" class="tab-content hidden">
@@ -807,14 +767,8 @@
                 window.addEventListener('load', animateOnScroll);
             </script>
 
-            <script>
-                document.querySelectorAll('.reply-toggle').forEach(button => {
-                    button.addEventListener('click', function () {
-                        const reviewId = this.getAttribute('data-review-id');
-                        const form = document.getElementById('reply-form-' + reviewId);
-                        form.classList.toggle('hidden');
-                    });
-                });
-            </script>
+
+
+
         @endpush
 @endsection

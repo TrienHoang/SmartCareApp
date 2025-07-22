@@ -74,5 +74,8 @@ class User extends Authenticatable
         return $this->belongsTo(User::class, 'patient_id');
     }
 
-    
+    public function isAdmin()
+    {
+        return $this->role && $this->role->name === '1';
+    }
 }

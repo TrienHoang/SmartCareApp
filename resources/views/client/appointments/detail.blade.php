@@ -422,32 +422,38 @@ body {
         @endif
 
         <!-- Đơn thuốc -->
-        @if ($appointment->prescription && $appointment->prescription->items->count())
-        <div class="info-card full-width-card">
-            <div class="card-header">
-                <i class="bx bx-capsule card-icon"></i>
-                <h3 class="card-title">Đơn thuốc</h3>
-            </div>
-            @foreach ($appointment->prescription->items as $item)
-                <div class="prescription-item">
-                    <div class="medicine-name">
-                        <i class="bx bx-plus-medical"></i>
-                        {{ $item->medicine->name ?? 'Không rõ' }}
+<!-- Đơn thuốc -->
+@if (
+    $appointment->medicalRecord &&
+    $appointment->medicalRecord->prescription &&
+    $appointment->medicalRecord->prescription->items->count()
+)
+    <div class="info-card full-width-card">
+        <div class="card-header">
+            <i class="bx bx-capsule card-icon"></i>
+            <h3 class="card-title">Đơn thuốc</h3>
+        </div>
+        @foreach ($appointment->medicalRecord->prescription->items as $item)
+            <div class="prescription-item">
+                <div class="medicine-name">
+                    <i class="bx bx-plus-medical"></i>
+                    {{ $item->medicine->name ?? 'Không rõ' }}
+                </div>
+                <div class="medicine-details">
+                    <div class="medicine-detail">
+                        <i class="bx bx-hash"></i>
+                        <strong>Số lượng:</strong> {{ $item->quantity }}
                     </div>
-                    <div class="medicine-details">
-                        <div class="medicine-detail">
-                            <i class="bx bx-hash"></i>
-                            <strong>Số lượng:</strong> {{ $item->quantity }}
-                        </div>
-                        <div class="medicine-detail">
-                            <i class="bx bx-info-circle"></i>
-                            <strong>Cách dùng:</strong> {{ $item->usage_instructions }}
-                        </div>
+                    <div class="medicine-detail">
+                        <i class="bx bx-info-circle"></i>
+                        <strong>Cách dùng:</strong> {{ $item->usage_instructions }}
                     </div>
                 </div>
-            @endforeach
-        </div>
-        @endif
+            </div>
+        @endforeach
+    </div>
+@endif
+
 
         <!-- Đánh giá -->
         @if ($appointment->review)
