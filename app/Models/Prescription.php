@@ -57,7 +57,15 @@ class Prescription extends Model
         return $this->prescriptionItems->sum('quantity');
     }
 
-    public function histories(){
+    public function histories()
+    {
         return $this->hasMany(PrescriptionHistory::class)->latest('changed_at');
     }
+
+    public function appointment()
+    {
+        return $this->belongsTo(Appointment::class);
+    }
+
+
 }

@@ -91,30 +91,7 @@ public function store(Request $request, $doctorId)
 
 
 
-    /**
-     * Gửi phản hồi đánh giá.
-     */
-    public function storeReply(Request $request, $reviewId)
-    {
-        try {
-            $request->validate([
-                'content' => 'required|string|max:1000',
-            ]);
 
-            $review = Review::findOrFail($reviewId);
-
-            ReviewReply::create([
-                'review_id' => $review->id,
-                'user_id' => Auth::id(),
-                'content' => $request->content,
-            ]);
-
-            return back()->with('success', 'Phản hồi của bạn đã được gửi.');
-        } catch (\Exception $e) {
-            Log::error('Lỗi khi gửi phản hồi: ' . $e->getMessage());
-            return back()->with('error', 'Có lỗi xảy ra khi gửi phản hồi. Vui lòng thử lại.');
-        }
-    }
 
     /**
      * Đánh dấu đánh giá là hữu ích.
