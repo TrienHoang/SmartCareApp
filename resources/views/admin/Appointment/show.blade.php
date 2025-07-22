@@ -297,6 +297,10 @@
                         <div class="border-top pt-3">
                             <div class="row g-3">
                                 <div class="col-12">
+                                    <small class="text-muted d-block">Người tạo</small>
+                                    <span class="text-dark">{{ $appointment->creator->full_name ?? 'Không xác định' }}</span>
+                                </div>
+                                <div class="col-12">
                                     <small class="text-muted d-block">Ngày tạo</small>
                                     <span class="text-dark">{{ $appointment->created_at->format('d/m/Y H:i') }}</span>
                                 </div>

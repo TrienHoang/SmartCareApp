@@ -23,6 +23,7 @@ class Appointment extends Model
         'treatment_plan_id',
         'created_at',
         'updated_at',
+        'created_by', // Thêm trường created_by
     ];
 
     protected $casts = [
@@ -173,5 +174,10 @@ class Appointment extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

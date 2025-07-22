@@ -410,6 +410,12 @@
                                                         onclick="cancelAppointment({{ $appointment->id }})">
                                                         <i class="fas fa-times"></i>
                                                     </button>
+                                                @elseif ($appointment->status === 'confirmed')
+                                                    <button type="button" class="btn btn-outline-danger"
+                                                        data-toggle="tooltip" title="Hủy lịch hẹn"
+                                                        onclick="cancelAppointment({{ $appointment->id }})">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
                                                 @endif
 
                                                 @if ($appointment->payment && $appointment->payment->status !== 'paid')
@@ -417,23 +423,11 @@
                                                         action="{{ route('receptionist.appointments.confirm-payment', $appointment->id) }}">
                                                         @csrf
                                                         @method('PATCH')
-                                                        <button class="btn btn-outline-success" data-toggle="tooltip" title="Xác nhận đã thanh toán">
+                                                        <button class="btn btn-outline-success" data-toggle="tooltip"
+                                                            title="Xác nhận đã thanh toán">
                                                             <i class="fas fa-money-check-alt"></i>
                                                         </button>
                                                     </form>
-                                                @endif
-
-                                                @if ($appointment->status === 'confirmed')
-                                                    <button type="button" class="btn btn-outline-success"
-                                                        data-toggle="tooltip" title="Hoàn thành"
-                                                        onclick="completeAppointment({{ $appointment->id }})">
-                                                        <i class="fas fa-check-double"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-outline-danger"
-                                                        data-toggle="tooltip" title="Hủy lịch hẹn"
-                                                        onclick="cancelAppointment({{ $appointment->id }})">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
                                                 @endif
                                             </div>
                                         </td>
@@ -719,16 +713,10 @@
                 let actionUrl = '';
                 switch (action) {
                     case 'confirm':
-                        actionUrl = `/receptionist/appointments/${id}/confirm`;
+                        actionUrl = `/receptionist/appointments/${id}/update-status`;
                         break;
                     case 'cancel':
                         actionUrl = `/receptionist/appointments/${id}/cancel`;
-                        break;
-                    case 'complete':
-                        actionUrl = `/receptionist/appointments/${id}/complete`;
-                        break;
-                    case 'delete':
-                        actionUrl = `/receptionist/appointments/${id}`;
                         break;
                 }
 
@@ -740,13 +728,11 @@
                 csrfToken.value = '{{ csrf_token() }}';
                 form.appendChild(csrfToken);
 
-                if (action === 'delete') {
-                    const methodField = document.createElement('input');
-                    methodField.type = 'hidden';
-                    methodField.name = '_method';
-                    methodField.value = 'DELETE';
-                    form.appendChild(methodField);
-                }
+                const methodField = document.createElement('input');
+                methodField.type = 'hidden';
+                methodField.name = '_method';
+                methodField.value = 'PATCH';
+                form.appendChild(methodField);
 
                 document.body.appendChild(form);
                 form.submit();

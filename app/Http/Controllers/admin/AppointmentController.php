@@ -265,6 +265,7 @@ class AppointmentController extends Controller
         ]);
 
         $requestData['end_time'] = $endTime;
+        $requestData['created_by'] = auth()->id();
 
         $appointment = Appointment::create($requestData);
 
@@ -279,6 +280,7 @@ class AppointmentController extends Controller
             'total_amount' => $price,
             'status' => 'completed',
             'ordered_at' => now(),
+            'created_by' => auth()->id(),
         ]);
 
         // Gắn dịch vụ vào order_service

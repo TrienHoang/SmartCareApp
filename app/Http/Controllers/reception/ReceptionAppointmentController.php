@@ -616,7 +616,6 @@ class ReceptionAppointmentController extends Controller
         try {
             $endTime = $appointmentDate->copy()->addMinutes($service->duration);
 
-            // $appointmentStatus = $validated['payment_method'] === 'cash' ? 'confirmed' : 'pending';
             $paymentStatus = $validated['payment_method'] === 'cash' ? 'paid' : 'pending';
             $orderStatus = $validated['payment_method'] === 'cash' ? 'completed' : 'pending';
 
@@ -644,13 +643,29 @@ class ReceptionAppointmentController extends Controller
                     'updated_at' => now(),
                 ]);
 
-
             $appointment->payment->update([
                 'amount' => $service->price,
                 'status' => $paymentStatus,
                 'payment_method' => $validated['payment_method'],
                 'paid_at' => $paymentStatus === 'paid' ? now() : null,
             ]);
+
+            // Nếu trạng thái mới là confirmed → payment cũng paid
+            if ($validated['status'] === 'confirmed' && $appointment->payment->status !== 'paid') {
+                $appointment->payment->update([
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                    'payment_method' => $validated['payment_method'],
+                ]);
+
+                PaymentHistory::create([
+                    'payment_id' => $appointment->payment->id,
+                    'amount' => $appointment->payment->amount,
+                    'payment_method' => $validated['payment_method'],
+                    'payment_date' => now(),
+                    'user_id' => auth()->id(),
+                ]);
+            }
 
             DB::commit();
 
@@ -661,5 +676,74 @@ class ReceptionAppointmentController extends Controller
             report($e);
             return back()->withErrors(['error' => 'Có lỗi khi cập nhật lịch hẹn: ' . $e->getMessage()])->withInput();
         }
+    }
+
+    public function updateStatus($id)
+    {
+        $appointment = Appointment::with('payment')->findOrFail($id);
+
+        if ($appointment->status !== 'pending') {
+            return back()->withErrors(['error' => 'Chỉ có thể cập nhật trạng thái lịch hẹn đang chờ xác nhận.']);
+        }
+
+        DB::transaction(function () use ($appointment) {
+            $appointment->update([
+                'status' => 'confirmed',
+                'updated_by' => auth()->id(),
+            ]);
+
+            if ($appointment->payment && $appointment->payment->status !== 'paid') {
+                $appointment->payment->update([
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                ]);
+
+                PaymentHistory::create([
+                    'payment_id' => $appointment->payment->id,
+                    'amount' => $appointment->payment->amount,
+                    'payment_method' => $appointment->payment->payment_method,
+                    'payment_date' => now(),
+                    'user_id' => auth()->id(),
+                ]);
+            }
+        });
+
+        return back()->with('success', 'Cập nhật trạng thái lịch hẹn và thanh toán thành công.');
+    }
+
+    public function cancel($id)
+    {
+        $appointment = Appointment::with('payment')->findOrFail($id);
+
+        if (in_array($appointment->status, ['completed', 'cancelled'])) {
+            return back()->withErrors(['error' => 'Không thể huỷ lịch hẹn đã hoàn tất hoặc đã huỷ.']);
+        }
+
+        if ($appointment->payment && $appointment->payment->status === 'paid') {
+            return back()->withErrors(['error' => 'Lịch hẹn đã được thanh toán. Vui lòng liên hệ quản trị viên để xử lý hoàn tiền.']);
+        }
+
+        DB::transaction(function () use ($appointment) {
+            $appointment->update([
+                'status' => 'cancelled',
+                'updated_by' => auth()->id(),
+            ]);
+
+            if ($appointment->payment) {
+                $appointment->payment->update([
+                    'status' => 'cancelled',
+                    'paid_at' => null,
+                ]);
+            }
+
+            // Nếu có Order liên quan cũng có thể update trạng thái
+            if ($appointment->order) {
+                $appointment->order->update([
+                    'status' => 'cancelled',
+                ]);
+            }
+        });
+
+        return back()->with('success', 'Đã huỷ lịch hẹn thành công.');
     }
 }
