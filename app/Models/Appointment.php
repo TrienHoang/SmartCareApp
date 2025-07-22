@@ -175,9 +175,12 @@ class Appointment extends Model
     {
         return $this->belongsTo(User::class);
     }
+<<<<<<< HEAD
 
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+=======
+>>>>>>> fa93bed (update logic nghỉ đột xuất của bác sĩ)
 }
