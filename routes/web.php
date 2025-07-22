@@ -263,6 +263,8 @@ Route::group([
         Route::post('/{id}/pay', [AppointmentController::class, 'pay'])
             ->middleware('check_permission:edit_appointments')->name('pay');
 
+        Route::post('/{id}/refund', [AppointmentController::class, 'refund'])->name('refund');
+
         Route::get('/doctor/{doctor}/services', [AppointmentController::class, 'getDoctorServices'])
             ->name('doctor.services');
 

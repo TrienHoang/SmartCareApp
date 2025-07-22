@@ -79,17 +79,37 @@ $(document).ready(function () {
 
         $slotSelect.html('<option>Đang tải...</option>').prop('disabled', true);
 
-        $.get(`/receptionist/appointments/doctor/${doctorId}/available-slots`, { date, service_id: serviceId, current_appointment_id: window.currentAppointmentId }, slots => {
+        $.get(`/receptionist/appointments/doctor/${doctorId}/available-slots`, {
+            date,
+            service_id: serviceId,
+            current_appointment_id: window.currentAppointmentId
+        }, slots => {
             $slotSelect.empty();
+
+            // Lấy giờ cũ trong data-old (H:i)
+            const oldFull = $slotSelect.data('old') || '';
+            const oldTimeOnly = oldFull.split(' ')[1] ?? '';
+
             if (!slots.length) {
                 $slotSelect.append('<option value="">Không còn giờ trống</option>');
             } else {
                 $slotSelect.append('<option value="">Chọn giờ</option>');
+                let hasOld = false;
+
                 slots.forEach(slot => {
                     const value = `${date} ${slot}`;
-                    const selected = (value === oldAppointmentTimeGlobal) ? 'selected' : '';
+                    const selected = (slot === oldTimeOnly) ? 'selected' : '';
+                    if (selected) hasOld = true;
+
                     $slotSelect.append(`<option value="${value}" ${selected}>${slot}</option>`);
                 });
+
+                // Nếu giờ cũ không còn trong slot mới => fallback
+                if (!hasOld && oldTimeOnly) {
+                    const fallbackValue = oldFull;
+                    const fallbackTime = oldTimeOnly;
+                    $slotSelect.append(`<option value="${fallbackValue}" selected>${fallbackTime} (giờ đã bận)</option>`);
+                }
             }
             $slotSelect.prop('disabled', false);
         }).fail(() => {

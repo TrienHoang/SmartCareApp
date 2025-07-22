@@ -26,6 +26,9 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+
+use Illuminate\Support\Facades\Log;
 
 class AppointmentController extends Controller
 {
@@ -265,6 +268,7 @@ class AppointmentController extends Controller
         ]);
 
         $requestData['end_time'] = $endTime;
+        $requestData['created_by'] = auth()->id();
 
         $appointment = Appointment::create($requestData);
 
@@ -279,6 +283,7 @@ class AppointmentController extends Controller
             'total_amount' => $price,
             'status' => 'completed',
             'ordered_at' => now(),
+            'created_by' => auth()->id(),
         ]);
 
         // Gắn dịch vụ vào order_service
@@ -576,24 +581,45 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
 
-        if (
-            ($appointment->payment && $appointment->payment->status === 'paid') ||
-            ($appointment->order && $appointment->order->status === 'completed')
-        ) {
+        // Kiểm tra nếu đã hoàn thành hoặc đã hủy trước đó
+        if (in_array($appointment->status, ['completed', 'cancelled'])) {
             return redirect()->route('admin.appointments.index')->withErrors([
-                'status' => 'Lịch hẹn đã được thanh toán và không thể hủy.',
+                'status' => 'Không thể hủy lịch hẹn đã hoàn thành hoặc đã hủy trước đó.',
             ]);
         }
 
-        // Nếu hợp lệ thì hủy
+        // Nếu đã thanh toán
+        if ($appointment->payment && $appointment->payment->status === 'paid') {
+            if ($appointment->status === 'confirmed') {
+                // Đã thanh toán & đã xác nhận ⇒ không cho hủy
+                return redirect()->route('admin.appointments.index')->withErrors([
+                    'status' => 'Lịch hẹn đã được thanh toán và xác nhận, không thể hủy.',
+                ]);
+            }
+
+            if ($appointment->status === 'pending') {
+                // Đã thanh toán nhưng chưa xác nhận ⇒ hủy & hoàn tiền
+                $appointment->status = 'cancelled';
+                $appointment->save();
+
+                // TODO: Gửi yêu cầu hoàn tiền ở đây nếu muốn
+                // Ví dụ: $this->refundPayment($appointment->payment);
+
+                return redirect()->route('admin.appointments.index')->with('success', 'Hủy lịch hẹn thành công & sẽ hoàn tiền cho bệnh nhân.');
+            }
+        }
+
+        // Nếu chưa thanh toán hoặc chưa xác nhận
         if (in_array($appointment->status, ['pending', 'confirmed'])) {
             $appointment->status = 'cancelled';
             $appointment->save();
-            return redirect()->route('admin.appointments.index')->with('success', 'Hủy lịch hẹn thành công');
+
+            return redirect()->route('admin.appointments.index')->with('success', 'Hủy lịch hẹn thành công.');
         }
 
+        // Trường hợp còn lại
         return redirect()->route('admin.appointments.index')->withErrors([
-            'status' => 'Không thể hủy lịch hẹn đã hoàn thành hoặc đã hủy.',
+            'status' => 'Không thể hủy lịch hẹn.',
         ]);
     }
     public function show($id)
@@ -818,5 +844,96 @@ class AppointmentController extends Controller
             });
 
         return response()->json($plans);
+    }
+
+    public function refund($id)
+    {
+        $appointment = Appointment::with('payment')->findOrFail($id);
+        $payment = $appointment->payment;
+
+        if (!$payment || $payment->status !== 'paid') {
+            return back()->withErrors(['error' => 'Lịch hẹn chưa được thanh toán.']);
+        }
+
+        if ($payment->is_refunded) {
+            return back()->withErrors(['error' => 'Đã hoàn tiền trước đó.']);
+        }
+
+        // Load config
+        $vnp_TmnCode = config('services.vnpay.tmn_code');
+        $vnp_HashSecret = config('services.vnpay.hash_secret');
+        $vnp_RefundUrl = config('services.vnpay.refund_url');
+
+        $vnp_RequestId = uniqid();
+        $vnp_Version = '2.1.0';
+        $vnp_Command = 'refund';
+        $vnp_TxnRef = $payment->txn_ref;               // mã giao dịch bạn đã gửi khi thanh toán
+        $vnp_Amount = $payment->amount * 100;         // nhân 100 theo VNPay
+        $vnp_TransactionType = '02';                  // 02 = hoàn toàn bộ
+        $vnp_TransactionNo = $payment->transaction_no; // số giao dịch VNPay trả về khi thanh toán
+        $vnp_TransactionDate = $payment->pay_date;   // yyyyMMddHHmmss thời điểm thanh toán
+        $vnp_CreateBy = auth()->user()->name ?? 'system';
+        $vnp_CreateDate = now()->format('YmdHis');
+        $vnp_IpAddr = request()->ip();
+
+        $inputData = [
+            'vnp_RequestId'       => $vnp_RequestId,
+            'vnp_Version'         => $vnp_Version,
+            'vnp_Command'         => $vnp_Command,
+            'vnp_TmnCode'         => $vnp_TmnCode,
+            'vnp_TransactionType' => $vnp_TransactionType,
+            'vnp_TxnRef'          => $vnp_TxnRef,
+            'vnp_Amount'          => $vnp_Amount,
+            'vnp_TransactionNo'   => $vnp_TransactionNo,
+            'vnp_TransactionDate' => $vnp_TransactionDate,
+            'vnp_CreateBy'        => $vnp_CreateBy,
+            'vnp_CreateDate'      => $vnp_CreateDate,
+            'vnp_IpAddr'          => $vnp_IpAddr,
+            'vnp_OrderInfo'       => 'Hoàn tiền lịch hẹn #' . $appointment->id,
+        ];
+
+        // Bước 1: tạo secure hash
+        ksort($inputData);
+        $hashData = urldecode(http_build_query($inputData));
+        $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
+        $inputData['vnp_SecureHash'] = $secureHash;
+
+        try {
+            $response = Http::asForm()->post($vnp_RefundUrl, $inputData);
+
+            if (!$response->ok()) {
+                Log::error('VNPay Refund HTTP error', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                return back()->withErrors(['error' => 'VNPay không phản hồi đúng: HTTP ' . $response->status()]);
+            }
+
+            $result = $response->json();
+
+            if (!is_array($result)) {
+                Log::error('VNPay Refund invalid JSON', ['body' => $response->body()]);
+                return back()->withErrors(['error' => 'Phản hồi VNPay không hợp lệ.']);
+            }
+
+            Log::info('VNPay Refund response', $result);
+
+            if (($result['vnp_ResponseCode'] ?? null) === '00') {
+                $payment->is_refunded = true;
+                $payment->refunded_at = now();
+                $payment->save();
+
+                return back()->with('success', 'Hoàn tiền thành công qua VNPay.');
+            }
+
+            $message = $result['vnp_Message'] ?? 'Không rõ lỗi';
+            return back()->withErrors(['error' => 'Hoàn tiền thất bại: ' . $message]);
+        } catch (\Throwable $e) {
+            Log::error('VNPay Refund exception', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return back()->withErrors(['error' => 'Có lỗi xảy ra khi hoàn tiền: ' . $e->getMessage()]);
+        }
     }
 }
