@@ -132,4 +132,5 @@ public function store(Request $request, $doctorId)
             return back()->with('error', 'Có lỗi xảy ra. Vui lòng thử lại.');
         }
     }
+    
 }
