@@ -33,7 +33,7 @@ class AppointmentReassigned extends Notification
             ->greeting('Xin chào ' . $notifiable->name . ',')
             ->line('Cuộc hẹn của bạn đã được chuyển sang một bác sĩ khác do bác sĩ ban đầu nghỉ đột xuất.')
             ->line("**Chi tiết cuộc hẹn:**")
-            ->line("Bác sĩ: {$doctor->name}")
+            ->line("Bác sĩ: {$doctor->user->full_name}")
             ->line("Thời gian: {$appointmentTime}")
             ->line("Ghi chú: {$this->appointment->note}")
             ->action('Xem Cuộc Hẹn', url('/appointments/' . $this->appointment->id))
