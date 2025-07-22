@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Client;
 
-use App\Http\Controllers\Client\PaymentHistoryClientController; // Đúng namespace, đúng chữ hoa/thường
+use App\Http\Controllers\Client\PaymentHistoryClientController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Client\PaymentController;
 use Illuminate\Support\Facades\Route;
-
 
 use App\Http\Controllers\Client\ReviewReplyController;
 use App\Http\Controllers\Client\AppointmentController;
@@ -55,11 +54,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/doctors/{doctor}/reviews', [ReviewReplyController::class, 'store'])->name('reviews.store');
 
     // Gửi phản hồi đánh giá
-Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
+    Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
 
     // Đánh dấu đánh giá là hữu ích
     Route::post('/reviews/{review}/useful', [ReviewReplyController::class, 'markUseful'])->name('reviews.useful');
-
 });
 
 // Route hiển thị chi tiết bác sĩ (không yêu cầu đăng nhập)
@@ -87,8 +85,11 @@ Route::prefix('client/payment_history')->name('client.payment_history.')->middle
     Route::get('/', [PaymentHistoryClientController::class, 'index'])->name('index');
     Route::get('/{id}', [PaymentHistoryClientController::class, 'show'])->name('show');
 });
-Route::prefix('client/payment')->name('client.payment.')->middleware(['auth'])->group(function () {
-    Route::get('/', [PaymentController::class, 'create'])->name('create');
-    Route::get('/return', [PaymentController::class, 'return'])->name('return');
-    Route::get('/ipn', [PaymentController::class, 'ipn'])->name('ipn');
+Route::get('/test-payment', function () {
+    return view('test-payment');
 });
+
+Route::post('/test-payment/process', [PaymentController::class, 'create'])->name('test.payment');
+Route::get('/vnpay-return', [PaymentController::class, 'return'])->name('vnpay.return');
+Route::post('/vnpay-ipn', [PaymentController::class, 'ipn'])->name('vnpay.ipn');
+Route::post('/vnpay-ipn', [PaymentController::class, 'ipn'])->name('vnpay.ipn');
