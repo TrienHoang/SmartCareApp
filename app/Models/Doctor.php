@@ -16,6 +16,7 @@ class Doctor extends Model
         'room_id',
         'specialization',
         'biography',
+        'status', // Thêm trường status
     ];
 
     // --------------------
@@ -60,7 +61,7 @@ class Doctor extends Model
     {
         return $this->hasMany(TreatmentPlan::class);
     }
-    
+
 
     public function services()
     {
@@ -78,4 +79,38 @@ class Doctor extends Model
             ->where('approved', true)
             ->whereNull('deleted_at');
     }
+
+    public function isOnLeaveToday()
+    {
+        return $this->leaves()
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->exists();
+    }
+
+    public function educations()
+    {
+        return $this->hasMany(Education::class);
+    }
+
+    public function experiences()
+    {
+        return $this->hasMany(Experience::class);
+    }
+
+    public function achievements()
+    {
+        return $this->hasMany(Achievement::class);
+    }
+
+    public function specialties()
+    {
+        return $this->belongsToMany(Specialty::class, 'doctor_specialty');
+    }
+
+    
+
+    
+
+    
 }

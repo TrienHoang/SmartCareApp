@@ -70,7 +70,9 @@ class User extends Authenticatable
     }
 
     public function patient()
-{
-    return $this->belongsTo(User::class, 'patient_id');
-}
+    {
+        return $this->belongsTo(User::class, 'patient_id');
+    }
+
+    
 }

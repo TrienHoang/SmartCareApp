@@ -20,6 +20,7 @@ class Appointment extends Model
         'status',
         'reason',
         'cancel_reason',
+        'treatment_plan_id',
         'created_at',
         'updated_at',
         'treatment_plan_id', 
@@ -50,6 +51,12 @@ class Appointment extends Model
     public function service()
     {
         return $this->belongsTo(Service::class, 'service_id');
+    }
+
+    // 📋 Quan hệ: kế hoạch điều trị
+    public function treatmentPlan()
+    {
+        return $this->belongsTo(TreatmentPlan::class, 'treatment_plan_id');
     }
 
     // 💰 Quan hệ: thanh toán
@@ -102,7 +109,7 @@ class Appointment extends Model
         };
     }
 
-    // ✅ Accessor: tên bệnh nhân (dễ dùng)
+    // ✅ Accessor: tên bệnh nhân
     public function getPatientNameAttribute()
     {
         return $this->patient?->full_name ?? '---';
@@ -152,9 +159,17 @@ class Appointment extends Model
     public function scopeThisMonth($query)
     {
         return $query->whereMonth('appointment_time', Carbon::now()->month)
-                     ->whereYear('appointment_time', Carbon::now()->year);
+            ->whereYear('appointment_time', Carbon::now()->year);
     }
 
+    public function prescription()
+    {
+        return $this->hasOne(Prescription::class);
+    } // long bổ xung mỗi lịch hẹn chỉ có một đơn thuốc
 
-    
+
+    public function review()
+    {
+        return $this->hasOne(Review::class);
+    }
 }

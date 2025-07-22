@@ -96,11 +96,13 @@
                                             use Carbon\Carbon;
                                             $now = Carbon::now();
                                             $appointmentTime = Carbon::parse($appointment->appointment_time);
-                                            $shouldShowEndTime = $appointmentTime->isPast() || $appointment->status === 'completed';
+                                            $shouldShowEndTime =
+                                                $appointmentTime->isPast() || $appointment->status === 'completed';
                                         @endphp
                                         @if ($shouldShowEndTime)
                                             <small class="text-muted">
-                                                Kết thúc: {{ \Carbon\Carbon::parse($appointment->end_time)->format('H:i') }}
+                                                Kết thúc:
+                                                {{ \Carbon\Carbon::parse($appointment->end_time)->format('H:i') }}
                                             </small>
                                         @endif
                                     </div>
@@ -109,42 +111,94 @@
                         </div>
 
                         <!-- Notes Section -->
-                        @if($appointment->reason)
-                        <div class="mt-4 p-3 bg-light rounded">
-                            <h6 class="mb-2">
-                                <i class="bx bx-note text-muted me-2"></i>
-                                Ghi chú
-                            </h6>
-                            <p class="mb-0 text-muted">{{ $appointment->reason }}</p>
-                        </div>
+                        @if ($appointment->reason)
+                            <div class="mt-4 p-3 bg-light rounded">
+                                <h6 class="mb-2">
+                                    <i class="bx bx-note text-muted me-2"></i>
+                                    Ghi chú
+                                </h6>
+                                <p class="mb-0 text-muted">{{ $appointment->reason }}</p>
+                            </div>
                         @endif
 
                         <!-- Cancel Reason -->
-                        @if($appointment->cancel_reason)
-                        <div class="mt-3 p-3 bg-danger-subtle rounded">
-                            <h6 class="mb-2 text-danger">
-                                <i class="bx bx-x-circle me-2"></i>
-                                Lí do hủy
-                            </h6>
-                            <p class="mb-0 text-danger">{{ $appointment->cancel_reason }}</p>
-                        </div>
+                        @if ($appointment->cancel_reason)
+                            <div class="mt-3 p-3 bg-danger-subtle rounded">
+                                <h6 class="mb-2 text-danger">
+                                    <i class="bx bx-x-circle me-2"></i>
+                                    Lí do hủy
+                                </h6>
+                                <p class="mb-0 text-danger">{{ $appointment->cancel_reason }}</p>
+                            </div>
                         @endif
 
                         <!-- Completion Notes -->
-                        @if($appointment->status === 'completed')
-                        @php
-                            $completionNote = optional($appointment->logs->where('status_after', 'completed')->sortByDesc('change_time')->first())->note;
-                        @endphp
-                        @if($completionNote)
-                        <div class="mt-3 p-3 bg-success-subtle rounded">
-                            <h6 class="mb-2 text-success">
-                                <i class="bx bx-check-circle me-2"></i>
-                                Ghi chú sau khi hoàn thành
-                            </h6>
-                            <p class="mb-0 text-success">{{ $completionNote }}</p>
+                        @if ($appointment->status === 'completed')
+                            @php
+                                $completionNote = optional(
+                                    $appointment->logs
+                                        ->where('status_after', 'completed')
+                                        ->sortByDesc('change_time')
+                                        ->first(),
+                                )->note;
+                            @endphp
+                            @if ($completionNote)
+                                <div class="mt-3 p-3 bg-success-subtle rounded">
+                                    <h6 class="mb-2 text-success">
+                                        <i class="bx bx-check-circle me-2"></i>
+                                        Ghi chú sau khi hoàn thành
+                                    </h6>
+                                    <p class="mb-0 text-success">{{ $completionNote }}</p>
+                                </div>
+                            @endif
+                        @endif
+                    </div>
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="card-title mb-0">
+                                <i class="bx bx-notepad text-primary me-2"></i>
+                                Kế hoạch điều trị
+                            </h5>
                         </div>
-                        @endif
-                        @endif
+                        <div class="card-body">
+                            @if (isset($appointment->treatmentPlan))
+                                <h6 class="mb-2 text-dark">{{ $appointment->treatmentPlan->plan_title }}</h6>
+                                <p class="text-muted mb-1">
+                                    <strong>Bác sĩ phụ trách:</strong>
+                                    {{ $appointment->treatmentPlan->doctor->user->full_name ?? 'N/A' }}
+                                </p>
+                                <ul class="list-group">
+                                    @foreach ($appointment->treatmentPlan->treatmentPlanItems as $item)
+                                        <li class="list-group-item">
+                                            {{ $item->service->name ?? 'Dịch vụ' }} -
+                                            Bắt đầu:
+                                            {{ \Carbon\Carbon::parse($item->expected_start_date)->format('d/m/Y') }}
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @elseif(isset($treatmentPlans) && $treatmentPlans->count())
+                                <p>Có {{ $treatmentPlans->count() }} kế hoạch điều trị:</p>
+                                @foreach ($treatmentPlans as $plan)
+                                    <div class="mb-3">
+                                        <h6 class="mb-1 text-dark">{{ $plan->plan_title }}</h6>
+                                        <p class="text-muted mb-1">
+                                            <strong>Bác sĩ:</strong> {{ $plan->doctor->user->full_name ?? 'N/A' }}
+                                        </p>
+                                        <ul class="list-group">
+                                            @foreach ($plan->treatmentPlanItems as $item)
+                                                <li class="list-group-item">
+                                                    {{ $item->service->name ?? 'Dịch vụ' }} -
+                                                    Bắt đầu:
+                                                    {{ \Carbon\Carbon::parse($item->expected_start_date)->format('d/m/Y') }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endforeach
+                            @else
+                                <p class="text-muted">Chưa có kế hoạch điều trị.</p>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
@@ -165,12 +219,28 @@
                             <div>
                                 @php
                                     $statusConfig = [
-                                        'pending' => ['color' => 'warning', 'text' => 'Chờ xác nhận', 'icon' => 'bx-time'],
-                                        'confirmed' => ['color' => 'info', 'text' => 'Đã xác nhận', 'icon' => 'bx-check'],
-                                        'completed' => ['color' => 'success', 'text' => 'Hoàn thành', 'icon' => 'bx-check-double'],
+                                        'pending' => [
+                                            'color' => 'warning',
+                                            'text' => 'Chờ xác nhận',
+                                            'icon' => 'bx-time',
+                                        ],
+                                        'confirmed' => [
+                                            'color' => 'info',
+                                            'text' => 'Đã xác nhận',
+                                            'icon' => 'bx-check',
+                                        ],
+                                        'completed' => [
+                                            'color' => 'success',
+                                            'text' => 'Hoàn thành',
+                                            'icon' => 'bx-check-double',
+                                        ],
                                         'cancelled' => ['color' => 'danger', 'text' => 'Đã hủy', 'icon' => 'bx-x'],
                                     ];
-                                    $config = $statusConfig[$appointment->status] ?? ['color' => 'secondary', 'text' => $appointment->status, 'icon' => 'bx-help'];
+                                    $config = $statusConfig[$appointment->status] ?? [
+                                        'color' => 'secondary',
+                                        'text' => $appointment->status,
+                                        'icon' => 'bx-help',
+                                    ];
                                 @endphp
                                 <span class="badge bg-{{ $config['color'] }} badge-lg">
                                     <i class="bx {{ $config['icon'] }} me-1"></i>
@@ -260,7 +330,7 @@
                                                     {{ $log->change_time->format('d/m/Y H:i') }}
                                                 </small>
                                             </div>
-                                            @if($log->note)
+                                            @if ($log->note)
                                                 <div class="timeline-body mt-2">
                                                     <div class="bg-light p-3 rounded">
                                                         <pre class="mb-0 text-muted">{{ $log->note }}</pre>
@@ -387,7 +457,7 @@
             .timeline {
                 padding-left: 20px;
             }
-            
+
             .timeline-marker {
                 left: -20px;
                 width: 30px;

@@ -39,9 +39,9 @@
             <div class="content-header-right col-md-4 col-12 text-md-right">
                 <div class="form-group breadcrum-right">
                     <a href="{{ route('admin.files.trash') }}"
-                        class="btn btn-gradient-primary btn-lg waves-effect waves-light shadow-lg text-white">
+                        class="btn btn-danger btn-lg waves-effect waves-light shadow-lg text-white">
                         <i class="bx bx-trash mr-2"></i>
-                        Thùng rác
+                        Đã xóa
                     </a>
                 </div>
                 <form id="export-form" action="{{ route('admin.files.export') }}" method="GET">

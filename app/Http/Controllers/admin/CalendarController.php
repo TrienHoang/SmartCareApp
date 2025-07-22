@@ -9,6 +9,9 @@ use App\Models\Department;
 use App\Models\User;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
 class CalendarController extends Controller
 {
     public function index()
@@ -19,12 +22,19 @@ class CalendarController extends Controller
         return view('admin.calendar.index', compact('departments', 'users'));
     }
 
-public function events(Request $request)
+public function events(Request $request) 
 {
+    Log::info('Calendar Events Request:', [
+        'type' => $request->input('type'),
+        'department_id' => $request->input('department_id'),
+        'user_id' => $request->input('user_id'),
+        'start' => $request->input('start'),
+        'end' => $request->input('end'),
+    ]);
+
     $type = $request->input('type');
     $departmentId = $request->input('department_id');
     $userId = $request->input('user_id');
-
     $start = $request->input('start');
     $end = $request->input('end');
 
@@ -33,23 +43,35 @@ public function events(Request $request)
 
     // Lấy công việc
     if (!$type || $type === 'task') {
-        $tasks = Task::query()
+        $tasksQuery = Task::query()
             ->select('id', 'title', 'deadline', 'department_id', 'assigned_to')
             ->whereNotNull('deadline');
 
         if ($start && $end) {
-            $tasks->whereBetween('deadline', [$start, $end]);
+            $tasksQuery->whereBetween('deadline', [$start, $end]);
         }
 
         if ($departmentId) {
-            $tasks->where('department_id', $departmentId);
+            $tasksQuery->where('department_id', $departmentId);
         }
 
         if ($userId) {
-            $tasks->where('assigned_to', $userId);
+            $tasksQuery->where('assigned_to', $userId);
         }
 
-        $taskEvents = $tasks->get()->map(function ($task) {
+        Log::info('Tasks SQL Query:', [
+            'sql' => $tasksQuery->toSql(),
+            'bindings' => $tasksQuery->getBindings()
+        ]);
+
+        $tasks = $tasksQuery->get();
+        
+        Log::info('Tasks found:', [
+            'count' => $tasks->count(),
+            'tasks' => $tasks->toArray()
+        ]);
+
+        $taskEvents = $tasks->map(function ($task) {
             return [
                 'id' => 'task_' . $task->id,
                 'title' => '🗂️ ' . $task->title,
@@ -60,35 +82,93 @@ public function events(Request $request)
         });
     }
 
-    // Lấy cuộc hẹn
+    // Lấy lịch hẹn
     if (!$type || $type === 'appointment') {
-        $appointments = Appointment::query()
-            ->select('id', 'title', 'start_time', 'department_id', 'doctor_id');
+        $appointmentsQuery = Appointment::query()
+            ->select('id', 'appointment_time', 'doctor_id', 'patient_id', 'service_id');
 
         if ($start && $end) {
-            $appointments->whereBetween('start_time', [$start, $end]);
+            $appointmentsQuery->whereBetween('appointment_time', [$start, $end]);
         }
 
         if ($departmentId) {
-            $appointments->where('department_id', $departmentId);
+            // Nếu bạn có cột department_id thì giữ lại, nếu không thì bỏ
+            $appointmentsQuery->where('doctor_id', $departmentId); // hoặc sửa theo business logic
         }
 
         if ($userId) {
-            $appointments->where('doctor_id', $userId);
+            $appointmentsQuery->where('doctor_id', $userId);
         }
 
-        $appointmentEvents = $appointments->get()->map(function ($appt) {
+        Log::info('Appointments SQL Query:', [
+            'sql' => $appointmentsQuery->toSql(),
+            'bindings' => $appointmentsQuery->getBindings()
+        ]);
+
+        $appointments = $appointmentsQuery->get();
+        
+        Log::info('Appointments found:', [
+            'count' => $appointments->count(),
+            'appointments' => $appointments->toArray()
+        ]);
+
+        $appointmentEvents = $appointments->map(function ($appt) {
             return [
                 'id' => 'appt_' . $appt->id,
-                'title' => '🩺 ' . $appt->title,
-                'start' => $appt->start_time,
+                'title' => '🩺 Lịch khám #' . $appt->id,
+                'start' => $appt->appointment_time,
                 'color' => '#198754',
                 'url' => route('admin.appointments.show', $appt->id),
             ];
         });
     }
 
-    return response()->json($taskEvents->merge($appointmentEvents));
+    $finalEvents = $taskEvents->merge($appointmentEvents);
+
+    Log::info('Final Events:', [
+        'count' => $finalEvents->count(),
+        'events' => $finalEvents->toArray()
+    ]);
+
+    return response()->json($finalEvents);
+}
+
+
+// Thêm method để test database connection
+public function testDatabase()
+{
+    try {
+        // Test connection
+        DB::connection()->getPdo();
+        
+        // Test Tasks table
+        $tasksCount = DB::table('tasks')->count();
+        $tasksSample = DB::table('tasks')->limit(5)->get();
+        
+        // Test Appointments table
+        $appointmentsCount = DB::table('appointments')->count();
+        $appointmentsSample = DB::table('appointments')->limit(5)->get();
+        
+        return response()->json([
+            'database_connection' => 'OK',
+            'tasks' => [
+                'count' => $tasksCount,
+                'sample' => $tasksSample,
+                'table_structure' => DB::select('DESCRIBE tasks')
+            ],
+            'appointments' => [
+                'count' => $appointmentsCount,
+                'sample' => $appointmentsSample,
+                'table_structure' => DB::select('DESCRIBE appointments')
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Database connection failed',
+            'message' => $e->getMessage()
+        ], 500);
+    }
 }
 
 

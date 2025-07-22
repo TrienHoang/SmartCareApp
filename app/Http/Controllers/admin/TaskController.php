@@ -8,6 +8,7 @@ use App\Models\Task;
 use App\Models\User;
 use App\Models\TaskLog;
 use App\Models\TaskComment;
+use Illuminate\Support\Carbon;
 
 class TaskController extends Controller
 {
@@ -30,10 +31,10 @@ class TaskController extends Controller
         if ($request->filled('priority')) {
             $query->where('priority', $request->priority);
         }
-        
+
 
         $tasks = $query->latest()->paginate(10)->withQueryString();
-        $users = \App\Models\User::orderBy('full_name')->get();
+        $users = User::whereHas('doctor')->orderBy('full_name')->get();
 
         return view('admin.tasks.index', compact('tasks', 'users'));
     }
@@ -41,38 +42,72 @@ class TaskController extends Controller
 
     public function create()
     {
-        $users = User::all();
+        $users = User::whereHas('doctor')->orderBy('full_name')->get();
         return view('admin.tasks.create', compact('users'));
     }
 
     public function store(Request $request)
     {
+        $now = Carbon::now();
+
+        // ✅ Nếu không phải admin → kiểm tra giới hạn thời gian
+        if (!auth()->user()->hasRole('admin')) {
+            if ($now->isWeekend()) {
+                return back()->withErrors([
+                    'outside_hours' => '❌ Bạn chỉ có thể tạo công việc từ Thứ 2 đến Thứ 6.',
+                ])->withInput();
+            }
+
+            if ($now->hour < 8 || $now->hour >= 17) {
+                return back()->withErrors([
+                    'outside_hours' => '❌ Bạn chỉ có thể tạo công việc trong khung giờ 08:00 đến 17:00.',
+                ])->withInput();
+            }
+        }
+
+        // ✅ Validate dữ liệu
         $request->validate([
-            'title'        => 'required|string|max:255',
-            'description'  => 'nullable|string',
-            'deadline'     => 'nullable|date',
-            'assigned_to'  => 'required|exists:users,id',
+            'title'         => 'required|string|max:255',
+            'description'   => 'nullable|string',
+            'deadline'      => 'nullable|date',
+            'priority'      => 'required|in:thap,trung_binh,cao',
+            'assigned_to'   => 'required|array|min:1',
+            'assigned_to.*' => [
+                'required',
+                'exists:users,id',
+                function ($attribute, $value, $fail) {
+                    if (!User::whereHas('doctor')->where('id', $value)->exists()) {
+                        $fail('Người dùng được chọn phải là bác sĩ.');
+                    }
+                }
+            ],
         ], [
-            'title.required'       => '📝 Vui lòng nhập tiêu đề công việc.',
-            'title.max'            => '📝 Tiêu đề không được vượt quá 255 ký tự.',
-            'deadline.date'        => '📅 Deadline phải là ngày hợp lệ.',
-            'assigned_to.required' => '👤 Vui lòng chọn người được giao.',
-            'assigned_to.exists'   => '👤 Người được giao không hợp lệ.',
+            'title.required'        => 'Vui lòng nhập tiêu đề công việc.',
+            'title.max'             => 'Tiêu đề không được vượt quá 255 ký tự.',
+            'deadline.date'         => 'Deadline phải là ngày hợp lệ.',
+            'priority.required'     => 'Vui lòng chọn mức độ ưu tiên.',
+            'priority.in'           => 'Mức độ ưu tiên không hợp lệ.',
+            'assigned_to.required'  => 'Vui lòng chọn bác sĩ được giao.',
+            'assigned_to.array'     => 'Dữ liệu người được giao không hợp lệ.',
         ]);
 
-        Task::create([
-            'title'        => $request->title,
-            'description'  => $request->description,
-            'deadline'     => $request->deadline,
-            'assigned_to'  => $request->assigned_to,
-            'created_by'   => auth()->id(),
-            'status'       => 'moi_tao',
-            'priority'     => 'trung_binh', // default
+        // ✅ Tạo task
+        $task = Task::create([
+            'title'       => $request->title,
+            'description' => $request->description,
+            'deadline'    => $request->filled('deadline') ? Carbon::parse($request->deadline) : null,
+            'created_by'  => auth()->id(),
+            'status'      => 'moi_tao',
+            'priority'    => $request->priority,
         ]);
+
+        // ✅ Giao cho nhiều bác sĩ
+        $task->assignedUsers()->sync($request->assigned_to);
 
         return redirect()->route('admin.tasks.index')
-            ->with('success', '✅ Đã tạo công việc thành công!');
+            ->with('success', '🎉 Đã tạo công việc và giao cho bác sĩ thành công.');
     }
+
 
     public function show(Task $task)
     {
@@ -98,32 +133,62 @@ class TaskController extends Controller
 
     public function edit(Task $task)
     {
-        $users = User::all();
+        $users = User::whereHas('doctor')->orderBy('full_name')->get();
         return view('admin.tasks.edit', compact('task', 'users'));
     }
 
     public function update(Request $request, Task $task)
     {
+        // 🕒 Lấy thời gian hiện tại theo đúng timezone
+        $now = Carbon::now();
+
+        // 📌 Debug (tùy chọn): Ghi log thời gian hiện tại
+        \Log::info('🕒 Cập nhật task lúc:', ['now' => $now->toDateTimeString()]);
+
+        // ❌ Chặn cập nhật ngoài giờ hành chính
+        if ($now->isWeekend()) {
+            return back()->withErrors([
+                'outside_hours' => '❌ Chỉ được cập nhật công việc từ Thứ 2 đến Thứ 6.',
+            ])->withInput();
+        }
+
+        if ($now->hour < 8 || $now->hour >= 17) {
+            return back()->withErrors([
+                'outside_hours' => '❌ Chỉ được cập nhật công việc trong khoảng 08:00 đến 17:00.',
+            ])->withInput();
+        }
+
+        // ✅ Validate dữ liệu đầu vào
         $request->validate([
-            'title'        => 'required|string|max:255',
-            'description'  => 'nullable|string',
-            'deadline'     => 'nullable|date',
-            'assigned_to'  => 'required|exists:users,id',
-            'status'       => 'required|in:moi_tao,dang_lam,hoan_thanh,tre_han',
-            'priority'     => 'required|in:thap,trung_binh,cao',
+            'title'         => 'required|string|max:255',
+            'description'   => 'nullable|string',
+            'deadline'      => 'nullable|date',
+            'assigned_to'   => 'required|array|min:1',
+            'assigned_to.*' => [
+                'required',
+                'exists:users,id',
+                function ($attribute, $value, $fail) {
+                    if (!User::whereHas('doctor')->where('id', $value)->exists()) {
+                        $fail('👨‍⚕️ Người được giao phải là bác sĩ.');
+                    }
+                }
+            ],
+            'status'        => 'required|in:moi_tao,dang_lam,hoan_thanh,tre_han',
+            'priority'      => 'required|in:thap,trung_binh,cao',
         ], [
-            'title.required'       => '📝 Vui lòng nhập tiêu đề công việc.',
-            'title.max'            => '📝 Tiêu đề không được vượt quá 255 ký tự.',
-            'deadline.date'        => '📅 Deadline phải là ngày hợp lệ.',
-            'assigned_to.required' => '👤 Vui lòng chọn người được giao.',
-            'assigned_to.exists'   => '👤 Người được giao không hợp lệ.',
-            'status.required'      => '⚠️ Vui lòng chọn trạng thái công việc.',
-            'status.in'            => '⚠️ Trạng thái không hợp lệ.',
-            'priority.required'    => '❗ Vui lòng chọn mức độ ưu tiên.',
-            'priority.in'          => '❗ Mức độ ưu tiên không hợp lệ.',
+            'title.required'        => 'Vui lòng nhập tiêu đề công việc.',
+            'title.max'             => 'Tiêu đề không được vượt quá 255 ký tự.',
+            'deadline.date'         => 'Deadline không hợp lệ.',
+            'assigned_to.required'  => 'Vui lòng chọn ít nhất một bác sĩ.',
+            'assigned_to.array'     => 'Danh sách người nhận không hợp lệ.',
+            'status.required'       => 'Vui lòng chọn trạng thái.',
+            'status.in'             => 'Trạng thái không hợp lệ.',
+            'priority.required'     => 'Vui lòng chọn mức độ ưu tiên.',
+            'priority.in'           => 'Mức độ ưu tiên không hợp lệ.',
         ]);
 
-        if ($request->status !== $task->status) {
+        // 📝 Lưu log nếu thay đổi trạng thái
+        if ($task->status !== $request->status) {
             TaskLog::create([
                 'task_id'     => $task->id,
                 'changed_by'  => auth()->id(),
@@ -133,18 +198,23 @@ class TaskController extends Controller
             ]);
         }
 
+        // ✅ Cập nhật task
         $task->update([
-            'title'        => $request->title,
-            'description'  => $request->description,
-            'deadline'     => $request->deadline,
-            'assigned_to'  => $request->assigned_to,
-            'status'       => $request->status,
-            'priority'     => $request->priority,
+            'title'       => $request->title,
+            'description' => $request->description,
+            'deadline'    => $request->filled('deadline') ? Carbon::parse($request->deadline) : null,
+            'status'      => $request->status,
+            'priority'    => $request->priority,
         ]);
 
+        // 👥 Gán lại người được giao
+        $task->assignedUsers()->sync($request->assigned_to);
+
         return redirect()->route('admin.tasks.index')
-            ->with('success', '🛠️ Cập nhật công việc thành công!');
+            ->with('success', '✅ Cập nhật công việc thành công.');
     }
+
+
 
     public function destroy(Task $task)
     {

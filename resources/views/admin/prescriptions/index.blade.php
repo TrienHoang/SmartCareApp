@@ -43,7 +43,7 @@
                         </a>
                     @endcan
                     <a href="{{ route('admin.prescriptions.trashed') }}"
-                        class="btn btn-gradient-danger btn-lg waves-effect waves-light shadow-lg text-white ml-2">
+                        class="btn btn-danger btn-lg waves-effect waves-light shadow-lg text-white ml-2">
                         <i class="bx bx-trash mr-1"></i>Đã xóa
                     </a>
                 </div>

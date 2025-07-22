@@ -24,6 +24,7 @@ class StoreAppointmentRequest extends FormRequest
             'appointment_time' => ['required', 'date', 'after:now'],
             'status' => ['required', Rule::in(['pending', 'confirmed', 'cancelled'])],
             'reason' => ['nullable', 'string', 'max:255'],
+            'treatment_plan_id' => ['nullable', 'exists:treatment_plans,id'],
         ];
     }
 
@@ -48,6 +49,9 @@ class StoreAppointmentRequest extends FormRequest
 
             'reason.string' => 'Lý do phải là chuỗi ký tự.',
             'reason.max' => 'Lý do không được vượt quá 255 ký tự.',
+
+            'treatment_plan_id.exists' => 'Kế hoạch khám chưa tạo.',
+            'treatment_plan_id.integer' => 'ID kế hoạch khám không hợp lệ.',
         ];
     }
 }

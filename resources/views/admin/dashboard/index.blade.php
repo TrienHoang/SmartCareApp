@@ -1,6 +1,6 @@
 @extends('admin.dashboard')
 @section('content')
-    <div class="container-fluid py-4 dashboard-scroll">
+    <div class="container-fluid py-4 dashboard-scroll" style="height:991.98px;">
         <div class="d-flex justify-content-end mb-3 gap-2">
             <button class="btn btn-success btn-sm" onclick="exportData('excel')">
                 <i class="fas fa-file-excel me-1"></i> Xuất Excel
