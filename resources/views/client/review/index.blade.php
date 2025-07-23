@@ -47,7 +47,8 @@
                                             </button>
                                         </form>
                                     @endif
-                                    <a href="{{ route('client.review.show', $review->id) }}" class="text-blue-600 hover:underline text-sm">Xem chi tiết</a>
+                                    <a href="{{ route('doctor.show', $review->doctor_id) }}" class="text-blue-600 hover:underline text-sm">Xem chi tiết</a>
+
                                 </div>
                             </td>
                         </tr>
