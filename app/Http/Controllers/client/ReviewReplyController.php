@@ -104,4 +104,104 @@ class ReviewReplyController extends Controller
             return back()->with('error', 'Có lỗi xảy ra. Vui lòng thử lại.');
         }
     }
+
+    /**
+     * Cập nhật bình luận đã chỉnh sửa trực tiếp tại trang chi tiết bác sĩ.
+     * Đảm bảo nhận đúng $doctorId và $id từ route.
+     */
+    public function update(Request $request, $doctorId, $id)
+    {
+        $review = Review::where('id', $id)
+            ->where('doctor_id', $doctorId)
+            ->where('patient_id', Auth::id())
+            ->firstOrFail();
+
+        // Chỉ cho sửa trong 1 giờ đầu
+        if (\Carbon\Carbon::parse($review->created_at)->diffInMinutes(now()) > 60) {
+            return redirect()->back()->with('error', 'Thời gian chỉnh sửa đã hết.');
+        }
+
+        $request->validate([
+            'comment' => 'required|string|max:1000',
+            'rating'  => 'required|integer|min:1|max:5',
+        ]);
+
+        // Đảm bảo cập nhật đúng rating
+        $review->comment = $request->comment;
+        $review->rating = intval($request->rating); // ép kiểu số nguyên
+        $review->save();
+
+        // Cập nhật lại rating trung bình cho bác sĩ (tính lại từ bảng reviews)
+        // Nếu chưa có cột average_rating và review_count thì bỏ qua cập nhật này
+        if (
+            Schema::hasColumn('doctors', 'average_rating') &&
+            Schema::hasColumn('doctors', 'review_count')
+        ) {
+            $doctor = Doctor::findOrFail($doctorId);
+            $doctor->average_rating = Review::where('doctor_id', $doctorId)
+                ->where('is_visible', true)
+                ->avg('rating') ?? 5;
+            $doctor->review_count = Review::where('doctor_id', $doctorId)
+                ->where('is_visible', true)
+                ->count();
+            $doctor->save();
+        }
+
+        return redirect()->route('doctor.show', $doctorId)
+            ->with('success', 'Bình luận đã được cập nhật.')
+            ->with('tab', 'reviews');
+    }
+
+    /**
+     * Hiển thị chi tiết bác sĩ (trang bác sĩ).
+     */
+    public function show($id)
+    {
+        $doctor = Doctor::findOrFail($id);
+
+        $reviews = Review::where('doctor_id', $doctor->id)
+            ->where('is_visible', true)
+            ->with('patient')
+            ->latest()
+            ->get();
+
+        $averageRating = $reviews->avg('rating');
+        $reviewCount = $reviews->count();
+
+        $userReview = Review::where('doctor_id', $doctor->id)
+            ->where('patient_id', Auth::id())
+            ->latest()
+            ->first();
+
+        $userReviewEditable = false;
+        if ($userReview) {
+            $userReviewEditable = \Carbon\Carbon::parse($userReview->created_at)->diffInMinutes(now()) <= 60;
+        }
+
+        return view('client.review.show', compact(
+            'doctor',
+            'reviews',
+            'averageRating',
+            'reviewCount',
+            'userReview',
+            'userReviewEditable'
+        ));
+    }
+
+    /**
+     * Hiển thị danh sách bình luận của người dùng (trang danh sách bình luận).
+     */
+    public function index()
+    {
+        $reviews = Review::where('patient_id', Auth::id())
+            ->latest()
+            ->get();
+
+        // Gắn thuộc tính editable cho từng review
+        foreach ($reviews as $review) {
+            $review->editable = \Carbon\Carbon::parse($review->created_at)->diffInMinutes(now()) <= 60;
+        }
+
+        return view('client.review.index', compact('reviews'));
+    }
 }
