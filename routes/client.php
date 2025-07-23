@@ -58,11 +58,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Đánh dấu đánh giá là hữu ích
     Route::post('/reviews/{review}/useful', [ReviewReplyController::class, 'markUseful'])->name('reviews.useful');
-<<<<<<< HEAD
-=======
 
     Route::put('/thong-tin-bac-si/{doctor}/reviews/{id}', [ReviewReplyController::class, 'update'])->name('reviews.update');
->>>>>>> 840c63c (danh sách bình luận chỉnh sửa bình luận trong thời gian nhất định và show đang bug)
 });
 
 // Route hiển thị chi tiết bác sĩ (không yêu cầu đăng nhập)
@@ -94,15 +91,13 @@ Route::get('/test-payment', function () {
     return view('test-payment');
 });
 
-<<<<<<< HEAD
+// VNPAY routes
 Route::post('/test-payment/process', [PaymentController::class, 'create'])->name('test.payment');
 Route::get('/vnpay-return', [PaymentController::class, 'return'])->name('vnpay.return');
 Route::post('/vnpay-ipn', [PaymentController::class, 'ipn'])->name('vnpay.ipn');
-Route::post('/vnpay-ipn', [PaymentController::class, 'ipn'])->name('vnpay.ipn');
-=======
+
 // Danh sách bình luận của người dùng (client)
 Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->group(function () {
     Route::get('/', [ReviewReplyController::class, 'index'])->name('index');
     Route::get('show/{id}', [ReviewReplyController::class, 'show'])->name('show');
 });
->>>>>>> 840c63c (danh sách bình luận chỉnh sửa bình luận trong thời gian nhất định và show đang bug)
