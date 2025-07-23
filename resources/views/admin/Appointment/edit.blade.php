@@ -112,7 +112,8 @@
 
                             <small class="text-info d-block mt-1">
                                 <i class="fas fa-info-circle me-1"></i>
-                                Kế hoạch điều trị sẽ tự động chuyển sang <strong>Hoàn thành</strong> khi tất cả lịch hẹn thuộc kế hoạch đã hoàn tất.
+                                Kế hoạch điều trị sẽ tự động chuyển sang <strong>Hoàn thành</strong> khi tất cả lịch hẹn
+                                thuộc kế hoạch đã hoàn tất.
                             </small>
                         </div>
 
@@ -149,6 +150,13 @@
                             @error('service_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        <!-- Giá dịch vụ -->
+                        <div class="col-12 col-md-6">
+                            <label for="service_price" class="form-label">Giá dịch vụ</label>
+                            <input type="text" id="service_price" class="form-control" readonly
+                                value="{{ number_format($appointment->service->price) }} ₫">
                         </div>
 
                         {{-- Thời gian hẹn --}}

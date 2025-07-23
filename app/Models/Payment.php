@@ -59,4 +59,9 @@ class Payment extends Model
     {
         return optional($this->appointment)->service;
     }
+
+    public function histories()
+    {
+        return $this->hasMany(PaymentHistory::class);
+    }
 }

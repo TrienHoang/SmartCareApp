@@ -1,6 +1,7 @@
 $(document).ready(function () {
     const $doctor = $('#doctor_id');
     const $serviceSelect = $('#service_id');
+    const $servicePrice = $('#service_price');
     const $timeInput = $('#appointment_time');
     const $treatmentPlan = $('#treatment_plan_id');
     const treatmentPlanDetailsUrl = $('#treatmentPlanDetailsUrl').val();
@@ -56,14 +57,33 @@ $(document).ready(function () {
             success: function (services) {
                 let options = '<option value="">Chọn dịch vụ</option>';
                 const oldServiceId = $serviceSelect.data('old');
+
                 services.forEach(service => {
                     const selected = oldServiceId == service.id ? 'selected' : '';
-                    options += `<option value="${service.id}" ${selected}>${service.name} (${service.department?.name ?? 'Không rõ khoa'})</option>`;
+                    options += `<option value="${service.id}" ${selected} data-price="${service.price}">
+                    ${service.name} (${service.department?.name ?? 'Không rõ khoa'})
+                </option>`;
                 });
+
                 $serviceSelect.html(options).trigger('change.select2');
+
+                // Cập nhật giá dịch vụ nếu đã chọn sẵn (edit)
+                if (oldServiceId) {
+                    $serviceSelect.val(oldServiceId).trigger('change.select2');
+                    const selected = $serviceSelect.find(`option[value="${oldServiceId}"]`);
+                    if (selected.length) {
+                        const price = Number(selected.data('price'));
+                        $servicePrice.val(price.toLocaleString() + ' ₫');
+                    } else {
+                        $servicePrice.val('');
+                    }
+                } else {
+                    $servicePrice.val('');
+                }
             },
             error: () => {
                 toastr.error('Không thể tải danh sách dịch vụ');
+                $servicePrice.val('');
             }
         });
     }
@@ -243,6 +263,11 @@ $(document).ready(function () {
             destroyFlatpickr();
             $('#vacation-notice').addClass('d-none');
         }
+    });
+
+    $serviceSelect.on('change', function () {
+        const price = $(this).find(':selected').data('price') || '';
+        $servicePrice.val(price ? price.toLocaleString() + ' ₫' : '');
     });
 
     if ($timeInput.val()) $timeInput.data('old', $timeInput.val());
