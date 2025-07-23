@@ -105,5 +105,4 @@ Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->gr
 // Danh sách bình luận của người dùng (client)
 Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->group(function () {
     Route::get('/', [ReviewReplyController::class, 'index'])->name('index');
-    Route::get('show/{id}', [ReviewReplyController::class, 'show'])->name('show');
 });

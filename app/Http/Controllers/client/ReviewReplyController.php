@@ -157,7 +157,7 @@ class ReviewReplyController extends Controller
      */
     public function show($id)
     {
-        $doctor = Doctor::findOrFail($id);
+        $doctor = Doctor::with('specialty')->findOrFail($id); // load cả chuyên khoa nếu cần
 
         $reviews = Review::where('doctor_id', $doctor->id)
             ->where('is_visible', true)
@@ -178,7 +178,7 @@ class ReviewReplyController extends Controller
             $userReviewEditable = \Carbon\Carbon::parse($userReview->created_at)->diffInMinutes(now()) <= 60;
         }
 
-        return view('client.review.show', compact(
+        return view('client.doctors_detail', compact(
             'doctor',
             'reviews',
             'averageRating',
@@ -187,6 +187,8 @@ class ReviewReplyController extends Controller
             'userReviewEditable'
         ));
     }
+
+
 
     /**
      * Hiển thị danh sách bình luận của người dùng (trang danh sách bình luận).
