@@ -186,6 +186,8 @@
                                             <i class="bx bx-filter mr-1"></i>Lọc
                                         </button>
                                         <a href="{{ route('admin.services.index') }}" class="btn btn-outline-secondary">
+                                            <i class="bx bx-refresh-cw mr-1"></i>Reset
+                                        <a href="{{ route('admin.services.index') }}" class="btn btn-outline-secondary">
                                             <i class="bx bx-refresh mr-1"></i>Reset
                                         </a>
                                     </div>
@@ -232,14 +234,18 @@
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" class="custom-control-input service-checkbox"
                                                     id="service-{{ $service->id }}" value="{{ $service->id }}">
+                                                <label class="custom-control-label"
+                                                    for="service-{{ $service->id }}"></label>
+                                                    id="service-{{ $service->id }}" value="{{ $service->id }}">
                                                 <label class="custom-control-label" for="service-{{ $service->id }}"></label>
                                             </div>
                                         </td>
                                         <td>
                                             <div class="service-info">
                                                 <h6 class="mb-0 font-weight-semibold">{{ $service->name }}</h6>
-                                                @if($service->description)
-                                                    <small class="text-muted">{{ Str::limit($service->description, 50) }}</small>
+                                                @if ($service->description)
+                                                    <small
+                                                        class="text-muted">{{ Str::limit($service->description, 50) }}</small>
                                                 @endif
                                             </div>
                                         </td>
@@ -249,6 +255,10 @@
                                             </span>
                                         </td>
                                         <td>
+                                            <div class="price-info">
+                                                <span
+                                                    class="font-weight-bold text-success">{{ number_format($service->price) }}đ</span>
+                                            </div>
                                             <span class="font-weight-bold text-success">
                                                 {{ number_format($service->price, 0, ',', '.') }}₫
                                             </span>
@@ -260,6 +270,20 @@
                                             </div>
                                         </td>
                                         <td>
+                                            @php
+                                                $statusConfig = [
+                                                    'active' => ['class' => 'success', 'icon' => 'check-circle'],
+                                                    'inactive' => ['class' => 'danger', 'icon' => 'x-circle'],
+                                                ];
+                                                $config = $statusConfig[$service->status] ?? [
+                                                    'class' => 'secondary',
+                                                    'icon' => 'help-circle',
+                                                ];
+                                            @endphp
+                                            <span class="badge badge-{{ $config['class'] }} badge-pill">
+                                                <i class="bx bx-{{ $config['icon'] }} mr-1"></i>
+                                                {{ ucfirst($service->status) }}
+                                            </span>
                                             @if($service->status === 'active')
                                                 <span class="badge badge-success badge-pill">
                                                     <i class="bx bx-check-circle mr-1"></i>Hoạt động
@@ -270,6 +294,9 @@
                                                 </span>
                                             @endif
                                         </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+
                                         <td class="text-center">
                                             <div class="btn-group-sm" role="group">
                                                 <a href="{{ route('admin.services.show', $service->id) }}"
@@ -301,6 +328,9 @@
                                             <div class="empty-state">
                                                 <i class="bx bx-cog text-muted" style="font-size: 48px;"></i>
                                                 <h5 class="mt-3 text-muted">Không có dịch vụ nào</h5>
+                                                <p class="text-muted">Chưa có dịch vụ nào được tạo hoặc không tìm thấy
+                                                    kết quả phù hợp.</p>
+                                                <a href="{{ route('admin.services.create') }}" class="btn btn-primary">
                                                 <p class="text-muted">Chưa có dịch vụ nào được tạo hoặc không tìm thấy kết quả phù hợp.</p>
                                                 <a href="{{ route('admin.services.create') }}" class="btn btn-primary">
                                                     <i class="bx bx-plus mr-1"></i>Tạo dịch vụ đầu tiên
@@ -324,7 +354,7 @@
                                     </small>
                                 </div>
                                 <div class="pagination-links">
-                                    {{ $services->links('pagination::bootstrap-4') }}
+                                    {{ $services->links('pagination::bootstrap-5') }}
                                 </div>
                             </div>
                         </div>

@@ -70,7 +70,12 @@ class User extends Authenticatable
     }
 
     public function patient()
-{
-    return $this->belongsTo(User::class, 'patient_id');
-}
+    {
+        return $this->belongsTo(User::class, 'patient_id');
+    }
+
+    public function isAdmin()
+    {
+        return $this->role && $this->role->name === '1';
+    }
 }

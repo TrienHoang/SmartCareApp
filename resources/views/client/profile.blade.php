@@ -32,11 +32,12 @@
                                 <i data-lucide="user" class="w-5 h-5"></i>
                                 <span class="font-semibold">Thông Tin Cá Nhân</span>
                             </a>
-                            <a href="#lich-su-kham"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
+                            <a href="{{ route('client.appointments.history') }}"
+                            class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="calendar" class="w-5 h-5"></i>
                                 <span>Lịch Sử Khám</span>
                             </a>
+
                             <a href="#lich-hen"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="clock" class="w-5 h-5"></i>
@@ -61,6 +62,16 @@
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="settings" class="w-5 h-5"></i>
                                 <span>Cài Đặt</span>
+                            </a>
+                            <a href="{{ route('client.payment_history.index') }}"
+                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
+                                <i data-lucide="settings" class="w-5 h-5"></i>
+                                <span>Lịch sử thanh toán</span>
+                            </a>
+                            <a href="{{ route('client.review.index') }}"
+                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
+                                <i data-lucide="message-square" class="w-5 h-5"></i>
+                                <span>Bình luận của tôi</span>
                             </a>
                         </nav>
                     </div>
@@ -819,4 +830,3 @@
     </script>
     @endpush
 @endsection
-
