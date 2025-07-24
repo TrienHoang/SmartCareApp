@@ -120,22 +120,14 @@ Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'
     Route::get('/list/{id}', [DoctorController::class, 'show'])->name('list.show');
     Route::get('/history', [DoctorController::class, 'history'])->name('history.index');
     Route::get('/history/{appointment}', [DoctorController::class, 'historyShow'])->name('history.show');
-    Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
-    Route::patch('/reviews/{review}/toggle-visibility', [ReviewController::class, 'toggleVisibility'])->name('reviews.toggle');
 });
+
 
 Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
     Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
     Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
-    Route::get('/calendar/test-database', [CalendarController::class, 'testDatabase'])->name('calendar.testDatabase');
-
-
-});
-
-Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
-    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
-    Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
-    Route::get('/calendar/test-database', [CalendarController::class, 'testDatabase'])->name('calendar.testDatabase');
-    Route::get('/tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
     Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
 });
+
+
+

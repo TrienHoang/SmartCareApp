@@ -2,181 +2,351 @@
 
 @section('content')
 <style>
-    /* Container chính với màu mộc mạc */
-    .calendar-container {
-        background: linear-gradient(135deg, #8B6F47, #D9C2A6); /* Nâu đất và be nhạt */
-        border-radius: 15px;
-        padding: 2rem;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        max-width: 1400px;
-        margin: 2rem auto;
-    }
+/* Simple Clean Theme */
+:root {
+    --ocean-blue: #1e40af;
+    --ocean-dark: #1d4ed8;
+    --bg-white: #ffffff;
+    --bg-light: #f8fafc;
+    --text-dark: #1e293b;
+    --text-gray: #64748b;
+    --border-light: #e2e8f0;
+}
 
-    .calendar-container:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
-    }
+.calendar-container {
+    padding: 20px;
+    background: var(--bg-light);
+}
 
-    /* Card lịch với hiệu ứng 3D */
-    .calendar-card {
-        background: #F5F5F5; /* Màu be nhạt */
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        transition: transform 0.2s ease;
-    }
+/* Compact Search Form */
+.search-section {
+    background: var(--bg-white);
+    border: 2px solid var(--ocean-blue);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
 
-    .calendar-card:hover {
-        transform: scale(1.02);
-    }
+.search-section h5 {
+    color: var(--ocean-blue);
+    margin-bottom: 15px;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
 
-    /* Header của card */
+.search-form {
+    display: flex;
+    gap: 15px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 150px;
+}
+
+.form-group label {
+    color: var(--text-dark);
+    font-weight: 500;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+    display: block;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--ocean-blue);
+}
+
+.btn-group {
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.btn-search {
+    background: var(--ocean-blue);
+    color: white;
+}
+
+.btn-search:hover {
+    background: var(--ocean-dark);
+}
+
+.btn-reset {
+    background: var(--text-gray);
+    color: white;
+}
+
+.btn-reset:hover {
+    background: #475569;
+}
+
+/* Calendar Card */
+.calendar-card {
+    background: var(--bg-white);
+    border: 2px solid var(--ocean-blue);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.calendar-card-header {
+    background: var(--ocean-blue);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.calendar-card-header h4 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+#refreshCalendar {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+}
+
+#refreshCalendar:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.calendar-card-body {
+    background: var(--bg-white);
+}
+
+#calendar {
+    padding: 15px;
+}
+
+/* FullCalendar Styling */
+.fc-button {
+    background: var(--ocean-blue) !important;
+    border-color: var(--ocean-blue) !important;
+    color: white !important;
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+    font-size: 0.85rem !important;
+}
+
+.fc-button:hover {
+    background: var(--ocean-dark) !important;
+    border-color: var(--ocean-dark) !important;
+}
+
+.fc-event {
+    background: var(--ocean-blue) !important;
+    border-color: var(--ocean-blue) !important;
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+    font-size: 0.85rem !important;
+}
+
+.fc-event:hover {
+    background: var(--ocean-dark) !important;
+}
+
+/* Search Results */
+.search-results {
+    background: rgba(30, 64, 175, 0.1);
+    border: 1px solid var(--ocean-blue);
+    border-radius: 6px;
+    padding: 10px 15px;
+    margin-top: 15px;
+    color: var(--ocean-blue);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Error Message */
+#calendarError {
+    border-left: 4px solid var(--ocean-blue);
+    background: rgba(30, 64, 175, 0.1);
+    color: var(--text-dark);
+    padding: 12px 15px;
+    margin: 15px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .search-form {
+        flex-direction: column;
+    }
+    
+    .form-group {
+        min-width: auto;
+    }
+    
+    .btn-group {
+        justify-content: center;
+    }
+    
     .calendar-card-header {
-        background: linear-gradient(to right, #4A7043, #8B9A46); /* Xanh olive và nâu nhạt */
-        color: #FFF8E7; /* Màu kem nhạt cho chữ */
-        padding: 1.5rem;
-        border-bottom: 4px solid #3F5E3A; /* Xanh olive đậm */
+        flex-direction: column;
+        gap: 10px;
         text-align: center;
     }
+}
 
-    .calendar-card-header h4 {
-        margin: 0;
-        font-size: 1.8rem;
-        font-weight: 600;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-    }
+/* Loading */
+.loading {
+    opacity: 0.7;
+}
 
-    /* Body của card */
-    .calendar-card-body {
-        padding: 1.5rem;
-    }
+.loading #calendar::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #ddd;
+    border-top: 2px solid var(--ocean-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
 
-    /* FullCalendar */
-    #calendar {
-        max-width: 100%;
-        height: 700px; /* Tăng chiều cao */
-        border-radius: 8px;
-        background: #FAF3E0; /* Màu be nhạt mộc mạc */
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Tùy chỉnh FullCalendar */
-    .fc-daygrid-day-number {
-        font-size: 1.2rem;
-        font-weight: 500;
-        color: #3F5E3A; /* Xanh olive đậm */
-        transition: color 0.3s ease;
-    }
-
-    .fc-daygrid-day-number:hover {
-        color: #8B9A46; /* Nâu nhạt */
-    }
-
-    .fc-event {
-        border-radius: 6px;
-        font-size: 1rem;
-        padding: 6px;
-        cursor: pointer;
-        color: #FFF8E7; /* Màu kem nhạt cho chữ */
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .fc-event:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Sự kiện công việc (màu nâu đất) */
-    .fc-event.task {
-        background: #8B6F47;
-        border: 1px solid #6B4E31;
-    }
-
-    /* Sự kiện lịch hẹn (màu xanh olive) */
-    .fc-event.appointment {
-        background: #4A7043;
-        border: 1px solid #3F5E3A;
-    }
-
-    .fc-button {
-        border-radius: 6px !important;
-        background: #6B4E31 !important; /* Nâu đậm */
-        border: none !important;
-        color: #FFF8E7 !important; /* Màu kem nhạt */
-        transition: background 0.3s ease, transform 0.2s ease;
-    }
-
-    .fc-button:hover {
-        background: #8B6F47 !important; /* Nâu nhạt */
-        transform: translateY(-1px);
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .calendar-container {
-            padding: 1rem;
-            margin: 1rem;
-        }
-
-        .calendar-card-header h4 {
-            font-size: 1.5rem;
-        }
-
-        #calendar {
-            height: 500px;
-        }
-
-        .fc-daygrid-day-number {
-            font-size: 1rem;
-        }
-
-        .fc-event {
-            font-size: 0.9rem;
-            padding: 4px;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .calendar-card-header h4 {
-            font-size: 1.2rem;
-        }
-
-        #calendar {
-            height: 400px;
-        }
-
-        .fc-button {
-            font-size: 0.8rem;
-            padding: 0.5rem;
-        }
-    }
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 </style>
 
 <div class="calendar-container">
+    <!-- Compact Search -->
+    <div class="search-section">
+        <h5>🔍 Tìm kiếm</h5>
+        <form class="search-form" id="searchForm">
+            <div class="form-group">
+                <label>Từ khóa</label>
+                <input type="text" id="searchKeyword" class="form-control" placeholder="Nhập từ khóa...">
+            </div>
+            <div class="form-group">
+                <label>Ngày</label>
+                <input type="date" id="searchDate" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Trạng thái</label>
+                <select id="searchStatus" class="form-control">
+                    <option value="">Tất cả</option>
+                    <option value="pending">Chờ xử lý</option>
+                    <option value="confirmed">Đã xác nhận</option>
+                    <option value="completed">Hoàn thành</option>
+                </select>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-search">Tìm</button>
+                <button type="button" class="btn btn-reset" id="resetSearch">Reset</button>
+            </div>
+        </form>
+        
+        <div id="searchResults" class="search-results" style="display: none;">
+            <span id="searchResultsText">Tìm thấy 0 kết quả</span>
+        </div>
+    </div>
+
+    <!-- Calendar -->
     <div class="calendar-card">
         <div class="calendar-card-header">
-            <h4><i class="bx bx-calendar me-2"></i>Lịch làm việc của bạn</h4>
+            <h4>📅 Lịch làm việc</h4>
+            <button id="refreshCalendar">🔄 Làm mới</button>
         </div>
         <div class="calendar-card-body">
-            <!-- Lịch -->
+            <div id="calendarError" class="d-none" role="alert"></div>
             <div id="calendar"></div>
         </div>
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('searchForm');
+    const resetBtn = document.getElementById('resetSearch');
+    const refreshBtn = document.getElementById('refreshCalendar');
+    const searchResults = document.getElementById('searchResults');
+    const searchResultsText = document.getElementById('searchResultsText');
+    const calendarContainer = document.querySelector('.calendar-container');
 
+    // Search
+    searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        performSearch();
+    });
+
+    // Reset
+    resetBtn.addEventListener('click', function() {
+        searchForm.reset();
+        searchResults.style.display = 'none';
+        refreshCalendar();
+    });
+
+    // Refresh
+    refreshBtn.addEventListener('click', function() {
+        refreshCalendar();
+    });
+
+    function performSearch() {
+        calendarContainer.classList.add('loading');
+        
+        setTimeout(() => {
+            const mockResults = Math.floor(Math.random() * 15) + 1;
+            searchResults.style.display = 'block';
+            searchResultsText.textContent = `Tìm thấy ${mockResults} kết quả`;
+            calendarContainer.classList.remove('loading');
+        }, 800);
+    }
+
+    function refreshCalendar() {
+        calendarContainer.classList.add('loading');
+        setTimeout(() => {
+            calendarContainer.classList.remove('loading');
+        }, 800);
+    }
+});
+</script>
 
 @endsection
 
 @push('scripts')
+<!-- FullCalendar và Axios -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const calendarEl = document.getElementById('calendar');
-
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'vi',
@@ -186,52 +356,75 @@ document.addEventListener('DOMContentLoaded', function () {
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
+        // Tùy chọn ngày hiện tại
+        now: '{{ Carbon\Carbon::now()->toIso8601String() }}',
+        // Tải sự kiện từ API
         events: function (fetchInfo, successCallback, failureCallback) {
             const params = {
                 start: fetchInfo.startStr,
                 end: fetchInfo.endStr,
             };
-
-            console.log('📤 Request Parameters:', params);
-
+            console.log('Gửi yêu cầu API với params:', params); // Debug params
             axios.get("{{ route('doctor.calendar.events') }}", { params })
                 .then(response => {
-                    console.log('✅ Đã tải sự kiện:', response.data);
-                    // Thêm class cho sự kiện để áp dụng màu riêng
-                    response.data.forEach(event => {
-                        if (event.id.startsWith('task_')) {
-                            event.classNames = ['task'];
-                        } else if (event.id.startsWith('appt_')) {
+                    console.log('Dữ liệu từ API:', response.data); // Debug dữ liệu API
+                    const events = response.data.map(event => {
+                        if (event.id.startsWith('appt_')) {
                             event.classNames = ['appointment'];
                         }
+                        return event;
                     });
-                    successCallback(response.data);
+                    successCallback(events);
+                    // Ẩn thông báo lỗi nếu có
+                    document.getElementById('calendarError').classList.add('d-none');
                 })
                 .catch(error => {
-                    console.error('❌ Lỗi khi tải sự kiện:', error);
-                    alert('Không thể tải sự kiện. Vui lòng thử lại.');
+                    console.error('Lỗi khi tải sự kiện:', error);
+                    const errorMsg = error.response?.data?.error || 'Không thể tải lịch hẹn.';
+                    document.getElementById('calendarError').innerText = errorMsg;
+                    document.getElementById('calendarError').classList.remove('d-none');
+                    alert('Không thể tải lịch hẹn. Vui lòng thử lại.');
                     failureCallback(error);
                 });
         },
+        // Xử lý click vào sự kiện
         eventClick: function (info) {
-            console.log('🖱️ Sự kiện được nhấp:', info.event);
             info.jsEvent.preventDefault();
-            if (info.event.url && info.event.url !== '#') {
-                window.location.href = info.event.url; // Chuyển hướng trong cùng tab
+            const url = info.event.url;
+            if (url && url !== '#') {
+                window.location.href = url; // Chuyển hướng trong cùng tab
             } else {
-                console.warn('URL sự kiện không hợp lệ:', info.event.url);
-                alert('Không thể xem chi tiết sự kiện do URL không hợp lệ.');
+                alert('Không có trang chi tiết cho sự kiện này.');
             }
         },
-        loading: function(bool) {
-            console.log('📊 Trạng thái tải lịch:', bool);
+        // Trạng thái loading
+        loading: function (isLoading) {
+            const errorDiv = document.getElementById('calendarError');
+            if (isLoading) {
+                console.log('Đang tải sự kiện...');
+                errorDiv.classList.add('d-none');
+            } else {
+                console.log('Đã tải xong sự kiện.');
+            }
         },
-        eventDidMount: function(info) {
-            console.log('📅 Sự kiện được gắn:', info.event.title);
+        // Debug khi sự kiện được gắn vào DOM
+        eventDidMount: function (info) {
+            console.log('📅 Gắn sự kiện:', info.event.title, info.event);
+        },
+        // Hiển thị ngày hiện tại
+        dayCellContent: function (arg) {
+            return { html: arg.dayNumberText.replace(' ', '') };
         }
     });
 
+    // Render lịch
     calendar.render();
+
+    // Xử lý nút làm mới
+    document.getElementById('refreshCalendar').addEventListener('click', function () {
+        calendar.refetchEvents();
+        console.log('Lịch đã được làm mới.');
+    });
 });
 </script>
 @endpush

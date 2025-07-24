@@ -105,17 +105,5 @@ public function store(Request $request, $doctorId)
     /**
      * Đánh dấu đánh giá là hữu ích.
      */
-    public function markUseful($reviewId)
-    {
-        try {
-            $review = Review::findOrFail($reviewId);
-            $review->useful_count = ($review->useful_count ?? 0) + 1;
-            $review->save();
 
-            return back()->with('success', 'Cảm ơn bạn đã đánh giá hữu ích.');
-        } catch (\Exception $e) {
-            Log::error('Lỗi khi đánh dấu hữu ích: ' . $e->getMessage());
-            return back()->with('error', 'Có lỗi xảy ra. Vui lòng thử lại.');
-        }
-    }
 }
