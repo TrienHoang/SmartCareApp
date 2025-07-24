@@ -20,8 +20,6 @@
             top: 0;
             left: 0;
             z-index: 1;
-
-
             -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
             mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
         }
@@ -33,7 +31,6 @@
         }
 
         .clinic-info h1 {
-            color: #2c3e50;
             font-size: 1.8rem;
             font-weight: 700;
         }
@@ -111,37 +108,6 @@
             /* Align with text */
         }
 
-        .medpro-app-banner {
-            background-color: #007bff;
-            /* Blue background matching the image */
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-            position: sticky;
-            /* Make it sticky */
-            top: 20px;
-            /* Distance from top when scrolled */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .medpro-app-banner h4 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .medpro-app-banner p {
-            font-size: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .app-store-logos img {
-            height: 45px;
-            /* Adjust size as needed */
-            margin: 0 8px;
-        }
-
         /* Override Tailwind's default list-style for cleaner look */
         ul {
             list-style: none;
@@ -151,163 +117,246 @@
 @endpush
 
 @section('content')
+
+
     <div class="hero-background-image"></div>
-
-{{-- Main Content Wrapper --}}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="main-content main-content-wrapper">
-        {{-- Header row: info + price/button --}}
-        <div id="header-content" class="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            {{-- Left Column: Clinic Info --}}
-            <div class="w-full md:w-2/3 clinic-info">
-                <h1 class="font-bold text-blue-700 text-3xl lg:text-4xl">
-                    Đặt khám Bệnh Dạ dày - Đại tràng
-                </h1>
-                <p class="text-gray-700 text-lg mb-2 mt-3 flex items-start">
-                    <i data-lucide="building-2" class="w-5 h-5 mr-2"></i>
-                    Trung Tâm Nội Soi Tiêu Hoá Doctor Check
-                    <i data-lucide="check-circle-2" class="w-5 h-5 ml-1 text-blue-600"></i>
-                </p>
-                <p class="text-gray-600 mb-2 flex items-start">
-                    <i data-lucide="map-pin" class="w-5 h-5 mr-2"></i>
-                    429 Tô Hiến Thành, Phường 14, Quận 10, Thành phố Hồ Chí Minh
-                </p>
-                <p class="text-gray-600 flex items-start">
-                    <i data-lucide="clock" class="w-5 h-5 mr-2"></i>
-                    Lịch khám: Thứ 2,3,4,5,6,7,Chủ nhật
-                </p>
+    {{-- Main Content Wrapper --}}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="main-content main-content-wrapper">
+            {{-- Header row: info + price/button --}}
+            <div id="header-content" class="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                {{-- Left Column: Clinic Info --}}
+                <div class="w-full md:w-2/3 clinic-info">
+                    <h1 class="font-bold text-blue-700 text-3xl lg:text-4xl">
+                        {{ $service->name }}
+                    </h1>
+                    <p class="text-gray-700 text-lg mb-2 mt-3 flex items-start">
+                        <i data-lucide="building-2" class="w-5 h-5 mr-2 text-blue-700"></i>
+                        Loại dịch vụ: {{ $service->category->name }}
+                    </p>
+                    <p class="text-gray-600 mb-2 flex items-start">
+                        <i data-lucide="map-pin" class="w-5 h-5 mr-2 text-blue-700"></i>
+                        Khoa: {{ $service->department->name }}
+                    </p>
+                    <p class="text-gray-600 mb-2 flex items-start">
+                        {{ $service->description }}
+                    </p>
+                </div>
+                {{-- Right Column: Price and Button --}}
+                <div class="w-full md:w-1/3 text-right flex flex-col items-end">
+                    <span class="price-display mb-2 text-2xl font-bold text-red-600">{{ number_format($service->price) }}
+                        đ</span>
+                    <form id="bookingForm" action="{{ route('booking.storeService') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="service_id" value="{{ $service->id }}">
+                        <input type="hidden" name="doctor_id" id="doctor_id">
+                        <input type="hidden" name="doctor_option" id="doctor_option_input" value="auto">
+                        <button type="submit"
+                            class="inline-block px-6 py-2 rounded-md bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition">
+                            Đặt khám ngay
+                        </button>
+                    </form>
+                </div>
             </div>
-            {{-- Right Column: Price and Button --}}
-            <div class="w-full md:w-1/3 text-right flex flex-col items-end">
-                <span class="price-display mb-2 text-2xl font-bold text-blue-600">200.000đ</span>
-                <a href="#" class="inline-block px-6 py-2 rounded-md bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition">Đặt khám ngay</a>
-            </div>
-        </div>
 
-        {{-- <hr class="my-5"> Divider --}}
+            {{-- <hr class="my-5"> Divider --}}
 
-        {{-- Content grid: details + banner --}}
-        <div id="content" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {{-- Left Column: Package Details --}}
-            <div class="lg:col-span-8">
-                <h3 class="package-title text-xl font-semibold text-gray-800">1. Tên gói khám: Gói Khám Chuyên Sâu Bệnh Lý Dạ Dày & Đại Tràng</h3>
-                <p class="package-value text-blue-600 font-medium mt-1">Trị giá gói khám: 200.000VNĐ</p>
+            {{-- Content grid: details + banner --}}
+            <div id="content" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {{-- Left Column: Package Details --}}
+                <div class="lg:col-span-8">
+                    <h3 class="package-title text-xl font-semibold text-gray-800">1. Tên gói khám: Gói Khám Chuyên Sâu Bệnh
+                        Lý Dạ Dày & Đại Tràng</h3>
+                    <p class="package-value text-blue-600 font-medium mt-1">Trị giá gói khám: 200.000VNĐ</p>
 
-                <h3 class="package-title text-xl font-semibold text-gray-800 mt-6">2. Lợi ích gói khám bệnh lý dạ dày & đại tràng là gì?</h3>
-                <ul class="list-benefits mt-2 space-y-2 text-gray-700">
-                    <li class="flex items-start">
-                        <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                        Hiện nay, bệnh ở dạ dày & đại tràng là bệnh lý dễ tái phát nếu không tìm ra chính xác nguyên nhân gây bệnh. Khi đó các triệu chứng tiêu hoá dai dẳng gây ảnh hưởng rất lớn đến chất lượng cuộc sống của bạn.
-                    </li>
-                    <li class="flex items-start">
-                        <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                        Bác sĩ Doctor Check sẽ giúp Bạn Khám Ra Bệnh - Trị Hết Bệnh & Ngừa Ung Thư.
-                    </li>
-                    {{-- Add more benefits as needed --}}
-                </ul>
-
-                <h3 class="package-title text-xl font-semibold text-gray-800 mt-6">3. Quy trình thực hiện gói khám nội soi dạ dày và đại tràng gồm những bước nào?</h3>
-                <ul class="list-benefits mt-2 space-y-2 text-gray-700">
-                    <li class="flex items-start">
-                        <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                        Bước 1: Đặt lịch khám ưu tiên qua Medpro để được khám nhanh, không chờ đợi.
-                    </li>
-                    <li class="flex items-start">
-                        <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                        Bước 2: Đến phòng khám Doctor Check, báo mã đặt khám cho lễ tân và vào khám ngay.
-                    </li>
-                    <li class="flex items-start">
-                        <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                        Bước 3: Gặp bác sĩ chuyên khoa tiêu hoá, thực hiện nội soi theo hướng dẫn và nhận kết quả, tư vấn điều trị.
-                    </li>
-                    {{-- Add more steps as needed --}}
-                </ul>
-
-                {{-- Additional services in the package --}}
-                <div class="mt-8">
-                    <h3 class="package-title text-xl font-semibold text-gray-800">Các dịch vụ có trong gói khám là gì?</h3>
+                    <h3 class="package-title text-xl font-semibold text-gray-800 mt-6">2. Lợi ích gói khám bệnh lý dạ dày &
+                        đại tràng là gì?</h3>
                     <ul class="list-benefits mt-2 space-y-2 text-gray-700">
                         <li class="flex items-start">
                             <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                            Đo dấu hiệu sinh tồn (mạch, huyết áp, nhiệt độ, SPO2, chiều cao, cân nặng, BMI).
+                            Hiện nay, bệnh ở dạ dày & đại tràng là bệnh lý dễ tái phát nếu không tìm ra chính xác nguyên
+                            nhân gây bệnh. Khi đó các triệu chứng tiêu hoá dai dẳng gây ảnh hưởng rất lớn đến chất lượng
+                            cuộc sống của bạn.
                         </li>
                         <li class="flex items-start">
                             <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                            Bảng câu hỏi sàng lọc chuyên sâu bệnh lý dạ dày & đại tràng (tiền sử gia đình, thói quen sinh hoạt, triệu chứng...).
+                            Bác sĩ Doctor Check sẽ giúp Bạn Khám Ra Bệnh - Trị Hết Bệnh & Ngừa Ung Thư.
                         </li>
-                        <li class="flex items-start">
-                            <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                            Bác sĩ chuyên khoa tiêu hóa đọc và chẩn đoán, đưa ra phác đồ điều trị phù hợp (nếu có).
-                        </li>
+                        {{-- Add more benefits as needed --}}
                     </ul>
-                </div>
-            </div>
 
-{{-- Right Column: Doctor Selection --}}
-<div class="lg:col-span-4 mt-8 lg:mt-0">
-    <div class="space-y-4">
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">Chọn bác sĩ</h3>
+                    <h3 class="package-title text-xl font-semibold text-gray-800 mt-6">3. Quy trình thực hiện gói khám nội
+                        soi dạ dày và đại tràng gồm những bước nào?</h3>
+                    <ul class="list-benefits mt-2 space-y-2 text-gray-700">
+                        <li class="flex items-start">
+                            <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
+                            Bước 1: Đặt lịch khám ưu tiên qua Medpro để được khám nhanh, không chờ đợi.
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
+                            Bước 2: Đến phòng khám Doctor Check, báo mã đặt khám cho lễ tân và vào khám ngay.
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
+                            Bước 3: Gặp bác sĩ chuyên khoa tiêu hoá, thực hiện nội soi theo hướng dẫn và nhận kết quả, tư
+                            vấn điều trị.
+                        </li>
+                        {{-- Add more steps as needed --}}
+                    </ul>
 
-        @foreach (['Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C'] as $doctor)
-            <div class="doctor-card bg-white rounded-lg shadow p-4 flex items-center space-x-4 hover:shadow-md transition">
-                {{-- Doctor Image --}}
-                <img src="https://via.placeholder.com/80" alt="{{ $doctor }}" class="w-20 h-20 rounded-full object-cover">
-
-                {{-- Doctor Info --}}
-                <div class="flex-1">
-                    <h4 class="text-lg font-semibold text-gray-800">{{ $doctor }}</h4>
-
-                    {{-- Rating --}}
-                    <div class="flex items-center text-yellow-500 text-sm mt-1">
-                        @for ($i = 0; $i < 5; $i++)
-                            <i data-lucide="star" class="w-4 h-4 fill-current {{ $i < 4 ? 'text-yellow-500' : 'text-gray-300' }}"></i>
-                        @endfor
-                        <span class="text-gray-600 ml-2">(4.0)</span>
-                    </div>
-
-                    {{-- Select Button --}}
-                    <button class="mt-2 inline-block px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition">
-                        Chọn bác sĩ
-                    </button>
-                </div>
-            </div>
-        @endforeach
-    </div>
-</div>
-        </div>
-    </div>
-</div>
-
-{{-- Section for related packages or other content can follow here --}}
-<section class="related-packages py-5 lg:py-8 mt-5">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl lg:text-3xl font-bold text-gray-800 text-center mb-5">
-            Các gói khám liên quan
-        </h2>
-        {{-- Responsive cards grid --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            @for ($i = 0; $i < 3; $i++)
-                {{-- Loop to simulate multiple packages --}}
-                <div class="h-full bg-white rounded-lg shadow-sm transition duration-300 ease-in-out hover:shadow-lg flex flex-col">
-                    <img src="https://via.placeholder.com/400x250?text=Goi+Kham+{{ $i + 1 }}" alt="Gói khám liên quan" class="w-full h-40 object-cover rounded-t-lg">
-                    <div class="p-4 flex flex-col flex-1">
-                        <h5 class="text-lg font-semibold mb-2">Gói khám [Tên Gói Khám {{ $i + 1 }}]</h5>
-                        <p class="text-sm text-gray-600 flex-grow">
-                            Mô tả ngắn về gói khám, ví dụ: tầm soát ung thư, nội soi không đau...
-                        </p>
-                        <p class="text-red-600 font-bold text-md mt-2">
-                            Giá: {{ number_format(500000 + $i * 100000, 0, ',', '.') }} VNĐ
-                        </p>
-                        <a href="#" class="mt-3 inline-block px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-600 hover:text-white transition">Đặt khám ngay</a>
+                    {{-- Additional services in the package --}}
+                    <div class="mt-8">
+                        <h3 class="package-title text-xl font-semibold text-gray-800">Các dịch vụ có trong gói khám là gì?
+                        </h3>
+                        <ul class="list-benefits mt-2 space-y-2 text-gray-700">
+                            <li class="flex items-start">
+                                <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
+                                Đo dấu hiệu sinh tồn (mạch, huyết áp, nhiệt độ, SPO2, chiều cao, cân nặng, BMI).
+                            </li>
+                            <li class="flex items-start">
+                                <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
+                                Bảng câu hỏi sàng lọc chuyên sâu bệnh lý dạ dày & đại tràng (tiền sử gia đình, thói quen
+                                sinh hoạt, triệu chứng...).
+                            </li>
+                            <li class="flex items-start">
+                                <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
+                                Bác sĩ chuyên khoa tiêu hóa đọc và chẩn đoán, đưa ra phác đồ điều trị phù hợp (nếu có).
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            @endfor
+
+                {{-- Right Column: Doctor Selection --}}
+                <div class="lg:col-span-4 mt-8 lg:mt-0">
+                    <div class="space-y-4 bg-blue-600 p-5 rounded-lg">
+                        <h3 class="text-2xl font-semibold text-white mb-2">Bác sĩ thực hiện</h3>
+                        <div class="mb-4 text-white">
+                            <p class="text-lg font-semibold mb-2">Lựa chọn bác sĩ</p>
+                            <div class="flex flex-col space-y-2">
+                                <label
+                                    class="flex items-center space-x-2 p-2 rounded-md cursor-pointer border border-transparent has-[:checked]:border-green-500 has-[:checked]:bg-green-100 has-[:checked]:text-black transition">
+                                    <input type="radio" name="doctor_option" value="auto" class="peer sr-only" checked>
+                                    <span class="text-white font-medium">Tự động chọn bác sĩ phù hợp</span>
+                                </label>
+                                <label
+                                    class="flex items-center space-x-2 p-2 rounded-md cursor-pointer border border-transparent has-[:checked]:border-green-500 has-[:checked]:bg-green-100 has-[:checked]:text-black transition">
+                                    <input type="radio" name="doctor_option" value="manual" class="peer sr-only">
+                                    <span class="text-white font-medium">Tôi muốn lựa chọn bác sĩ</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div id="doctor-list"
+                            class="hidden transform space-y-4 transition duration-300 ease-out translate-y-[-10px] opacity-0">
+                            @foreach ($service->doctors as $doctor)
+                                <label for="doctor_{{ $doctor->id }}"
+                                    class="transform cursor-pointer m-1 transition duration-300 hover:scale-105 ">
+                                    <div
+                                        class="doctor-card transform bg-white rounded-lg shadow p-4 flex items-center space-x-4 hover:shadow-md transition border-2 border-transparent duration-300 hover:scale-105 focus-within:border-blue-500 has-[:checked]:border-green-500 has-[:checked]:bg-green-100">
+                                        <input type="radio" id="doctor_{{ $doctor->id }}" name="selected_doctor"
+                                            value="{{ $doctor->id }}" class="sr-only" hidden>
+                                        <img src="{{ $doctor->user->avatar }}" alt="{{ $doctor->user->full_name }}"
+                                            class="w-20 h-20 rounded-full object-cover">
+                                        <div class="flex-1">
+                                            <h4 class="text-lg font-semibold text-gray-800">{{ $doctor->user->full_name }}
+                                            </h4>
+                                            <div class="flex items-center text-yellow-500 text-sm mt-1">
+                                                @php $averageRating = $doctor->reviews->avg('rating'); @endphp
+                                                @if ($averageRating)
+                                                    @for ($i = 0; $i < 5; $i++)
+                                                        <i data-lucide="star"
+                                                            class="w-4 h-4 fill-current {{ $i < round($averageRating) ? 'text-yellow-500' : 'text-gray-300' }}"></i>
+                                                    @endfor
+                                                    <span
+                                                        class="ml-2 text-sm text-gray-600">({{ number_format($averageRating, 1) }}/5)</span>
+                                                @else
+                                                    <span class="text-sm text-gray-500 italic">Chưa có đánh giá</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</section>
 
+    {{-- Section for related packages or other content can follow here --}}
+    <section class="related-packages py-5 lg:py-8 mt-5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl lg:text-3xl font-bold text-gray-800 text-center mb-5">
+                Các gói khám liên quan
+            </h2>
+            {{-- Responsive cards grid --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach ($relatedServices as $service)
+                    {{-- Loop to simulate multiple packages --}}
+                    <div
+                        class="h-full bg-white rounded-lg shadow-sm transition duration-300 ease-in-out hover:shadow-lg flex flex-col">
+                        <img src="#" alt="Gói khám liên quan" class="w-full h-40 object-cover rounded-t-lg">
+                        <div class="p-4 flex flex-col flex-1">
+                            <h5 class="text-lg font-semibold mb-2">{{ $service->name }}</h5>
+                            <p class="text-sm text-gray-600 flex-grow">
+                                {{ $service->description }}
+                            </p>
+                            <p class="text-red-600 font-bold text-md mt-2">
+                                Giá: {{ number_format($service->price, 0, ',', '.') }} VNĐ
+                            </p>
+                            <a href="{{ route('booking.showService', ['service_id' => $service->id]) }}"
+                                class="mt-3 inline-block px-4 py-2 border border-blue-600 text-center text-blue-600 rounded-md hover:bg-blue-600 hover:text-white transition">
+                                Xem chi tiết</a>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
     </div>
 @endsection
 
 @push('scripts')
-@endpush
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.getElementById('bookingForm');
+                const doctorRadios = document.querySelectorAll('input[name="selected_doctor"]');
+                const doctorIdInput = document.getElementById('doctor_id');
+                const doctorOptionInput = document.getElementById('doctor_option_input');
+                const doctorOptionRadios = document.querySelectorAll('input[name="doctor_option"]');
+                const doctorList = document.getElementById('doctor-list');
+
+                // Cập nhật doctor_option_input khi người dùng chọn radio
+                doctorOptionRadios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        doctorOptionInput.value = this.value;
+
+                        if (this.value === 'manual') {
+                            doctorList.classList.remove('hidden');
+                            doctorList.classList.add('opacity-100', 'translate-y-0');
+                        } else {
+                            doctorList.classList.add('hidden');
+                            doctorIdInput.value = ''; 
+                        }
+                    });
+                });
+
+                // Cập nhật doctor_id khi chọn bác sĩ
+                doctorRadios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        doctorIdInput.value = this.value;
+                    });
+                });
+
+                // Validate trước khi submit
+                form.addEventListener('submit', function(event) {
+                    const selectedOption = document.querySelector('input[name="doctor_option"]:checked')?.value;
+
+                    if (selectedOption === 'manual' && !doctorIdInput.value) {
+                        event.preventDefault();
+                        alert('Vui lòng chọn một bác sĩ trước khi đặt khám.');
+                    }
+                });
+            });
+        </script>
+    @endpush

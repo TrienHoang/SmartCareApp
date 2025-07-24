@@ -223,18 +223,18 @@
         }
 
         /*
-                                                                                    .guide-overlay {
-                                                                                        position: fixed;
-                                                                                        top: 0;
-                                                                                        left: 0;
-                                                                                        width: 100%;
-                                                                                        height: 100%;
-                                                                                        background: rgba(0, 0, 0, 0.5);
-                                                                                        z-index: 999;
-                                                                                        opacity: 0;
-                                                                                        visibility: hidden;
-                                                                                        transition: all 0.3s ease;
-                                                                                    } */
+                                                                                .guide-overlay {
+                                                                                    position: fixed;
+                                                                                    top: 0;
+                                                                                    left: 0;
+                                                                                    width: 100%;
+                                                                                    height: 100%;
+                                                                                    background: rgba(0, 0, 0, 0.5);
+                                                                                    z-index: 999;
+                                                                                    opacity: 0;
+                                                                                    visibility: hidden;
+                                                                                    transition: all 0.3s ease;
+                                                                                } */
 
         .guide-overlay.show {
             opacity: 1;

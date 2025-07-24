@@ -57,9 +57,6 @@ Route::middleware(['auth'])->group(function () {
 
     // Đánh dấu đánh giá là hữu ích
     Route::post('/reviews/{review}/useful', [ReviewReplyController::class, 'markUseful'])->name('reviews.useful');
-
-
-
 });
 
 // Route hiển thị chi tiết bác sĩ (không yêu cầu đăng nhập)
@@ -93,4 +90,15 @@ Route::prefix('client/payment')->name('client.payment.')->middleware(['auth'])->
     Route::get('/ipn', [PaymentController::class, 'ipn'])->name('ipn');
 });
 
-Route::get('/chon-ngay-kham/{service_id}', [BookingController::class, 'chonNgay'])->name('booking.date');
+Route::get('/chi-tiet-dich-vu/{service_id}', [BookingController::class, 'show'])->name('booking.showService');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/luu-dich-vu', [BookingController::class, 'storeService'])->name('booking.storeService');
+    Route::get('/chon-ngay', [BookingController::class, 'chonNgay'])->name('booking.chonNgay');
+});
+
+
+
+Route::get('/abc', function () {
+    return view('client.note');
+});

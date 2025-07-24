@@ -203,7 +203,7 @@
                             <div class="text-blue-600 font-semibold mt-4">
                                 Giá: {{ number_format($service->price, 0, ',', '.') }} VNĐ
                             </div>
-                            <a href="{{ route('booking.date', ['service_id' => $service->id]) }}"
+                            <a href="{{ route('booking.showService', ['service_id' => $service->id]) }}"
                                 class="inline-block mt-4 bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition-colors">
                                 Xem Chi Tiết
                             </a>
