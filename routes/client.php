@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Client\PaymentHistoryClientController; // Đúng namespace, đúng chữ hoa/thường
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Client\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -97,4 +97,17 @@ Route::prefix('client/payment')->name('client.payment.')->middleware(['auth'])->
 // Danh sách bình luận của người dùng (client)
 Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->group(function () {
     Route::get('/', [ReviewReplyController::class, 'index'])->name('index');
+});
+
+Route::get('/chi-tiet-dich-vu/{service_id}', [BookingController::class, 'show'])->name('booking.showService');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/luu-dich-vu', [BookingController::class, 'storeService'])->name('booking.storeService');
+    Route::get('/chon-ngay', [BookingController::class, 'chonNgay'])->name('booking.chonNgay');
+});
+
+
+
+Route::get('/abc', function () {
+    return view('client.note');
 });

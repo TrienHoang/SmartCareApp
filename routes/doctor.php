@@ -111,6 +111,9 @@ Route::prefix('doctor')
                 Route::patch('treatment-plan-items/{itemId}/update-status', [TreatmentPlanController::class, 'updateItemStatus'])->name('treatment-plan-items.update-status');
             });
 
+            Route::post('/check-appointment', [DoctorAppointmentController::class, 'checkAppointmentAvailability'])
+            ->name('check-appointment');
+
     });
 
     // Nhóm route dành riêng cho bác sĩ
@@ -120,8 +123,8 @@ Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'
     Route::get('/list/{id}', [DoctorController::class, 'show'])->name('list.show');
     Route::get('/history', [DoctorController::class, 'history'])->name('history.index');
     Route::get('/history/{appointment}', [DoctorController::class, 'historyShow'])->name('history.show');
-    Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
-    Route::patch('/reviews/{review}/toggle-visibility', [ReviewController::class, 'toggleVisibility'])->name('reviews.toggle');
+    // Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+    // Route::patch('/reviews/{review}/toggle-visibility', [ReviewController::class, 'toggleVisibility'])->name('reviews.toggle');
 });
 
 Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
