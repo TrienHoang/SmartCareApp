@@ -424,7 +424,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Bạn có chắc chắn muốn xóa tài liệu này không? Hành động này không thể hoàn tác.</p>
+                    <p>Bạn có chắc chắn muốn xóa tài liệu này không?</p>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -704,7 +704,7 @@
         function deleteFile(id, fileName) {
             Swal.fire({
                 title: 'Xác nhận xóa',
-                html: `Bạn có chắc chắn muốn xóa tài liệu <strong>${fileName}</strong> không?<br>Hành động này không thể hoàn tác!`,
+                html: `Bạn có chắc chắn muốn xóa tài liệu <strong>${fileName}</strong> không?`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',

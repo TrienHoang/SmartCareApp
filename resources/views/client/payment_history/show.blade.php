@@ -8,16 +8,16 @@
 
 <style>
     body {
-        background-color: #f0f8ff;
+        background-color: #f8f9fa;
     }
 
     .payment-card {
-        background: #ffffff;
+        background: #fff;
         border-left: 6px solid #0d6efd;
         border-radius: 1rem;
         padding: 2rem;
-        box-shadow: 0 0.5rem 1rem rgba(13, 110, 253, 0.15);
-        transition: 0.3s ease;
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease;
     }
 
     .payment-card:hover {
@@ -33,6 +33,7 @@
     .detail-label {
         font-weight: 600;
         color: #6c757d;
+        font-size: 0.95rem;
     }
 
     .detail-value {
@@ -42,14 +43,14 @@
     }
 
     .badge-method {
-        padding: 0.45rem 0.8rem;
+        padding: 0.45rem 0.9rem;
         font-size: 0.95rem;
         border-radius: 0.5rem;
     }
 
     .btn-back {
         background-color: #0d6efd;
-        color: white;
+        color: #fff;
         border-radius: 0.5rem;
     }
 
@@ -59,8 +60,9 @@
 
     @media (max-width: 768px) {
         .detail-label {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
+
         .detail-value {
             font-size: 1rem;
         }
@@ -107,10 +109,10 @@
             </div>
 
             @isset($paymentHistory->note)
-            <div class="col-md-12">
-                <div class="detail-label">📝 Ghi chú</div>
-                <div class="detail-value">{{ $paymentHistory->note }}</div>
-            </div>
+                <div class="col-12">
+                    <div class="detail-label">📝 Ghi chú</div>
+                    <div class="detail-value">{{ $paymentHistory->note }}</div>
+                </div>
             @endisset
         </div>
 

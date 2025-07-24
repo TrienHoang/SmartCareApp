@@ -4,33 +4,33 @@
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <style>
     body {
-        background-color: #f0f8ff;
+        background-color: #f8f9fa;
     }
 
     .table-container {
-        background-color: #ffffff;
-        border-radius: 0.75rem;
-        box-shadow: 0 0.5rem 1rem rgba(13, 110, 253, 0.1);
+        background-color: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
         padding: 2rem;
     }
 
     h2 {
-        font-weight: 700;
         color: #0d6efd;
+        font-weight: bold;
     }
 
-    th {
-        background-color: #e8f0fe !important;
+    .form-label {
+        font-weight: 500;
         color: #0d6efd;
     }
 
     .badge {
-        font-size: 0.85rem;
-        padding: 0.45rem 0.75rem;
         border-radius: 0.5rem;
+        padding: 0.4em 0.8em;
+        font-size: 0.85rem;
     }
 
     .btn-outline-info {
@@ -43,13 +43,14 @@
         color: white;
     }
 
-    .filter-label {
-        font-weight: 600;
-        color: #0d6efd;
+    .no-data {
+        font-size: 1rem;
+        color: #6c757d;
     }
 
     @media (max-width: 768px) {
-        h2 { font-size: 1.4rem; }
+        h2 { font-size: 1.5rem; }
+        .table-container { padding: 1rem; }
         .table-responsive { font-size: 0.9rem; }
     }
 </style>
@@ -62,26 +63,25 @@
     {{-- Bộ lọc --}}
     <form method="GET" action="{{ route('client.payment_history.index') }}" class="row g-3 mb-4">
         <div class="col-md-4">
-            <label for="payment_date" class="form-label filter-label">Lọc theo ngày thanh toán</label>
-            <input type="date" id="payment_date" name="payment_date"
-                   class="form-control" value="{{ request('payment_date') }}">
+            <label for="payment_date" class="form-label">Lọc theo ngày thanh toán</label>
+            <input type="date" name="payment_date" id="payment_date" value="{{ request('payment_date') }}" class="form-control">
         </div>
         <div class="col-md-8 d-flex align-items-end gap-2">
-            <button type="submit" class="btn btn-primary">
+            <button class="btn btn-primary">
                 <i class="fas fa-filter me-1"></i> Lọc
             </button>
             <a href="{{ route('client.payment_history.index') }}" class="btn btn-secondary">
-                <i class="fas fa-sync me-1"></i> Đặt lại
+                <i class="fas fa-sync-alt me-1"></i> Đặt lại
             </a>
         </div>
     </form>
 
+    {{-- Bảng dữ liệu --}}
     <div class="table-container">
-        {{-- Bảng dữ liệu --}}
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead>
-                    <tr class="text-center">
+            <table class="table table-bordered align-middle">
+                <thead class="text-center table-light">
+                    <tr>
                         <th>📅 Ngày thanh toán</th>
                         <th>💳 Phương thức</th>
                         <th>💰 Số tiền</th>
@@ -90,7 +90,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($paymentHistories as $payment)
+                    @forelse($paymentHistories as $payment)
                         <tr>
                             <td class="text-center">{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y H:i') }}</td>
                             <td class="text-center">
@@ -103,17 +103,15 @@
                                 <span class="badge bg-success">Thành công</span>
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('client.payment_history.show', $payment->id) }}"
-                                   class="btn btn-sm btn-outline-info" title="Xem chi tiết">
+                                <a href="{{ route('client.payment_history.show', $payment->id) }}" class="btn btn-sm btn-outline-info" title="Xem chi tiết">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-3">
-                                <i class="fas fa-money-bill-wave-slash me-1"></i>
-                                Không có dữ liệu thanh toán nào.
+                            <td colspan="5" class="text-center py-4">
+                                <span class="no-data"><i class="fas fa-money-bill-wave-slash me-1"></i> Không có dữ liệu thanh toán.</span>
                             </td>
                         </tr>
                     @endforelse

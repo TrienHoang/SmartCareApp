@@ -263,6 +263,8 @@ Route::group([
         Route::post('/{id}/pay', [AppointmentController::class, 'pay'])
             ->middleware('check_permission:edit_appointments')->name('pay');
 
+        Route::post('/{id}/refund', [AppointmentController::class, 'refund'])->name('refund');
+
         Route::get('/doctor/{doctor}/services', [AppointmentController::class, 'getDoctorServices'])
             ->name('doctor.services');
 
@@ -720,3 +722,8 @@ require __DIR__ . '/client.php';
 
 // Trong routes/web.php hoặc routes/doctor.php
 require __DIR__ . '/doctor.php';
+
+
+
+// Route phần lễ tân
+require __DIR__ . '/reception.php';

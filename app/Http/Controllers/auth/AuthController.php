@@ -32,11 +32,17 @@ class AuthController extends Controller
             session()->put('user_id', Auth::id());
 
             if (Auth::user()->role_id == 1) {
-                return redirect()->route('admin.dashboard.index')->with('success', 'Chào mừng quản trị viên!');
+                return redirect()->route('admin.dashboard.index')
+                    ->with('success', 'Chào mừng quản trị viên!');
             } elseif (Auth::user()->role_id == 2) {
-                return redirect()->route('doctor.dashboard')->with('success', 'Chào mừng bác sĩ!');
+                return redirect()->route('doctor.dashboard')
+                    ->with('success', 'Chào mừng bác sĩ!');
+            } elseif (Auth::user()->role_id == 4) {
+                return redirect()->route('receptionist.dashboard')
+                    ->with('success', 'Chào mừng lễ tân!');
             } else {
-                return redirect()->route('home')->with('success', 'Đăng nhập thành công!');
+                return redirect()->route('home')
+                    ->with('success', 'Đăng nhập thành công!');
             }
         }
 
