@@ -337,167 +337,269 @@
                 </div>
 
                 <!-- Reviews Tab -->
-<!-- Import Lucide icons (put in <head> or before </body>) -->
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+                <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
-<!-- Reviews Section -->
-<div id="content-reviews" class="tab-content hidden">
-    <div class="mt-10 space-y-8">
-        <!-- Danh sách đánh giá -->
-        <div class="space-y-6">
-            @forelse ($doctor->reviews->sortByDesc('created_at') as $review)
-                <div class="border-b pb-6">
-                    <div class="flex items-start space-x-4">
-                        <!-- Avatar -->
-                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">
-                            {{ $review->patient ? strtoupper(Str::substr($review->patient->full_name, 0, 1)) . '***' : 'Ẩn danh' }}
-                        </div>
-
-                        <div class="flex-1">
-                            <!-- Stars & Date -->
-                            <div class="flex items-center justify-between mb-1">
-                                <div class="flex space-x-1">
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        <i data-lucide="star"
-                                           class="w-4 h-4 {{ $i <= $review->rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"></i>
-                                    @endfor
-                                </div>
-                                <div class="text-sm text-gray-500">
-                                    {{ $review->created_at->diffForHumans() }}
-                                </div>
-                            </div>
-
-                            <!-- Nội dung -->
-                            <p class="text-gray-700 mb-2">{{ $review->comment }}</p>
-
-                            <!-- Hữu ích -->
-                            <div class="flex space-x-4 text-sm text-gray-500">
-                                <form method="POST" action="{{ route('reviews.useful', $review->id) }}">
-                                    @csrf
-                                    <button class="flex items-center space-x-1 hover:text-blue-600">
-                                        <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                                        <span>Hữu ích ({{ $review->useful_count ?? 0 }})</span>
-                                    </button>
-                                </form>
-                            </div>
-
-                            <!-- Phản hồi -->
-                            @if ($review->replies->count())
-                                <div class="mt-3 space-y-2 border-l pl-4 border-gray-200">
-                                    @foreach ($review->replies as $reply)
-                                        <div class="text-sm bg-gray-100 p-2 rounded">
-                                            <strong>{{ $reply->user->name ?? 'Ẩn danh' }}</strong>:
-                                            {{ $reply->content }}
-                                            <div class="text-xs text-gray-500">
-                                                {{ $reply->created_at->diffForHumans() }}
+                <div id="content-reviews" class="tab-content hidden">
+                    <div class="mt-10 space-y-8">
+                        <!-- Danh sách đánh giá -->
+                        <div class="space-y-6">
+                            @forelse ($doctor->reviews->where('is_visible', true)->sortByDesc('created_at') as $review)
+                                <div class="border-b pb-6">
+                                    <div class="flex items-start space-x-4">
+                                        <!-- Avatar + Tên bệnh nhân -->
+                                        <div class="flex flex-col items-center w-24">
+                                            <div
+                                                class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">
+                                                {{ strtoupper(substr($review->patient->full_name ?? 'A', 0, 1)) }}
+                                            </div>
+                                            <div class="text-xs text-center mt-1 text-gray-700">
+                                                {{ $review->patient->full_name ?? 'Ẩn danh' }}
                                             </div>
                                         </div>
-                                    @endforeach
+
+                                        <!-- Nội dung đánh giá -->
+                                        <div class="flex-1">
+                                            <!-- Stars & Date -->
+                                            <div class="flex items-center justify-between mb-1">
+                                                <div class="flex space-x-1">
+                                                    @for ($i = 1; $i <= 5; $i++)
+                                                        @php
+                                                            $full = $review->rating >= $i;
+                                                            $half = !$full && $review->rating >= ($i - 0.5);
+                                                        @endphp
+
+                                                        @if ($full)
+                                                            <svg class="w-5 h-5 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24">
+                                                                <path
+                                                                    d="M12 2l2.9 6.1L22 9.3l-5 4.8 1.2 6.9L12 17.8l-6.2 3.2L7 14l-5-4.8 7.1-1.2z" />
+                                                            </svg>
+                                                        @elseif ($half)
+                                                            <svg class="w-5 h-5 text-yellow-400" viewBox="0 0 24 24">
+                                                                <defs>
+                                                                    <linearGradient id="half_{{ $review->id }}_{{ $i }}">
+                                                                        <stop offset="50%" stop-color="#facc15" />
+                                                                        <stop offset="50%" stop-color="#d1d5db" />
+                                                                    </linearGradient>
+                                                                </defs>
+                                                                <path fill="url(#half_{{ $review->id }}_{{ $i }})" stroke="#facc15"
+                                                                    d="M12 2l2.9 6.1L22 9.3l-5 4.8 1.2 6.9L12 17.8l-6.2 3.2L7 14l-5-4.8 7.1-1.2z" />
+                                                            </svg>
+                                                        @else
+                                                            <svg class="w-5 h-5 text-gray-300 fill-none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path
+                                                                    d="M12 2l2.9 6.1L22 9.3l-5 4.8 1.2 6.9L12 17.8l-6.2 3.2L7 14l-5-4.8 7.1-1.2z" />
+                                                            </svg>
+                                                        @endif
+                                                    @endfor
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    {{ $review->created_at->diffForHumans() }}
+                                                </div>
+                                            </div>
+
+                                            <!-- Dịch vụ đã sử dụng -->
+                                            @if ($review->appointment && $review->appointment->order && $review->appointment->order->services->count())
+                                                <div class="text-sm text-gray-500 italic mb-1">
+                                                    <i data-lucide="stethoscope" class="inline w-4 h-4 text-gray-400 mr-1"></i>
+                                                    Dịch vụ đã sử dụng:
+                                                    @foreach ($review->appointment->order->services as $service)
+                                                        <span>{{ $service->name }}</span>@if (!$loop->last), @endif
+                                                    @endforeach
+                                                </div>
+                                            @endif
+
+                                            <!-- Nội dung bình luận -->
+                                            <p class="text-gray-700 mb-2">{{ $review->comment }}</p>
+
+                                            <!-- Phản hồi -->
+                                            @if ($review->replies->count())
+                                                <div class="mt-3 space-y-2 border-l pl-4 border-gray-200">
+                                                    @foreach ($review->replies as $reply)
+                                                        <div class="text-sm bg-gray-100 p-2 rounded">
+                                                            <strong>{{ $reply->user->name ?? 'Ẩn danh' }}</strong>:
+                                                            {{ $reply->content }}
+                                                            <div class="text-xs text-gray-500">
+                                                                {{ $reply->created_at->diffForHumans() }}
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
-                            @endif
+                            @empty
+                                <p class="text-gray-500">Chưa có đánh giá nào.</p>
+                            @endforelse
                         </div>
+
+                        <!-- Gửi đánh giá -->
+                        <!-- Gửi đánh giá -->
+                        @auth
+                            <div class="bg-gray-50 p-6 rounded-lg border">
+                                <h3 class="text-lg font-semibold mb-4">Gửi đánh giá của bạn</h3>
+
+                                @if (session('success'))
+                                    <div class="mb-4 p-3 bg-green-100 text-green-800 rounded">
+                                        {{ session('success') }}
+                                    </div>
+                                @endif
+                                @if (session('error'))
+                                    <div class="mb-4 p-3 bg-red-100 text-red-800 rounded">
+                                        {{ session('error') }}
+                                    </div>
+                                @endif
+
+                                @if (!$appointment)
+                                    <p class="text-sm text-gray-500">Bạn cần hoàn tất một cuộc hẹn với bác sĩ để gửi đánh giá.</p>
+                                @elseif ($alreadyReviewed && $userReview)
+                                    <div class="mb-4 p-4 border rounded bg-gray-100">
+                                        <p class="text-sm mb-1 text-gray-700">
+                                            Bạn đã đánh giá: <strong>{{ $userReview->rating }} sao</strong>
+                                        </p>
+                                        <p class="text-sm text-gray-800 italic">"{{ $userReview->comment }}"</p>
+                                    </div>
+                                @else
+                                    <form action="{{ route('reviews.store', $doctor->id) }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="appointment_id" value="{{ $appointment->id }}">
+                                        @if ($appointment->service)
+                                            <input type="hidden" name="service_id" value="{{ $appointment->service->id }}">
+                                        @endif
+
+                                        <div class="mb-4">
+                                            <label class="text-sm block mb-1">Đánh giá:</label>
+                                            <div class="flex items-center space-x-1 relative" id="rating-container">
+                                                <input type="hidden" name="rating" id="rating" value="0">
+                                                @for ($i = 1; $i <= 5; $i++) {{-- 10 vì mỗi nửa sao --}}
+                                                    <svg class="w-6 h-6 cursor-pointer transition-transform duration-150 transform hover:scale-110 rating-star text-gray-300"
+                                                        data-value="{{ $i * 1 }}" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path
+                                                            d="M12 2l2.9 6.1L22 9.3l-5 4.8 1.2 6.9L12 17.8l-6.2 3.2L7 14l-5-4.8 7.1-1.2z" />
+                                                    </svg>
+                                                @endfor
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="comment" class="block text-sm font-medium mb-1">Nhận xét:</label>
+                                            <textarea name="comment" id="comment" rows="3" class="w-full border rounded p-2 text-sm"
+                                                placeholder="Nhận xét của bạn..." required>{{ old('comment') }}</textarea>
+                                        </div>
+
+                                        <div class="text-right">
+                                            <button type="submit"
+                                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium">
+                                                Gửi đánh giá
+                                            </button>
+                                        </div>
+                                    </form>
+                                @endif
+                            </div>
+                        @endauth
+
+                        <!-- Rating script -->
+                        @push('scripts')
+                            <script>
+                                const stars = document.querySelectorAll('.rating-star');
+                                const ratingInput = document.getElementById('rating');
+
+                                let selectedRating = 0;
+
+                                function highlightStars(value) {
+                                    stars.forEach(star => {
+                                        const starValue = parseFloat(star.dataset.value);
+                                        if (starValue <= value) {
+                                            star.classList.add('text-yellow-400');
+                                            star.classList.remove('text-gray-300');
+                                        } else {
+                                            star.classList.remove('text-yellow-400');
+                                            star.classList.add('text-gray-300');
+                                        }
+                                    });
+                                }
+
+                                stars.forEach(star => {
+                                    star.addEventListener('mouseover', () => {
+                                        highlightStars(parseFloat(star.dataset.value));
+                                    });
+
+                                    star.addEventListener('mouseout', () => {
+                                        highlightStars(selectedRating);
+                                    });
+
+                                    star.addEventListener('click', () => {
+                                        selectedRating = parseFloat(star.dataset.value);
+                                        ratingInput.value = selectedRating;
+                                        highlightStars(selectedRating);
+                                    });
+                                });
+                            </script>
+                        @endpush
+
                     </div>
                 </div>
-            @empty
-                <p class="text-gray-500">Chưa có đánh giá nào.</p>
-            @endforelse
-        </div>
 
-        <!-- Gửi đánh giá -->
-        @auth
-            <div class="bg-gray-50 p-6 rounded-lg border">
-                <h3 class="text-lg font-semibold mb-4">Gửi đánh giá của bạn</h3>
+                <!-- ⭐ STAR JS -->
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const starEls = document.querySelectorAll("#rating-stars .star");
+                        const ratingInput = document.getElementById("rating");
+                        let selectedRating = 0;
 
-                @if (session('success'))
-                    <div class="mb-4 p-3 bg-green-100 text-green-800 rounded">
-                        {{ session('success') }}
-                    </div>
-                @endif
-                @if (session('error'))
-                    <div class="mb-4 p-3 bg-red-100 text-red-800 rounded">
-                        {{ session('error') }}
-                    </div>
-                @endif
+                        function setClipPath(star, type) {
+                            const svg = star.querySelector("svg");
+                            if (type === "full") {
+                                svg.style.color = "#facc15";
+                                svg.style.clipPath = "none";
+                            } else if (type === "half") {
+                                svg.style.color = "#facc15";
+                                svg.style.clipPath = "inset(0 50% 0 0)";
+                            } else {
+                                svg.style.color = "#d1d5db";
+                                svg.style.clipPath = "none";
+                            }
+                        }
 
-                @if (!$appointment)
-                    <p class="text-sm text-gray-500">Bạn cần hoàn tất một cuộc hẹn với bác sĩ để gửi đánh giá.</p>
-                @elseif ($alreadyReviewed && $userReview)
-                    <div class="mb-4 p-4 border rounded bg-gray-100">
-                        <p class="text-sm mb-1 text-gray-700">Bạn đã đánh giá: <strong>{{ $userReview->rating }} sao</strong></p>
-                        <p class="text-sm text-gray-800 italic">"{{ $userReview->comment }}"</p>
-                    </div>
-                @else
-                    <form action="{{ route('reviews.store', $doctor->id) }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="appointment_id" value="{{ $appointment->id }}">
-                        @if ($appointment->service)
-                            <input type="hidden" name="service_id" value="{{ $appointment->service->id }}">
-                        @endif
+                        function renderStars(hoverValue = selectedRating) {
+                            starEls.forEach((star, i) => {
+                                const value = i + 1;
+                                if (hoverValue >= value) {
+                                    setClipPath(star, "full");
+                                } else if (hoverValue >= value - 0.5) {
+                                    setClipPath(star, "half");
+                                } else {
+                                    setClipPath(star, "empty");
+                                }
+                            });
+                        }
 
-                        <div class="flex items-center mb-4 space-x-2">
-                            <label class="text-sm">Đánh giá:</label>
-                            @for ($i = 1; $i <= 5; $i++)
-                                <label class="cursor-pointer flex items-center group">
-                                    <input type="radio" name="rating" value="{{ $i }}" class="hidden rating-input">
-                                    <i data-lucide="star"
-                                       class="w-6 h-6 rating-star text-gray-300 fill-none transition-colors"
-                                       data-value="{{ $i }}"></i>
-                                </label>
-                            @endfor
-                        </div>
+                        starEls.forEach((star, i) => {
+                            star.addEventListener("mousemove", (e) => {
+                                const rect = star.getBoundingClientRect();
+                                const isLeft = e.clientX - rect.left < rect.width / 2;
+                                const hoverVal = isLeft ? i + 0.5 : i + 1;
+                                renderStars(hoverVal);
+                            });
 
-                        <div class="mb-4">
-                            <label for="comment" class="block text-sm font-medium mb-1">Nhận xét:</label>
-                            <textarea name="comment" id="comment" rows="3"
-                                      class="w-full border rounded p-2 text-sm"
-                                      placeholder="Nhận xét của bạn..." required>{{ old('comment') }}</textarea>
-                        </div>
+                            star.addEventListener("mouseleave", () => {
+                                renderStars();
+                            });
 
-                        <div class="text-right">
-                            <button type="submit"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium">
-                                Gửi đánh giá
-                            </button>
-                        </div>
-                    </form>
-                @endif
-            </div>
-        @endauth
-    </div>
+                            star.addEventListener("click", (e) => {
+                                const rect = star.getBoundingClientRect();
+                                const isLeft = e.clientX - rect.left < rect.width / 2;
+                                selectedRating = isLeft ? i + 0.5 : i + 1;
+                                ratingInput.value = selectedRating;
+                                renderStars();
+                            });
+                        });
+                    });
+                </script>
 
-    <!-- JavaScript xử lý đánh giá -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Kích hoạt icon
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
 
-            const ratingInputs = document.querySelectorAll('.rating-input');
-            const ratingStars = document.querySelectorAll('.rating-star');
 
-            function updateStars(selectedValue) {
-                ratingStars.forEach(star => {
-                    const value = parseInt(star.getAttribute('data-value'));
-                    if (value <= selectedValue) {
-                        star.classList.add('text-yellow-400', 'fill-yellow-400');
-                        star.classList.remove('text-gray-300', 'fill-none');
-                    } else {
-                        star.classList.remove('text-yellow-400', 'fill-yellow-400');
-                        star.classList.add('text-gray-300', 'fill-none');
-                    }
-                });
-            }
-
-            ratingInputs.forEach(input => {
-                input.addEventListener('change', function () {
-                    const selected = parseInt(this.value);
-                    updateStars(selected);
-                });
-            });
-        });
-    </script>
-</div>
 
 
 
@@ -649,6 +751,15 @@
                     animation: fadeIn 0.6s ease forwards;
                 }
 
+                .rating-container {
+                    display: flex;
+                    gap: 2px;
+                    cursor: pointer;
+                    user-select: none;
+                }
+
+
+
                 @keyframes fadeIn {
                     to {
                         opacity: 1;
@@ -686,6 +797,8 @@
                     background: rgba(255, 255, 255, 0.9);
                 }
             </style>
+
+
         @endpush
 
 

@@ -29,7 +29,7 @@ public function store(Request $request, $doctorId)
 
         // ✅ Validate đầu vào
         $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
+            'rating' => 'required|numeric|min:0.5|max:5',
             'comment' => 'required|string|max:1000',
             'appointment_id' => [
                 'required',
@@ -41,7 +41,7 @@ public function store(Request $request, $doctorId)
             'service_id' => 'nullable|exists:services,id',
         ]);
 
-        // ✅ Kiểm tra lại cuộc hẹn
+        // ✅ Kiểm tra cuộc hẹn hợp lệ
         $appointment = Appointment::where('id', $request->appointment_id)
             ->where('doctor_id', $doctor->id)
             ->where('patient_id', Auth::id())
@@ -51,7 +51,7 @@ public function store(Request $request, $doctorId)
             return back()->with('error', 'Cuộc hẹn không hợp lệ hoặc không thuộc về bạn.');
         }
 
-        // ✅ Kiểm tra đã đánh giá chưa (chỉ 1 lần cho mỗi appointment)
+        // ✅ Kiểm tra đã đánh giá chưa
         $alreadyReviewed = Review::where('appointment_id', $appointment->id)
             ->where('patient_id', Auth::id())
             ->exists();
@@ -60,7 +60,7 @@ public function store(Request $request, $doctorId)
             return back()->with('error', 'Bạn đã đánh giá cuộc hẹn này rồi.');
         }
 
-        // ✅ Tạo đánh giá mới
+        // ✅ Tạo đánh giá
         $review = Review::create([
             'appointment_id' => $appointment->id,
             'patient_id'     => Auth::id(),
@@ -71,6 +71,15 @@ public function store(Request $request, $doctorId)
             'is_visible'     => true,
         ]);
 
+        // ✅ Cập nhật điểm trung bình và tổng số đánh giá
+        $average = Review::where('doctor_id', $doctor->id)->avg('rating');
+        $total = Review::where('doctor_id', $doctor->id)->count();
+
+        $doctor->average_rating = round($average, 2);
+        $doctor->total_ratings = $total;
+        $doctor->save();
+
+        // ✅ Log
         Log::info('Đánh giá được tạo', [
             'review_id' => $review->id,
             'doctor_id' => $doctor->id,
