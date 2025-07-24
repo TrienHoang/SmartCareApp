@@ -54,9 +54,13 @@ Route::middleware(['auth'])->group(function () {
     // Gửi đánh giá
     Route::post('/doctors/{doctor}/reviews', [ReviewReplyController::class, 'store'])->name('reviews.store');
 
+    // Gửi phản hồi đánh giá
+    Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
 
     // Đánh dấu đánh giá là hữu ích
     Route::post('/reviews/{review}/useful', [ReviewReplyController::class, 'markUseful'])->name('reviews.useful');
+
+    Route::put('/thong-tin-bac-si/{doctor}/reviews/{id}', [ReviewReplyController::class, 'update'])->name('reviews.update');
 });
 
 // Route hiển thị chi tiết bác sĩ (không yêu cầu đăng nhập)
@@ -88,6 +92,11 @@ Route::prefix('client/payment')->name('client.payment.')->middleware(['auth'])->
     Route::get('/', [PaymentController::class, 'create'])->name('create');
     Route::get('/return', [PaymentController::class, 'return'])->name('return');
     Route::get('/ipn', [PaymentController::class, 'ipn'])->name('ipn');
+});
+
+// Danh sách bình luận của người dùng (client)
+Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->group(function () {
+    Route::get('/', [ReviewReplyController::class, 'index'])->name('index');
 });
 
 Route::get('/chi-tiet-dich-vu/{service_id}', [BookingController::class, 'show'])->name('booking.showService');

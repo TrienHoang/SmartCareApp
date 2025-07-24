@@ -53,9 +53,9 @@
             @enderror
         </div>
 
-        {{-- Checkbox nghỉ đột xuất --}}
+        {{-- Radio button nghỉ đột xuất --}}
         <div class="form-check mb-4">
-            <input class="form-check-input" type="checkbox" name="is_emergency" id="is_emergency" value="1" {{ old('is_emergency') ? 'checked' : '' }}>
+            <input class="form-check-input" type="radio" name="is_emergency" id="is_emergency" value="1" {{ old('is_emergency') ? 'checked' : '' }}>
             <label class="form-check-label text-danger" for="is_emergency">
                 Đây là đơn nghỉ đột xuất (nghỉ gấp không cần báo trước)
             </label>
