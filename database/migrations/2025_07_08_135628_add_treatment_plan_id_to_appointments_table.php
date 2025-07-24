@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::table('appointments', function (Blueprint $table) {
             $table->foreignId('treatment_plan_id')->nullable()->constrained('treatment_plans')->onDelete('set null');
+            $table->unsignedBigInteger('treatment_plan_item_id')->nullable()->after('treatment_plan_id');
+
+            $table->foreign('treatment_plan_item_id')
+                ->references('id')
+                ->on('treatment_plan_items')
+                ->onDelete('set null');
         });
     }
 
@@ -22,7 +28,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
-            //
+            $table->dropForeign(['treatment_plan_id']);
+            $table->dropColumn('treatment_plan_id');
+            $table->dropForeign(['treatment_plan_item_id']);
+            $table->dropColumn('treatment_plan_item_id');
         });
     }
 };
