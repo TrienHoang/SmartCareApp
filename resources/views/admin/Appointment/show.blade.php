@@ -329,6 +329,57 @@
                                                 </strong>
                                             </small>
                                         @endif
+
+                                        @if ($appointment->payment && $appointment->payment->refund_status)
+                                            <div class="mt-3">
+                                                <small class="text-muted d-block">
+                                                    <i class="bx bx-undo me-1"></i>
+                                                    Hoàn tiền:
+                                                    @php
+                                                        $refundConfig = [
+                                                            'none' => [
+                                                                'text' => 'Chưa hoàn tiền',
+                                                                'color' => 'secondary',
+                                                                'icon' => 'bx-time',
+                                                            ],
+                                                            'pending' => [
+                                                                'text' => 'Đang xử lý hoàn tiền',
+                                                                'color' => 'warning',
+                                                                'icon' => 'bx-loader-circle',
+                                                            ],
+                                                            'completed' => [
+                                                                'text' => 'Đã hoàn tiền',
+                                                                'color' => 'success',
+                                                                'icon' => 'bx-check-circle',
+                                                            ],
+                                                            'failed' => [
+                                                                'text' => 'Hoàn tiền thất bại',
+                                                                'color' => 'danger',
+                                                                'icon' => 'bx-x-circle',
+                                                            ],
+                                                        ];
+                                                        $refund = $refundConfig[
+                                                            $appointment->payment->refund_status
+                                                        ] ?? [
+                                                            'text' => 'Không xác định',
+                                                            'color' => 'dark',
+                                                            'icon' => 'bx-help-circle',
+                                                        ];
+                                                    @endphp
+                                                    <span class="badge bg-{{ $refund['color'] }}">
+                                                        <i class="bx {{ $refund['icon'] }} me-1"></i>
+                                                        {{ $refund['text'] }}
+                                                    </span>
+                                                </small>
+
+                                                @if ($appointment->payment->note)
+                                                    <small class="text-muted d-block mt-1">
+                                                        <i class="bx bx-info-circle me-1"></i>
+                                                        Ghi chú: {{ $appointment->payment->note }}
+                                                    </small>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </div>
                                 @endif
                             </div>

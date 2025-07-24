@@ -4,6 +4,7 @@ namespace App\Http\Controllers\reception;
 
 use App\Helpers\AppointmentHelper;
 use App\Http\Controllers\Controller;
+use App\Mail\AppointmentConfirmed;
 use App\Models\Appointment;
 use App\Models\AppointmentLog;
 use App\Models\Doctor;
@@ -20,6 +21,7 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class ReceptionAppointmentController extends Controller
@@ -504,6 +506,8 @@ class ReceptionAppointmentController extends Controller
 
         $appointment = Appointment::with(['service'])->findOrFail($id);
 
+        $oldStatus = $appointment->status;
+
         if (in_array($appointment->status, ['completed', 'cancelled'])) {
             return back()->withErrors(['error' => 'Không thể sửa lịch hẹn đã hoàn tất hoặc đã huỷ.'])->withInput();
         }
@@ -669,6 +673,13 @@ class ReceptionAppointmentController extends Controller
 
             DB::commit();
 
+            // Gửi mail nếu chuyển sang trạng thái xác nhận
+            if ($oldStatus !== 'confirmed' && $request->status === 'confirmed') {
+                Mail::to($appointment->patient->email)->send(new AppointmentConfirmed(
+                    $appointment->fresh(['patient', 'doctor.user', 'service'])
+                ));
+            }
+
             return redirect()->route('receptionist.appointments.index')
                 ->with('success', 'Cập nhật lịch hẹn thành công.');
         } catch (\Throwable $e) {
@@ -680,7 +691,7 @@ class ReceptionAppointmentController extends Controller
 
     public function updateStatus($id)
     {
-        $appointment = Appointment::with('payment')->findOrFail($id);
+        $appointment = Appointment::with(['payment', 'patient', 'doctor.user', 'service'])->findOrFail($id);
 
         if ($appointment->status !== 'pending') {
             return back()->withErrors(['error' => 'Chỉ có thể cập nhật trạng thái lịch hẹn đang chờ xác nhận.']);
@@ -706,9 +717,17 @@ class ReceptionAppointmentController extends Controller
                     'user_id' => auth()->id(),
                 ]);
             }
+
+            // ✅ Gửi mail xác nhận lịch hẹn tại đây
+            try {
+                Mail::to($appointment->patient->email)->send(new AppointmentConfirmed($appointment));
+            } catch (\Exception $e) {
+                // Ghi log lỗi nếu cần
+                logger()->error('Lỗi gửi email xác nhận: ' . $e->getMessage());
+            }
         });
 
-        return back()->with('success', 'Cập nhật trạng thái lịch hẹn và thanh toán thành công.');
+        return back()->with('success', 'Cập nhật trạng thái lịch hẹn và thanh toán thành công. Email đã được gửi.');
     }
 
     public function cancel($id)
