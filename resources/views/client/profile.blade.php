@@ -13,7 +13,8 @@
                         {{-- Profile Avatar --}}
                         <div class="text-center mb-8">
                             <div class="relative inline-block">
-                                <img id="profile-avatar" src="{{ auth()->user()->avatar ?? '/images/default-avatar.png' }}"
+                                <img id="profile-avatar"
+                                    src="{{ optional($user)->avatar ? asset('storage/' . $user->avatar) : asset('images/default-avatar.png') }}"
                                     alt="Avatar"
                                     class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-100 object-cover">
                                 <button onclick="openAvatarModal()"
@@ -21,8 +22,8 @@
                                     <i data-lucide="camera" class="w-4 h-4"></i>
                                 </button>
                             </div>
-                            <h3 class="text-xl font-bold mb-2">{{ auth()->user()->name ?? 'Người dùng' }}</h3>
-                            <p class="text-gray-600">{{ auth()->user()->email ?? 'email@example.com' }}</p>
+                            <h3 class="text-xl font-bold mb-2">{{ $user->name ?? 'Người dùng' }}</h3>
+                            <p class="text-gray-600">{{ $user->email ?? 'email@example.com' }}</p>
                         </div>
 
                         {{-- Menu --}}
@@ -33,11 +34,10 @@
                                 <span class="font-semibold">Thông Tin Cá Nhân</span>
                             </a>
                             <a href="{{ route('client.appointments.history') }}"
-                            class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
+                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="calendar" class="w-5 h-5"></i>
                                 <span>Lịch Sử Khám</span>
                             </a>
-
                             <a href="#lich-hen"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="clock" class="w-5 h-5"></i>
@@ -65,8 +65,8 @@
                             </a>
                             <a href="{{ route('client.payment_history.index') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="settings" class="w-5 h-5"></i>
-                                <span>Lịch sử thanh toán</span>
+                                <i data-lucide="credit-card" class="w-5 h-5"></i>
+                                <span>Lịch Sử Thanh Toán</span>
                             </a>
                         </nav>
                     </div>
@@ -77,7 +77,7 @@
                     {{-- Header --}}
                     <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
                         <div class="flex items-center justify-between mb-6">
-                            <h1 class="text-3xl font-bold gradient-text">Thông Tin Cá Nhân</h1>
+                            <h1 class="text-3xl font-bold text-gray-800">Thông Tin Cá Nhân</h1>
                             <button onclick="openEditModal()"
                                 class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors flex items-center space-x-2 shadow-lg hover:shadow-xl">
                                 <i data-lucide="edit" class="w-4 h-4"></i>
@@ -85,211 +85,251 @@
                             </button>
                         </div>
 
-                        {{-- Personal Information --}}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Họ và Tên</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">{{ auth()->user()->name ?? 'Nguyễn Văn A' }}</p>
+                        {{-- Personal Information Form --}}
+                        <form action="{{ route('client.profile.update') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            @method('PATCH')
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {{-- Full Name --}}
+                                <div>
+                                    <label class="block font-medium text-gray-700">Họ tên</label>
+                                    <input type="text" name="full_name" value="{{ old('full_name', $user->full_name) }}"
+                                        class="form-input mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                                    @error('full_name')
+                                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                                    @enderror
                                 </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">{{ auth()->user()->email ?? 'nguyenvana@email.com' }}</p>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Số Điện Thoại</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">{{ auth()->user()->phone ?? '0123456789' }}</p>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Ngày Sinh</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">{{ auth()->user()->birth_date ?? '01/01/1990' }}</p>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Giới Tính</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">{{ auth()->user()->gender ?? 'Nam' }}</p>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">CCCD/CMND</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">{{ auth()->user()->id_card ?? '123456789012' }}</p>
-                                </div>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Địa Chỉ</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">
-                                        {{ auth()->user()->address ?? 'Số 123, Phố ABC, Quận XYZ, Hà Nội' }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    {{-- Medical Information --}}
-                    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-2xl font-bold gradient-text">Thông Tin Y Tế</h2>
-                            <button onclick="openMedicalModal()"
-                                class="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition-colors flex items-center space-x-2 text-sm">
-                                <i data-lucide="edit" class="w-4 h-4"></i>
-                                <span>Chỉnh Sửa</span>
-                            </button>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Nhóm Máu</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">{{ auth()->user()->blood_type ?? 'A+' }}</p>
+                                {{-- Email --}}
+                                <div>
+                                    <label class="block font-medium text-gray-700">Email</label>
+                                    <input type="email" name="email" value="{{ old('email', $user->email) }}"
+                                        class="form-input mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                                    @error('email')
+                                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                                    @enderror
                                 </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Chiều Cao (cm)</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">{{ auth()->user()->height ?? '170' }}</p>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Cân Nặng (kg)</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">{{ auth()->user()->weight ?? '65' }}</p>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Người Liên Hệ Khẩn Cấp</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">
-                                        {{ auth()->user()->emergency_contact ?? 'Nguyễn Thị B - 0987654321' }}</p>
-                                </div>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Tiền Sử Bệnh Án</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">
-                                        {{ auth()->user()->medical_history ?? 'Không có tiền sử bệnh lý đặc biệt' }}</p>
-                                </div>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Dị Ứng</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">{{ auth()->user()->allergies ?? 'Không có dị ứng đã biết' }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    {{-- Recent Appointments --}}
-                    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
-                        <h2 class="text-2xl font-bold mb-6 gradient-text">Lịch Hẹn Gần Đây</h2>
-                        <div class="space-y-4">
-                            @php
-                                $appointments = [
-                                    [
-                                        'date' => '2024-01-15',
-                                        'time' => '14:30',
-                                        'doctor' => 'BS. Nguyễn Văn An',
-                                        'specialty' => 'Nội Khoa',
-                                        'status' => 'Hoàn thành',
-                                        'status_color' => 'bg-green-100 text-green-800',
-                                    ],
-                                    [
-                                        'date' => '2024-01-20',
-                                        'time' => '09:00',
-                                        'doctor' => 'BS. Trần Thị Bình',
-                                        'specialty' => 'Sản Phụ Khoa',
-                                        'status' => 'Đã đặt',
-                                        'status_color' => 'bg-blue-100 text-blue-800',
-                                    ],
-                                    [
-                                        'date' => '2024-01-25',
-                                        'time' => '16:00',
-                                        'doctor' => 'BS. Lê Văn Cường',
-                                        'specialty' => 'Ngoại Khoa',
-                                        'status' => 'Đã đặt',
-                                        'status_color' => 'bg-blue-100 text-blue-800',
-                                    ],
-                                ];
-                            @endphp
-                            @foreach ($appointments as $appointment)
-                                <div
-                                    class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                    <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <i data-lucide="calendar" class="w-6 h-6 text-blue-600"></i>
-                                        </div>
-                                        <div>
-                                            <h3 class="font-semibold text-gray-900">{{ $appointment['doctor'] }}</h3>
-                                            <p class="text-sm text-gray-600">{{ $appointment['specialty'] }}</p>
-                                            <p class="text-sm text-gray-500">{{ $appointment['date'] }} -
-                                                {{ $appointment['time'] }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-3">
-                                        <span
-                                            class="px-3 py-1 rounded-full text-sm font-semibold {{ $appointment['status_color'] }}">
-                                            {{ $appointment['status'] }}
-                                        </span>
-                                        <button class="text-blue-600 hover:text-blue-800">
-                                            <i data-lucide="more-horizontal" class="w-5 h-5"></i>
-                                        </button>
-                                    </div>
+                                {{-- Phone --}}
+                                <div>
+                                    <label class="block font-medium text-gray-700">Số điện thoại</label>
+                                    <input type="text" name="phone" value="{{ old('phone', $user->phone) }}"
+                                        class="form-input mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                                    @error('phone')
+                                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                                    @enderror
                                 </div>
-                            @endforeach
-                        </div>
-                        <div class="mt-6 text-center">
-                            <a href="{{ url('/lich-hen') }}" class="text-blue-600 hover:text-blue-800 font-semibold">
-                                Xem Tất Cả Lịch Hẹn →
-                            </a>
-                        </div>
-                    </div>
 
-                    {{-- Quick Actions --}}
-                    <div class="bg-white rounded-xl shadow-lg p-8">
-                        <h2 class="text-2xl font-bold mb-6 gradient-text">Thao Tác Nhanh</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <a href="{{ url('/dat-lich') }}"
-                                class="p-6 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg hover:from-blue-100 hover:to-blue-200 transition-all hover-scale">
-                                <div class="flex items-center space-x-3">
-                                    <i data-lucide="calendar-plus" class="w-8 h-8 text-blue-600"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-blue-900">Đặt Lịch Khám</h3>
-                                        <p class="text-sm text-blue-700">Đặt lịch hẹn mới</p>
-                                    </div>
+                                {{-- Gender --}}
+                                <div>
+                                    <label class="block font-medium text-gray-700">Giới tính</label>
+                                    <select name="gender"
+                                        class="form-select mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                                        <option value="">-- Chọn giới tính --</option>
+                                        <option value="male"
+                                            {{ old('gender', $user->gender) == 'male' ? 'selected' : '' }}>Nam</option>
+                                        <option value="female"
+                                            {{ old('gender', $user->gender) == 'female' ? 'selected' : '' }}>Nữ</option>
+                                        <option value="other"
+                                            {{ old('gender', $user->gender) == 'other' ? 'selected' : '' }}>Khác</option>
+                                    </select>
+                                    @error('gender')
+                                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                                    @enderror
                                 </div>
-                            </a>
-                            <a href="{{ url('/lich-su-kham') }}"
-                                class="p-6 bg-gradient-to-r from-green-50 to-green-100 rounded-lg hover:from-green-100 hover:to-green-200 transition-all hover-scale">
-                                <div class="flex items-center space-x-3">
-                                    <i data-lucide="file-text" class="w-8 h-8 text-green-600"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-green-900">Xem Hồ Sơ</h3>
-                                        <p class="text-sm text-green-700">Lịch sử khám bệnh</p>
-                                    </div>
+
+                                {{-- Date of Birth --}}
+                                <div>
+                                    <label class="block font-medium text-gray-700">Ngày sinh</label>
+                                    <input type="date" name="date_of_birth"
+                                        value="{{ old('date_of_birth', $user->date_of_birth) }}"
+                                        class="form-input mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                                    @error('date_of_birth')
+                                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                                    @enderror
                                 </div>
-                            </a>
-                            <a href="{{ url('/lien-he') }}"
-                                class="p-6 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg hover:from-purple-100 hover:to-purple-200 transition-all hover-scale">
-                                <div class="flex items-center space-x-3">
-                                    <i data-lucide="phone" class="w-8 h-8 text-purple-600"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-purple-900">Liên Hệ</h3>
-                                        <p class="text-sm text-purple-700">Hỗ trợ khách hàng</p>
-                                    </div>
+
+                                {{-- Address --}}
+                                <div>
+                                    <label class="block font-medium text-gray-700">Địa chỉ</label>
+                                    <input type="text" name="address" value="{{ old('address', $user->address) }}"
+                                        class="form-input mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                                    @error('address')
+                                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                                    @enderror
                                 </div>
-                            </a>
-                        </div>
+                            </div>
+
+                            <div class="mt-6">
+                                <button type="submit"
+                                    class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl">
+                                    Cập nhật
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    {{-- Medical Information --}}
+    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold gradient-text">Thông Tin Y Tế</h2>
+            <button onclick="openMedicalModal()"
+                class="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition-colors flex items-center space-x-2 text-sm">
+                <i data-lucide="edit" class="w-4 h-4"></i>
+                <span>Chỉnh Sửa</span>
+            </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Nhóm Máu</label>
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <p class="text-gray-900">{{ auth()->user()->blood_type ?? 'A+' }}</p>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Chiều Cao (cm)</label>
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <p class="text-gray-900">{{ auth()->user()->height ?? '170' }}</p>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Cân Nặng (kg)</label>
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <p class="text-gray-900">{{ auth()->user()->weight ?? '65' }}</p>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Người Liên Hệ Khẩn
+                    Cấp</label>
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <p class="text-gray-900">
+                        {{ auth()->user()->emergency_contact ?? 'Nguyễn Thị B - 0987654321' }}</p>
+                </div>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Tiền Sử Bệnh Án</label>
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <p class="text-gray-900">
+                        {{ auth()->user()->medical_history ?? 'Không có tiền sử bệnh lý đặc biệt' }}</p>
+                </div>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Dị Ứng</label>
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <p class="text-gray-900">{{ auth()->user()->allergies ?? 'Không có dị ứng đã biết' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Recent Appointments --}}
+    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+        <h2 class="text-2xl font-bold mb-6 gradient-text">Lịch Hẹn Gần Đây</h2>
+        <div class="space-y-4">
+            @php
+                $appointments = [
+                    [
+                        'date' => '2024-01-15',
+                        'time' => '14:30',
+                        'doctor' => 'BS. Nguyễn Văn An',
+                        'specialty' => 'Nội Khoa',
+                        'status' => 'Hoàn thành',
+                        'status_color' => 'bg-green-100 text-green-800',
+                    ],
+                    [
+                        'date' => '2024-01-20',
+                        'time' => '09:00',
+                        'doctor' => 'BS. Trần Thị Bình',
+                        'specialty' => 'Sản Phụ Khoa',
+                        'status' => 'Đã đặt',
+                        'status_color' => 'bg-blue-100 text-blue-800',
+                    ],
+                    [
+                        'date' => '2024-01-25',
+                        'time' => '16:00',
+                        'doctor' => 'BS. Lê Văn Cường',
+                        'specialty' => 'Ngoại Khoa',
+                        'status' => 'Đã đặt',
+                        'status_color' => 'bg-blue-100 text-blue-800',
+                    ],
+                ];
+            @endphp
+            @foreach ($appointments as $appointment)
+                <div
+                    class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i data-lucide="calendar" class="w-6 h-6 text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">{{ $appointment['doctor'] }}</h3>
+                            <p class="text-sm text-gray-600">{{ $appointment['specialty'] }}</p>
+                            <p class="text-sm text-gray-500">{{ $appointment['date'] }} -
+                                {{ $appointment['time'] }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="px-3 py-1 rounded-full text-sm font-semibold {{ $appointment['status_color'] }}">
+                            {{ $appointment['status'] }}
+                        </span>
+                        <button class="text-blue-600 hover:text-blue-800">
+                            <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+        <div class="mt-6 text-center">
+            <a href="{{ url('/lich-hen') }}" class="text-blue-600 hover:text-blue-800 font-semibold">
+                Xem Tất Cả Lịch Hẹn →
+            </a>
+        </div>
+    </div>
+
+    {{-- Quick Actions --}}
+    <div class="bg-white rounded-xl shadow-lg p-8">
+        <h2 class="text-2xl font-bold mb-6 gradient-text">Thao Tác Nhanh</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <a href="{{ url('/dat-lich') }}"
+                class="p-6 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg hover:from-blue-100 hover:to-blue-200 transition-all hover-scale">
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="calendar-plus" class="w-8 h-8 text-blue-600"></i>
+                    <div>
+                        <h3 class="font-semibold text-blue-900">Đặt Lịch Khám</h3>
+                        <p class="text-sm text-blue-700">Đặt lịch hẹn mới</p>
+                    </div>
+                </div>
+            </a>
+            <a href="{{ url('/lich-su-kham') }}"
+                class="p-6 bg-gradient-to-r from-green-50 to-green-100 rounded-lg hover:from-green-100 hover:to-green-200 transition-all hover-scale">
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="file-text" class="w-8 h-8 text-green-600"></i>
+                    <div>
+                        <h3 class="font-semibold text-green-900">Xem Hồ Sơ</h3>
+                        <p class="text-sm text-green-700">Lịch sử khám bệnh</p>
+                    </div>
+                </div>
+            </a>
+            <a href="{{ url('/lien-he') }}"
+                class="p-6 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg hover:from-purple-100 hover:to-purple-200 transition-all hover-scale">
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="phone" class="w-8 h-8 text-purple-600"></i>
+                    <div>
+                        <h3 class="font-semibold text-purple-900">Liên Hệ</h3>
+                        <p class="text-sm text-purple-700">Hỗ trợ khách hàng</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
     </div>
 
     {{-- Edit Profile Modal --}}
@@ -519,309 +559,309 @@
         </div>
     </div>
     @push('scripts')
-            <script>
-        // Smooth scrolling for sidebar links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
+        <script>
+            // Smooth scrolling for sidebar links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
             });
-        });
 
-        // Active menu item highlighting
-        const menuItems = document.querySelectorAll('nav a');
-        menuItems.forEach(item => {
-            item.addEventListener('click', function() {
-                // Remove active class from all items
-                menuItems.forEach(mi => {
-                    mi.classList.remove('bg-blue-50', 'text-blue-600', 'border-l-4',
-                        'border-blue-600');
-                    mi.classList.add('text-gray-700');
+            // Active menu item highlighting
+            const menuItems = document.querySelectorAll('nav a');
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    menuItems.forEach(mi => {
+                        mi.classList.remove('bg-blue-50', 'text-blue-600', 'border-l-4',
+                            'border-blue-600');
+                        mi.classList.add('text-gray-700');
+                    });
+
+                    // Add active class to clicked item
+                    this.classList.remove('text-gray-700');
+                    this.classList.add('bg-blue-50', 'text-blue-600', 'border-l-4', 'border-blue-600');
+                });
+            });
+
+            // Modal functions
+            function openEditModal() {
+                document.getElementById('editModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeEditModal() {
+                document.getElementById('editModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            function openMedicalModal() {
+                document.getElementById('medicalModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMedicalModal() {
+                document.getElementById('medicalModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            function openAvatarModal() {
+                document.getElementById('avatarModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeAvatarModal() {
+                document.getElementById('avatarModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            // Toast functions
+            function showToast(type, message) {
+                const toast = document.getElementById(type + 'Toast');
+                const messageElement = document.getElementById(type + 'Message');
+
+                messageElement.textContent = message;
+                toast.classList.remove('hidden');
+
+                // Animate in
+                setTimeout(() => {
+                    toast.classList.remove('translate-x-full');
+                }, 100);
+
+                // Auto hide after 3 seconds
+                setTimeout(() => {
+                    toast.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        toast.classList.add('hidden');
+                    }, 300);
+                }, 3000);
+            }
+
+            function showLoading() {
+                document.getElementById('loadingOverlay').classList.remove('hidden');
+            }
+
+            function hideLoading() {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+
+            // Form validation
+            function validateForm(formId) {
+                const form = document.getElementById(formId);
+                const requiredFields = form.querySelectorAll('[required]');
+                let isValid = true;
+
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.classList.add('border-red-500');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('border-red-500');
+                    }
                 });
 
-                // Add active class to clicked item
-                this.classList.remove('text-gray-700');
-                this.classList.add('bg-blue-50', 'text-blue-600', 'border-l-4', 'border-blue-600');
-            });
-        });
+                return isValid;
+            }
 
-        // Modal functions
-        function openEditModal() {
-            document.getElementById('editModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
+            // Handle profile form submission
+            document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
 
-        function closeEditModal() {
-            document.getElementById('editModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
+                if (!validateForm('editProfileForm')) {
+                    showToast('error', 'Vui lòng điền đầy đủ thông tin bắt buộc!');
+                    return;
+                }
 
-        function openMedicalModal() {
-            document.getElementById('medicalModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
+                showLoading();
 
-        function closeMedicalModal() {
-            document.getElementById('medicalModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
+                try {
+                    const formData = new FormData(this);
 
-        function openAvatarModal() {
-            document.getElementById('avatarModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
 
-        function closeAvatarModal() {
-            document.getElementById('avatarModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
+                    // Here you would make the actual API call
+                    // const response = await fetch('/api/profile/update', {
+                    //     method: 'POST',
+                    //     body: formData
+                    // });
 
-        // Toast functions
-        function showToast(type, message) {
-            const toast = document.getElementById(type + 'Toast');
-            const messageElement = document.getElementById(type + 'Message');
+                    // if (!response.ok) throw new Error('Update failed');
 
-            messageElement.textContent = message;
-            toast.classList.remove('hidden');
+                    // Update UI with new data
+                    updateProfileUI(formData);
 
-            // Animate in
-            setTimeout(() => {
-                toast.classList.remove('translate-x-full');
-            }, 100);
+                    hideLoading();
+                    closeEditModal();
+                    showToast('success', 'Cập nhật thông tin cá nhân thành công!');
 
-            // Auto hide after 3 seconds
-            setTimeout(() => {
-                toast.classList.add('translate-x-full');
-                setTimeout(() => {
-                    toast.classList.add('hidden');
-                }, 300);
-            }, 3000);
-        }
-
-        function showLoading() {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-        }
-
-        // Form validation
-        function validateForm(formId) {
-            const form = document.getElementById(formId);
-            const requiredFields = form.querySelectorAll('[required]');
-            let isValid = true;
-
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    field.classList.add('border-red-500');
-                    isValid = false;
-                } else {
-                    field.classList.remove('border-red-500');
+                } catch (error) {
+                    hideLoading();
+                    showToast('error', 'Có lỗi xảy ra khi cập nhật thông tin!');
                 }
             });
 
-            return isValid;
-        }
+            // Handle medical form submission
+            document.getElementById('editMedicalForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
 
-        // Handle profile form submission
-        document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+                showLoading();
 
-            if (!validateForm('editProfileForm')) {
-                showToast('error', 'Vui lòng điền đầy đủ thông tin bắt buộc!');
-                return;
-            }
+                try {
+                    const formData = new FormData(this);
 
-            showLoading();
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
 
-            try {
-                const formData = new FormData(this);
+                    // Here you would make the actual API call
+                    // const response = await fetch('/api/profile/medical-update', {
+                    //     method: 'POST',
+                    //     body: formData
+                    // });
 
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                    // if (!response.ok) throw new Error('Update failed');
 
-                // Here you would make the actual API call
-                // const response = await fetch('/api/profile/update', {
-                //     method: 'POST',
-                //     body: formData
-                // });
+                    hideLoading();
+                    closeMedicalModal();
+                    showToast('success', 'Cập nhật thông tin y tế thành công!');
 
-                // if (!response.ok) throw new Error('Update failed');
+                } catch (error) {
+                    hideLoading();
+                    showToast('error', 'Có lỗi xảy ra khi cập nhật thông tin y tế!');
+                }
+            });
 
-                // Update UI with new data
-                updateProfileUI(formData);
+            // Handle avatar form submission
+            document.getElementById('avatarForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
 
-                hideLoading();
-                closeEditModal();
-                showToast('success', 'Cập nhật thông tin cá nhân thành công!');
+                const fileInput = document.getElementById('avatar-input');
+                if (!fileInput.files[0]) {
+                    showToast('error', 'Vui lòng chọn ảnh để upload!');
+                    return;
+                }
 
-            } catch (error) {
-                hideLoading();
-                showToast('error', 'Có lỗi xảy ra khi cập nhật thông tin!');
-            }
-        });
+                // Validate file size (5MB max)
+                if (fileInput.files[0].size > 5 * 1024 * 1024) {
+                    showToast('error', 'Kích thước ảnh không được vượt quá 5MB!');
+                    return;
+                }
 
-        // Handle medical form submission
-        document.getElementById('editMedicalForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+                showLoading();
 
-            showLoading();
+                try {
+                    const formData = new FormData(this);
 
-            try {
-                const formData = new FormData(this);
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 2000));
 
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                    // Here you would make the actual API call
+                    // const response = await fetch('/api/profile/avatar-update', {
+                    //     method: 'POST',
+                    //     body: formData
+                    // });
 
-                // Here you would make the actual API call
-                // const response = await fetch('/api/profile/medical-update', {
-                //     method: 'POST',
-                //     body: formData
-                // });
+                    // if (!response.ok) throw new Error('Upload failed');
 
-                // if (!response.ok) throw new Error('Update failed');
+                    // Update avatar in UI
+                    const newAvatarUrl = URL.createObjectURL(fileInput.files[0]);
+                    document.getElementById('profile-avatar').src = newAvatarUrl;
 
-                hideLoading();
-                closeMedicalModal();
-                showToast('success', 'Cập nhật thông tin y tế thành công!');
+                    hideLoading();
+                    closeAvatarModal();
+                    showToast('success', 'Cập nhật avatar thành công!');
 
-            } catch (error) {
-                hideLoading();
-                showToast('error', 'Có lỗi xảy ra khi cập nhật thông tin y tế!');
-            }
-        });
+                } catch (error) {
+                    hideLoading();
+                    showToast('error', 'Có lỗi xảy ra khi cập nhật avatar!');
+                }
+            });
 
-        // Handle avatar form submission
-        document.getElementById('avatarForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+            // Avatar preview
+            document.getElementById('avatar-input').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('avatar-preview').src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
 
-            const fileInput = document.getElementById('avatar-input');
-            if (!fileInput.files[0]) {
-                showToast('error', 'Vui lòng chọn ảnh để upload!');
-                return;
-            }
-
-            // Validate file size (5MB max)
-            if (fileInput.files[0].size > 5 * 1024 * 1024) {
-                showToast('error', 'Kích thước ảnh không được vượt quá 5MB!');
-                return;
-            }
-
-            showLoading();
-
-            try {
-                const formData = new FormData(this);
-
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                // Here you would make the actual API call
-                // const response = await fetch('/api/profile/avatar-update', {
-                //     method: 'POST',
-                //     body: formData
-                // });
-
-                // if (!response.ok) throw new Error('Upload failed');
-
-                // Update avatar in UI
-                const newAvatarUrl = URL.createObjectURL(fileInput.files[0]);
-                document.getElementById('profile-avatar').src = newAvatarUrl;
-
-                hideLoading();
-                closeAvatarModal();
-                showToast('success', 'Cập nhật avatar thành công!');
-
-            } catch (error) {
-                hideLoading();
-                showToast('error', 'Có lỗi xảy ra khi cập nhật avatar!');
-            }
-        });
-
-        // Avatar preview
-        document.getElementById('avatar-input').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('avatar-preview').src = e.target.result;
+            // Update profile UI after successful form submission
+            function updateProfileUI(formData) {
+                const updates = {
+                    name: formData.get('name'),
+                    email: formData.get('email'),
+                    phone: formData.get('phone'),
+                    birth_date: formData.get('birth_date'),
+                    gender: formData.get('gender'),
+                    id_card: formData.get('id_card'),
+                    address: formData.get('address')
                 };
-                reader.readAsDataURL(file);
-            }
-        });
 
-        // Update profile UI after successful form submission
-        function updateProfileUI(formData) {
-            const updates = {
-                name: formData.get('name'),
-                email: formData.get('email'),
-                phone: formData.get('phone'),
-                birth_date: formData.get('birth_date'),
-                gender: formData.get('gender'),
-                id_card: formData.get('id_card'),
-                address: formData.get('address')
-            };
-
-            // Update display values (this would normally be handled by a page reload or AJAX update)
-            for (const [key, value] of Object.entries(updates)) {
-                if (value) {
-                    // Update form values for next edit
-                    const formField = document.querySelector(`[name="${key}"]`);
-                    if (formField) {
-                        formField.value = value;
+                // Update display values (this would normally be handled by a page reload or AJAX update)
+                for (const [key, value] of Object.entries(updates)) {
+                    if (value) {
+                        // Update form values for next edit
+                        const formField = document.querySelector(`[name="${key}"]`);
+                        if (formField) {
+                            formField.value = value;
+                        }
                     }
                 }
             }
-        }
 
-        // Close modals when clicking outside
-        document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
-                closeEditModal();
-                closeMedicalModal();
-                closeAvatarModal();
-            }
-        });
-
-        // Close modals with ESC key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeEditModal();
-                closeMedicalModal();
-                closeAvatarModal();
-            }
-        });
-
-        // Phone number formatting
-        document.querySelector('input[name="phone"]').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 10) {
-                value = value.slice(0, 10);
-            }
-            e.target.value = value;
-        });
-
-        // ID card formatting
-        document.querySelector('input[name="id_card"]').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 12) {
-                value = value.slice(0, 12);
-            }
-            e.target.value = value;
-        });
-
-        // Auto-resize textareas
-        document.querySelectorAll('textarea').forEach(textarea => {
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = (this.scrollHeight) + 'px';
+            // Close modals when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
+                    closeEditModal();
+                    closeMedicalModal();
+                    closeAvatarModal();
+                }
             });
-        });
-    </script>
+
+            // Close modals with ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeEditModal();
+                    closeMedicalModal();
+                    closeAvatarModal();
+                }
+            });
+
+            // Phone number formatting
+            document.querySelector('input[name="phone"]').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 10) {
+                    value = value.slice(0, 10);
+                }
+                e.target.value = value;
+            });
+
+            // ID card formatting
+            document.querySelector('input[name="id_card"]').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 12) {
+                    value = value.slice(0, 12);
+                }
+                e.target.value = value;
+            });
+
+            // Auto-resize textareas
+            document.querySelectorAll('textarea').forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
+            });
+        </script>
     @endpush
 @endsection

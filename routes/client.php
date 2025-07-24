@@ -8,9 +8,15 @@ use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 
+
 use App\Http\Controllers\Client\ReviewReplyController;
 use App\Http\Controllers\Client\AppointmentController;
 use App\Http\Controllers\Client\DoctorController;
+use App\Http\Controllers\Client\ClientFileController;
+use App\Http\Controllers\Client\AppointmentHistoryController;
+use App\Http\Controllers\Client\UserController;
+use App\Http\Controllers\Client\ProfileController;
+
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -55,11 +61,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/doctors/{doctor}/reviews', [ReviewReplyController::class, 'store'])->name('reviews.store');
 
     // Gửi phản hồi đánh giá
-Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
+    Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
 
     // Đánh dấu đánh giá là hữu ích
     Route::post('/reviews/{review}/useful', [ReviewReplyController::class, 'markUseful'])->name('reviews.useful');
-
 });
 
 // Route hiển thị chi tiết bác sĩ (không yêu cầu đăng nhập)
@@ -91,4 +96,8 @@ Route::prefix('client/payment')->name('client.payment.')->middleware(['auth'])->
     Route::get('/', [PaymentController::class, 'create'])->name('create');
     Route::get('/return', [PaymentController::class, 'return'])->name('return');
     Route::get('/ipn', [PaymentController::class, 'ipn'])->name('ipn');
+});
+Route::middleware(['auth'])->prefix('client/profile')->group(function () {
+    Route::get('/', [ProfileController::class, 'show'])->name('client.profile.show');
+    Route::patch('/update', [ProfileController::class, 'update'])->name('client.profile.update');
 });
