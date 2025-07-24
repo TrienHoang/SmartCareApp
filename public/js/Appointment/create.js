@@ -3,6 +3,7 @@ $(document).ready(function () {
     const $hidden = $('#patient_id_hidden');
     const $doctor = $('#doctor_id');
     const $serviceSelect = $('#service_id');
+    const $servicePrice = $('#service_price');
     const $timeInput = $('#appointment_time');
     const $treatmentPlan = $('#treatment_plan_id');
     const $treatmentWrapper = $('#treatment-plan-wrapper');
@@ -125,6 +126,7 @@ $(document).ready(function () {
         const doctorId = $(this).val();
 
         $serviceSelect.html('<option value="">Đang tải dịch vụ...</option>');
+        $servicePrice.val('');
 
         if (!doctorId) {
             $serviceSelect.html('<option value="">Chọn dịch vụ</option>').trigger('change.select2');
@@ -138,12 +140,21 @@ $(document).ready(function () {
         $.get(window.doctorServicesUrl.replace(':id', doctorId), function (services) {
             const oldServiceId = $serviceSelect.data('old');
             const html = services.map(service =>
-                `<option value="${service.id}" ${oldServiceId == service.id ? 'selected' : ''}>
-                    ${service.name} (${service.department?.name ?? 'Không rõ khoa'})
-                </option>`).join('');
+                `<option value="${service.id}" data-price="${service.price}" ${oldServiceId == service.id ? 'selected' : ''}>
+                ${service.name} (${service.department?.name ?? 'Không rõ khoa'})
+            </option>`).join('');
             $serviceSelect.html('<option value="">Chọn dịch vụ</option>' + html).trigger('change.select2');
+
+            if (oldServiceId) {
+                const selected = $serviceSelect.find(`option[value="${oldServiceId}"]`);
+                $servicePrice.val(selected.data('price')?.toLocaleString() + ' VND');
+            }
         }).fail(() => toastr.error('Không thể tải danh sách dịch vụ'));
 
+        $serviceSelect.on('change', function () {
+            const price = $(this).find(':selected').data('price') || '';
+            $servicePrice.val(price ? price.toLocaleString() + ' VND' : '');
+        });
         // Load lịch làm việc và khởi tạo Flatpickr
         $.get(window.doctorWorkingDaysUrl.replace(':id', doctorId), function ({ daysOfWeek, specificDates, vacationDates }) {
             if (flatpickrInstance) flatpickrInstance.destroy();
@@ -218,6 +229,11 @@ $(document).ready(function () {
             $timeInput.prop('disabled', true);
             if (flatpickrInstance) flatpickrInstance.destroy();
         });
+    });
+
+    $serviceSelect.on('change', function () {
+        const price = $(this).find(':selected').data('price') || '';
+        $servicePrice.val(price ? price.toLocaleString() + ' VND' : '');
     });
 
     // Khởi tạo lại dữ liệu cũ khi reload

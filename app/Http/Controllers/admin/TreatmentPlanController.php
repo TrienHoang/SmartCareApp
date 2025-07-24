@@ -61,7 +61,6 @@ class TreatmentPlanController extends Controller
         ));
     }
 
-
     /**
      * Hiển thị chi tiết một kế hoạch điều trị.
      */
