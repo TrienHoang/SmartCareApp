@@ -9,8 +9,6 @@ use Database\Seeders\FileUploadSeeder;
 use Database\Seeders\StatisticSeeder;
 use Database\Seeders\ReviewSeeder;
 
-
-
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -23,7 +21,9 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RolePermissionSeeder::class,
 
-            TaskSeeder::class, // đã bao gồm tạo Task + Comment + Log
+
+            TaskSeeder::class,
+
             UserSeeder::class,
             DepartmentSeeder::class,
             RoomSeeder::class,
@@ -32,10 +32,18 @@ class DatabaseSeeder extends Seeder
             WorkingScheduleSeeder::class,
             DoctorLeaveSeeder::class,
 
+            DoctorDetailSeeder::class,
+            DoctorServiceSeeder::class,
+
+            SpecialtySeeder::class,
+
+
             ServiceCategorySeeder::class,
             ServiceSeeder::class,
 
+
             AppointmentSeeder::class,
+
             AppointmentLogSeeder::class,
             StatisticSeeder::class,
 
@@ -47,12 +55,18 @@ class DatabaseSeeder extends Seeder
             MedicalRecordSeeder::class,
             PrescriptionSeeder::class,
             PrescriptionItemSeeder::class,
+
              TreatmentPlanSeeder::class,
+
 
             FileUploadSeeder::class,
             UploadHistorySeeder::class,
 
             BlogSeeder::class,
+
+            ContactSeeder::class,
+      
+
              NotificationSeeder::class,
             FaqSeeder::class,
             OrderSeeder::class,
@@ -67,6 +81,7 @@ class DatabaseSeeder extends Seeder
         DoctorDetailSeeder::class,
 
         ReviewReplySeeder::class
+
 
 
         ]);

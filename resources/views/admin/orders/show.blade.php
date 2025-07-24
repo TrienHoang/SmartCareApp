@@ -71,7 +71,7 @@
                                     @php
                                         $statusLabels = [
                                             'pending' => 'Chờ xác nhận',
-                                            'paid' => 'Đã thanh toán',
+                                            'paid' => 'Đã xác nhận',
                                             'completed' => 'Hoàn tất',
                                             'cancelled' => 'Đã hủy',
                                         ];

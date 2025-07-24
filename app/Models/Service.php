@@ -17,6 +17,8 @@ class Service extends Model
         'price',
         'duration',
         'status',
+        'content',
+
     ];
 
     protected $dates = ['deleted_at'];

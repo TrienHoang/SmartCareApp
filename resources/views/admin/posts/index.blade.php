@@ -1,6 +1,6 @@
 @extends('admin.dashboard')
 
-@section('title', 'Quản lý Đơn hàng')
+@section('title', 'Quản lý Bài viết')
 
 @section('content')
     <div class="content-wrapper">
@@ -11,11 +11,11 @@
                     <div class="col-12">
                         <div class="d-flex align-items-center mb-3">
                             <div class="icon-circle bg-primary mr-3">
-                                <i class="bx bx-receipt text-white"></i>
+                                <i class="bx bx-edit text-white"></i>
                             </div>
                             <div>
-                                <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý Đơn hàng</h2>
-                                <p class="text-muted mb-0">Quản lý và theo dõi tất cả đơn hàng trong hệ thống</p>
+                                <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý Bài viết</h2>
+                                <p class="text-muted mb-0">Quản lý và theo dõi tất cả bài viết trong hệ thống</p>
                             </div>
                         </div>
                         <div class="breadcrumb-wrapper col-12">
@@ -27,7 +27,7 @@
                                         </a>
                                     </li>
                                     <li class="breadcrumb-item active text-primary font-weight-semibold">
-                                        Đơn hàng
+                                        Bài viết
                                     </li>
                                 </ol>
                             </nav>
@@ -35,7 +35,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <div class="content-body">
@@ -70,25 +69,8 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 class="text-white mb-0">{{ $orders->where('status', 'completed')->count() }}</h4>
-                                    <small class="text-white">Hoàn tất</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-12">
-                    <div class="card gradient-card bg-gradient-info">
-                        <div class="card-body text-white">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar bg-rgba-white mr-2">
-                                    <div class="avatar-content">
-                                        <i class="bx bx-credit-card font-medium-5"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="text-white mb-0">{{ $orders->where('status', 'paid')->count() }}</h4>
-                                    <small class="text-white">Đã xác nhận</small>
+                                    <h4 class="text-white mb-0">{{ $posts->where('status', 'published')->count() }}</h4>
+                                    <small class="text-white">Đã xuất bản</small>
                                 </div>
                             </div>
                         </div>
@@ -100,12 +82,12 @@
                             <div class="d-flex align-items-center">
                                 <div class="avatar bg-rgba-white mr-2">
                                     <div class="avatar-content">
-                                        <i class="bx bx-clock font-medium-5"></i>
+                                        <i class="bx bx-edit font-medium-5"></i>
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 class="text-white mb-0">{{ $orders->where('status', 'pending')->count() }}</h4>
-                                    <small class="text-white">Chờ xác nhận</small>
+                                    <h4 class="text-white mb-0">{{ $posts->where('status', 'draft')->count() }}</h4>
+                                    <small class="text-white">Bản nháp</small>
                                 </div>
                             </div>
                         </div>
@@ -117,12 +99,29 @@
                             <div class="d-flex align-items-center">
                                 <div class="avatar bg-rgba-white mr-2">
                                     <div class="avatar-content">
-                                        <i class="bx bx-x-circle font-medium-5"></i>
+                                        <i class="bx bx-archive font-medium-5"></i>
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 class="text-white mb-0">{{ $orders->where('status', 'cancelled')->count() }}</h4>
-                                    <small class="text-white">Đã hủy</small>
+                                    <h4 class="text-white mb-0">{{ $posts->where('status', 'archived')->count() }}</h4>
+                                    <small class="text-white">Lưu trữ</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-12">
+                    <div class="card gradient-card bg-gradient-info">
+                        <div class="card-body text-white">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar bg-rgba-white mr-2">
+                                    <div class="avatar-content">
+                                        <i class="bx bx-list-ul font-medium-5"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-white mb-0">{{ $posts->total() }}</h4>
+                                    <small class="text-white">Tổng bài viết</small>
                                 </div>
                             </div>
                         </div>
@@ -136,10 +135,12 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
                             <i class="bx bx-list mr-2"></i>
-                            <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách Đơn hàng</h4>
+                            <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách Bài viết</h4>
                         </div>
                         <div class="card-tools">
-                            <span class="badge badge-light">{{ $orders->total() }} đơn hàng</span>
+                            <a href="{{ route('admin.posts.create') }}" class="btn btn-light btn-sm">
+                                <i class="bx bx-plus mr-1"></i>Thêm bài viết
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -147,21 +148,29 @@
                 <div class="card-body p-0">
                     <!-- Enhanced Filter Section -->
                     <div class="filter-section bg-light p-4 border-bottom">
-                        <form action="{{ route('orders.index') }}" method="GET" class="filter-form">
+                        <form method="GET" action="{{ route('admin.posts.index') }}" class="filter-form">
                             <div class="row align-items-end">
                                 <div class="col-lg-3 col-md-6 mb-2">
                                     <label class="form-label font-weight-semibold">
-                                        <i class="bx bx-calendar mr-1 text-primary"></i>Từ ngày
+                                        <i class="bx bx-search mr-1 text-primary"></i>Tìm kiếm
                                     </label>
-                                    <input type="date" name="start_date" class="form-control"
-                                        value="{{ request('start_date') }}">
+                                    <input type="text" name="search" class="form-control" 
+                                        placeholder="Tìm theo tiêu đề..." value="{{ request('search') }}">
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
                                     <label class="form-label font-weight-semibold">
-                                        <i class="bx bx-calendar mr-1 text-info"></i>Đến ngày
+                                        <i class="bx bx-category mr-1 text-info"></i>Danh mục
                                     </label>
-                                    <input type="date" name="end_date" class="form-control"
-                                        value="{{ request('end_date') }}">
+                                    <select name="category" class="form-control custom-select">
+                                        <option value="">-- Tất cả danh mục --</option>
+                                        @if(isset($categories))
+                                            @foreach($categories as $category)
+                                                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                                                    {{ $category->name }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+                                    </select>
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
                                     <label class="form-label font-weight-semibold">
@@ -169,19 +178,9 @@
                                     </label>
                                     <select name="status" class="form-control custom-select">
                                         <option value="">-- Tất cả trạng thái --</option>
-                                        @php
-                                            $statusLabels = [
-                                                'pending' => 'Chờ xác nhận',
-                                                'paid' => 'Đã xác nhận',
-                                                'completed' => 'Hoàn tất',
-                                                'cancelled' => 'Đã hủy',
-                                            ];
-                                        @endphp
-                                        @foreach ($statusLabels as $key => $label)
-                                            <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>
-                                                {{ $label }}
-                                            </option>
-                                        @endforeach
+                                        <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Đã xuất bản</option>
+                                        <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Bản nháp</option>
+                                        <option value="archived" {{ request('status') == 'archived' ? 'selected' : '' }}>Lưu trữ</option>
                                     </select>
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
@@ -189,7 +188,7 @@
                                         <button type="submit" class="btn btn-primary">
                                             <i class="bx bx-filter mr-1"></i>Lọc
                                         </button>
-                                        <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary">
+                                        <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary">
                                             <i class="bx bx-refresh mr-1"></i>Reset
                                         </a>
                                     </div>
@@ -209,91 +208,110 @@
                                             <label class="custom-control-label" for="select-all"></label>
                                         </div>
                                     </th>
-                                    <th class="border-top-0">#ID</th>
                                     <th class="border-top-0">
-                                        <i class="mr-1"></i>Người đặt
+                                        <i class="bx bx-edit mr-1"></i>Tiêu đề
                                     </th>
                                     <th class="border-top-0">
-                                        <i class="mr-1"></i>Tổng tiền
+                                        <i class="bx bx-category mr-1"></i>Danh mục
                                     </th>
                                     <th class="border-top-0">
-                                        <i class="mr-1"></i>Trạng thái
+                                        <i class="bx bx-activity mr-1"></i>Trạng thái
                                     </th>
                                     <th class="border-top-0">
-                                        <i class="mr-1"></i>Thời gian
+                                        <i class="bx bx-calendar mr-1"></i>Ngày tạo
                                     </th>
-                                   
                                     <th class="border-top-0 text-center">
-                                        <i class="mr-1"></i>Hành động
+                                        <i class="bx bx-cog mr-1"></i>Thao tác
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($orders as $order)
-                                    <tr class="order-row" data-id="{{ $order->id }}">
+                                @forelse($posts as $post)
+                                    <tr class="post-row" data-id="{{ $post->id }}">
                                         <td>
                                             <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input order-checkbox"
-                                                    id="order-{{ $order->id }}" value="{{ $order->id }}">
-                                                <label class="custom-control-label" for="order-{{ $order->id }}"></label>
+                                                <input type="checkbox" class="custom-control-input post-checkbox"
+                                                    id="post-{{ $post->id }}" value="{{ $post->id }}">
+                                                <label class="custom-control-label" for="post-{{ $post->id }}"></label>
                                             </div>
                                         </td>
-                                        <td class="font-weight-bold text-primary">#{{ $order->id }}</td>
                                         <td>
-                                            <div class="user-info">
-                                                <h6 class="mb-0 font-weight-semibold">
-                                                    {{ $order->user->full_name ?? 'Ẩn danh' }}
-                                                </h6>
-                                                @if($order->user && $order->user->email)
-                                                    <small class="text-muted">{{ $order->user->email }}</small>
+                                            <div class="post-info">
+                                                <h6 class="mb-0 font-weight-semibold">{{ $post->title }}</h6>
+                                                @if($post->excerpt)
+                                                    <small class="text-muted">{{ Str::limit($post->excerpt, 50) }}</small>
                                                 @endif
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="font-weight-bold text-success">
-                                                {{ number_format($order->total_amount ?? 0, 0, ',', '.') }}₫
+                                            <span class="badge badge-info badge-pill">
+                                                {{ $post->serviceCategory->name ?? '(Không có)' }}
                                             </span>
                                         </td>
                                         <td>
-                                            @php
-                                                $statusConfig = [
-                                                    'pending' => ['class' => 'warning', 'icon' => 'clock'],
-                                                    'paid' => ['class' => 'info', 'icon' => 'credit-card'],
-                                                    'completed' => ['class' => 'success', 'icon' => 'check-circle'],
-                                                    'cancelled' => ['class' => 'danger', 'icon' => 'x-circle'],
-                                                ];
-                                                $config = $statusConfig[$order->status] ?? ['class' => 'secondary', 'icon' => 'help-circle'];
-                                            @endphp
-                                            <span class="badge badge-{{ $config['class'] }} badge-pill">
-                                                <i class="bx bx-{{ $config['icon'] }} mr-1"></i>
-                                                {{ $statusLabels[$order->status] ?? ucfirst($order->status) }}
-                                            </span>
+                                            @switch($post->status)
+                                                @case('published')
+                                                    <span class="badge badge-success badge-pill">
+                                                        <i class="bx bx-check-circle mr-1"></i>Đã xuất bản
+                                                    </span>
+                                                    @break
+                                                @case('draft')
+                                                    <span class="badge badge-warning badge-pill">
+                                                        <i class="bx bx-edit mr-1"></i>Bản nháp
+                                                    </span>
+                                                    @break
+                                                @case('archived')
+                                                    <span class="badge badge-secondary badge-pill">
+                                                        <i class="bx bx-archive mr-1"></i>Lưu trữ
+                                                    </span>
+                                                    @break
+                                                @default
+                                                    <span class="badge badge-secondary badge-pill">
+                                                        <i class="bx bx-question-mark mr-1"></i>Không xác định
+                                                    </span>
+                                            @endswitch
                                         </td>
                                         <td>
-                                            <div class="time-info">
-                                                <div class="d-flex align-items-center text-muted">
-                                                    <i class="bx bx-time mr-1"></i>
-                                                    <div>
-                                                        <small class="font-weight-semibold">Đặt hàng</small><br>
-                                                        <small class="text-muted">{{ $order->created_at->format('d/m/Y H:i') }}</small>
-                                                    </div>
-                                                </div>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bx bx-calendar mr-1 text-muted"></i>
+                                                <span class="font-weight-semibold">{{ $post->created_at->format('d/m/Y') }}</span>
                                             </div>
                                         </td>
                                         <td class="text-center">
-                                            <a href="{{ route('orders.show', $order) }}"
-                                                class="btn btn-outline-info btn-sm" data-toggle="tooltip" title="Xem chi tiết">
-                                                <i class="bx bx-show-alt"></i>
-                                            </a>
+                                            <div class="btn-group-sm" role="group">
+                                                <a href="{{ route('admin.posts.show', $post->id) }}"
+                                                    class="btn btn-outline-info btn-sm" data-toggle="tooltip" title="Xem chi tiết">
+                                                    <i class="bx bx-show-alt"></i>
+                                                </a>
+                                                <a href="{{ route('admin.posts.edit', $post->id) }}"
+                                                    class="btn btn-outline-warning btn-sm" data-toggle="tooltip" title="Chỉnh sửa">
+                                                    <i class="bx bx-edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    data-toggle="tooltip" title="Xóa" onclick="deletePost({{ $post->id }})">
+                                                    <i class="bx bx-trash"></i>
+                                                </button>
+                                            </div>
+
+                                            <!-- Hidden form for delete -->
+                                            <form id="delete-form-{{ $post->id }}" 
+                                                action="{{ route('admin.posts.destroy', $post->id) }}" 
+                                                method="POST" style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center py-5">
+                                        <td colspan="6" class="text-center py-5">
                                             <div class="empty-state">
-                                                <i class="bx bx-receipt text-muted" style="font-size: 48px;"></i>
-                                                <h5 class="mt-3 text-muted">Không có đơn hàng nào</h5>
-                                                <p class="text-muted">Chưa có đơn hàng nào được tạo hoặc không tìm thấy kết quả phù hợp.</p>
+                                                <i class="bx bx-edit text-muted" style="font-size: 48px;"></i>
+                                                <h5 class="mt-3 text-muted">Không có bài viết nào</h5>
+                                                <p class="text-muted">Chưa có bài viết nào được tạo hoặc không tìm thấy kết quả phù hợp.</p>
+                                                <a href="{{ route('admin.posts.create') }}" class="btn btn-primary">
+                                                    <i class="bx bx-plus mr-1"></i>Tạo bài viết đầu tiên
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
@@ -303,17 +321,17 @@
                     </div>
 
                     <!-- Enhanced Pagination -->
-                    @if ($orders->hasPages())
+                    @if ($posts->hasPages())
                         <div class="pagination-wrapper bg-light p-3 border-top">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="pagination-info">
                                     <small class="text-muted">
-                                        Hiển thị {{ $orders->firstItem() }} - {{ $orders->lastItem() }}
-                                        trong tổng số {{ $orders->total() }} kết quả
+                                        Hiển thị {{ $posts->firstItem() }} - {{ $posts->lastItem() }}
+                                        trong tổng số {{ $posts->total() }} kết quả
                                     </small>
                                 </div>
                                 <div class="pagination-links">
-                                    {{ $orders->links('pagination::bootstrap-4') }}
+                                    {{ $posts->links('pagination::bootstrap-4') }}
                                 </div>
                             </div>
                         </div>
@@ -420,16 +438,12 @@
             padding: 1rem 0.75rem;
         }
 
-        .order-row:hover {
+        .post-row:hover {
             background-color: rgba(102, 126, 234, 0.05);
         }
 
-        .user-info h6 {
+        .post-info h6 {
             color: #2c3e50;
-        }
-
-        .time-info small {
-            line-height: 1.2;
         }
 
         .filter-section {
@@ -491,68 +505,26 @@
     <script>
         // Select all checkboxes functionality
         document.getElementById('select-all').addEventListener('change', function() {
-            const checkboxes = document.querySelectorAll('.order-checkbox');
+            const checkboxes = document.querySelectorAll('.post-checkbox');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = this.checked;
             });
         });
 
-        // Confirm order function
-        function confirmOrder(id) {
+        // Delete post function
+        function deletePost(id) {
             Swal.fire({
-                title: 'Xác nhận đơn hàng',
-                text: 'Bạn có chắc chắn muốn xác nhận đơn hàng này?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Xác nhận',
-                cancelButtonText: 'Hủy'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Create and submit form
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = `/admin/orders/${id}/confirm`;
-
-                    const csrfToken = document.createElement('input');
-                    csrfToken.type = 'hidden';
-                    csrfToken.name = '_token';
-                    csrfToken.value = '{{ csrf_token() }}';
-                    form.appendChild(csrfToken);
-
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-        }
-
-        // Cancel order function
-        function cancelOrder(id) {
-            Swal.fire({
-                title: 'Hủy đơn hàng',
-                text: 'Bạn có chắc chắn muốn hủy đơn hàng này?',
+                title: 'Xóa bài viết',
+                text: 'Bạn chắc chắn muốn xóa bài viết này?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Hủy đơn',
-                cancelButtonText: 'Không'
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Create and submit form
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = `/admin/orders/${id}/cancel`;
-
-                    const csrfToken = document.createElement('input');
-                    csrfToken.type = 'hidden';
-                    csrfToken.name = '_token';
-                    csrfToken.value = '{{ csrf_token() }}';
-                    form.appendChild(csrfToken);
-
-                    document.body.appendChild(form);
-                    form.submit();
+                    document.getElementById('delete-form-' + id).submit();
                 }
             });
         }
