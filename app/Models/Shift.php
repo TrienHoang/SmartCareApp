@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Shift extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'name',
         'start_time',
@@ -18,5 +18,9 @@ class Shift extends Model
     public function workingSchedules()
     {
         return $this->hasMany(WorkingSchedule::class);
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

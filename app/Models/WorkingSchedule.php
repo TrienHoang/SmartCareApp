@@ -9,8 +9,9 @@ class WorkingSchedule extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['doctor_id', 'day_of_week', 'start_time', 'end_time', 'day', 'room_id'];
+    protected $fillable = ['doctor_id', 'day_of_week', 'day', 'room_id', 'shift_id', 'status'];
     public $timestamps = false;
+
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);
@@ -19,5 +20,9 @@ class WorkingSchedule extends Model
     public function room()
     {
         return $this->belongsTo(Room::class);
+    }
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class, 'shift_id', 'id');
     }
 }

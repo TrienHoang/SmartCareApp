@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+@extends('doctor.dashboard')
 
 @section('title', 'Danh sách lịch làm việc')
 
@@ -22,6 +22,9 @@
             </ul>
         </div>
     @endif
+
+    <a href="{{ route('doctor.working_schedules.create') }}" class="btn btn-success mb-3">Thêm lịch làm việc mới</a>
+
     <div class="table-responsive">
         <table class="table table-striped">
             <thead class="table-primary">
@@ -46,22 +49,19 @@
                         <td>{{ $schedule->shift?->start_time ? \Carbon\Carbon::parse($schedule->shift->start_time)->format('H:i') : 'Chưa có' }}</td>
                         <td>{{ $schedule->shift?->end_time ? \Carbon\Carbon::parse($schedule->shift->end_time)->format('H:i') : 'Chưa có' }}</td>
                         <td>{{ $schedule->status }}</td>
-<td>
-    <a href="{{ route('admin.schedules.show', $schedule->id) }}"
-       class="btn btn-outline-info btn-sm" data-toggle="tooltip" title="Xem chi tiết">
-        <i class="bx bx-show-alt"></i>
-    </a>
-    @if($schedule->status === 'Chờ xét duyệt')
-        <form action="{{ route('admin.schedules.status', $schedule->id) }}"
-              method="POST" style="display:inline;"
-              onsubmit="return confirm('Xác nhận duyệt lịch này?');">
-            @csrf
-            <button type="submit" class="btn btn-success btn-sm" title="Xác nhận">Xác nhận</button>
-        </form>
-    @else
-        <span class="badge bg-success">Đã xét duyệt</span>
-    @endif
-</td>
+                        <td>
+                            @if ($schedule->status === 'Chờ xét duyệt')
+                                <a href="{{ route('doctor.working_schedules.edit', $schedule->id) }}" class="btn btn-warning btn-sm">Sửa</a>
+
+                                <form action="{{ route('doctor.working_schedules.destroy', $schedule->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa?')" style="display:inline-block;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                </form>
+                            @else
+                                <span class="text-muted">Không khả dụng</span>
+                            @endif
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

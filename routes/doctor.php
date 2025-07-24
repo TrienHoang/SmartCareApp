@@ -136,3 +136,12 @@ Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'
     Route::get('/tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
     Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
 });
+//Lịch làm việc bác sĩ 
+Route::prefix('doctor/working_schedules')->name('doctor.working_schedules.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'index'])->name('index');
+    Route::get('/create', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'create'])->name('create');
+    Route::post('/', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'update'])->name('update');
+    Route::delete('/{id}', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'destroy'])->name('destroy');
+});
