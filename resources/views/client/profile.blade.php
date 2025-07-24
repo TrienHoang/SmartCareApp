@@ -68,6 +68,11 @@
                                 <i data-lucide="credit-card" class="w-5 h-5"></i>
                                 <span>Lịch Sử Thanh Toán</span>
                             </a>
+                            <a href="{{ route('client.review.index') }}"
+                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
+                                <i data-lucide="message-square" class="w-5 h-5"></i>
+                                <span>Bình luận của tôi</span>
+                            </a>
                         </nav>
                     </div>
                 </div>

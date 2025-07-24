@@ -62,6 +62,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Gửi phản hồi đánh giá
     Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
+    Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
 
     // Đánh dấu đánh giá là hữu ích
     Route::post('/reviews/{review}/useful', [ReviewReplyController::class, 'markUseful'])->name('reviews.useful');

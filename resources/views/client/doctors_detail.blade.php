@@ -14,7 +14,8 @@
                         <div
                             class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
                             @if ($doctor->user && $doctor->user->avatar)
-                                <img src="{{ asset('storage/' . $doctor->user->avatar) }}" alt="{{ $doctor->user->full_name }}"
+                                <img src="{{ asset('storage/' . $doctor->user->avatar) }}"
+                                    alt="{{ $doctor->user->full_name }}"
                                     class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
                             @else
                                 <img src="{{ asset('images/default-doctor.png') }}" alt="{{ $doctor->user->full_name }}"
@@ -28,11 +29,9 @@
                                 <div class="flex items-center space-x-4 mb-4">
                                     <div class="flex items-center">
                                         <div class="flex text-yellow-400 mr-2">
-                                            @for ($i = 0; $i < floor($doctor->average_rating ?? 5); $i++)
-                                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                            @endfor
-                                            @for ($i = floor($doctor->average_rating ?? 5); $i < 5; $i++)
-                                                <i data-lucide="star" class="w-4 h-4 text-gray-300"></i>
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <i data-lucide="star"
+                                                    class="w-4 h-4 {{ $i <= round($doctor->average_rating ?? 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"></i>
                                             @endfor
                                         </div>
                                         <span class="text-blue-100">
@@ -50,7 +49,8 @@
                                 <div class="flex flex-wrap gap-2">
                                     @if ($doctor->specialties && $doctor->specialties->count())
                                         @foreach ($doctor->specialties as $specialty)
-                                            <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $specialty->name }}</span>
+                                            <span
+                                                class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $specialty->name }}</span>
                                         @endforeach
                                     @else
                                         <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Đa khoa</span>
@@ -337,55 +337,100 @@
                 </div>
 
                 <!-- Reviews Tab -->
-                <div id="content-reviews" class="tab-content hidden">
-                    <!-- Review Section -->
-                    <div class="mt-10 space-y-8">
+                <!-- Import Lucide icons (put in <head> or before </body>) -->
+                <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
+                <!-- Reviews Section -->
+                <div id="content-reviews" class="tab-content hidden">
+                    <div class="mt-10 space-y-8">
                         <!-- Danh sách đánh giá -->
                         <div class="space-y-6">
                             @forelse ($doctor->reviews->sortByDesc('created_at') as $review)
+                                @php
+                                    $editable = Auth::check() && $review->patient_id == Auth::id() && \Carbon\Carbon::parse($review->created_at)->diffInMinutes(now()) <= 60;
+                                @endphp
                                 <div class="border-b pb-6">
                                     <div class="flex items-start space-x-4">
-
                                         <!-- Avatar -->
                                         <div
                                             class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">
                                             {{ $review->patient ? strtoupper(Str::substr($review->patient->full_name, 0, 1)) . '***' : 'Ẩn danh' }}
                                         </div>
-
                                         <div class="flex-1">
                                             <!-- Stars & Date -->
                                             <div class="flex items-center justify-between mb-1">
-                                                <div class="flex text-yellow-400">
-                                                    @for ($i = 1; $i <= 5; $i++)
-                                                        <i data-lucide="star"
-                                                            class="w-4 h-4 {{ $i <= $review->rating ? 'fill-current' : '' }}"></i>
-                                                    @endfor
+                                                <div class="flex space-x-1">
+                                                    @if ($editable && request('edit_review_id') == $review->id)
+                                                        {{-- Đặt form bên dưới, chỉ hiển thị số sao ở đây --}}
+                                                        @for ($i = 1; $i <= 5; $i++)
+                                                            <label class="cursor-pointer flex items-center group">
+                                                                <input type="radio" name="rating_{{ $review->id }}" value="{{ $i }}" class="hidden"
+                                                                    {{ old('rating', $review->rating) == $i ? 'checked' : '' }}>
+                                                                <i data-lucide="star"
+                                                                   class="w-5 h-5 {{ $i <= old('rating', $review->rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"
+                                                                   data-value="{{ $i }}"></i>
+                                                            </label>
+                                                        @endfor
+                                                    @else
+                                                        @for ($i = 1; $i <= 5; $i++)
+                                                            <i data-lucide="star"
+                                                               class="w-4 h-4 {{ $i <= $review->rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"></i>
+                                                        @endfor
+                                                    @endif
                                                 </div>
-                                                <div class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}
+                                                <div class="text-sm text-gray-500">
+                                                    {{ $review->created_at->diffForHumans() }}
                                                 </div>
                                             </div>
-
-                                            <!-- Nội dung -->
-                                            <p class="text-gray-700 mb-2">{{ $review->comment }}</p>
-
-                                            <!-- Hữu ích + Trả lời -->
-                                            <div class="flex space-x-4 text-sm text-gray-500">
+                                            <!-- Nội dung + form chỉnh sửa -->
+                                            @if ($editable && request('edit_review_id') == $review->id)
+                                                <form method="POST" action="{{ url('/thong-tin-bac-si/' . $doctor->id . '/reviews/' . $review->id) }}">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <div class="mb-2 flex items-center">
+                                                        <label class="mr-2 text-sm">Đánh giá:</label>
+                                                        @for ($i = 1; $i <= 5; $i++)
+                                                            <label class="cursor-pointer flex items-center group">
+                                                                <input type="radio" name="rating" value="{{ $i }}" class="hidden"
+                                                                    {{ old('rating', $review->rating) == $i ? 'checked' : '' }}>
+                                                                <i data-lucide="star"
+                                                                   class="w-5 h-5 {{ $i <= old('rating', $review->rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"
+                                                                   data-value="{{ $i }}"></i>
+                                                            </label>
+                                                        @endfor
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <textarea name="comment" rows="2" class="w-full border rounded p-2 text-sm" required>{{ old('comment', $review->comment) }}</textarea>
+                                                    </div>
+                                                    <div class="flex space-x-2">
+                                                        <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm font-medium">Lưu</button>
+                                                        <a href="{{ url()->current() }}" class="px-3 py-1 bg-gray-300 text-gray-700 rounded text-sm font-medium">Hủy</a>
+                                                    </div>
+                                                </form>
+                                            @else
+                                                <p class="text-gray-700 mb-2">{{ $review->comment }}</p>
+                                            @endif
+                                            <!-- Hữu ích và chỉnh sửa -->
+                                            <div class="flex space-x-4 text-sm text-gray-500 items-center">
                                                 <form method="POST" action="{{ route('reviews.useful', $review->id) }}">
                                                     @csrf
-                                                    <button class="flex items-center space-x-1 hover:text-blue-600">
+                                                    <button
+                                                        class="flex items-center space-x-1 hover:text-blue-600 font-medium">
                                                         <i data-lucide="thumbs-up" class="w-4 h-4"></i>
                                                         <span>Hữu ích ({{ $review->useful_count ?? 0 }})</span>
                                                     </button>
                                                 </form>
-
-                                                @auth
-                                                    <button type="button" class="flex items-center space-x-1 hover:text-blue-600"
-                                                        onclick="toggleReplyForm({{ $review->id }})">
-                                                        <i data-lucide="message-circle" class="w-4 h-4"></i>
-                                                        <span>Trả lời</span>
-                                                    </button>
-                                                @endauth
+                                                @if ($editable && request('edit_review_id') != $review->id)
+                                                    <form method="GET" action="{{ url()->current() }}">
+                                                        <input type="hidden" name="edit_review_id"
+                                                            value="{{ $review->id }}">
+                                                        <button type="submit"
+                                                            class="flex items-center space-x-1 hover:text-yellow-500 font-medium ml-2 bg-transparent border-none p-0">
+                                                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                                            <span>Chỉnh sửa</span>
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             </div>
 
                                             <!-- Phản hồi -->
@@ -395,29 +440,13 @@
                                                         <div class="text-sm bg-gray-100 p-2 rounded">
                                                             <strong>{{ $reply->user->name ?? 'Ẩn danh' }}</strong>:
                                                             {{ $reply->content }}
-                                                            <div class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}
+                                                            <div class="text-xs text-gray-500">
+                                                                {{ $reply->created_at->diffForHumans() }}
                                                             </div>
                                                         </div>
                                                     @endforeach
                                                 </div>
                                             @endif
-
-                                            <!-- Form phản hồi -->
-                                            @auth
-                                                <form id="reply-form-{{ $review->id }}" class="mt-3 hidden" method="POST"
-                                                    action="{{ route('reviews.replies.store', $review->id) }}">
-                                                    @csrf
-                                                    <textarea name="content" rows="2" class="w-full border rounded p-2 text-sm"
-                                                        placeholder="Nhập phản hồi..."></textarea>
-                                                    <div class="text-right mt-2">
-                                                        <button type="submit"
-                                                            class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 text-sm">
-                                                            Gửi phản hồi
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            @endauth
-
                                         </div>
                                     </div>
                                 </div>
@@ -426,7 +455,7 @@
                             @endforelse
                         </div>
 
-                        <!-- Gửi đánh giá hoặc phản hồi -->
+                        <!-- Gửi đánh giá -->
                         @auth
                             <div class="bg-gray-50 p-6 rounded-lg border">
                                 <h3 class="text-lg font-semibold mb-4">Gửi đánh giá của bạn</h3>
@@ -442,32 +471,28 @@
                                     </div>
                                 @endif
 
-                                @if (!$appointment)
-                                    <p class="text-sm text-gray-500">Bạn cần hoàn tất một cuộc hẹn với bác sĩ để gửi đánh giá.</p>
-                                @elseif ($alreadyReviewed && $userReview)
-                                    <!-- Đã đánh giá => hiển thị lại và cho phép nhận xét thêm -->
-                                    <div class="mb-4 p-4 border rounded bg-gray-100">
-                                        <p class="text-sm mb-1 text-gray-700">Bạn đã đánh giá: <strong>{{ $userReview->rating }}
-                                                sao</strong></p>
-                                        <p class="text-sm text-gray-800 italic">"{{ $userReview->comment }}"</p>
-                                    </div>
+                                @if (!isset($userReviewEditable))
+                                    @php $userReviewEditable = false; @endphp
+                                @endif
 
-                                    <form method="POST" action="{{ route('reviews.replies.store', $userReview->id) }}">
-                                        @csrf
-                                        <div class="mb-2">
-                                            <label for="content" class="block text-sm font-medium mb-1">Bổ sung nhận xét:</label>
-                                            <textarea name="content" rows="2" class="w-full border rounded p-2 text-sm"
-                                                placeholder="Nhận xét thêm về trải nghiệm của bạn..."></textarea>
-                                        </div>
-                                        <div class="text-right">
-                                            <button type="submit"
-                                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium">
-                                                Gửi phản hồi bổ sung
-                                            </button>
-                                        </div>
-                                    </form>
+                                @if (!$appointment)
+                                    <p class="text-sm text-gray-500">Bạn cần hoàn tất một cuộc hẹn với bác sĩ để gửi đánh giá.
+                                    </p>
+                                @elseif ($alreadyReviewed && $userReview)
+                                    <div class="mb-4 p-4 border rounded bg-gray-100">
+                                        <p class="text-sm mb-1 text-gray-700">Bạn đã đánh giá:
+                                            <strong>{{ $userReview->rating }} sao</strong></p>
+                                        <p class="text-sm text-gray-800 italic">"{{ $userReview->comment }}"</p>
+                                        @if ($userReviewEditable)
+                                            <div class="mt-2">
+                                                <a href="{{ route('reviews.edit', $userReview->id) }}"
+                                                    class="inline-block px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition-colors text-sm font-medium">
+                                                    Chỉnh sửa
+                                                </a>
+                                            </div>
+                                        @endif
+                                    </div>
                                 @else
-                                    <!-- Gửi đánh giá mới -->
                                     <form action="{{ route('reviews.store', $doctor->id) }}" method="POST">
                                         @csrf
                                         <input type="hidden" name="appointment_id" value="{{ $appointment->id }}">
@@ -475,14 +500,15 @@
                                             <input type="hidden" name="service_id" value="{{ $appointment->service->id }}">
                                         @endif
 
-                                        <div class="flex items-center mb-4">
-                                            <label class="mr-4">Đánh giá:</label>
+                                        <div class="flex items-center mb-4 space-x-2">
+                                            <label class="text-sm">Đánh giá:</label>
                                             @for ($i = 1; $i <= 5; $i++)
-                                                <label class="cursor-pointer mr-2 flex items-center">
-                                                    <input type="radio" name="rating" value="{{ $i }}" class="hidden rating-input"
-                                                        required>
-                                                    <i data-lucide="star" class="w-6 h-6 text-gray-300 rating-star"
-                                                        data-index="{{ $i }}"></i>
+                                                <label class="cursor-pointer flex items-center group">
+                                                    <input type="radio" name="rating" value="{{ $i }}"
+                                                        class="hidden rating-input">
+                                                    <i data-lucide="star"
+                                                        class="w-6 h-6 rating-star text-gray-300 fill-none transition-colors"
+                                                        data-value="{{ $i }}"></i>
                                                 </label>
                                             @endfor
                                         </div>
@@ -505,41 +531,41 @@
                         @endauth
                     </div>
 
-                    <!-- JS: Toggle Reply Form + Rating -->
+                    <!-- JavaScript xử lý đánh giá -->
                     <script>
-                        function toggleReplyForm(id) {
-                            const form = document.getElementById(`reply-form-${id}`);
-                            if (form) {
-                                form.classList.toggle('hidden');
-                            }
-                        }
-
-                        document.addEventListener('DOMContentLoaded', function () {
-                            const ratingInputs = document.querySelectorAll('input[name="rating"]');
-                            const stars = document.querySelectorAll('.rating-star');
-
-                            ratingInputs.forEach(input => {
-                                input.addEventListener('change', function () {
-                                    const selectedRating = parseInt(this.value);
-
-                                    stars.forEach((star, index) => {
-                                        if (index < selectedRating) {
-                                            star.classList.add('text-yellow-400');
-                                            star.classList.remove('text-gray-300');
-                                        } else {
-                                            star.classList.remove('text-yellow-400');
-                                            star.classList.add('text-gray-300');
-                                        }
-                                    });
-                                });
-                            });
-
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Kích hoạt icon
                             if (typeof lucide !== 'undefined') {
                                 lucide.createIcons();
                             }
+
+                            const ratingInputs = document.querySelectorAll('.rating-input');
+                            const ratingStars = document.querySelectorAll('.rating-star');
+
+                            function updateStars(selectedValue) {
+                                ratingStars.forEach(star => {
+                                    const value = parseInt(star.getAttribute('data-value'));
+                                    if (value <= selectedValue) {
+                                        star.classList.add('text-yellow-400', 'fill-yellow-400');
+                                        star.classList.remove('text-gray-300', 'fill-none');
+                                    } else {
+                                        star.classList.remove('text-yellow-400', 'fill-yellow-400');
+                                        star.classList.add('text-gray-300', 'fill-none');
+                                    }
+                                });
+                            }
+
+                            ratingInputs.forEach(input => {
+                                input.addEventListener('change', function() {
+                                    const selected = parseInt(this.value);
+                                    updateStars(selected);
+                                });
+                            });
                         });
                     </script>
                 </div>
+
+
 
                 <!-- Location Tab -->
                 <div id="content-location" class="tab-content hidden">
@@ -805,16 +831,42 @@
                 // Initialize animations
                 window.addEventListener('scroll', animateOnScroll);
                 window.addEventListener('load', animateOnScroll);
-            </script>
 
-            <script>
-                document.querySelectorAll('.reply-toggle').forEach(button => {
-                    button.addEventListener('click', function () {
-                        const reviewId = this.getAttribute('data-review-id');
-                        const form = document.getElementById('reply-form-' + reviewId);
-                        form.classList.toggle('hidden');
+                // Hiệu ứng click vào sao khi chỉnh sửa bình luận
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Hiệu ứng cho radio star trong form chỉnh sửa review
+                    document.querySelectorAll('form[action*="/reviews/"]').forEach(function(form) {
+                        const stars = form.querySelectorAll('label .w-5.h-5');
+                        const radios = form.querySelectorAll('input[type="radio"][name="rating"]');
+                        radios.forEach(function(radio, idx) {
+                            radio.addEventListener('change', function () {
+                                stars.forEach(function(star, i) {
+                                    if (i < idx + 1) {
+                                        star.classList.add('text-yellow-400', 'fill-yellow-400');
+                                        star.classList.remove('text-gray-300', 'fill-none');
+                                    } else {
+                                        star.classList.remove('text-yellow-400', 'fill-yellow-400');
+                                        star.classList.add('text-gray-300', 'fill-none');
+                                    }
+                                });
+                            });
+                        });
+                        // Khởi tạo hiệu ứng ban đầu
+                        radios.forEach(function(radio, idx) {
+                            if (radio.checked) {
+                                stars.forEach(function(star, i) {
+                                    if (i < idx + 1) {
+                                        star.classList.add('text-yellow-400', 'fill-yellow-400');
+                                        star.classList.remove('text-gray-300', 'fill-none');
+                                    } else {
+                                        star.classList.remove('text-yellow-400', 'fill-yellow-400');
+                                        star.classList.add('text-gray-300', 'fill-none');
+                                    }
+                                });
+                            }
+                        });
                     });
                 });
             </script>
         @endpush
-@endsection
+    @endsection
