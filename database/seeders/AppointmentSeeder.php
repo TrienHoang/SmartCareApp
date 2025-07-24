@@ -23,20 +23,29 @@ class AppointmentSeeder extends Seeder
         }
 
         foreach ($patients as $patient) {
-            // Chọn random bác sĩ và dịch vụ
+            // ✅ Random bác sĩ, dịch vụ, thời gian khám
             $doctor = $doctors->random();
             $service = $services->random();
 
+            $start = Carbon::now()->subDays(rand(5, 30))->setTime(rand(8, 15), rand(0, 59));
+            $checkIn = (clone $start)->addMinutes(5);
+            $end = (clone $checkIn)->addMinutes(20);
+
             Appointment::create([
-              'patient_id' => $patient->id,
-                'doctor_id' => $doctor->id,
-                'service_id' => $service->id,
-                'appointment_time' => Carbon::now()->addDays(rand(0, 30)),
-                'status' => 'completed', // trạng thái để review được phép tạo
-              
+                'patient_id'       => $patient->id,
+                'doctor_id'        => $doctor->id,
+                'service_id'       => $service->id,
+                'appointment_time' => $start,
+                'check_in_time'    => $checkIn,
+                'end_time'         => $end,
+                'status'           => 'completed',
+                'reason'           => fake()->sentence(),
+                'cancel_reason'    => null,
+                'created_at'       => now(),
+                'updated_at'       => now(),
             ]);
         }
 
-        $this->command->info('✅ Đã tạo lịch hẹn thành công giữa bệnh nhân và bác sĩ.');
+        $this->command->info('✅ Đã tạo lịch sử khám bệnh thành công.');
     }
 }

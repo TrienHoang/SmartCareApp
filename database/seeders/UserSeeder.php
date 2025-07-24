@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
         }
 
         // Tạo 30 bệnh nhân
-        for ($i = 1; $i <= 30; $i++) {
+        for ($i = 1; $i <= 5; $i++) {
             User::create([
                 'username' => "patient$i",
                 'email' => "patient$i@example.com",

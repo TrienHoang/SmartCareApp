@@ -19,64 +19,77 @@ class CalendarController extends Controller
         return view('admin.calendar.index', compact('departments', 'users'));
     }
 
-    public function events(Request $request)
-    {
-        $type = $request->input('type');
-        $departmentId = $request->input('department_id');
-        $userId = $request->input('user_id');
+public function events(Request $request)
+{
+    $type = $request->input('type');
+    $departmentId = $request->input('department_id');
+    $userId = $request->input('user_id');
 
-        $taskEvents = collect();
-        $appointmentEvents = collect();
+    $start = $request->input('start');
+    $end = $request->input('end');
 
-        // Lấy công việc
-        if (!$type || $type === 'task') {
-            $tasks = Task::query()
-                ->select('id', 'title', 'deadline', 'department_id', 'assigned_to')
-                ->whereNotNull('deadline');
+    $taskEvents = collect();
+    $appointmentEvents = collect();
 
-            if ($departmentId) {
-                $tasks->where('department_id', $departmentId);
-            }
+    // Lấy công việc
+    if (!$type || $type === 'task') {
+        $tasks = Task::query()
+            ->select('id', 'title', 'deadline', 'department_id', 'assigned_to')
+            ->whereNotNull('deadline');
 
-            if ($userId) {
-                $tasks->where('assigned_to', $userId);
-            }
-
-            $taskEvents = $tasks->get()->map(function ($task) {
-                return [
-                    'id' => 'task_' . $task->id,
-                    'title' => '🗂️ ' . $task->title,
-                    'start' => $task->deadline,
-                    'color' => '#0d6efd',
-                    'url' => route('admin.tasks.show', $task->id),
-                ];
-            });
+        if ($start && $end) {
+            $tasks->whereBetween('deadline', [$start, $end]);
         }
 
-        // Lấy cuộc hẹn
-        if (!$type || $type === 'appointment') {
-            $appointments = Appointment::query()
-                ->select('id', 'title', 'start_time', 'department_id', 'doctor_id');
-
-            if ($departmentId) {
-                $appointments->where('department_id', $departmentId);
-            }
-
-            if ($userId) {
-                $appointments->where('doctor_id', $userId);
-            }
-
-            $appointmentEvents = $appointments->get()->map(function ($appt) {
-                return [
-                    'id' => 'appt_' . $appt->id,
-                    'title' => '🩺 ' . $appt->title,
-                    'start' => $appt->start_time,
-                    'color' => '#198754',
-                    'url' => route('admin.appointments.show', $appt->id),
-                ];
-            });
+        if ($departmentId) {
+            $tasks->where('department_id', $departmentId);
         }
 
-        return response()->json($taskEvents->merge($appointmentEvents));
+        if ($userId) {
+            $tasks->where('assigned_to', $userId);
+        }
+
+        $taskEvents = $tasks->get()->map(function ($task) {
+            return [
+                'id' => 'task_' . $task->id,
+                'title' => '🗂️ ' . $task->title,
+                'start' => $task->deadline,
+                'color' => '#0d6efd',
+                'url' => route('admin.tasks.show', $task->id),
+            ];
+        });
     }
+
+    // Lấy cuộc hẹn
+    if (!$type || $type === 'appointment') {
+        $appointments = Appointment::query()
+            ->select('id', 'title', 'start_time', 'department_id', 'doctor_id');
+
+        if ($start && $end) {
+            $appointments->whereBetween('start_time', [$start, $end]);
+        }
+
+        if ($departmentId) {
+            $appointments->where('department_id', $departmentId);
+        }
+
+        if ($userId) {
+            $appointments->where('doctor_id', $userId);
+        }
+
+        $appointmentEvents = $appointments->get()->map(function ($appt) {
+            return [
+                'id' => 'appt_' . $appt->id,
+                'title' => '🩺 ' . $appt->title,
+                'start' => $appt->start_time,
+                'color' => '#198754',
+                'url' => route('admin.appointments.show', $appt->id),
+            ];
+        });
+    }
+
+    return response()->json($taskEvents->merge($appointmentEvents));
+}
+
+
 }

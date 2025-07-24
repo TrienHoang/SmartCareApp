@@ -86,7 +86,7 @@
                                 <div class="text-center">
                                     <img src="{{ Storage::url($file->file_path) }}" alt="{{ $file->file_name }}"
                                         class="img-fluid rounded shadow" style="max-height: 400px; cursor: pointer;"
-                                        data-toggle="modal" data-target="#imageModal">
+                                        data-bs-toggle="modal" data-bs-target="#imageModal-{{ $file->id }}">
                                     <p class="text-muted mt-2"><small>Click để xem kích thước đầy đủ</small></p>
                                 </div>
                             </div>
@@ -330,15 +330,21 @@
 
     <!-- Image Modal -->
     @if (in_array(strtolower($fileExtension), $imageExtensions))
-        <div class="modal fade" id="imageModal" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-xl" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">{{ $file->file_name }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal fade" id="imageModal-{{ $file->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content bg-dark text-white border-0">
+                    <div class="modal-header border-0">
+                        <h6 class="modal-title text-truncate" style="max-width: 90%;">
+                            {{ $file->file_name }}
+                        </h6>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center">
-                        <img src="{{ Storage::url($file->file_path) }}" alt="{{ $file->file_name }}" class="img-fluid">
+                        <div class="image-container">
+                            <img src="{{ Storage::url($file->file_path) }}" alt="{{ $file->file_name }}"
+                                class="img-fluid zoomable-img rounded shadow">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -357,8 +363,7 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="newCategory">Danh mục mới</label>
-                            <select id="newCategory" class="form-control"
-                                data-current="{{ $file->file_category }}">
+                            <select id="newCategory" class="form-control" data-current="{{ $file->file_category }}">
                                 <option value="">-- Chọn danh mục --</option>
                                 <option value="Kết quả xét nghiệm"
                                     {{ $file->file_category == 'Kết quả xét nghiệm' ? 'selected' : '' }}>Kết quả xét nghiệm
@@ -444,6 +449,37 @@
 
         .gap-2 {
             gap: 0.5rem;
+        }
+
+        /* Phần modal */
+        .modal-content {
+            background-color: #000;
+            /* nền đen */
+            color: #fff;
+        }
+
+        /* Tiêu đề */
+        .modal-header h6 {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Ảnh phóng */
+        .zoomable-img {
+            max-height: 80vh;
+            transition: transform 0.3s ease;
+            cursor: zoom-in;
+        }
+
+        .zoomable-img:hover {
+            transform: scale(1.2);
+        }
+
+        /* Căn giữa ảnh */
+        .image-container {
+            display: inline-block;
+            overflow: hidden;
         }
     </style>
 @endpush

@@ -4,13 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
-// Thêm import model quan hệ
-use App\Models\User;
-use App\Models\Doctor;
-use App\Models\Service;
-use App\Models\Appointment;
 
 class Review extends Model
 {
@@ -26,34 +19,39 @@ class Review extends Model
         'is_visible',
     ];
 
+    protected $casts = [
+        'is_visible' => 'boolean',
+        'rating' => 'integer',
+    ];
+
     /**
-     * Get the patient who wrote the review.
+     * Quan hệ: Người đánh giá (bệnh nhân)
      */
-    public function patient(): BelongsTo
+    public function patient()
     {
         return $this->belongsTo(User::class, 'patient_id');
     }
 
     /**
-     * Get the doctor who was reviewed.
+     * Quan hệ: Bác sĩ được đánh giá
      */
-    public function doctor(): BelongsTo
+    public function doctor()
     {
         return $this->belongsTo(Doctor::class, 'doctor_id');
     }
 
     /**
-     * Get the service that was reviewed.
+     * Quan hệ: Dịch vụ đã sử dụng
      */
-    public function service(): BelongsTo
+    public function service()
     {
         return $this->belongsTo(Service::class, 'service_id');
     }
 
     /**
-     * Get the appointment associated with the review.
+     * Quan hệ: Lịch hẹn liên quan
      */
-    public function appointment(): BelongsTo
+    public function appointment()
     {
         return $this->belongsTo(Appointment::class, 'appointment_id');
     }

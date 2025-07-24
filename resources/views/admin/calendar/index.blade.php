@@ -1,9 +1,8 @@
 @extends('admin.dashboard')
 
-@section('title', 'Lịch làm việc')
 
 @section('content')
-    <h4 class="fw-bold mb-4"><i class="bx bx-calendar"></i> Lịch làm việc</h4>
+    <h4 class="fw-bold mb-4"><i class="bx bx-calendar"></i> Lịch làm việc bác sĩ</h4>
 
     {{-- Bộ lọc --}}
     <form id="filterForm" class="row g-3 mb-4">
@@ -25,7 +24,7 @@
             </select>
         </div>
         <div class="col-md-3">
-            <label for="filterUser" class="form-label">Người phụ trách:</label>
+            <label for="filterUser" class="form-label">Bác sĩ:</label>
             <select id="filterUser" class="form-select">
                 <option value="">-- Tất cả --</option>
                 @foreach ($users as $user)
@@ -54,22 +53,34 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            let calendarEl = document.getElementById('calendar');
+            const calendarEl = document.getElementById('calendar');
 
-            let calendar = new FullCalendar.Calendar(calendarEl, {
+            const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                height: "auto",
                 locale: 'vi',
-                events: function(fetchInfo, successCallback, failureCallback) {
+                height: 'auto',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: function (fetchInfo, successCallback, failureCallback) {
                     axios.get("{{ route('admin.calendar.events') }}", {
                         params: {
                             type: document.getElementById('filterType').value,
                             department_id: document.getElementById('filterDepartment').value,
                             user_id: document.getElementById('filterUser').value,
+                            start: fetchInfo.startStr,
+                            end: fetchInfo.endStr,
                         }
                     })
-                    .then(response => successCallback(response.data))
-                    .catch(error => failureCallback(error));
+                        .then(response => {
+                            successCallback(response.data);
+                        })
+                        .catch(error => {
+                            console.error("Lỗi khi tải sự kiện:", error);
+                            failureCallback(error);
+                        });
                 },
                 eventClick: function (info) {
                     if (info.event.url) {
@@ -86,7 +97,7 @@
                 calendar.refetchEvents();
             });
 
-            // Reset lọc
+            // Reset bộ lọc
             document.getElementById('btnReset').addEventListener('click', function () {
                 document.getElementById('filterType').value = '';
                 document.getElementById('filterDepartment').value = '';

@@ -1,6 +1,8 @@
 @extends('admin.dashboard')
 @section('title', 'Chi tiết Danh mục Dịch vụ')
 
+@section('title', 'Chi tiết Danh mục Dịch vụ')
+
 @section('content')
     <div class="content-wrapper">
         <div class="content-header row">

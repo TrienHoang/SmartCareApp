@@ -10,8 +10,8 @@ class Post extends Model
         'title', 'slug', 'excerpt', 'content', 'service_cate_id', 'thumbnail', 'status', 'published_at'
     ];
 
-    public function serviceCategory() {
-    return $this->belongsTo(ServiceCategory::class, 'service_cate_id');
-}
-
+    public function serviceCategory()
+    {
+        return $this->belongsTo(ServiceCategory::class, 'service_cate_id');
+    }
 }

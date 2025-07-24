@@ -39,12 +39,13 @@ class FacebookController extends Controller
             }
 
             $newUser = User::create([
-                'name' => $facebookUser->getName(),
+                'full_name' => $facebookUser->getName(),
                 'email' => $facebookUser->getEmail(),
                 'facebook_id' => $facebookUser->getId(),
                 'username' => Str::slug($facebookUser->getName()) . rand(1000, 9999),
                 'password' => bcrypt(Str::random(16)),
-                'role_id' => 3
+                'role_id' => 3,
+                'status' => 'online',
             ]);
 
             Auth::login($newUser);

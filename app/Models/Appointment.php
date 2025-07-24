@@ -15,85 +15,111 @@ class Appointment extends Model
         'doctor_id',
         'service_id',
         'appointment_time',
+        'check_in_time',
+        'end_time',
         'status',
         'reason',
         'cancel_reason',
-        'end_time',
+        'treatment_plan_id',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 
     protected $casts = [
         'appointment_time' => 'datetime',
+        'check_in_time' => 'datetime',
+        'end_time' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'end_time' => 'datetime',
     ];
 
-    // Relationship với User (Patient)
+    // 🧑‍🤝‍🧑 Quan hệ: bệnh nhân (User)
     public function patient()
     {
         return $this->belongsTo(User::class, 'patient_id');
     }
 
-    // Relationship với Doctor
+    // 👨‍⚕️ Quan hệ: bác sĩ
     public function doctor()
     {
         return $this->belongsTo(Doctor::class, 'doctor_id');
     }
 
-    // Relationship với Service
+    // 🏥 Quan hệ: dịch vụ
     public function service()
     {
         return $this->belongsTo(Service::class, 'service_id');
     }
 
-    // Relationship với Payment
+    // 📋 Quan hệ: kế hoạch điều trị
+    public function treatmentPlan()
+    {
+        return $this->belongsTo(TreatmentPlan::class, 'treatment_plan_id');
+    }
+
+    // 💰 Quan hệ: thanh toán
     public function payment()
     {
         return $this->hasOne(Payment::class, 'appointment_id')->latestOfMany();
     }
 
-    // Relationship với Medical Record
+    // 📋 Quan hệ: hồ sơ bệnh án
     public function medicalRecord()
     {
         return $this->hasOne(MedicalRecord::class, 'appointment_id');
     }
 
-    // Relationship với File Uploads
+    // 📎 Quan hệ: file đính kèm
     public function fileUploads()
     {
         return $this->hasMany(FileUpload::class, 'appointment_id');
     }
 
-    // Relationship với Appointment Logs
+    // 📝 Quan hệ: log lịch hẹn
     public function logs()
     {
         return $this->hasMany(AppointmentLog::class, 'appointment_id');
     }
 
-    // Accessor cho formatted time
-    public function getFormattedTimeAttribute()
+    // 🛒 Quan hệ: đơn hàng
+    public function order()
     {
-        return $this->appointment_time ?
-            Carbon::parse($this->appointment_time)->format('d/m/Y H:i') :
-            'N/A';
+        return $this->hasOne(Order::class, 'appointment_id');
     }
 
-    // Accessor cho status text
+    // ✅ Accessor: thời gian hiển thị đẹp
+    public function getFormattedTimeAttribute()
+    {
+        return $this->appointment_time
+            ? Carbon::parse($this->appointment_time)->format('d/m/Y H:i')
+            : 'N/A';
+    }
+
+    // ✅ Accessor: trạng thái hiển thị rõ
     public function getStatusTextAttribute()
     {
-        $statusMap = [
+        return match ($this->status) {
             'pending' => 'Chờ xác nhận',
             'confirmed' => 'Đã xác nhận',
             'completed' => 'Hoàn thành',
-            'cancelled' => 'Đã hủy'
-        ];
-
-        return $statusMap[$this->status] ?? $this->status;
+            'cancelled' => 'Đã hủy',
+            default => ucfirst($this->status),
+        };
     }
 
-    // Scope cho các trạng thái
+    // ✅ Accessor: tên bệnh nhân
+    public function getPatientNameAttribute()
+    {
+        return $this->patient?->full_name ?? '---';
+    }
+
+    // ✅ Accessor: tên bác sĩ
+    public function getDoctorNameAttribute()
+    {
+        return $this->doctor?->user?->full_name ?? '---';
+    }
+
+    // 🔍 Scope: theo trạng thái
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
@@ -114,13 +140,12 @@ class Appointment extends Model
         return $query->where('status', 'cancelled');
     }
 
-    // Scope cho hôm nay
+    // 📅 Scope: theo thời gian
     public function scopeToday($query)
     {
         return $query->whereDate('appointment_time', Carbon::today());
     }
 
-    // Scope cho tuần này
     public function scopeThisWeek($query)
     {
         return $query->whereBetween('appointment_time', [
@@ -129,16 +154,15 @@ class Appointment extends Model
         ]);
     }
 
-    // Scope cho tháng này
     public function scopeThisMonth($query)
     {
         return $query->whereMonth('appointment_time', Carbon::now()->month)
             ->whereYear('appointment_time', Carbon::now()->year);
     }
-    public function order()
-    {
-        return $this->hasOne(Order::class, 'appointment_id');
-    }
+    // public function order()
+    // {
+    //     return $this->hasOne(Order::class, 'appointment_id');
+    // }
    
 
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\admin\RoleController;
 use App\Http\Controllers\admin\AppointmentController;
 use App\Http\Controllers\Admin\CalendarController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ContactController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DoctorController;
@@ -29,6 +30,7 @@ use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\admin\FaqController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TaskController;
+use App\Http\Controllers\Admin\TreatmentPlanController;
 use App\Models\Admin_notification;
 use App\Models\Role;
 use App\Models\User;
@@ -36,7 +38,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use Illuminate\Support\Facades\Auth;
 
-require __DIR__ . '/client.php';
+Route::get('/', function () {
+    return view('client.home');
+})->name('home');
 
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -260,6 +264,18 @@ Route::group([
 
         Route::post('/{id}/pay', [AppointmentController::class, 'pay'])
             ->middleware('check_permission:edit_appointments')->name('pay');
+
+        Route::get('/doctor/{doctor}/services', [AppointmentController::class, 'getDoctorServices'])
+            ->name('doctor.services');
+
+        Route::get('/doctor/{doctor}/working-days', [AppointmentController::class, 'getDoctorWorkingDays'])
+            ->name('doctor.working-days');
+
+        Route::get('/treatment-plans/{id}/details', [AppointmentController::class, 'getTreatmentPlanDetails'])
+            ->name('treatment-plan.details');
+
+        Route::get('/treatment-plans/by-patient/{patient}', [AppointmentController::class, 'getTreatmentPlansByPatient'])
+            ->name('treatment-plans.by-patient');
     });
     // quản lý đơn thuốc
     Route::group([
@@ -309,23 +325,48 @@ Route::group([
 
         Route::delete('/delete/{doctor}', [DoctorController::class, 'destroy'])
             ->middleware('check_permission:delete_doctors')->name('destroy');
+
+        Route::get('/{doctor}', [DoctorController::class, 'show'])
+            ->middleware('check_permission:view_doctors')->name('show');
     });
 
-
-    // Quản lý phòng ban
-
+    // Nhóm quản lý phòng ban
     Route::group([
         'prefix' => 'departments',
         'as' => 'departments.',
         'middleware' => 'check_permission:view_departments'
     ], function () {
-        Route::get('/', [DepartmentController::class, 'index'])->name('index');
-        Route::get('/create', [DepartmentController::class, 'create'])->middleware('check_permission:create_departments')->name('create');
-        Route::post('/', [DepartmentController::class, 'store'])->middleware('check_permission:create_departments')->name('store');
-        Route::get('/{department}/edit', [DepartmentController::class, 'edit'])->middleware('check_permission:edit_departments')->name('edit');
-        Route::put('/{department}', [DepartmentController::class, 'update'])->middleware('check_permission:edit_departments')->name('update');
-        Route::delete('/{department}', [DepartmentController::class, 'destroy'])->middleware('check_permission:delete_departments')->name('destroy');
+        Route::get('/', [DepartmentController::class, 'index'])
+            ->name('index');
+
+        Route::get('/create', [DepartmentController::class, 'create'])
+            ->middleware('check_permission:create_departments')
+            ->name('create');
+
+        Route::post('/store', [DepartmentController::class, 'store'])
+            ->middleware('check_permission:create_departments')
+            ->name('store');
+
+        Route::get('/edit/{department}', [DepartmentController::class, 'edit'])
+            ->middleware('check_permission:edit_departments')
+            ->name('edit');
+
+        Route::put('/update/{department}', [DepartmentController::class, 'update'])
+            ->middleware('check_permission:edit_departments')
+            ->name('update');
+
+        Route::delete('/delete/{department}', [DepartmentController::class, 'destroy'])
+            ->middleware('check_permission:delete_departments')
+            ->name('destroy');
+
+        Route::get('/{department}', [DepartmentController::class, 'show'])
+            ->middleware('check_permission:view_departments')
+            ->name('show');
     });
+
+
+
+
 
     // lịch sử thanh toán
     Route::group([
@@ -568,14 +609,14 @@ Route::group([
     // Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('payment_histories.index');
     // Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('payment_histories.show');
 
-
-    // quản lý file tải lên
+    // Quản lý file tải lên
     Route::group([
         'prefix' => 'files',
         'as' => 'files.',
         'middleware' => 'check_permission:view_medical_documents'
     ], function () {
         Route::get('/', [AdminFileController::class, 'index'])->name('index');
+        Route::get('/export', [AdminFileController::class, 'export'])->name('export');
 
         Route::get('/trash', [AdminFileController::class, 'trash'])->name('trash');
 
@@ -612,12 +653,105 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     // API lấy dữ liệu sự kiện (task, appointment)
     Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
+    Route::group([
+        'prefix' => 'treatment-plans',
+        'as' => 'treatment-plans.',
+        'middleware' => ['auth', 'checkAdmin'] // ✅ chỉ giữ 2 middleware chung
+    ], function () {
+
+        // 1. Quản lý Danh sách Kế hoạch Điều trị
+        Route::get('/', [TreatmentPlanController::class, 'index'])->name('index');
+
+        // 2. Xem và Chỉnh sửa Chi tiết Kế hoạch Điều trị
+        Route::get('/{id}/edit', [TreatmentPlanController::class, 'edit'])->name('edit'); // Đổi từ /edit/{id} thành /{id}/edit
+        Route::put('/{id}/edit', [TreatmentPlanController::class, 'update'])->name('update'); // Đổi từ /edit/{id} thành /{id}/edit
+
+        // Xóa Kế hoạch Điều trị
+        Route::delete('/{id}/destroy', [TreatmentPlanController::class, 'destroy'])->name('destroy'); // Đổi từ /destroy/{id} thành /{id}/destroy
+
+        // Xem Chi tiết Kế hoạch Điều trị
+        Route::get('/{id}/show', [TreatmentPlanController::class, 'show'])->name('show'); // Đổi từ /show/{id} thành /{id}/show
+
+        // 4. Theo dõi Lịch sử và Kiểm soát Phiên bản
+        Route::get('/{id}/history', [TreatmentPlanController::class, 'history'])->name('history'); // Đổi tên từ logs sang history và đường dẫn
+
+        // 3. Theo dõi và Thống kê Tiến độ Điều trị (Dashboard tổng quan)
+        Route::get('/dashboard', [TreatmentPlanController::class, 'dashboard'])->name('dashboard');
+
+        // 5. Quản lý Bác sĩ và Chuyển giao Kế hoạch
+        Route::post('/{id}/transfer-doctor', [TreatmentPlanController::class, 'transferDoctor'])->name('transfer-doctor');
+
+        // 6. In ấn và Xuất báo cáo
+        Route::get('/{id}/export-pdf', [TreatmentPlanController::class, 'exportPdf'])->name('exportPdf');
+        Route::get('/{id}/export-excel', [TreatmentPlanController::class, 'exportExcel'])->name('exportExcel');
+        // Route để in chi tiết một kế hoạch
+        Route::delete('/{id}', [TreatmentPlanController::class, 'destroy'])->name('destroy');
+
+        Route::get('trash', [TreatmentPlanController::class, 'trash'])->name('trash');
+        Route::post('restore/{id}', [TreatmentPlanController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{id}', [TreatmentPlanController::class, 'forceDelete'])->name('force-delete');
+
+        Route::post('bulk-restore', [TreatmentPlanController::class, 'bulkRestore'])->name('bulkRestore');
+        Route::post('bulk-delete', [TreatmentPlanController::class, 'bulkDelete'])->name('bulkDelete');
+        Route::delete('empty-trash', [TreatmentPlanController::class, 'emptyTrash'])->name('emptyTrash');
+    });
 });
 
+// quản lý bài viết
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::resource('posts', PostController::class);
 });
 
-// Trong routes/web.php hoặc routes/doctor.php
+// quản lý liên hệ
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('contacts')->name('contacts.')->group(function () {
+        Route::get('/', [ContactController::class, 'index'])->name('index');    
+        Route::get('/{id}', [ContactController::class, 'show'])->name('show');     
+        Route::delete('/{id}', [ContactController::class, 'destroy'])->name('destroy'); 
+        Route::post('/{id}/reply', [ContactController::class, 'reply'])->name('reply');
+        Route::patch('/{id}/status', [ContactController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/search', [ContactController::class, 'search'])->name('search'); 
 
+    });
+});
+
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+
+Route::get('/test-email', function () {
+    try {
+        Mail::raw('Đây là email test từ hệ thống Laravel.', function ($message) {
+            $message->to('lehieu19042005@gmail.com')
+                    ->subject('Thử gửi email');
+        });
+
+        return 'Gửi email thành công';
+    } catch (\Exception $e) {
+        Log::error('Lỗi gửi mail: ' . $e->getMessage());
+        return 'Lỗi: ' . $e->getMessage();
+    }
+});
+
+
+
+
+// phân quyền bác sĩ
+// Route::get('/doctor/dashboard', function () {
+//     return view('doctor.dashboard');
+// })->name('doctor.dashboard');
+
+Route::prefix('doctor')->name('doctor.')->middleware('auth')->group(function () {
+    Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
+    // Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
+});
+require __DIR__ . '/client.php';
+
+
+
+
+
+
+
+
+// Trong routes/web.php hoặc routes/doctor.php
 require __DIR__ . '/doctor.php';

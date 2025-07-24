@@ -22,7 +22,7 @@
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb bg-transparent p-0">
                                     <li class="">
-                                        <a href="{{ route('admin.dashboard.index') }}" class="text-decoration-none">
+                                        <a href="{{ route('admin.departments.index') }}" class="text-decoration-none">
                                             Trang chủ >
                                         </a>
                                     </li>
@@ -37,8 +37,7 @@
             </div>
             <div class="content-header-right col-md-4 col-12 text-md-right">
                 <div class="form-group breadcrum-right">
-                    <a href="{{ route('admin.departments.create') }}"
-                        class="btn btn-gradient-primary btn-lg waves-effect waves-light shadow-lg  text-white">
+                    <a href="{{ route('admin.departments.create') }}" class="btn btn-gradient-primary btn-lg waves-effect waves-light shadow-lg  text-white">
                         Thêm phòng ban mới
                     </a>
                 </div>
@@ -103,111 +102,193 @@
 
                 <div class="card-body p-0">
                     <!-- Enhanced Filter Section -->
-                    <div class="filter-section bg-light p-4 border-bottom">
+
+                    <!-- Enhanced Filter Section -->
+                    <div class="filter-section bg-light p-4 border-bottom shadow-sm rounded">
                         <form action="{{ route('admin.departments.index') }}" method="GET" class="filter-form">
                             <div class="row align-items-end">
-                                <div class="col-lg-4 col-md-6 mb-2">
+                                <!-- Tìm kiếm -->
+                                <div class="col-lg-4 col-md-6 mb-3">
                                     <label class="form-label font-weight-semibold">
-                                        <i class="bx bx-search mr-1 text-primary"></i>Tìm kiếm
+                                        <i class="bx bx-search text-primary mr-1"></i> Tìm kiếm
                                     </label>
-                                    <div class="input-group">
-                                        <input type="text" name="search" class="form-control border-left-0"
-                                            placeholder="Tên phòng ban, mô tả..." value="{{ request('search') }}">
-                                    </div>
+                                    <input type="text" name="search" class="form-control"
+                                        placeholder="Tên phòng ban, mô tả..." value="{{ request('search') }}">
                                 </div>
-                                <div class="col-lg-4 col-md-6 mb-2">
+
+                                <!-- Trạng thái -->
+                                <div class="col-lg-2 col-md-6 mb-3">
                                     <label class="form-label font-weight-semibold">
-                                        <i class="bx bx-calendar mr-1 text-info"></i>Ngày tạo
+                                        <i class="bx bx-toggle-left text-success mr-1"></i> Trạng thái
+                                    </label>
+                                    <select name="status" class="form-control">
+                                        <option value="">Tất cả</option>
+                                        <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Hoạt
+                                            động</option>
+                                        <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>
+                                            Ngưng</option>
+                                    </select>
+                                </div>
+
+                                <!-- Phòng ban trống -->
+                                <div class="col-lg-2 col-md-6 mb-3">
+                                    <label class="form-label font-weight-semibold">
+                                        <i class="bx bx-user-x text-danger mr-1"></i> Trống bác sĩ
+                                    </label>
+                                    <select name="empty" class="form-control">
+                                        <option value="">Tất cả</option>
+                                        <option value="1" {{ request('empty') === '1' ? 'selected' : '' }}>Chưa có bác sĩ
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Ngày tạo -->
+                                <div class="col-lg-2 col-md-6 mb-3">
+                                    <label class="form-label font-weight-semibold">
+                                        <i class="bx bx-calendar text-info mr-1"></i> Ngày tạo
                                     </label>
                                     <input type="date" name="created_at" class="form-control"
                                         value="{{ request('created_at') }}">
                                 </div>
-                                <div class="col-lg-4 col-md-6 mb-2">
-                                    <div class="btn-group w-50" role="group">
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="bx bx-filter mr-1"></i>Lọc
-                                        </button>
-                                        <a href="{{ route('admin.departments.index') }}"
-                                            class="btn btn-outline-secondary">
-                                            <i class="bx bx-refresh-cw mr-1"></i>Reset
-                                        </a>
-                                    </div>
+
+                                <!-- Nút hành động -->
+                                <div class="col-lg-2 col-md-12 mb-3 d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bx bx-filter-alt mr-1"></i> Lọc
+                                    </button>
+                                    <a href="{{ route('admin.departments.index') }}"
+                                        class="btn btn-outline-secondary w-100">
+                                        <i class="bx bx-reset mr-1"></i> Reset
+                                    </a>
                                 </div>
                             </div>
                         </form>
                     </div>
+
+
 
                     <!-- Enhanced Table -->
                     <div class="table-responsive">
                         <table class="table table-hover table-modern mb-0">
                             <thead class="thead-light">
                                 <tr>
-                                    <th class="border-top-0">
+                                    <th class="border-top-0" style="width: 40px;">
                                         <div class="custom-control custom-checkbox">
                                             <input type="checkbox" class="custom-control-input" id="select-all">
                                             <label class="custom-control-label" for="select-all"></label>
                                         </div>
                                     </th>
-                                    <th class="border-top-0">#ID</th>
-                                    <th class="border-top-0">Tên phòng ban</th>
-                                    <th class="border-top-0">Mô tả</th>
-                                    <th class="border-top-0">Ngày tạo</th>
-                                    <th class="border-top-0 text-center">Hành động</th>
+                                    <th class="border-top-0" style="width: 60px;">
+                                        <i class="bx bx-hash text-muted mr-1"></i> ID
+                                    </th>
+                                    <th class="border-top-0">
+                                        <i class="bx bx-building-house text-primary mr-1"></i> Tên phòng ban
+                                    </th>
+                                    <th class="border-top-0">
+                                        <i class="bx bx-detail text-secondary mr-1"></i> Mô tả
+                                    </th>
+                                    <th class="border-top-0">
+                                        <i class="bx bx-user text-info mr-1"></i> Người phụ trách
+                                    </th>
+                                    <th class="border-top-0">
+                                        <i class="bx bx-calendar text-success mr-1"></i> Ngày tạo
+                                    </th>
+                                    <th class="border-top-0">
+                                        <i class="bx bx-toggle-left text-warning mr-1"></i> Trạng thái
+                                    </th>
+                                    <th class="border-top-0 text-center" style="width: 140px;">
+                                        <i class="bx bx-cog text-dark mr-1"></i> Hành động
+                                    </th>
                                 </tr>
                             </thead>
+
                             <tbody>
                                 @forelse ($departments as $department)
                                     <tr class="notification-row" data-id="{{ $department->id }}">
                                         <td>
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" class="custom-control-input notification-checkbox"
-                                                    id="department-{{ $department->id }}"
-                                                    value="{{ $department->id }}">
+                                                    id="department-{{ $department->id }}" value="{{ $department->id }}">
                                                 <label class="custom-control-label"
                                                     for="department-{{ $department->id }}"></label>
                                             </div>
                                         </td>
+
                                         <td class="font-weight-bold text-primary">#{{ $department->id }}</td>
+
                                         <td>
-                                            <div class="notification-title">
-                                                <h6 class="mb-0 font-weight-semibold">
-                                                    {{ Str::limit($department->name, 40) }}</h6>
-                                                <small class="text-muted">{{ Str::limit(strip_tags($department->description), 60) }}</small>
-                                            </div>
+                                            <h6 class="mb-0 font-weight-semibold">
+                                                <a href="{{ route('admin.departments.show', $department) }}"
+                                                    class="text-primary">
+                                                    {{ Str::limit($department->name, 40) }}
+                                                </a>
+                                            </h6>
                                         </td>
+
                                         <td>
-                                            <span class="badge badge-outline-primary">
-                                                {{ Str::limit($department->description, 30) }}
-                                            </span>
+                                            <small
+                                                class="text-muted">{{ Str::limit(strip_tags($department->description), 60) }}</small>
                                         </td>
+
                                         <td>
-                                            <div class="time-info">
-                                                @if ($department->created_at)
-                                                    <div class="d-flex align-items-center text-success">
-                                                        <i class="bx bx-calendar mr-1"></i>
-                                                        <div>
-                                                            <small class="font-weight-semibold">Tạo lúc</small><br>
-                                                            <small class="text-muted">{{ $department->created_at->format('d/m/Y H:i') }}</small>
-                                                        </div>
+                                            @if($department->doctors->count() > 0)
+                                                @php $doctor = $department->doctors->first(); @endphp
+                                                <div class="text-success">
+                                                    <i class="bx bx-user-check"></i>
+                                                    {{ $doctor->user->full_name ?? 'Không rõ' }}
+                                                    <br>
+                                                    <small class="text-muted"><i class="bx bx-phone-call"></i>
+                                                        {{ $doctor->user->phone ?? 'N/A' }}</small>
+                                                </div>
+                                            @else
+                                                <span class="badge badge-danger">
+                                                    <i class="bx bx-error-circle"></i> Chưa có bác sĩ
+                                                </span>
+                                            @endif
+                                        </td>
+
+                                        <td>
+                                            @if ($department->created_at)
+                                                <div class="d-flex align-items-center text-success">
+                                                    <i class="bx bx-calendar mr-1"></i>
+                                                    <div>
+                                                        <small class="font-weight-semibold">Tạo lúc</small><br>
+                                                        <small
+                                                            class="text-muted">{{ $department->created_at->format('d/m/Y H:i') }}</small>
                                                     </div>
-                                                @else
-                                                    <div class="d-flex align-items-center text-muted">
-                                                        <i class="bx bx-clock mr-1"></i>
-                                                        <small>Không rõ</small>
-                                                    </div>
-                                                @endif
-                                            </div>
+                                                </div>
+                                            @else
+                                                <div class="d-flex align-items-center text-muted">
+                                                    <i class="bx bx-clock mr-1"></i>
+                                                    <small>Không rõ</small>
+                                                </div>
+                                            @endif
                                         </td>
+
+                                        <td>
+                                            @if ($department->is_active)
+                                                <span class="badge badge-success">
+                                                    <i class="bx bx-check-circle"></i> Hoạt động
+                                                </span>
+                                            @else
+                                                <span class="badge badge-danger">
+                                                    <i class="bx bx-block"></i> Ngưng hoạt động
+                                                </span>
+                                            @endif
+                                        </td>
+
                                         <td class="text-center">
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <a href="{{ route('admin.departments.edit', $department) }}"
-                                                    class="btn btn-outline-warning" data-toggle="tooltip"
-                                                    title="Chỉnh sửa">
+                                                <a href="{{ route('admin.departments.edit', $department->id) }}"
+                                                    class="btn btn-outline-warning" data-toggle="tooltip" title="Chỉnh sửa">
                                                     <i class="bx bx-edit"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-outline-danger"
-                                                    data-toggle="tooltip" title="Xóa"
-                                                    onclick="deleteDepartment({{ $department->id }})">
+                                                <a href="{{ route('admin.departments.show', $department->id) }}"
+                                                    class="btn btn-outline-info" data-toggle="tooltip" title="Xem chi tiết">
+                                                    <i class="bx bx-show"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-outline-danger" data-toggle="tooltip"
+                                                    title="Xóa" onclick="deleteDepartment({{ $department->id }})">
                                                     <i class="bx bx-trash"></i>
                                                 </button>
                                             </div>
@@ -215,20 +296,21 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center py-5">
+                                        <td colspan="8" class="text-center py-5">
                                             <div class="empty-state">
                                                 <i class="bx bx-building text-muted" style="font-size: 48px;"></i>
                                                 <h5 class="mt-3 text-muted">Không có phòng ban nào</h5>
-                                                <p class="text-muted">Chưa có phòng ban nào được tạo hoặc không tìm thấy kết quả phù hợp.</p>
-                                                <a href="{{ route('admin.departments.create') }}"
-                                                    class="btn btn-primary">
-                                                    <i class="bx bx-plus mr-1"></i>Tạo phòng ban đầu tiên
+                                                <p class="text-muted">Chưa có phòng ban nào được tạo hoặc không tìm thấy kết quả
+                                                    phù hợp.</p>
+                                                <a href="{{ route('admin.departments.create') }}" class="btn btn-primary">
+                                                    <i class="bx bx-plus mr-1"></i> Tạo phòng ban đầu tiên
                                                 </a>
                                             </div>
                                         </td>
                                     </tr>
                                 @endforelse
                             </tbody>
+
                         </table>
                     </div>
 
@@ -434,7 +516,7 @@
 @push('scripts')
     <script>
         // Select all checkboxes functionality
-        document.getElementById('select-all').addEventListener('change', function() {
+        document.getElementById('select-all').addEventListener('change', function () {
             const checkboxes = document.querySelectorAll('.notification-checkbox');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = this.checked;
@@ -478,11 +560,11 @@
         }
 
         // Initialize tooltips
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip();
 
             // Auto-hide alerts after 5 seconds
-            setTimeout(function() {
+            setTimeout(function () {
                 $('.alert').fadeOut('slow');
             }, 5000);
         });

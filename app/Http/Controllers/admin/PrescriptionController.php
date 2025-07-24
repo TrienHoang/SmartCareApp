@@ -75,12 +75,18 @@ class PrescriptionController extends Controller
             });
         }
 
+        $totalQuantity = $query->get()->sum(function ($p) {
+            return $p->prescriptionItems->sum('quantity');
+        });
+
         $prescriptions = $query->orderByDesc('prescribed_at')->paginate(10);
+        $todayCount = Prescription::whereDate('prescribed_at', today())->count();
+        $weeklyCount = Prescription::where('prescribed_at', '>=', now()->startOfWeek())->count();
         $prescriptions->appends($request->all());
         $medicines = Medicine::pluck('name', 'id')->all();
         $departments = Department::all();
 
-        return view('admin.prescriptions.index', compact('prescriptions', 'medicines', 'departments', 'from_input', 'to_input'));
+        return view('admin.prescriptions.index', compact('prescriptions', 'medicines', 'departments', 'from_input', 'to_input', 'todayCount', 'weeklyCount', 'totalQuantity'));
     }
 
     public function create()
@@ -310,7 +316,7 @@ class PrescriptionController extends Controller
     {
         $query = $request->get('q', '');
 
-        $records = MedicalRecord::with('appointment.patient')
+        $records = MedicalRecord::with(['appointment.patient', 'appointment.doctor.user'])
             ->whereDoesntHave('prescriptions')
             ->whereHas('appointment', function ($q) {
                 $q->where('status', 'completed');
@@ -323,9 +329,11 @@ class PrescriptionController extends Controller
             ->get();
 
         return response()->json($records->map(function ($record) {
+            $patientName = $record->appointment->patient->full_name ?? 'Không xác định';
+            $doctorName = $record->appointment->doctor->user->full_name ?? 'Không xác định';
             return [
                 'id' => $record->id,
-                'text' => "#{$record->code} - {$record->appointment->patient->full_name}"
+                'text' => "#{$record->code} - {$patientName} - BS. {$doctorName}"
             ];
         }));
     }

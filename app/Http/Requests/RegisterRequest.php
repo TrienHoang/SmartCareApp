@@ -19,10 +19,10 @@ class RegisterRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-   public function rules(): array
+    public function rules(): array
     {
         return [
-            'username' => 'required|unique:users,username|max:30',
+            'username' => 'required|string|min:4|max:30|regex:/^[a-zA-Z0-9_]+$/|unique:users,username',
             'fullname' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email|max:100',
             'password' => 'required|min:6|max:32',
@@ -33,8 +33,11 @@ class RegisterRequest extends FormRequest
     {
         return [
             'username.required' => 'Vui lòng nhập tên đăng nhập',
-            'username.unique' => 'Tên đăng nhập đã tồn tại',
+            'username.string' => 'Tên đăng nhập phải là chuỗi ký tự',
+            'username.min' => 'Tên đăng nhập phải có ít nhất 4 ký tự',
             'username.max' => 'Tên đăng nhập không được vượt quá 30 ký tự',
+            'username.regex' => 'Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới',
+            'username.unique'   => 'Tên đăng nhập đã tồn tại',
 
             'fullname.required' => 'Vui lòng nhập họ tên',
             'fullname.string' => 'Họ tên phải là chuỗi ký tự',

@@ -14,7 +14,7 @@ class RolePermissionSeeder extends Seeder
    // Gán toàn bộ quyền cho admin
         $admin = Role::where('name', 'admin')->first();
         if ($admin) {
-            $admin->permissions()->sync(range(1, 75));
+            $admin->permissions()->sync(range(1, 93));
         }
 
    // Gán quyền phù hợp cho bác sĩ
@@ -29,6 +29,7 @@ class RolePermissionSeeder extends Seeder
                 45, 47, 74,        // Files
                 57,                // Statistics
                 62, 63, 64, 65     // Doctor Leaves
+                                   
             ];
             $doctor->permissions()->sync($doctorPermissionIds);
         }

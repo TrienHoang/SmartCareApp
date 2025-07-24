@@ -19,6 +19,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            RoleSeeder::class,
+            PermissionSeeder::class,
+            RolePermissionSeeder::class,
 
             TaskSeeder::class, // đã bao gồm tạo Task + Comment + Log
             UserSeeder::class,
@@ -32,7 +35,7 @@ class DatabaseSeeder extends Seeder
             ServiceCategorySeeder::class,
             ServiceSeeder::class,
 
-            AppointmentSeeder::class,           // 👈 phải chạy trước log/statistics
+            AppointmentSeeder::class,           
             AppointmentLogSeeder::class,
             StatisticSeeder::class,
 
@@ -44,8 +47,7 @@ class DatabaseSeeder extends Seeder
             MedicalRecordSeeder::class,
             PrescriptionSeeder::class,
             PrescriptionItemSeeder::class,
-            TreatmentPlanSeeder::class,
-            TreatmentHistorySeeder::class,
+            // TreatmentPlanSeeder::class,
 
             FileUploadSeeder::class,
             UploadHistorySeeder::class,
@@ -54,10 +56,11 @@ class DatabaseSeeder extends Seeder
             // NotificationSeeder::class,
             FaqSeeder::class,
             OrderSeeder::class,
+            ContactSeeder::class,
             // NotificationSeeder::class,
             //   FaqSeeder::class,
             ReviewSeeder::class,
+            DoctorServiceSeeder::class,
         ]);
-
     }
 }

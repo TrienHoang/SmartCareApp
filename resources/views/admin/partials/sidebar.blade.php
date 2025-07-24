@@ -78,6 +78,11 @@
                 <div>Quản lý phòng ban</div>
             </a>
             <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('admin.departments.index') }}" class="menu-link">
+                        <div>Danh sách phòng ban</div>
+                    </a>
+                </li>
                 <li class="menu-item"><a href="{{ route('admin.departments.index') }}" class="menu-link">
                         <div>Danh sách</div>
                     </a></li>
@@ -123,7 +128,16 @@
                         <div>Lịch làm việc</div>
                     </a>
                 </li>
+
             </ul>
+        </li>
+
+
+        <li class="menu-item">
+            <a href="{{ route('admin.treatment-plans.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-notepad"></i> <!-- Icon phù hợp với "kế hoạch điều trị" -->
+                <div>Quản lý kế hoạch điều trị</div>
+            </a>
         </li>
 
 
@@ -224,7 +238,7 @@
             <ul class="menu-sub">
                 <li class="menu-item">
                     <a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
-                        <div>List</div>
+                        <div>Danh Sách</div>
                     </a>
                 </li>
             </ul>
@@ -239,6 +253,15 @@
                 <div>Thông báo</div>
             </a>
         </li>
+
+        <li class="menu-item">
+            <a href="{{ route('admin.contacts.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-envelope"></i>
+                <div>Quản lý liên hệ</div>
+            </a>
+        </li>
+
+
 
         <li class="menu-item">
             <a href="app-chat.html" class="menu-link">
