@@ -106,3 +106,16 @@ Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->gr
 Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->group(function () {
     Route::get('/', [ReviewReplyController::class, 'index'])->name('index');
 });
+
+Route::get('/chi-tiet-dich-vu/{service_id}', [BookingController::class, 'show'])->name('booking.showService');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/luu-dich-vu', [BookingController::class, 'storeService'])->name('booking.storeService');
+    Route::get('/chon-ngay', [BookingController::class, 'chonNgay'])->name('booking.chonNgay');
+});
+
+
+
+Route::get('/abc', function () {
+    return view('client.note');
+});

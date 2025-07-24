@@ -9,7 +9,7 @@ class Notification extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'title', 'message', 'is_read', 'created_at'
+        'id','user_id', 'title', 'message', 'is_read', 'created_at'
     ];
     public $timestamps = false;
 }
