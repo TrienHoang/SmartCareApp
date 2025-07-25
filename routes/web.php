@@ -452,7 +452,7 @@ Route::get('admin/vouchers/show/{id}', [VoucherController::class, 'show'])->name
 // quản lý lịch làm việc
 Route::get('admin/schedules', [SchedulesController::class, 'index'])->name('admin.schedules.index');
 Route::get('admin/schedules/show/{id}', [SchedulesController::class, 'show'])->name('admin.schedules.show');
-Route::post('/admin/schedules/status/{id}', [SchedulesController::class, 'status'])->name('admin.schedules.status');
+Route::post('/admin/schedules/{id}/status', [SchedulesController::class, 'status'])->name('admin.schedules.status');
 
 
 // Quản lý đánh giá bác sĩ

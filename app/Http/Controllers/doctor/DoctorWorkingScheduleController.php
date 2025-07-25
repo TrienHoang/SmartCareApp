@@ -11,17 +11,39 @@ use App\Models\Shift;
 class DoctorWorkingScheduleController extends Controller
 {
     // Danh sách lịch làm việc của bác sĩ
-    public function index()
+    public function index(Request $request)
     {
-        $doctorId = Auth::id();
+        $doctorId = Auth::user()->doctor->id;
 
-        // Lấy danh sách lịch làm việc và phân trang
-        $workingSchedules = WorkingSchedule::with('shift')
+        $shifts = Shift::all();
+
+        $query = WorkingSchedule::with('shift')
             ->where('doctor_id', $doctorId)
-            ->orderBy('day', 'asc')
-            ->paginate(10); // Bạn có thể điều chỉnh số lượng phân trang
+            ->orderBy('day', 'asc');
 
-        return view('doctor.working-schedules.index', compact('workingSchedules'));
+        // Lọc theo ngày bắt đầu
+        if ($request->filled('from_date')) {
+            $query->whereDate('day', '>=', $request->from_date);
+        }
+
+        // Lọc theo ngày kết thúc
+        if ($request->filled('to_date')) {
+            $query->whereDate('day', '<=', $request->to_date);
+        }
+
+        // Lọc theo trạng thái
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Lọc theo ca trực
+        if ($request->filled('shift_id')) {
+            $query->where('shift_id', $request->shift_id);
+        }
+
+        $workingSchedules = $query->paginate(10)->withQueryString(); // Giữ lại query khi phân trang
+
+        return view('doctor.working-schedules.index', compact('workingSchedules', 'shifts'));
     }
     // Form tạo mới
     public function create()
