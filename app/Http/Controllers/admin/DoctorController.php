@@ -46,9 +46,8 @@ class DoctorController extends Controller
             ->get();
 
         $departments = Department::all();
-        $rooms = Room::all();
 
-        return view('admin.doctors.create', compact('availableUsers', 'departments', 'rooms'));
+        return view('admin.doctors.create', compact('availableUsers', 'departments'));
     }
 
 
@@ -62,7 +61,7 @@ class DoctorController extends Controller
             'avatar'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'specialization'  => 'required|string|max:255',
             'department_id'   => 'required|exists:departments,id',
-            'room_id'         => 'required|exists:rooms,id',
+            // 'room_id'         => 'required|exists:rooms,id',
         ], [
             'full_name.required'      => 'Vui lòng nhập họ tên bác sĩ.',
             'full_name.max'           => 'Họ tên không được vượt quá 100 ký tự.',
@@ -84,8 +83,8 @@ class DoctorController extends Controller
             'department_id.required'  => 'Vui lòng chọn phòng ban.',
             'department_id.exists'    => 'Phòng ban đã chọn không hợp lệ.',
 
-            'room_id.required'        => 'Vui lòng chọn phòng khám.',
-            'room_id.exists'          => 'Phòng khám đã chọn không hợp lệ.',
+            // 'room_id.required'        => 'Vui lòng chọn phòng khám.',
+            // 'room_id.exists'          => 'Phòng khám đã chọn không hợp lệ.',
         ]);
 
 
@@ -110,7 +109,7 @@ class DoctorController extends Controller
             'user_id'       => $user->id,
             'specialization' => $request->specialization,
             'department_id' => $request->department_id,
-            'room_id'       => $request->room_id,
+            // 'room_id'       => $request->room_id,
             'biography'     => $request->biography,
         ]);
 

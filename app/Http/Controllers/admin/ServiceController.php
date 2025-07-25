@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
+use App\Models\Room;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Http\Request;
@@ -43,7 +45,11 @@ class ServiceController extends Controller
     public function create()
     {
         $categories = ServiceCategory::where('status', 'active')->orderBy('name')->get();
-        return view('admin.services.create', compact('categories'));
+        $depatments = Department::where('is_active', '1')->get();
+        $rooms = Room::all();
+
+
+        return view('admin.services.create', compact('categories', 'depatments', 'rooms'));
     }
 
     public function store(Request $request)
@@ -59,7 +65,18 @@ class ServiceController extends Controller
         $validated['description'] = $validated['description'] ? trim($validated['description']) : null;
         $validated['price'] = round($validated['price'], 0);
         $validated['slug'] = str()->slug($validated['name']);
-        $validated['content'] = $request->input('content'); // ✅ thêm dòng này
+        $validated['content'] = $request->input('content');
+        $validated['department_id'] = $request->input('department_id');
+        $validated['room_id'] = $request->input('room_id'); // gán room_id
+        $validated['image'] = $request->input('image');
+
+        // Xử lý ảnh nếu có
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $path = $image->storeAs('services', $filename, 'public');
+            $validated['image'] = $path;
+        }
 
         DB::beginTransaction();
         try {
@@ -76,7 +93,10 @@ class ServiceController extends Controller
     {
         $service = Service::findOrFail($id);
         $categories = ServiceCategory::where('status', 'active')->orderBy('name')->get();
-        return view('admin.services.edit', compact('service', 'categories'));
+        $rooms = Room::orderBy('name')->get(); // lấy thêm tất cả phòng
+        $departments = Department::where('is_active', '1')->orderBy('name')->get();
+
+        return view('admin.services.edit', compact('service', 'departments', 'categories', 'rooms'));
     }
 
     public function update(Request $request, $id)
@@ -93,8 +113,22 @@ class ServiceController extends Controller
         $validated['price'] = round($validated['price'], 0);
         $validated['slug'] = str()->slug($validated['name']);
         $validated['content'] = $request->input('content'); // ✅ thêm dòng này
+        $validated['department_id'] = $request->input('department_id');
+        $validated['room_id'] = $request->input('room_id');
 
         $service = Service::findOrFail($id);
+
+        // Nếu có ảnh mới → xử lý upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $path = $image->storeAs('services', $filename, 'public');
+            $validated['image'] = $path;
+        } else {
+            // Nếu không có ảnh mới → giữ nguyên ảnh cũ
+            $validated['image'] = $service->image;
+        }
+
         $service->update($validated);
 
         return redirect()->route('admin.services.index')->with('success', 'Cập nhật dịch vụ thành công!');
@@ -102,7 +136,7 @@ class ServiceController extends Controller
 
     public function show($id)
     {
-        $service = Service::with('category')->findOrFail($id);
+        $service = Service::with('category', 'room', 'department')->findOrFail($id);
         return view('admin.services.show', compact('service'));
     }
 
@@ -124,6 +158,9 @@ class ServiceController extends Controller
             'service_cate_id' => 'required|exists:service_categories,id',
             'name' => 'required|string|min:3|max:255|unique:services,name|regex:/^[\p{L}\p{N}\s\-_.,()]+$/u',
             'description' => 'nullable|string|max:2000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'room_id' => 'required|exists:rooms,id',
+            'department_id' => 'required|exists:departments,id',
             'content' => 'nullable|string', // ✅ thêm dòng này
             'price' => 'required|numeric|min:1000|max:99999999',
             'duration' => 'required|integer|min:5|max:600',
@@ -138,6 +175,9 @@ class ServiceController extends Controller
             'name' => ['required', 'string', 'min:3', 'max:255', Rule::unique('services', 'name')->ignore($id), 'regex:/^[\p{L}\p{N}\s\-_.,()]+$/u'],
             'description' => 'nullable|string|max:2000',
             'content' => 'nullable|string', // ✅ thêm dòng này
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'department_id' => 'required|exists:departments,id',
+            'room_id' => 'required|exists:rooms,id',
             'price' => 'required|numeric|min:1000|max:99999999',
             'duration' => 'required|integer|min:5|max:600',
             'status' => ['required', Rule::in(['active', 'inactive'])]

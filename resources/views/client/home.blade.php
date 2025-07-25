@@ -200,7 +200,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     @foreach ($dich_vu as $service)
                         <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow hover-scale">
-                            <i data-lucide="{{ $service->icon }}" class="w-8 h-8 text-blue-600 mb-4"></i>
+                            <img src="{{ asset('storage/' . $service->image) }}" alt="{{ $service->name }}"
+                                class="w-full h-60 object-cover rounded-t-lg mb-2">
                             <h3 class="text-xl font-semibold mb-3">{{ $service->name }}</h3>
                             <p class="text-gray-600">{{ $service->description }}</p>
                             <div class="text-blue-600 font-semibold mt-4">
@@ -228,7 +229,7 @@
                             <ul class="splide__list">
                                 @forelse ($testimonials as $testimonial)
                                     <li class="splide__slide">
-                                        <div class="bg-white p-8 rounded-xl shadow-lg hover:scale-105 transition">
+                                        <div class="bg-white p-5 rounded-xl shadow-lg hover:scale-105 transition">
                                             {{-- Stars --}}
                                             <div class="flex items-center mb-4">
                                                 @for ($i = 0; $i < $testimonial->rating; $i++)

@@ -61,10 +61,10 @@
                         <span class="info-value">{{ $doctor->department->name ?? 'N/A' }}</span>
                     </div>
 
-                    <div class="mb-3">
+                    {{-- <div class="mb-3">
                         <span class="info-label">🏨 Phòng khám:</span>
                         <span class="info-value">{{ $doctor->room->name ?? 'N/A' }}</span>
-                    </div>
+                    </div> --}}
 
                     <div class="mb-3">
                         <span class="info-label">📝 Tiểu sử:</span>
