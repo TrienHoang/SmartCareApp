@@ -124,6 +124,11 @@
             </a>
         </li>
         <li class="menu-item">
+            <a href="{{ route('admin.shifts.index') }}" class="menu-link">
+                <div>Ca làm việc</div>
+            </a>
+        </li>
+        <li class="menu-item">
             <a href="{{ route('admin.system_notifications.index') }}" class="menu-link">
                 <div>Thông báo hệ thống</div>
             </a>
@@ -250,6 +255,7 @@
                 <div>Chat</div>
             </a>
         </li>
+
 
     </ul>
 </aside>
