@@ -45,7 +45,7 @@
                         </h5>
                     </div>
                     <div class="card-body p-4">
-                        <form action="{{ route('admin.services.store') }}" method="POST">
+                        <form action="{{ route('admin.services.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
                             <div class="row">
@@ -82,7 +82,63 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+
                             </div>
+
+                            <div class="row">
+                                <!-- Room -->
+                                <div class=" col-md-6 mb-3">
+                                    <label for="room_id" class="form-label fw-semibold">
+                                        <i class="fas fa-door-open text-primary me-1"></i>
+                                        Phòng thực hiện
+                                    </label>
+                                    <select name="room_id" class="form-select @error('room_id') is-invalid @enderror">
+                                        <option value="">-- Chọn phòng --</option>
+                                        @foreach ($rooms as $room)
+                                            <option value="{{ $room->id }}"
+                                                {{ old('room_id') == $room->id ? 'selected' : '' }}>
+                                                {{ $room->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('room_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <!-- Depatments -->
+                                <div class=" col-md-6 mb-3">
+                                    <label for="department_id" class="form-label fw-semibold">
+                                        <i class="fas fa-building text-info me-1"></i>Khoa phụ trách
+                                    </label>
+                                    <select name="department_id"
+                                        class="form-select @error('department_id') is-invalid @enderror">
+                                        <option value="">-- Chọn khoa --</option>
+                                        @foreach ($depatments as $dept)
+                                            <option value="{{ $dept->id }}"
+                                                {{ old('department_id', isset($service) ? $service->department_id : '') == $dept->id ? 'selected' : '' }}>
+                                                {{ $dept->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('department_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <!-- Image -->
+                            <div class="mb-3">
+                                <label for="image" class="form-label fw-semibold">
+                                    <i class="fas fa-image text-primary me-1"></i>
+                                    Ảnh dịch vụ
+                                </label>
+                                <input type="file" name="image"
+                                    class="form-control @error('image') is-invalid @enderror">
+                                @error('image')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
 
                             <!-- Description -->
                             <div class="mb-3">
@@ -107,7 +163,6 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-
 
                             <div class="row">
                                 <!-- Price -->

@@ -46,7 +46,7 @@
                         </h5>
                     </div>
                     <div class="card-body p-4">
-                        <form action="{{ route('admin.services.update', $service->id) }}" method="POST">
+                        <form action="{{ route('admin.services.update', $service->id) }}" method="POST"  enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
@@ -82,6 +82,64 @@
                                         {{ $message }}
                                     </div>
                                 @enderror
+                            </div>
+
+                            <!-- Department select -->
+                            <div class="mb-3">
+                                <label for="department_id" class="form-label fw-semibold">
+                                    <i class="fas fa-building text-secondary me-1"></i>Khoa phụ trách
+                                </label>
+                                <select name="department_id"
+                                    class="form-select @error('department_id') is-invalid @enderror">
+                                    <option value="">-- Chọn khoa --</option>
+                                    @foreach ($departments as $department)
+                                        <option value="{{ $department->id }}"
+                                            {{ old('department_id', $service->department_id) == $department->id ? 'selected' : '' }}>
+                                            {{ $department->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('department_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Room select -->
+                            <div class="mb-3">
+                                <label for="room_id" class="form-label fw-semibold">
+                                    <i class="fas fa-door-open text-secondary me-1"></i>Phòng thực hiện
+                                </label>
+                                <select name="room_id" class="form-select @error('room_id') is-invalid @enderror">
+                                    <option value="">-- Chọn phòng --</option>
+                                    @foreach ($rooms as $room)
+                                        <option value="{{ $room->id }}"
+                                            {{ old('room_id', $service->room_id) == $room->id ? 'selected' : '' }}>
+                                            {{ $room->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('room_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Image upload -->
+                            <div class="mb-3">
+                                <label for="image" class="form-label fw-semibold">
+                                    <i class="fas fa-image text-primary me-1"></i>Ảnh đại diện dịch vụ
+                                </label>
+                                <input type="file" name="image"
+                                    class="form-control @error('image') is-invalid @enderror">
+                                @error('image')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+
+                                @if ($service->image)
+                                    <div class="mt-2">
+                                        <img src="{{ asset('storage/' . $service->image) }}" alt="Ảnh hiện tại"
+                                            class="img-thumbnail" width="150">
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- Nội dung chi tiết -->

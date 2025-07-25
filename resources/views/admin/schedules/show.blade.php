@@ -215,9 +215,7 @@
                                         <i class="bx bx-arrow-back me-1"></i>Quay lại danh sách
                                     </a>
                                     <div class="btn-group" role="group">
-                                        <a class="btn btn-outline-primary" href="{{ route('admin.schedules.edit', $schedule->id) }}">
-                                            <i class="bx bx-edit-alt me-1"></i>Chỉnh sửa
-                                        </a>
+                                    
                                     </div>
                                 </div>
                             </div>

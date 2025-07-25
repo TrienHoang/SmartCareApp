@@ -97,6 +97,12 @@
                     <span>Lịch bác sĩ</span>
                 </a>
             </li>
+            <li class="menu-item">
+                <a href="{{ route('doctor.working_schedules.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-calendar"></i>
+                    <span>Lịch làm việc</span>
+                </a>
+            </li>
         @endif
     </ul>
 </aside>

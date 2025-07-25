@@ -236,8 +236,7 @@
                                                     id="service-{{ $service->id }}" value="{{ $service->id }}">
                                                 <label class="custom-control-label"
                                                     for="service-{{ $service->id }}"></label>
-                                                    id="service-{{ $service->id }}" value="{{ $service->id }}">
-                                                <label class="custom-control-label" for="service-{{ $service->id }}"></label>
+                
                                             </div>
                                         </td>
                                         <td>
@@ -256,9 +255,6 @@
                                         </td>
                                         <td>
                                             <div class="price-info">
-                                                <span
-                                                    class="font-weight-bold text-success">{{ number_format($service->price) }}đ</span>
-                                            </div>
                                             <span class="font-weight-bold text-success">
                                                 {{ number_format($service->price, 0, ',', '.') }}₫
                                             </span>
@@ -270,20 +266,6 @@
                                             </div>
                                         </td>
                                         <td>
-                                            @php
-                                                $statusConfig = [
-                                                    'active' => ['class' => 'success', 'icon' => 'check-circle'],
-                                                    'inactive' => ['class' => 'danger', 'icon' => 'x-circle'],
-                                                ];
-                                                $config = $statusConfig[$service->status] ?? [
-                                                    'class' => 'secondary',
-                                                    'icon' => 'help-circle',
-                                                ];
-                                            @endphp
-                                            <span class="badge badge-{{ $config['class'] }} badge-pill">
-                                                <i class="bx bx-{{ $config['icon'] }} mr-1"></i>
-                                                {{ ucfirst($service->status) }}
-                                            </span>
                                             @if($service->status === 'active')
                                                 <span class="badge badge-success badge-pill">
                                                     <i class="bx bx-check-circle mr-1"></i>Hoạt động

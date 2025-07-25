@@ -18,7 +18,9 @@ class Service extends Model
         'duration',
         'status',
         'content',
-
+        'department_id',
+        'room_id', 
+        'image',
     ];
 
     protected $dates = ['deleted_at'];
@@ -42,9 +44,13 @@ class Service extends Model
             ->withTimestamps();
     }
 
+    public function room (){
+        return $this->belongsTo(Room::class);
+    }
+
     public function department()
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Department::class, 'department_id', 'id');
     }
     public function doctor()
     {

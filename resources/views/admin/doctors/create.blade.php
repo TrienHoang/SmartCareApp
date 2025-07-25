@@ -87,7 +87,7 @@
                 @enderror
             </div>
 
-            <div class="col-md-6 mb-3">
+            {{-- <div class="col-md-6 mb-3">
                 <label class="form-label fw-semibold">🏨 Phòng khám <span class="text-danger">*</span></label>
                 <select name="room_id" class="form-select @error('room_id') is-invalid @enderror">
                     <option value="">-- Chọn phòng khám --</option>
@@ -100,7 +100,7 @@
                 @error('room_id')
                     <div class="invalid-feedback d-block">{{ $message }}</div>
                 @enderror
-            </div>
+            </div> --}}
 
             <div class="col-12 mb-3">
                 <label class="form-label fw-semibold">📝 Tiểu sử</label>

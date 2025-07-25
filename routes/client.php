@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Client\ServiceController;
 use App\Http\Controllers\client\ClientFileController;
-use App\Http\Controllers\Client\PaymentHistoryClientController; // Đúng namespace, đúng chữ hoa/thường
-
 use App\Http\Controllers\Client\PaymentHistoryClientController;
 
 use App\Http\Controllers\HomeController;
