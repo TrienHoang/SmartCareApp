@@ -24,7 +24,7 @@ class Appointment extends Model
         'created_at',
         'updated_at',
         'treatment_plan_id', 
-        'treatment_plan_item_id'
+        'treatment_plan_item_id',
         'created_by', // Thêm trường created_by
     ];
 
