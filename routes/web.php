@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\admin\RoleController;
 use App\Http\Controllers\admin\AppointmentController;
 use App\Http\Controllers\Admin\CalendarController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ContactController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DoctorController;
@@ -27,6 +29,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\admin\FaqController;
+use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\TreatmentPlanController;
 use App\Http\Controllers\Admin\RoomController;
@@ -441,12 +444,11 @@ Route::patch('admin/categories/toggle-status/{id}', [ServiceCategoryController::
 // quản lý dịch vụ
 Route::get('admin/services', [ServiceController::class, 'index'])->name('admin.services.index');
 Route::get('admin/services/create', [ServiceController::class, 'create'])->name('admin.services.create');
-Route::post('admin/services/store', [ServiceController::class, 'store'])->name('admin.services.store');
-Route::get('admin/services/edit/{id}', [ServiceController::class, 'edit'])->name('admin.services.edit');
-Route::put('admin/services/edit/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
-Route::delete('admin/services/destroy/{id}', [ServiceController::class, 'destroy'])->name('admin.services.destroy');
-Route::get('admin/services/show/{id}', [ServiceController::class, 'show'])->name('admin.services.show');
-
+Route::post('admin/services', [ServiceController::class, 'store'])->name('admin.services.store'); // Sửa ở đây
+Route::get('admin/services/{id}', [ServiceController::class, 'show'])->name('admin.services.show');
+Route::get('admin/services/{id}/edit', [ServiceController::class, 'edit'])->name('admin.services.edit');
+Route::put('admin/services/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
+Route::delete('admin/services/{id}', [ServiceController::class, 'destroy'])->name('admin.services.destroy');
 
 
 // Quản lý đơn hàng
@@ -720,6 +722,42 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     });
 });
 
+// quản lý bài viết
+Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+    Route::resource('posts', PostController::class);
+});
+
+// quản lý liên hệ
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('contacts')->name('contacts.')->group(function () {
+        Route::get('/', [ContactController::class, 'index'])->name('index');    
+        Route::get('/{id}', [ContactController::class, 'show'])->name('show');     
+        Route::delete('/{id}', [ContactController::class, 'destroy'])->name('destroy'); 
+        Route::post('/{id}/reply', [ContactController::class, 'reply'])->name('reply');
+        Route::patch('/{id}/status', [ContactController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/search', [ContactController::class, 'search'])->name('search'); 
+
+    });
+});
+
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+
+Route::get('/test-email', function () {
+    try {
+        Mail::raw('Đây là email test từ hệ thống Laravel.', function ($message) {
+            $message->to('lehieu19042005@gmail.com')
+                    ->subject('Thử gửi email');
+        });
+
+        return 'Gửi email thành công';
+    } catch (\Exception $e) {
+        Log::error('Lỗi gửi mail: ' . $e->getMessage());
+        return 'Lỗi: ' . $e->getMessage();
+    }
+});
+
+
 
 
 // phân quyền bác sĩ
@@ -741,6 +779,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 });
 
 require __DIR__ . '/client.php';
+
+
+
+
+
 
 
 
