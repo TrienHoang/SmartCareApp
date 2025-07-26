@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Doctor;
 
 use App\Http\Controllers\Controller;
+use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\WorkingSchedule;
@@ -55,8 +56,9 @@ class DoctorWorkingScheduleController extends Controller
         }
 
         $shifts = Shift::all();
+        $rooms = Room::all();
 
-        return view('doctor.working-schedules.create', compact('shifts', 'doctor'));
+        return view('doctor.working-schedules.create', compact('shifts', 'doctor','rooms'));
     }
 
 
@@ -83,12 +85,18 @@ class DoctorWorkingScheduleController extends Controller
                 'integer',
                 'exists:shifts,id',
             ],
+            'room_id' => [
+                'required',
+                'exists:rooms,id',
+            ],
         ], [
             'day.required' => 'Vui lòng chọn ngày làm việc.',
             'day.date' => 'Ngày không hợp lệ.',
             'day.after_or_equal' => 'Ngày làm việc phải là hôm nay hoặc trong tương lai.',
             'shift_ids.required' => 'Vui lòng chọn ít nhất một ca làm việc.',
             'shift_ids.*.exists' => 'Một hoặc nhiều ca làm việc không hợp lệ.',
+            'room_id.required' => 'Vui lòng chọn phòng làm việc.',
+            'room_id.exists' => 'Phòng làm việc không hợp lệ.',
         ]);
 
         $created = 0;
@@ -110,6 +118,7 @@ class DoctorWorkingScheduleController extends Controller
                 'day' => $validated['day'],
                 'shift_id' => $shiftId,
                 'status' => 'Chờ xét duyệt',
+                'room_id' => $validated['room_id']
             ]);
 
             $created++;
@@ -132,12 +141,14 @@ class DoctorWorkingScheduleController extends Controller
         $schedule = WorkingSchedule::where('id', $id)
             ->where('status', 'Chờ xét duyệt')
             ->where('doctor_id', Auth::user()->doctor->id ?? null)
+            ->with('room')
             ->firstOrFail();
 
         // Lấy danh sách ca làm việc
         $shifts = Shift::all();
+        $rooms = Room::all();   
 
-        return view('doctor.working-schedules.edit', compact('schedule', 'shifts'));
+        return view('doctor.working-schedules.edit', compact('schedule', 'shifts','rooms'));
     }
 
 
@@ -154,6 +165,7 @@ class DoctorWorkingScheduleController extends Controller
         $request->validate([
             'day' => 'required|date|after_or_equal:' . now()->toDateString(),
             'shift_id' => 'required|exists:shifts,id',
+            'room_id' => 'required|exists:rooms,id',
         ]);
 
         // Kiểm tra trùng lịch (cùng ngày, cùng ca làm)
@@ -171,6 +183,7 @@ class DoctorWorkingScheduleController extends Controller
         $schedule->update([
             'day' => $request->day,
             'shift_id' => $request->shift_id,
+            'room_id' => $request->room_id,
         ]);
 
         return redirect()->route('doctor.working_schedules.index')->with('success', 'Cập nhật lịch làm việc thành công.');
