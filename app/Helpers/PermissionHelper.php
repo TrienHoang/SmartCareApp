@@ -132,6 +132,11 @@ if (!function_exists('getPermissionLabel')) {
 
             // 22. Quản lý lịch sử chỉnh sửa đơn thuốc
             'view_prescription_histories' => 'Xem lịch sử chỉnh sửa đơn thuốc',
+
+            'view_contacts' => 'Xem liên hệ',
+            'delete_contacts' => 'Xóa liên hệ',
+
+
         ];
 
         return $labels[$permission] ?? $permission;
@@ -165,6 +170,7 @@ if (!function_exists('getPermissionGroupLabel')) {
             'vouchers' => 'Voucher',
             'upload_histories' => 'Lịch sử upload',
             'prescription_histories' => 'Lịch sử đơn thuốc',
+            'contacts' => 'Liên hệ',
         ];
 
         return $groups[$group] ?? ucfirst(str_replace('_', ' ', $group));

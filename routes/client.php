@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Http\Controllers\Client\ServiceController;
+use App\Http\Controllers\client\ClientFileController;
 use App\Http\Controllers\Client\PaymentHistoryClientController;
+
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Client\PaymentController;
 use Illuminate\Support\Facades\Route;
@@ -17,9 +20,21 @@ Route::get('/gioi-thieu', function () {
     return view('client.about');
 })->name('about');
 
-Route::get('/dich-vu', function () {
-    return view('client.services');
-})->name('services');
+// Dịch vụ
+Route::get('/dich-vu', [ServiceController::class, 'index'])->name('client.services');
+Route::get('/dich-vu/{id}', [ServiceController::class, 'show'])->name('client.services.show');
+Route::get('/dich-vu/chi-tiet/{id}', [ServiceController::class, 'detail'])->name('client.services.detail');
+
+// Tin tức
+Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news');
+Route::get('/tin-tuc/danh-muc/{id}', [NewsController::class, 'category'])->name('client.news.category');
+Route::get('/tin-tuc/{slug}', [NewsController::class, 'show'])->name('client.news.show');
+
+
+
+// liên hệ
+Route::get('/contact', [ContactController::class, 'showForm'])->name('contact.form');
+Route::post('/contact', [ContactController::class, 'submitForm'])->name('contact.submit');
 
 Route::get('/dat-lich', function () {
     return view('client.booking');
@@ -29,9 +44,9 @@ Route::get('/lien-he', function () {
     return view('client.contact');
 })->name('contact');
 
-Route::get('/tin-tuc', function () {
-    return view('client.news');
-})->name('news');
+// Route::get('/tin-tuc', function () {
+//     return view('client.news');
+// })->name('news');
 
 Route::get('/chi-tiet-tin-tuc/{id}', function ($id) {
     return view('client.news_detail', ['id' => $id]);

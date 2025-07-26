@@ -16,7 +16,7 @@ class SchedulesController extends Controller
 {
     public function index(Request $request)
     {
-        $workingSchedules = WorkingSchedule::with('shift')
+        $workingSchedules = WorkingSchedule::with('shift', 'doctor.user')
             ->paginate(10); // Bạn có thể điều chỉnh số lượng phân trang
 
         return view('admin.schedules.index', compact('workingSchedules'));

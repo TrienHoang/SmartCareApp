@@ -38,12 +38,23 @@ class BookingController extends Controller
         }
 
         $validated = $request->validate($rules);
+        // Lưu service_id và doctor_option vào session
+        $request->session()->put('booking_data', [
+            'service_id' => $validated['service_id'],
+            'doctor_option' => $validated['doctor_option'],
+            'doctor_id' => $validated['doctor_id'] ?? null, 
+        ]);
+
 
         return redirect()->route('booking.chonNgay');
     }
 
     public function chonNgay()
     {
-        return view('client.booking');
+        $service = Service::with(['category', 'department', 'doctors.user', 'doctors.reviews'])
+        ->where('id', session('booking_data.service_id'))
+        ->firstOrFail();
+
+        return view('client.booking', compact('service'));
     }
 }

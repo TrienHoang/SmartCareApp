@@ -6,24 +6,15 @@
 <div class="container py-4">
     <h2 class="mb-4">Tạo lịch làm việc mới</h2>
 
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <strong>Lỗi!</strong> Vui lòng kiểm tra lại thông tin.<br><br>
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    <div id="alert-area"></div>
 
-    <form action="{{ route('doctor.working_schedules.store') }}" method="POST">
+    <form id="working-schedule-form">
         @csrf
 
         {{-- Ngày làm việc --}}
         <div class="mb-3">
             <label for="day" class="form-label">Ngày làm việc <span class="text-danger">*</span></label>
-            <input type="date" name="day" id="day" class="form-control" value="{{ old('day') }}" required>
+            <input type="date" name="day" id="day" class="form-control" required min="{{ now()->toDateString() }}">
         </div>
 
         {{-- Tên bác sĩ --}}
@@ -34,8 +25,15 @@
 
         {{-- Phòng khám --}}
         <div class="mb-3">
-            <label class="form-label">Phòng khám:</label>
-            <input type="text" class="form-control" value="Phòng {{ auth()->user()->doctor->room_id }}" readonly>
+            <label for="room_id" class="form-label fw-semibold">
+                <i class="fas fa-door-open text-primary me-1"></i> Phòng thực hiện
+            </label>
+            <select name="room_id" class="form-select" required>
+                <option value="">-- Chọn phòng --</option>
+                @foreach ($rooms as $room)
+                    <option value="{{ $room->id }}">{{ $room->name }}</option>
+                @endforeach
+            </select>
         </div>
 
         {{-- Thứ trong tuần --}}
@@ -43,24 +41,25 @@
             <label class="form-label">Thứ:</label>
             <input type="text" id="day_of_week" class="form-control" readonly>
         </div>
-{{-- Chọn ca làm việc --}}
-<div class="mb-3">
-    <label class="form-label">Chọn ca làm việc <span class="text-danger">*</span></label>
-    <div class="row">
-        @foreach ($shifts as $shift)
-            <div class="col-md-4">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="shift_ids[]" 
-                           value="{{ $shift->id }}" id="shift_{{ $shift->id }}"
-                           {{ is_array(old('shift_ids')) && in_array($shift->id, old('shift_ids')) ? 'checked' : '' }}>
-                    <label class="form-check-label" for="shift_{{ $shift->id }}">
-                        {{ $shift->name }} ({{ \Carbon\Carbon::parse($shift->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($shift->end_time)->format('H:i') }})
-                    </label>
-                </div>
+
+        {{-- Chọn ca làm việc --}}
+        <div class="mb-3">
+            <label class="form-label">Chọn ca làm việc <span class="text-danger">*</span></label>
+            <div class="row">
+                @foreach ($shifts as $shift)
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="shift_ids[]"
+                                value="{{ $shift->id }}" id="shift_{{ $shift->id }}">
+                            <label class="form-check-label" for="shift_{{ $shift->id }}">
+                                {{ $shift->name }} ({{ \Carbon\Carbon::parse($shift->start_time)->format('H:i') }} -
+                                {{ \Carbon\Carbon::parse($shift->end_time)->format('H:i') }})
+                            </label>
+                        </div>
+                    </div>
+                @endforeach
             </div>
-        @endforeach
-    </div>
-</div>
+        </div>
 
         {{-- Nút gửi --}}
         <button type="submit" class="btn btn-primary">Tạo lịch</button>
@@ -77,8 +76,52 @@
     dayInput.addEventListener('change', function () {
         const day = new Date(this.value);
         const weekdays = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-        const weekday = weekdays[day.getDay()];
-        dayOfWeekInput.value = weekday;
+        dayOfWeekInput.value = weekdays[day.getDay()];
+    });
+
+    document.getElementById('working-schedule-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const formData = new FormData(form);
+        const alertArea = document.getElementById('alert-area');
+        alertArea.innerHTML = '';
+
+        try {
+            const response = await fetch("{{ route('doctor.working_schedules.store') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new Error("Phản hồi không hợp lệ từ server.");
+            }
+
+            const result = await response.json();
+
+            let messageHTML = `<div class="alert alert-success">${result.message}</div>`;
+
+            if (result.duplicates?.length) {
+                messageHTML += `<div class="alert alert-warning">⚠ Một số ca đã trùng lịch: ${result.duplicates.join(', ')}</div>`;
+            }
+
+            if (result.room_conflicts?.length) {
+                messageHTML += `<div class="alert alert-warning">⚠ Phòng đã có người sử dụng ở các ca: ${result.room_conflicts.join(', ')}</div>`;
+            }
+
+            alertArea.innerHTML = messageHTML;
+            form.reset();
+            dayOfWeekInput.value = '';
+
+        } catch (error) {
+            let msg = error?.message ?? 'Lỗi không xác định';
+            alertArea.innerHTML = `<div class="alert alert-danger">Lỗi gửi dữ liệu: ${msg}</div>`;
+        }
     });
 </script>
 @endpush

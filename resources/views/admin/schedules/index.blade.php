@@ -36,14 +36,14 @@
                     </div>
                 </div>
             </div>
-            <div class="content-header-right col-md-4 col-12 text-md-right">
+            {{-- <div class="content-header-right col-md-4 col-12 text-md-right">
                 <div class="form-group breadcrum-right">
                     <a href="{{ route('admin.schedules.create') }}"
                         class="btn btn-gradient-primary btn-lg waves-effect waves-light shadow-lg text-white">
                         Tạo lịch làm việc mới
                     </a>
                 </div>
-            </div>
+            </div> --}}
         </div>
 
         <div class="content-body">
@@ -220,7 +220,6 @@
                             </div>
                         </form>
                     </div>
-
                     <!-- Enhanced Table -->
                     <div class="table-responsive">
                         <table class="table table-hover table-modern mb-0">
@@ -233,6 +232,9 @@
                                         </div>
                                     </th>
                                     <th class="border-top-0">STT</th>
+                                    <th class="border-top-0">
+                                        <i class="bx bx-user mr-1"></i>Bác sĩ
+                                    </th>
                                     <th class="border-top-0">
                                         <i class="bx bx-calendar mr-1"></i>Ngày làm việc
                                     </th>
@@ -261,8 +263,15 @@
                                                     for="schedule-{{ $schedule->id }}"></label>
                                             </div>
                                         </td>
+
                                         <td class="font-weight-bold text-primary">
                                             {{ $workingSchedules->firstItem() + $index }}</td>
+                                        <td>
+                                            <div class=" text-blue ">
+                                                <span
+                                                    class="font-weight-bold">{{ $schedule->doctor->user->full_name ?? 'N/A' }}</span>
+                                            </div>
+                                        </td>
                                         <td>
                                             <div class="date-info">
                                                 <h6 class="mb-0 font-weight-semibold">
