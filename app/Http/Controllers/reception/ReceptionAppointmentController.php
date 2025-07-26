@@ -180,11 +180,33 @@ class ReceptionAppointmentController extends Controller
         $service = Service::findOrFail($serviceId);
         $slotDuration = $service->duration ?? 30; // fallback 30 phút nếu không có
 
-        // Giả sử bác sĩ làm từ 08:00–12:00 & 13:00–17:00
-        $workingHours = [
-            ['start' => '08:00', 'end' => '12:00'],
-            ['start' => '13:00', 'end' => '17:00'],
-        ];
+        // Tìm working schedule theo ngày cụ thể
+        $working = WorkingSchedule::with('shift')
+            ->where('doctor_id', $doctorId)
+            ->whereDate('day', $date)
+            ->first();
+
+        // Nếu không có theo ngày, tìm theo thứ
+        if (!$working) {
+            $dayOfWeek = Carbon::parse($date)->format('l');
+            $working = WorkingSchedule::with('shift')
+                ->where('doctor_id', $doctorId)
+                ->where('day_of_week', $dayOfWeek)
+                ->first();
+        }
+
+        if ($working && $working->shift) {
+            $workingHours = [[
+                'start' => $working->shift->start_time,
+                'end' => $working->shift->end_time
+            ]];
+        } else {
+            // Nếu bác sĩ không có lịch cụ thể → mặc định làm cả ngày
+            $workingHours = [
+                ['start' => '08:00', 'end' => '12:00'],
+                ['start' => '13:00', 'end' => '17:00'],
+            ];
+        }
 
         // Lấy các lịch đã đặt trong ngày
         $appointments = Appointment::where('doctor_id', $doctorId)
@@ -298,22 +320,33 @@ class ReceptionAppointmentController extends Controller
         }
 
         // Kiểm tra lịch làm việc
-        $working = WorkingSchedule::where('doctor_id', $validated['doctor_id'])
+        $working = WorkingSchedule::with('shift')
+            ->where('doctor_id', $validated['doctor_id'])
             ->whereDate('day', $day)
             ->first()
-            ?? WorkingSchedule::where('doctor_id', $validated['doctor_id'])
+            ?? WorkingSchedule::with('shift')
+            ->where('doctor_id', $validated['doctor_id'])
             ->where('day_of_week', $dayOfWeek)
             ->first();
 
-        if (!$working) {
+        if (!$working || !$working->shift) {
             if ($dayOfWeek === 'Sunday') {
                 return back()->withErrors(['doctor_id' => 'Bác sĩ không làm việc Chủ nhật.'])->withInput();
             }
-            $working = (object) ['start_time' => '08:00', 'end_time' => '17:00'];
+
+            // fallback giờ nếu shift không có
+            $working = (object) [
+                'shift' => (object)[
+                    'start_time' => '08:00',
+                    'end_time' => '17:00',
+                ]
+            ];
         }
 
-        if ($timeOnly < $working->start_time || $timeOnly >= $working->end_time) {
-            return back()->withErrors(['appointment_time' => 'Giờ hẹn ngoài khung giờ làm việc (' . $working->start_time . ' - ' . $working->end_time . ').'])->withInput();
+        if ($timeOnly < $working->shift->start_time || $timeOnly >= $working->shift->end_time) {
+            return back()->withErrors([
+                'appointment_time' => 'Giờ hẹn ngoài khung giờ làm việc (' . $working->shift->start_time . ' - ' . $working->shift->end_time . ').'
+            ])->withInput();
         }
 
         // Kiểm tra nghỉ phép
@@ -573,22 +606,33 @@ class ReceptionAppointmentController extends Controller
         }
 
         // Kiểm tra lịch làm việc
-        $working = WorkingSchedule::where('doctor_id', $validated['doctor_id'])
+        $working = WorkingSchedule::with('shift')
+            ->where('doctor_id', $validated['doctor_id'])
             ->whereDate('day', $day)
             ->first()
-            ?? WorkingSchedule::where('doctor_id', $validated['doctor_id'])
+            ?? WorkingSchedule::with('shift')
+            ->where('doctor_id', $validated['doctor_id'])
             ->where('day_of_week', $dayOfWeek)
             ->first();
 
-        if (!$working) {
+        if (!$working || !$working->shift) {
             if ($dayOfWeek === 'Sunday') {
                 return back()->withErrors(['doctor_id' => 'Bác sĩ không làm việc Chủ nhật.'])->withInput();
             }
-            $working = (object) ['start_time' => '08:00', 'end_time' => '17:00'];
+
+            // fallback giờ nếu shift không có
+            $working = (object)[
+                'shift' => (object)[
+                    'start_time' => '07:00',
+                    'end_time' => '17:00',
+                ]
+            ];
         }
 
-        if ($timeOnly < $working->start_time || $timeOnly >= $working->end_time) {
-            return back()->withErrors(['appointment_time' => 'Giờ hẹn ngoài khung giờ làm việc (' . $working->start_time . ' - ' . $working->end_time . ').'])->withInput();
+        if ($timeOnly < $working->shift->start_time || $timeOnly >= $working->shift->end_time) {
+            return back()->withErrors([
+                'appointment_time' => 'Giờ hẹn ngoài khung giờ làm việc (' . $working->shift->start_time . ' - ' . $working->shift->end_time . ').'
+            ])->withInput();
         }
 
         // Kiểm tra nghỉ phép
@@ -764,5 +808,12 @@ class ReceptionAppointmentController extends Controller
         });
 
         return back()->with('success', 'Đã huỷ lịch hẹn thành công.');
+    }
+
+    public function getDoctorsByService(Service $service)
+    {
+        $doctors = $service->doctors()->with('user')->get();
+
+        return response()->json($doctors);
     }
 }

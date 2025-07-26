@@ -126,7 +126,7 @@
                                 @foreach ($services as $service)
                                     <option value="{{ $service->id }}" data-price="{{ $service->price }}"
                                         {{ $appointment->service_id == $service->id ? 'selected' : '' }}>
-                                        {{ $service->name }}
+                                        {{ $service->name }} - {{ $service->department?->name ?? 'Không rõ khoa' }}
                                     </option>
                                 @endforeach
                             </select>

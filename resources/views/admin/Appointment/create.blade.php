@@ -57,7 +57,7 @@
                                 @foreach ($services as $service)
                                     <option value="{{ $service->id }}" data-price="{{ $service->price }}"
                                         {{ old('service_id') == $service->id ? 'selected' : '' }}>
-                                        {{ $service->name }}
+                                        {{ $service->name }} - {{ $service->department?->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -152,7 +152,8 @@
         window.treatmentPlanDetailsUrl = '{{ route('admin.appointments.treatment-plan.details', ['id' => '__ID__']) }}';
 
         window.treatmentPlansByPatientUrl = '{{ route('admin.appointments.treatment-plans.by-patient', ':id') }}';
-        window.doctorAvailableTimesUrl = '{{ route('admin.appointments.doctor.available-times', ['doctor' => '__DOCTOR__']) }}';
+        window.doctorAvailableTimesUrl =
+            '{{ route('admin.appointments.doctor.available-times', ['doctor' => '__DOCTOR__']) }}';
     </script>
 
     {{-- Flatpickr Vietnamese --}}

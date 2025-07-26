@@ -12,7 +12,7 @@ $(document).ready(function () {
     const oldAppointmentTimeGlobal = $slotSelect.data('old');
 
     function resetForm() {
-        $serviceSelect.html('<option value="">Chọn dịch vụ</option>').trigger('change.select2');
+        $doctor.html('<option value="">Chọn bác sĩ</option>').trigger('change.select2');
         $servicePrice.val('');
         $slotSelect.html('<option value="">Chọn giờ</option>').prop('disabled', true);
         $dateInput.prop('disabled', true);
@@ -20,22 +20,18 @@ $(document).ready(function () {
         if (flatpickrDate) flatpickrDate.destroy();
     }
 
-    function loadServices(doctorId, callback) {
-        $.get(doctorServicesUrl.replace(':id', doctorId), services => {
-            const oldServiceId = $serviceSelect.data('old');
-            let options = '<option value="">Chọn dịch vụ</option>';
-            services.forEach(service => {
-                const selected = oldServiceId == service.id ? 'selected' : '';
-                options += `<option value="${service.id}" data-price="${service.price}" ${selected}>${service.name}</option>`;
+    function loadDoctors(serviceId, callback) {
+        $.get(window.serviceDoctorsUrl.replace(':id', serviceId), doctors => {
+            const oldDoctorId = $doctor.data('old');
+            let options = '<option value="">Chọn bác sĩ</option>';
+            doctors.forEach(doc => {
+                const selected = oldDoctorId == doc.id ? 'selected' : '';
+                options += `<option value="${doc.id}" ${selected}>${doc.user.full_name}</option>`;
             });
-            $serviceSelect.html(options).trigger('change.select2');
-
-            if (oldServiceId) {
-                $serviceSelect.val(oldServiceId).trigger('change');
-            }
+            $doctor.html(options).trigger('change.select2');
 
             if (typeof callback === 'function') callback();
-        }).fail(() => toastr.error('Không thể tải danh sách dịch vụ'));
+        }).fail(() => toastr.error('Không thể tải danh sách bác sĩ'));
     }
 
     function loadWorkingDays(doctorId, callback) {
@@ -86,7 +82,6 @@ $(document).ready(function () {
         }, slots => {
             $slotSelect.empty();
 
-            // Lấy giờ cũ trong data-old (H:i)
             const oldFull = $slotSelect.data('old') || '';
             const oldTimeOnly = oldFull.split(' ')[1] ?? '';
 
@@ -104,7 +99,6 @@ $(document).ready(function () {
                     $slotSelect.append(`<option value="${value}" ${selected}>${slot}</option>`);
                 });
 
-                // Nếu giờ cũ không còn trong slot mới => fallback
                 if (!hasOld && oldTimeOnly) {
                     const fallbackValue = oldFull;
                     const fallbackTime = oldTimeOnly;
@@ -118,31 +112,46 @@ $(document).ready(function () {
         });
     }
 
-    $doctor.on('change', function () {
-        const doctorId = $(this).val();
-        if (!doctorId) {
+    $serviceSelect.on('change', function () {
+        const price = parseFloat($(this).find(':selected').data('price')) || 0;
+        $servicePrice.val(price.toLocaleString('vi-VN') + ' ₫');
+
+        const serviceId = $(this).val();
+        if (!serviceId) {
             resetForm();
             return;
         }
 
-        loadServices(doctorId, () => {
-            loadWorkingDays(doctorId, () => {
-                if ($dateInput.val()) {
-                    loadAvailableSlots();
-                }
-            });
+        loadDoctors(serviceId, () => {
+            const selectedDoctorId = $doctor.val();
+            if (selectedDoctorId) {
+                loadWorkingDays(selectedDoctorId, () => {
+                    if ($dateInput.val()) {
+                        loadAvailableSlots();
+                    }
+                });
+            }
         });
     });
 
-    $serviceSelect.on('change', function () {
-        const price = parseFloat($(this).find(':selected').data('price')) || 0;
-        $servicePrice.val(price.toLocaleString('vi-VN') + ' ₫');
-        if ($dateInput.val()) {
-            loadAvailableSlots();
+    $doctor.on('change', function () {
+        const doctorId = $(this).val();
+        if (!doctorId) {
+            $dateInput.prop('disabled', true).val('');
+            $slotSelect.html('<option value="">Chọn giờ</option>').prop('disabled', true);
+            if (flatpickrDate) flatpickrDate.destroy();
+            return;
         }
+
+        loadWorkingDays(doctorId, () => {
+            if ($dateInput.val()) {
+                loadAvailableSlots();
+            }
+        });
     });
 
-    if ($doctor.val()) {
-        $doctor.trigger('change');
+    // Tự động load lại dữ liệu cũ nếu có
+    if ($serviceSelect.val()) {
+        $serviceSelect.trigger('change');
     }
 });

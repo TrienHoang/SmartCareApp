@@ -55,5 +55,7 @@ Route::prefix('receptionist')
             Route::get('/doctor/{doctor}/services', [ReceptionAppointmentController::class, 'getDoctorServices'])->name('doctor.services');
 
             Route::get('/doctor/{doctor}/working-days', [ReceptionAppointmentController::class, 'getDoctorWorkingDays'])->name('doctor.working-days');
+
+            Route::get('/services/{service}/doctors', [ReceptionAppointmentController::class, 'getDoctorsByService'])->name('services.doctors');
         });
     });
