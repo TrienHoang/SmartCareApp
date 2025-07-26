@@ -147,12 +147,10 @@ class DoctorController extends Controller
         $validator = Validator::make($request->all(), [
             'specialization' => 'required|string|max:100',
             'department_id' => 'required|exists:departments,id',
-            'room_id' => 'required|exists:rooms,id',
             'biography' => 'nullable|string|max:1000',
         ], [
             'specialization.required' => '💼 Vui lòng nhập chuyên môn.',
             'department_id.required' => '🏥 Vui lòng chọn phòng ban.',
-            'room_id.required' => '🏨 Vui lòng chọn phòng khám.',
         ]);
 
         if ($validator->fails()) {

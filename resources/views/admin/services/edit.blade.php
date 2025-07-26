@@ -105,7 +105,7 @@
                             </div>
 
                             <!-- Room select -->
-                            <div class="mb-3">
+                            {{-- <div class="mb-3">
                                 <label for="room_id" class="form-label fw-semibold">
                                     <i class="fas fa-door-open text-secondary me-1"></i>Phòng thực hiện
                                 </label>
@@ -121,7 +121,7 @@
                                 @error('room_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                            </div>
+                            </div> --}}
 
                             <!-- Image upload -->
                             <div class="mb-3">

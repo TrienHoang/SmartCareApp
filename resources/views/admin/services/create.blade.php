@@ -87,7 +87,7 @@
 
                             <div class="row">
                                 <!-- Room -->
-                                <div class=" col-md-6 mb-3">
+                                {{-- <div class=" col-md-6 mb-3">
                                     <label for="room_id" class="form-label fw-semibold">
                                         <i class="fas fa-door-open text-primary me-1"></i>
                                         Phòng thực hiện
@@ -104,7 +104,7 @@
                                     @error('room_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                </div>
+                                </div> --}}
 
                                 <!-- Depatments -->
                                 <div class=" col-md-6 mb-3">
@@ -125,19 +125,21 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+
+                                <!-- Image -->
+                                <div class="mb-3">
+                                    <label for="image" class="form-label fw-semibold">
+                                        <i class="fas fa-image text-primary me-1"></i>
+                                        Ảnh dịch vụ
+                                    </label>
+                                    <input type="file" name="image"
+                                        class="form-control @error('image') is-invalid @enderror">
+                                    @error('image')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
-                            <!-- Image -->
-                            <div class="mb-3">
-                                <label for="image" class="form-label fw-semibold">
-                                    <i class="fas fa-image text-primary me-1"></i>
-                                    Ảnh dịch vụ
-                                </label>
-                                <input type="file" name="image"
-                                    class="form-control @error('image') is-invalid @enderror">
-                                @error('image')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+
 
 
                             <!-- Description -->

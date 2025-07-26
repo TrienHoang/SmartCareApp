@@ -15,7 +15,7 @@ class ServiceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Service::with('category');
+        $query = Service::with('category','department');
 
         if ($request->filled('search')) {
             $search = $request->get('search');
@@ -46,10 +46,9 @@ class ServiceController extends Controller
     {
         $categories = ServiceCategory::where('status', 'active')->orderBy('name')->get();
         $depatments = Department::where('is_active', '1')->get();
-        $rooms = Room::all();
 
 
-        return view('admin.services.create', compact('categories', 'depatments', 'rooms'));
+        return view('admin.services.create', compact('categories', 'depatments'));
     }
 
     public function store(Request $request)
@@ -67,7 +66,7 @@ class ServiceController extends Controller
         $validated['slug'] = str()->slug($validated['name']);
         $validated['content'] = $request->input('content');
         $validated['department_id'] = $request->input('department_id');
-        $validated['room_id'] = $request->input('room_id'); // gán room_id
+        // $validated['room_id'] = $request->input('room_id'); // gán room_id
         $validated['image'] = $request->input('image');
 
         // Xử lý ảnh nếu có
@@ -93,10 +92,9 @@ class ServiceController extends Controller
     {
         $service = Service::findOrFail($id);
         $categories = ServiceCategory::where('status', 'active')->orderBy('name')->get();
-        $rooms = Room::orderBy('name')->get(); // lấy thêm tất cả phòng
         $departments = Department::where('is_active', '1')->orderBy('name')->get();
 
-        return view('admin.services.edit', compact('service', 'departments', 'categories', 'rooms'));
+        return view('admin.services.edit', compact('service', 'departments', 'categories'));
     }
 
     public function update(Request $request, $id)
@@ -114,7 +112,7 @@ class ServiceController extends Controller
         $validated['slug'] = str()->slug($validated['name']);
         $validated['content'] = $request->input('content'); // ✅ thêm dòng này
         $validated['department_id'] = $request->input('department_id');
-        $validated['room_id'] = $request->input('room_id');
+        // $validated['room_id'] = $request->input('room_id');
 
         $service = Service::findOrFail($id);
 
@@ -159,7 +157,6 @@ class ServiceController extends Controller
             'name' => 'required|string|min:3|max:255|unique:services,name|regex:/^[\p{L}\p{N}\s\-_.,()]+$/u',
             'description' => 'nullable|string|max:2000',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'room_id' => 'required|exists:rooms,id',
             'department_id' => 'required|exists:departments,id',
             'content' => 'nullable|string', // ✅ thêm dòng này
             'price' => 'required|numeric|min:1000|max:99999999',
@@ -177,7 +174,6 @@ class ServiceController extends Controller
             'content' => 'nullable|string', // ✅ thêm dòng này
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'department_id' => 'required|exists:departments,id',
-            'room_id' => 'required|exists:rooms,id',
             'price' => 'required|numeric|min:1000|max:99999999',
             'duration' => 'required|integer|min:5|max:600',
             'status' => ['required', Rule::in(['active', 'inactive'])]
