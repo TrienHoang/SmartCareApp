@@ -257,11 +257,13 @@
                                 </td>
                                 <td data-label="Thao tác">
                                     <div class="table-actions">
+                                        {{-- Xem chi tiết --}}
                                         <a href="{{ route('admin.appointments.show', $appointment->id) }}"
                                             class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
                                             <i class="bx bx-show"></i>
                                         </a>
 
+                                        {{-- Chỉnh sửa --}}
                                         @if ($appointment->status != 'completed' && $appointment->status != 'cancelled')
                                             <a href="{{ route('admin.appointments.edit', $appointment->id) }}"
                                                 class="btn btn-sm btn-outline-warning" title="Chỉnh sửa">
@@ -269,6 +271,7 @@
                                             </a>
                                         @endif
 
+                                        {{-- Hoàn thành --}}
                                         @if ($appointment->status === 'confirmed')
                                             <button class="btn btn-sm btn-outline-success"
                                                 onclick="updateStatus({{ $appointment->id }}, 'completed')"
@@ -277,6 +280,7 @@
                                             </button>
                                         @endif
 
+                                        {{-- Thanh toán --}}
                                         @if (optional($appointment->payment)->status !== 'paid')
                                             @if ($appointment->status === 'confirmed')
                                                 <form action="{{ route('admin.appointments.pay', $appointment->id) }}"
@@ -292,11 +296,26 @@
                                             @endif
                                         @endif
 
+                                        {{-- Hủy lịch hẹn --}}
                                         @if (in_array($appointment->status, ['pending', 'confirmed']))
                                             <button class="btn btn-sm btn-outline-danger"
                                                 onclick="showCancelModal({{ $appointment->id }})" title="Hủy lịch hẹn">
                                                 <i class="bx bx-x-circle"></i>
                                             </button>
+                                        @endif
+
+                                        {{-- Hoàn tiền VNPay --}}
+                                        @if (
+                                            $appointment->status === 'cancelled' &&
+                                                optional($appointment->payment)->status === 'paid' &&
+                                                !optional($appointment->payment)->is_refunded)
+                                            <form action="{{ route('admin.appointments.refund', $appointment->id) }}"
+                                                method="POST" class="d-inline">
+                                                @csrf
+                                                <button class="btn btn-sm btn-outline-danger" title="Hoàn tiền VNPay">
+                                                    <i class="bx bx-undo"></i> Hoàn tiền
+                                                </button>
+                                            </form>
                                         @endif
                                     </div>
                                 </td>

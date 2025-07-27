@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Client;
 
-use App\Http\Controllers\Client\PaymentHistoryClientController; // Đúng namespace, đúng chữ hoa/thường
+use App\Http\Controllers\Client\PaymentHistoryClientController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Client\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -98,7 +98,9 @@ Route::prefix('client/payment')->name('client.payment.')->middleware(['auth'])->
     Route::get('/return', [PaymentController::class, 'return'])->name('return');
     Route::get('/ipn', [PaymentController::class, 'ipn'])->name('ipn');
 });
-Route::middleware(['auth'])->prefix('client/profile')->group(function () {
-    Route::get('/', [ProfileController::class, 'show'])->name('client.profile.show');
-    Route::patch('/update', [ProfileController::class, 'update'])->name('client.profile.update');
+
+
+Route::middleware(['auth'])->prefix('client/profile')->name('client.profile.')->group(function () {
+    Route::get('/', [ProfileController::class, 'show'])->name('show');
+    Route::patch('/update', [ProfileController::class, 'update'])->name('update');
 });
