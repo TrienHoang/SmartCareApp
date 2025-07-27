@@ -69,24 +69,28 @@ $(document).ready(function () {
             return;
         }
 
-        $.get(window.doctorWorkingDaysUrl.replace(':id', doctorId), ({ vacationDates }) => {
+        $.get(window.doctorWorkingDaysUrl.replace(':id', doctorId), ({ specificDates, vacationDates }) => {
             $dateInput.prop('disabled', false);
 
             if (flatpickrDate) flatpickrDate.destroy();
 
+            // Chỉ cho phép chọn các ngày có trong specificDates, trừ ngày nghỉ phép
             flatpickrDate = flatpickr($dateInput[0], {
                 dateFormat: "Y-m-d",
                 minDate: "today",
                 disableMobile: true,
                 locale: 'vi',
                 disable: [
-                    ...vacationDates,
-                    date => date.getDay() === 0
+                    function (date) {
+                        const str = flatpickr.formatDate(date, 'Y-m-d');
+                        // disable nếu KHÔNG thuộc ngày bác sĩ đăng ký hoặc là ngày nghỉ
+                        return !specificDates.includes(str) || vacationDates.includes(str);
+                    }
                 ],
                 onChange: loadAvailableSlots
             });
 
-            if (vacationDates.length) {
+            if (vacationDates && vacationDates.length) {
                 const info = vacationDates.join(', ');
                 $vacationText.text(`Bác sĩ nghỉ: ${info}`);
                 $vacationNotice.removeClass('d-none');

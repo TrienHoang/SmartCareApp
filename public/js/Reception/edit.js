@@ -8,7 +8,6 @@ $(document).ready(function () {
     const $vacationText = $('#vacation-text');
 
     let flatpickrDate;
-
     const oldAppointmentTimeGlobal = $slotSelect.data('old');
 
     function resetForm() {
@@ -35,19 +34,22 @@ $(document).ready(function () {
     }
 
     function loadWorkingDays(doctorId, callback) {
-        $.get(window.doctorWorkingDaysUrl.replace(':id', doctorId), ({ vacationDates }) => {
+        $.get(window.doctorWorkingDaysUrl.replace(':id', doctorId), ({ specificDates, vacationDates }) => {
             $dateInput.prop('disabled', false);
 
             if (flatpickrDate) flatpickrDate.destroy();
 
+            // Chỉ cho phép chọn những ngày trong specificDates và không bị nghỉ phép
             flatpickrDate = flatpickr($dateInput[0], {
                 dateFormat: "Y-m-d",
                 minDate: "today",
                 disableMobile: true,
                 locale: 'vi',
                 disable: [
-                    ...vacationDates,
-                    date => date.getDay() === 0
+                    function (date) {
+                        const str = flatpickr.formatDate(date, 'Y-m-d');
+                        return !specificDates.includes(str) || vacationDates.includes(str);
+                    }
                 ],
                 onChange: loadAvailableSlots
             });
@@ -99,10 +101,9 @@ $(document).ready(function () {
                     $slotSelect.append(`<option value="${value}" ${selected}>${slot}</option>`);
                 });
 
+                // Nếu giờ cũ không còn trong danh sách, vẫn hiển thị để tránh mất dữ liệu khi edit
                 if (!hasOld && oldTimeOnly) {
-                    const fallbackValue = oldFull;
-                    const fallbackTime = oldTimeOnly;
-                    $slotSelect.append(`<option value="${fallbackValue}" selected>${fallbackTime} (giờ đã bận)</option>`);
+                    $slotSelect.append(`<option value="${oldFull}" selected>${oldTimeOnly} (giờ đã bận)</option>`);
                 }
             }
             $slotSelect.prop('disabled', false);

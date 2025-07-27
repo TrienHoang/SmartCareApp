@@ -220,30 +220,12 @@ class AppointmentController extends Controller
                 ->get();
         }
 
-        // Nếu vẫn không có -> mặc định ca Full (07:00 - 17:00)
+        // Bác sĩ đk lịch làm việc mới đặt được lịch hẹn
         if ($workings->isEmpty()) {
-            if ($dayOfWeekEn !== 'Sunday') {
-                $defaultShift = Shift::where('name', 'Full')->first();
-
-                if (!$defaultShift) {
-                    return back()->withErrors([
-                        'appointment_time' => 'Không tìm thấy ca trực mặc định.'
-                    ])->withInput();
-                }
-
-                $fakeWorking = new WorkingSchedule([
-                    'doctor_id' => $request->doctor_id,
-                    'day' => $day,
-                    'shift_id' => $defaultShift->id,
-                ]);
-
-                $fakeWorking->setRelation('shift', $defaultShift);
-                $workings = collect([$fakeWorking]);
-            } else {
-                return back()->withErrors([
-                    'appointment_time' => 'Bác sĩ không làm việc vào Chủ nhật.'
-                ])->withInput();
-            }
+            return back()->withErrors([
+                'appointment_time' => 'Bác sĩ chưa đăng ký lịch làm việc vào ngày ' . $day .
+                    '. Vui lòng chọn bác sĩ khác hoặc ngày khác.'
+            ])->withInput();
         }
 
         // Trong giờ nghỉ trưa
@@ -501,35 +483,10 @@ class AppointmentController extends Controller
             logger()->info('📌 LỊCH THEO THỨ (ĐÃ LỌC SHIFT):', $workings->toArray());
 
             if ($workings->isEmpty()) {
-                if (!in_array($dayOfWeek, ['Sunday'])) {
-                    $defaultShift = Shift::whereRaw('LOWER(name) = ?', ['full'])->first();
-
-                    logger()->info('DEFAULT SHIFT', [
-                        'shift' => $defaultShift?->toArray(),
-                    ]);
-
-                    if (!$defaultShift) {
-                        return back()->withErrors([
-                            'appointment_time' => 'Không tìm thấy ca trực mặc định.'
-                        ])->withInput();
-                    }
-
-                    $fakeWorking = new WorkingSchedule();
-                    $fakeWorking->shift_id = $defaultShift->id;
-                    $fakeWorking->doctor_id = $request->doctor_id;
-                    $fakeWorking->setRelation('shift', $defaultShift);
-
-                    $workings = collect([$fakeWorking]);
-
-                    logger()->info('✅ CA TRỰC FINAL (DÙNG Fallback):', $workings->map(fn($w) => [
-                        'start' => $w->shift->start_time ?? 'null',
-                        'end' => $w->shift->end_time ?? 'null'
-                    ])->toArray());
-                } else {
-                    return back()->withErrors([
-                        'appointment_time' => 'Bác sĩ không làm việc vào Chủ nhật. Vui lòng chọn ngày khác.'
-                    ])->withInput();
-                }
+                return back()->withErrors([
+                    'appointment_time' => 'Bác sĩ chưa đăng ký lịch làm việc vào ngày ' . $day .
+                        '. Vui lòng chọn bác sĩ khác hoặc ngày khác.'
+                ])->withInput();
             }
         }
 

@@ -133,9 +133,9 @@ class ReceptionAppointmentController extends Controller
             ->toArray();
 
         // ⚡ Nếu không có dữ liệu, mặc định Thứ 2–Thứ 7
-        if (empty($daysOfWeek)) {
-            $daysOfWeek = [1, 2, 3, 4, 5, 6];
-        }
+        // if (empty($daysOfWeek)) {
+        //     $daysOfWeek = [1, 2, 3, 4, 5, 6];
+        // }
 
         // Ngày làm việc cụ thể (YYYY-MM-DD)
         $specificDates = $doctor->workingSchedules()
@@ -195,18 +195,14 @@ class ReceptionAppointmentController extends Controller
                 ->first();
         }
 
-        if ($working && $working->shift) {
-            $workingHours = [[
-                'start' => $working->shift->start_time,
-                'end' => $working->shift->end_time
-            ]];
-        } else {
-            // Nếu bác sĩ không có lịch cụ thể → mặc định làm cả ngày
-            $workingHours = [
-                ['start' => '08:00', 'end' => '12:00'],
-                ['start' => '13:00', 'end' => '17:00'],
-            ];
+        if (!$working || !$working->shift) {
+            return response()->json([]); // Không có lịch làm việc => không có slot
         }
+
+        $workingHours = [[
+            'start' => $working->shift->start_time,
+            'end' => $working->shift->end_time
+        ]];
 
         // Lấy các lịch đã đặt trong ngày
         $appointments = Appointment::where('doctor_id', $doctorId)
@@ -330,17 +326,9 @@ class ReceptionAppointmentController extends Controller
             ->first();
 
         if (!$working || !$working->shift) {
-            if ($dayOfWeek === 'Sunday') {
-                return back()->withErrors(['doctor_id' => 'Bác sĩ không làm việc Chủ nhật.'])->withInput();
-            }
-
-            // fallback giờ nếu shift không có
-            $working = (object) [
-                'shift' => (object)[
-                    'start_time' => '08:00',
-                    'end_time' => '17:00',
-                ]
-            ];
+            return back()->withErrors([
+                'doctor_id' => 'Bác sĩ chưa đăng ký lịch làm việc cho ngày này, không thể đặt lịch.'
+            ])->withInput();
         }
 
         if ($timeOnly < $working->shift->start_time || $timeOnly >= $working->shift->end_time) {
@@ -616,17 +604,9 @@ class ReceptionAppointmentController extends Controller
             ->first();
 
         if (!$working || !$working->shift) {
-            if ($dayOfWeek === 'Sunday') {
-                return back()->withErrors(['doctor_id' => 'Bác sĩ không làm việc Chủ nhật.'])->withInput();
-            }
-
-            // fallback giờ nếu shift không có
-            $working = (object)[
-                'shift' => (object)[
-                    'start_time' => '07:00',
-                    'end_time' => '17:00',
-                ]
-            ];
+            return back()->withErrors([
+                'doctor_id' => 'Bác sĩ chưa đăng ký lịch làm việc cho ngày này, không thể đặt lịch.'
+            ])->withInput();
         }
 
         if ($timeOnly < $working->shift->start_time || $timeOnly >= $working->shift->end_time) {

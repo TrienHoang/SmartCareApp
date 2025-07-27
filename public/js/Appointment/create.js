@@ -150,8 +150,9 @@ $(document).ready(function () {
             return;
         }
 
-        $.get(window.doctorWorkingDaysUrl.replace(':id', doctorId), function ({ daysOfWeek, specificDates, vacationDates: vacations }) {
+        $.get(window.doctorWorkingDaysUrl.replace(':id', doctorId), function ({ specificDates, vacationDates: vacations }) {
             vacationDates = vacations || [];
+            const workingSpecific = specificDates || [];
 
             if (flatpickrInstance) flatpickrInstance.destroy();
 
@@ -163,19 +164,11 @@ $(document).ready(function () {
                 disable: [
                     function (date) {
                         const str = flatpickr.formatDate(date, 'Y-m-d');
-                        return date.getDay() === 0 || vacationDates.includes(str);
+
+                        // Chỉ cho phép chọn những ngày có trong workingSpecific và không bị nghỉ phép
+                        return !workingSpecific.includes(str) || vacationDates.includes(str);
                     }
                 ],
-                onDayCreate: function (_, __, fp, dayElem) {
-                    const date = flatpickr.formatDate(dayElem.dateObj, 'Y-m-d');
-                    dayElem.classList.remove('vacation-day');
-                    dayElem.removeAttribute('title');
-
-                    if (vacationDates.includes(date)) {
-                        dayElem.classList.add('flatpickr-disabled', 'vacation-day');
-                        dayElem.setAttribute('title', 'Bác sĩ nghỉ phép');
-                    }
-                },
                 onChange: function (selectedDates, dateStr) {
                     if (vacationDates.includes(dateStr)) {
                         toastr.warning('Bác sĩ nghỉ phép ngày này, vui lòng chọn ngày khác.', 'Cảnh báo');

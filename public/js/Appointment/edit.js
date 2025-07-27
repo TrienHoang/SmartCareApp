@@ -74,8 +74,9 @@ $(document).ready(function () {
     function loadWorkingDays(doctorId) {
         destroyFlatpickr();
 
-        $.get(doctorWorkingDaysUrl.replace(':id', doctorId), function ({ vacationDates: vacations }) {
+        $.get(doctorWorkingDaysUrl.replace(':id', doctorId), function ({ specificDates, vacationDates: vacations }) {
             vacationDates = vacations || [];
+            const workingSpecific = specificDates || [];
 
             flatpickrInstance = flatpickr("#appointment_date", {
                 dateFormat: "Y-m-d",
@@ -85,19 +86,11 @@ $(document).ready(function () {
                 disable: [
                     function (date) {
                         const str = flatpickr.formatDate(date, 'Y-m-d');
-                        return date.getDay() === 0 || vacationDates.includes(str);
+
+                        // Chỉ bật chọn nếu ngày nằm trong workingSpecific và không nằm trong vacationDates
+                        return !workingSpecific.includes(str) || vacationDates.includes(str);
                     }
                 ],
-                onDayCreate: function (_, __, fp, dayElem) {
-                    const date = flatpickr.formatDate(dayElem.dateObj, 'Y-m-d');
-                    dayElem.classList.remove('vacation-day');
-                    dayElem.removeAttribute('title');
-
-                    if (vacationDates.includes(date)) {
-                        dayElem.classList.add('flatpickr-disabled', 'vacation-day');
-                        dayElem.setAttribute('title', 'Bác sĩ nghỉ phép');
-                    }
-                },
                 onChange: function (selectedDates, dateStr) {
                     if (vacationDates.includes(dateStr)) {
                         toastr.warning('Bác sĩ nghỉ phép ngày này, vui lòng chọn ngày khác.', 'Cảnh báo');
