@@ -90,7 +90,7 @@ class BookingController extends Controller
         // Lấy tháng và năm từ request của frontend
         $queryMonth = $validated['month']; // Month là 0-indexed từ JS (0-11)
         $queryYear = $validated['year'];
-        
+
         $start_of_month = Carbon::create($queryYear, $queryMonth + 1, 1)->startOfDay();
 
         $end_of_month = Carbon::create($queryYear, $queryMonth + 1, 1)->endOfMonth()->endOfDay();
@@ -127,10 +127,10 @@ class BookingController extends Controller
 
         $doctor_ids = collect($doctor_ids);
 
-            // Nếu không tìm thấy bác sĩ nào khớp, trả về mảng rỗng
-            if ($doctor_ids->isEmpty()) {
-                return response()->json([]);
-            }
+        // Nếu không tìm thấy bác sĩ nào khớp, trả về mảng rỗng
+        if ($doctor_ids->isEmpty()) {
+            return response()->json([]);
+        }
 
         // Lấy ngày khả dụng cho các bác sĩ đã chọn trong khoảng thời gian tìm kiếm
         $schedules = WorkingSchedule::whereIn('doctor_id', $doctor_ids)
@@ -141,7 +141,7 @@ class BookingController extends Controller
 
         $available_dates = [];
         foreach ($schedules as $schedule) {
-            $date = Carbon::parse($schedule->day); 
+            $date = Carbon::parse($schedule->day);
             $shift = $schedule->shift;
 
             if (!$shift) {
@@ -158,7 +158,7 @@ class BookingController extends Controller
             } catch (\Exception $e) {
                 // Log lỗi nếu parse thời gian thất bại
                 \Log::error("Invalid shift time for schedule ID {$schedule->id}: Start: {$start_time_str}, End: {$end_time_str}");
-                continue; 
+                continue;
             }
 
             $current = $start->copy();
@@ -195,75 +195,129 @@ class BookingController extends Controller
     public function getSlots(Request $request)
     {
         $validated = $request->validate([
-            'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(7)->toDateString(),
+            'date' => 'required|date_format:Y-m-d',
             'service_id' => 'required|exists:services,id',
             'doctor_id' => 'nullable|exists:doctors,id',
         ]);
 
+        $selected_date = Carbon::parse($validated['date'])->startOfDay();
         $service = Service::findOrFail($validated['service_id']);
-        $selected_date = Carbon::parse($validated['date']);
         $doctor_id = $validated['doctor_id'];
+        $current_datetime = Carbon::now();
 
-        if ($doctor_id) {
-            $doctor_ids = [$doctor_id];
-        } else {
-            // Random: Lấy bác sĩ ít lịch nhất
-            $doctor_ids = Doctor::where('department_id', $service->department_id)
-                ->whereIn('id', function ($query) use ($service) {
-                    $query->select('doctor_id')
-                        ->from('doctor_service')
-                        ->where('service_id', $service->id);
-                })
-                ->leftJoinSub(
-                    Appointment::whereBetween('appointment_time', [now(), now()->addDays(7)])
-                        ->where('status', '!=', 'cancelled')
-                        ->groupBy('doctor_id')
-                        ->select('doctor_id', DB::raw('count(*) as appointment_count')),
-                    'appointments',
-                    'doctors.id',
-                    '=',
-                    'appointments.doctor_id'
-                )
-                ->orderBy('appointment_count', 'asc')
-                ->pluck('doctors.id');
+        // Lấy danh sách bác sĩ và số lịch hẹn (nếu random)
+        $doctor_appointments = [];
+        if (!$doctor_id) {
+            $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(7)])
+                ->where('status', '!=', 'cancelled')
+                ->groupBy('doctor_id')
+                ->select('doctor_id', \DB::raw('count(*) as appointment_count'))
+                ->pluck('appointment_count', 'doctor_id')
+                ->toArray();
         }
 
-        $schedules = WorkingSchedule::whereIn('doctor_id', $doctor_ids)
+        $schedules = WorkingSchedule::whereHas('doctor', function ($query) use ($service, $doctor_id) {
+            $query->where('department_id', $service->department_id);
+            if ($doctor_id) {
+                $query->where('id', $doctor_id);
+            } else {
+                $query->whereIn('id', function ($subQuery) use ($service) {
+                    $subQuery->select('doctor_id')
+                        ->from('doctor_service')
+                        ->where('service_id', $service->id);
+                });
+            }
+        })
+            ->where('day', $selected_date->toDateString())
             ->where('status', 'Đã xét duyệt')
-            ->where(function ($query) use ($selected_date) {
-                $query->where('day', $selected_date->toDateString());
-            })
             ->with('shift')
             ->get();
 
-        $slots = [];
+        $available_slots = [];
+
         foreach ($schedules as $schedule) {
             $shift = $schedule->shift;
-            $start = Carbon::parse($shift->start_time);
-            $end = Carbon::parse($shift->end_time);
-            $current = $start->copy();
+            if (!$shift) {
+                \Log::warning("No shift found for schedule ID {$schedule->id}");
+                continue;
+            }
 
-            while ($current->lessThan($end)) {
-                $slot_start = $current->format('H:i');
-                $slot_end = $current->addMinutes($service->duration)->format('H:i');
+            try {
+                $start = Carbon::parse($shift->start_time);
+                $end = Carbon::parse($shift->end_time);
+            } catch (\Exception $e) {
+                \Log::error("Invalid shift time for schedule ID {$schedule->id}: Start: {$shift->start_time}, End: {$shift->end_time}");
+                continue;
+            }
 
-                // Kiểm tra slot đã đặt
+            $current_slot_time = $start->copy();
+
+            while ($current_slot_time->lessThan($end)) {
+                $slot_end_time = $current_slot_time->copy()->addMinutes($service->duration);
+
+                // Kiểm tra slot kết thúc không vượt quá end_time
+                if ($slot_end_time->greaterThan($end)) {
+                    break;
+                }
+
+                $slot_full_datetime = $selected_date->copy()->setTimeFromTimeString($current_slot_time->format('H:i'));
+
+                // Bỏ qua slot trong quá khứ
+                if ($slot_full_datetime->lt($current_datetime)) {
+                    $current_slot_time->addMinutes($service->duration);
+                    continue;
+                }
+
+                // Kiểm tra slot đã được đặt
                 $booked = Appointment::where('doctor_id', $schedule->doctor_id)
-                    ->where('appointment_time', $selected_date->setTimeFromTimeString($slot_start))
+                    ->where('appointment_time', $slot_full_datetime)
                     ->where('status', '!=', 'cancelled')
                     ->exists();
 
-                if (!$booked) {
-                    $slots[] = [
-                        'doctor_id' => $schedule->doctor_id,
-                        'start' => $slot_start,
-                        'end' => $slot_end,
-                    ];
+                if ($booked) {
+                    $current_slot_time->addMinutes($service->duration);
+                    continue;
                 }
+
+                $slot_key = $current_slot_time->format('H:i') . '-' . $slot_end_time->format('H:i');
+
+                // Kiểm tra slot đã tồn tại
+                if (!isset($available_slots[$slot_key])) {
+                    $available_slots[$slot_key] = [
+                        'start' => $current_slot_time->format('H:i'),
+                        'end' => $slot_end_time->format('H:i'),
+                        'doctor_id' => $schedule->doctor_id,
+                        'appointment_count' => $doctor_id ? 0 : ($doctor_appointments[$schedule->doctor_id] ?? 0),
+                    ];
+                } else {
+                    // Nếu slot đã tồn tại và là random, ưu tiên bác sĩ có ít lịch hẹn hơn
+                    if (!$doctor_id) {
+                        $current_count = $doctor_appointments[$schedule->doctor_id] ?? 0;
+                        $existing_count = $available_slots[$slot_key]['appointment_count'];
+                        if ($current_count < $existing_count) {
+                            $available_slots[$slot_key]['doctor_id'] = $schedule->doctor_id;
+                            $available_slots[$slot_key]['appointment_count'] = $current_count;
+                        }
+                    }
+                }
+
+                $current_slot_time->addMinutes($service->duration);
             }
         }
 
-        return response()->json($slots);
+        // Chuyển mảng kết quả về dạng danh sách
+        $result = array_values($available_slots);
+        usort($result, function ($a, $b) {
+            return strtotime($a['start']) - strtotime($b['start']);
+        });
+
+        // Loại bỏ appointment_count khỏi kết quả
+        $result = array_map(function ($slot) {
+            unset($slot['appointment_count']);
+            return $slot;
+        }, $result);
+
+        return response()->json($result);
     }
 
     public function store(Request $request)
