@@ -22,7 +22,6 @@ class Doctor extends Model
     // --------------------
     // Relationships
     // --------------------
-
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
@@ -106,10 +105,4 @@ class Doctor extends Model
     {
         return $this->belongsToMany(Specialty::class, 'doctor_specialty');
     }
-
-    
-
-    
-
-    
 }
