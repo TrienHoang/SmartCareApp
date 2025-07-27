@@ -200,6 +200,6 @@ class DoctorWorkingScheduleController extends Controller
 
         $schedule->delete();
 
-        return redirect()->route('doctor.working-schedules.index')->with('success', 'Xóa lịch làm việc thành công.');
+        return redirect()->route('doctor.working_schedules.index')->with('success', 'Xóa lịch làm việc thành công.');
     }
 }

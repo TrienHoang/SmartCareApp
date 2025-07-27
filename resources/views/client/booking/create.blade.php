@@ -3,9 +3,8 @@
 @section('title', 'Đặt lịch khám bệnh')
 @push('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
     <style>
-        /* Calendar styles */
+        /* Giữ nguyên CSS của bạn */
         .date-cell.disabled {
             color: #9ca3af;
             background-color: #f3f4f6;
@@ -46,7 +45,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        /* Time slot buttons - Using direct CSS instead of @apply */
         .time-slot-btn {
             display: inline-block;
             padding: 12px 16px;
@@ -91,7 +89,6 @@
             box-shadow: none !important;
         }
 
-        /* Smooth animations */
         .fade-in {
             animation: fadeIn 0.3s ease-in-out;
         }
@@ -101,22 +98,27 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes slideUp {
-            from { 
-                opacity: 0; 
-                transform: translateY(20px); 
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        /* Loading animation */
         .loading {
             position: relative;
             pointer-events: none;
@@ -137,11 +139,15 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
-        /* Card hover effects */
         .info-card {
             transition: all 0.3s ease-in-out;
         }
@@ -151,7 +157,6 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
-        /* Navigation buttons */
         .nav-btn {
             transition: all 0.2s ease-in-out;
         }
@@ -161,7 +166,6 @@
             transform: scale(1.1);
         }
 
-        /* Time slots section */
         .time-slots-enter {
             opacity: 0;
             transform: translateY(-10px);
@@ -173,7 +177,6 @@
             transition: all 0.3s ease-in-out;
         }
 
-        /* Responsive improvements */
         @media (max-width: 768px) {
             .time-slot-btn {
                 min-width: 100px;
@@ -187,7 +190,6 @@
 @section('content')
     <div class="container mx-auto px-4 py-8 md:py-12">
         <div class="flex flex-col lg:flex-row justify-center gap-6">
-
             {{-- Left Column: Thông tin cơ sở y tế --}}
             <div class="w-full lg:w-1/3 mb-6 lg:mb-0">
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden info-card">
@@ -215,14 +217,12 @@
                         </div>
                     </div>
                 </div>
-                
-                {{-- Quay lại link --}}
-                <div class="mt-6">
-                    <a href="#" class="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline text-base font-medium transition-colors duration-200">
+                {{-- <div class="mt-6">
+                    <a href="{{ route('booking.showService') }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline text-base font-medium transition-colors duration-200">
                         <i class="bi bi-arrow-left mr-2"></i>
                         Quay lại danh sách dịch vụ
                     </a>
-                </div>
+                </div> --}}
             </div>
 
             {{-- Right Column: Chọn ngày khám --}}
@@ -233,18 +233,18 @@
                         Vui lòng chọn ngày khám
                     </div>
                     <div class="p-6">
-                        {{-- Month Navigation --}}
                         <div class="flex justify-center items-center text-xl font-semibold text-gray-800 mb-6">
-                            <button id="prevMonth" class="nav-btn bg-transparent border-none text-blue-600 text-2xl cursor-pointer p-3 rounded-full hover:bg-blue-50 transition-all duration-200">
+                            <button id="prevMonth"
+                                class="nav-btn bg-transparent border-none text-blue-600 text-2xl cursor-pointer p-3 rounded-full hover:bg-blue-50 transition-all duration-200">
                                 <i class="bi bi-chevron-left"></i>
                             </button>
                             <span id="monthYearDisplay" class="mx-8 text-blue-700 font-bold text-xl"></span>
-                            <button id="nextMonth" class="nav-btn bg-transparent border-none text-blue-600 text-2xl cursor-pointer p-3 rounded-full hover:bg-blue-50 transition-all duration-200">
+                            <button id="nextMonth"
+                                class="nav-btn bg-transparent border-none text-blue-600 text-2xl cursor-pointer p-3 rounded-full hover:bg-blue-50 transition-all duration-200">
                                 <i class="bi bi-chevron-right"></i>
                             </button>
                         </div>
 
-                        {{-- Calendar Grid --}}
                         <div id="calendarGrid" class="grid grid-cols-7 gap-2 text-center mb-4">
                             <div class="font-bold text-gray-600 py-3 text-sm text-red-600">CN</div>
                             <div class="font-bold text-gray-600 py-3 text-sm">Hai</div>
@@ -255,69 +255,75 @@
                             <div class="font-bold text-gray-600 py-3 text-sm text-yellow-600">Bảy</div>
                         </div>
 
-                        {{-- Time Slots Section --}}
-                        <div id="timeSlotsSection" class="mt-8 pt-6 border-t-2 border-gray-100 hidden">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-xl font-bold text-gray-800 flex items-center">
-                                    <i class="bi bi-clock mr-2 text-blue-600"></i>
-                                    Chọn giờ khám
-                                </h3>
-                                <button id="closeTimeSlots" class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium transition-colors duration-200 flex items-center">
-                                    <i class="bi bi-x-lg mr-1"></i>
-                                    Đóng
-                                </button>
-                            </div>
+                        <form id="bookingForm" method="POST" action="{{ route('booking.store') }}">
+                            @csrf
+                            <input type="hidden" name="date" id="selectedDateInput">
+                            <input type="hidden" name="slot_start" id="selectedSlotInput">
+                            <input type="hidden" name="doctor_id" id="selectedDoctorInput">
 
-                            <div class="mb-8">
-                                <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
-                                    <i class="bi bi-sun mr-2 text-yellow-500"></i>
-                                    Buổi sáng
-                                </h4>
-                                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="morningSlots">
-                                    <button type="button" class="time-slot-btn" data-time="07:00-08:00">07:00 - 08:00</button>
-                                    <button type="button" class="time-slot-btn" data-time="08:00-09:00">08:00 - 09:00</button>
-                                    <button type="button" class="time-slot-btn" data-time="09:00-10:00">09:00 - 10:00</button>
-                                    <button type="button" class="time-slot-btn" data-time="10:00-11:00">10:00 - 11:00</button>
-                                    <button type="button" class="time-slot-btn" data-time="11:00-12:00">11:00 - 12:00</button>
-                                    <button type="button" class="time-slot-btn disabled-slot" data-time="06:00-07:00" disabled>06:00 - 07:00</button>
+                            <div id="timeSlotsSection" class="mt-8 pt-6 border-t-2 border-gray-100 hidden">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                                        <i class="bi bi-clock mr-2 text-blue-600"></i>
+                                        Chọn giờ khám
+                                    </h3>
+                                    <button type="button" id="closeTimeSlots"
+                                        class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium transition-colors duration-200 flex items-center">
+                                        <i class="bi bi-x-lg mr-1"></i>
+                                        Đóng
+                                    </button>
                                 </div>
-                            </div>
 
-                            <div class="mb-6">
-                                <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
-                                    <i class="bi bi-sunset mr-2 text-orange-500"></i>
-                                    Buổi chiều
-                                </h4>
-                                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="afternoonSlots">
-                                    <button type="button" class="time-slot-btn" data-time="13:00-14:00">13:00 - 14:00</button>
-                                    <button type="button" class="time-slot-btn" data-time="14:00-15:00">14:00 - 15:00</button>
-                                    <button type="button" class="time-slot-btn" data-time="15:00-16:00">15:00 - 16:00</button>
-                                    <button type="button" class="time-slot-btn" data-time="16:00-17:00">16:00 - 17:00</button>
-                                    <button type="button" class="time-slot-btn disabled-slot" data-time="12:00-13:00" disabled>12:00 - 13:00</button>
+                                <div class="mb-8">
+                                    <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                                        <i class="bi bi-sun mr-2 text-yellow-500"></i>
+                                        Buổi sáng
+                                    </h4>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="morningSlots">
+                                    </div>
                                 </div>
-                            </div>
 
-                            {{-- Booking confirmation section --}}
-                            <div id="bookingConfirm" class="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200 hidden">
-                                <h5 class="font-semibold text-blue-800 mb-2">Thông tin đặt lịch:</h5>
-                                <p class="text-blue-700 text-sm">
-                                    <i class="bi bi-calendar-date mr-2"></i>
-                                    <span id="selectedDateDisplay"></span>
-                                </p>
-                                <p class="text-blue-700 text-sm mt-1">
-                                    <i class="bi bi-clock mr-2"></i>
-                                    <span id="selectedTimeDisplay"></span>
-                                </p>
-                                <button class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
-                                    Xác nhận đặt lịch
-                                </button>
-                            </div>
+                                <div class="mb-6">
+                                    <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                                        <i class="bi bi-sunset mr-2 text-orange-500"></i>
+                                        Buổi chiều
+                                    </h4>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="afternoonSlots">
+                                    </div>
+                                </div>
 
-                            <p class="text-xs text-gray-500 mt-6 text-center italic">
-                                <i class="bi bi-info-circle mr-1"></i>
-                                Tất cả thời gian theo múi giờ Việt Nam GMT+7
-                            </p>
-                        </div>
+                                <div class="mb-3">
+                                    <label class="text-gray-700 font-semibold">Ghi chú</label>
+                                    <textarea name="reason" class="form-control w-full p-3 border rounded-lg @error('reason') border-red-500 @enderror"
+                                        rows="4">{{ old('reason') }}</textarea>
+                                    @error('reason')
+                                        <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div id="bookingConfirm"
+                                    class="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200 hidden">
+                                    <h5 class="font-semibold text-blue-800 mb-2">Thông tin đặt lịch:</h5>
+                                    <p class="text-blue-700 text-sm">
+                                        <i class="bi bi-calendar-date mr-2"></i>
+                                        <span id="selectedDateDisplay"></span>
+                                    </p>
+                                    <p class="text-blue-700 text-sm mt-1">
+                                        <i class="bi bi-clock mr-2"></i>
+                                        <span id="selectedTimeDisplay"></span>
+                                    </p>
+                                    <button type="submit"
+                                        class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200">
+                                        Xác nhận đặt lịch
+                                    </button>
+                                </div>
+
+                                <p class="text-xs text-gray-500 mt-6 text-center italic">
+                                    <i class="bi bi-info-circle mr-1"></i>
+                                    Tất cả thời gian theo múi giờ Việt Nam GMT+7
+                                </p>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -335,6 +341,7 @@
         let currentViewDate = new Date();
         let selectedDate = null;
         let selectedTimeSlot = null;
+        let availableDates = [];
 
         const monthYearDisplay = document.getElementById('monthYearDisplay');
         const calendarGrid = document.getElementById('calendarGrid');
@@ -345,8 +352,12 @@
         const bookingConfirm = document.getElementById('bookingConfirm');
         const selectedDateDisplay = document.getElementById('selectedDateDisplay');
         const selectedTimeDisplay = document.getElementById('selectedTimeDisplay');
+        const morningSlots = document.getElementById('morningSlots');
+        const afternoonSlots = document.getElementById('afternoonSlots');
+        const selectedDateInput = document.getElementById('selectedDateInput');
+        const selectedSlotInput = document.getElementById('selectedSlotInput');
+        const selectedDoctorInput = document.getElementById('selectedDoctorInput');
 
-        // Debounce function for smooth interactions
         function debounce(func, wait) {
             let timeout;
             return function executedFunction(...args) {
@@ -359,11 +370,22 @@
             };
         }
 
+        // Hàm helper để format ngày theo format YYYY-MM-DD
+        function formatDateToString(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         function showTimeSlots() {
             timeSlotsSection.classList.remove('hidden');
             timeSlotsSection.classList.add('slide-up');
             setTimeout(() => {
-                timeSlotsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                timeSlotsSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
             }, 100);
         }
 
@@ -371,6 +393,8 @@
             timeSlotsSection.classList.add('hidden');
             timeSlotsSection.classList.remove('slide-up');
             bookingConfirm.classList.add('hidden');
+            morningSlots.innerHTML = '';
+            afternoonSlots.innerHTML = '';
         }
 
         function updateBookingConfirmation() {
@@ -383,6 +407,9 @@
                 });
                 selectedDateDisplay.textContent = dateStr;
                 selectedTimeDisplay.textContent = selectedTimeSlot.dataset.time;
+                selectedDateInput.value = formatDateToString(selectedDate);
+                selectedSlotInput.value = selectedTimeSlot.dataset.time.split('-')[0].trim();
+                selectedDoctorInput.value = selectedTimeSlot.dataset.doctorId;
                 bookingConfirm.classList.remove('hidden');
                 bookingConfirm.classList.add('fade-in');
             } else {
@@ -390,31 +417,144 @@
             }
         }
 
-        function renderCalendar() {
-            // Add loading state
+        function fetchAvailableDates() {
             calendarGrid.classList.add('loading');
-            
+            fetch('{{ route('booking.available-dates') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        service_id: {{ $service->id }},
+                        doctor_id: {{ $doctor ? $doctor->id : 'null' }},
+                        // Truyền tháng và năm hiện tại của lịch
+                        month: currentViewDate.getMonth(), // month là 0-indexed (0-11)
+                        year: currentViewDate.getFullYear()
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // Xử lý lỗi HTTP nếu có
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.message || 'Server responded with an error');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    availableDates = data;
+                    // Debug: In ra console để kiểm tra dữ liệu
+                    console.log('Available dates received:', availableDates);
+                    renderCalendar();
+                })
+                .catch(error => {
+                    console.error('Error fetching available dates:', error);
+                    calendarGrid.classList.remove('loading');
+                    // Hiển thị thông báo lỗi cho người dùng nếu cần
+                });
+        }
+
+        function fetchTimeSlots(date) {
+            morningSlots.innerHTML = '<p class="text-gray-500">Đang tải...</p>';
+            afternoonSlots.innerHTML = '<p class="text-gray-500">Đang tải...</p>';
+
+            fetch('{{ route('booking.slots') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        date: formatDateToString(date),
+                        service_id: {{ $service->id }},
+                        doctor_id: {{ $doctor ? $doctor->id : 'null' }}
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    morningSlots.innerHTML = '';
+                    afternoonSlots.innerHTML = '';
+
+                    if (!Array.isArray(data) || data.length === 0) {
+                        morningSlots.innerHTML = '<p class="text-gray-500">Không có khung giờ trống.</p>';
+                        afternoonSlots.innerHTML = '';
+                        return;
+                    }
+
+                    const morning = [];
+                    const afternoon = [];
+
+                    data.forEach(slot => {
+                        const hour = parseInt(slot.start.split(':')[0]);
+                        if (hour < 12) {
+                            morning.push(slot);
+                        } else {
+                            afternoon.push(slot);
+                        }
+                    });
+
+                    morning.forEach(slot => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.classList.add('time-slot-btn');
+                        btn.dataset.time = `${slot.start} - ${slot.end}`;
+                        btn.dataset.doctorId = slot.doctor_id;
+                        btn.textContent = `${slot.start} - ${slot.end}`;
+                        btn.addEventListener('click', function() {
+                            if (selectedTimeSlot) selectedTimeSlot.classList.remove('selected-slot');
+                            this.classList.add('selected-slot');
+                            selectedTimeSlot = this;
+                            updateBookingConfirmation();
+                        });
+                        morningSlots.appendChild(btn);
+                    });
+
+                    afternoon.forEach(slot => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.classList.add('time-slot-btn');
+                        btn.dataset.time = `${slot.start} - ${slot.end}`;
+                        btn.dataset.doctorId = slot.doctor_id;
+                        btn.textContent = `${slot.start} - ${slot.end}`;
+                        btn.addEventListener('click', function() {
+                            if (selectedTimeSlot) selectedTimeSlot.classList.remove('selected-slot');
+                            this.classList.add('selected-slot');
+                            selectedTimeSlot = this;
+                            updateBookingConfirmation();
+                        });
+                        afternoonSlots.appendChild(btn);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching slots:', error);
+                    morningSlots.innerHTML = '<p class="text-red-500">Lỗi khi tải khung giờ.</p>';
+                    afternoonSlots.innerHTML = '';
+                });
+        }
+
+        function renderCalendar() {
+            calendarGrid.classList.add('loading');
+
             setTimeout(() => {
                 calendarGrid.innerHTML = '';
                 calendarGrid.innerHTML += `
-                    <div class="font-bold text-gray-600 py-3 text-sm text-red-600">CN</div>
-                    <div class="font-bold text-gray-600 py-3 text-sm">Hai</div>
-                    <div class="font-bold text-gray-600 py-3 text-sm">Ba</div>
-                    <div class="font-bold text-gray-600 py-3 text-sm">Tư</div>
-                    <div class="font-bold text-gray-600 py-3 text-sm">Năm</div>
-                    <div class="font-bold text-gray-600 py-3 text-sm">Sáu</div>
-                    <div class="font-bold text-gray-600 py-3 text-sm text-yellow-600">Bảy</div>
-                `;
-
+            <div class="font-bold text-gray-600 py-3 text-sm text-red-600">CN</div>
+            <div class="font-bold text-gray-600 py-3 text-sm">Hai</div>
+            <div class="font-bold text-gray-600 py-3 text-sm">Ba</div>
+            <div class="font-bold text-gray-600 py-3 text-sm">Tư</div>
+            <div class="font-bold text-gray-600 py-3 text-sm">Năm</div>
+            <div class="font-bold text-gray-600 py-3 text-sm">Sáu</div>
+            <div class="font-bold text-gray-600 py-3 text-sm text-yellow-600">Bảy</div>
+        `;
                 const year = currentViewDate.getFullYear();
                 const month = currentViewDate.getMonth();
-
                 monthYearDisplay.textContent = `${monthNames[month]} - ${year}`;
-
                 const firstDayOfMonth = new Date(year, month, 1).getDay();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
                 const daysInPrevMonth = new Date(year, month, 0).getDate();
-
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
 
@@ -422,7 +562,8 @@
                 for (let i = 0; i < firstDayOfMonth; i++) {
                     const day = daysInPrevMonth - firstDayOfMonth + i + 1;
                     const cell = document.createElement('div');
-                    cell.classList.add('date-cell', 'disabled', 'p-3', 'bg-gray-50', 'rounded-lg', 'text-gray-400', 'text-base', 'font-medium');
+                    cell.classList.add('date-cell', 'disabled', 'p-3', 'bg-gray-50', 'rounded-lg', 'text-gray-400',
+                        'text-base', 'font-medium');
                     cell.textContent = day;
                     calendarGrid.appendChild(cell);
                 }
@@ -430,27 +571,30 @@
                 // Add days of the current month
                 for (let day = 1; day <= daysInMonth; day++) {
                     const cell = document.createElement('div');
-                    cell.classList.add('date-cell', 'p-3', 'bg-white', 'rounded-lg', 'text-gray-800', 'text-base', 'font-medium',
-                        'cursor-pointer', 'border', 'border-gray-200', 'hover:border-blue-300');
+                    cell.classList.add('date-cell', 'p-3', 'bg-white', 'rounded-lg', 'text-gray-800', 'text-base',
+                        'font-medium');
                     cell.textContent = day;
 
                     const fullDate = new Date(year, month, day);
                     fullDate.setHours(0, 0, 0, 0);
 
-                    // Add 'today' class
-                    if (fullDate.getTime() === today.getTime()) {
+                    // Sử dụng hàm helper để format ngày
+                    const dateStr = formatDateToString(fullDate);
+
+                    // Debug: In ra console để kiểm tra
+                    console.log(`Checking date: ${dateStr}, Available: ${availableDates[dateStr]}`);
+
+                    if (fullDate.getDate() === today.getDate() &&
+                        fullDate.getMonth() === today.getMonth() &&
+                        fullDate.getFullYear() === today.getFullYear()) {
                         cell.classList.add('today');
                     }
-
-                    // Add weekend styling
                     if (fullDate.getDay() === 6) {
                         cell.classList.add('saturday-text');
                     }
                     if (fullDate.getDay() === 0) {
                         cell.classList.add('sunday-text');
                     }
-
-                    // Add 'selected' class
                     if (selectedDate &&
                         fullDate.getDate() === selectedDate.getDate() &&
                         fullDate.getMonth() === selectedDate.getMonth() &&
@@ -458,14 +602,15 @@
                         cell.classList.add('selected');
                     }
 
-                    // Disable past dates
-                    if (fullDate.getTime() < today.getTime()) {
+                    // Disable past dates or unavailable dates
+                    // Sửa đổi điều kiện kiểm tra: kiểm tra xem ngày có trong availableDates và có giá trị true không
+                    if (fullDate.getTime() < today.getTime() || !availableDates.hasOwnProperty(dateStr) || !
+                        availableDates[dateStr]) {
                         cell.classList.add('disabled');
                         cell.classList.remove('cursor-pointer', 'hover:border-blue-300');
                     } else {
-                        // Add click event listener for selectable dates
+                        cell.classList.add('cursor-pointer', 'border', 'border-gray-200', 'hover:border-blue-300');
                         cell.addEventListener('click', debounce(() => {
-                            // Remove previous selection
                             const prevSelectedCell = document.querySelector('.date-cell.selected');
                             if (prevSelectedCell) {
                                 prevSelectedCell.classList.remove('selected');
@@ -473,11 +618,9 @@
 
                             cell.classList.add('selected');
                             selectedDate = new Date(year, month, day);
-                            console.log('Selected date:', selectedDate.toLocaleDateString('vi-VN'));
-
                             showTimeSlots();
+                            fetchTimeSlots(selectedDate);
 
-                            // Reset selected time slot when a new date is selected
                             if (selectedTimeSlot) {
                                 selectedTimeSlot.classList.remove('selected-slot');
                                 selectedTimeSlot = null;
@@ -495,7 +638,8 @@
                 const remainingCells = (7 - (totalCells % 7)) % 7;
                 for (let i = 1; i <= remainingCells; i++) {
                     const cell = document.createElement('div');
-                    cell.classList.add('date-cell', 'disabled', 'p-3', 'bg-gray-50', 'rounded-lg', 'text-gray-400', 'text-base', 'font-medium');
+                    cell.classList.add('date-cell', 'disabled', 'p-3', 'bg-gray-50', 'rounded-lg', 'text-gray-400',
+                        'text-base', 'font-medium');
                     cell.textContent = i;
                     calendarGrid.appendChild(cell);
                 }
@@ -505,10 +649,9 @@
             }, 200);
         }
 
-        // Event listeners for month navigation
         prevMonthBtn.addEventListener('click', debounce(() => {
             currentViewDate.setMonth(currentViewDate.getMonth() - 1);
-            renderCalendar();
+            fetchAvailableDates();
             hideTimeSlots();
             if (selectedTimeSlot) {
                 selectedTimeSlot.classList.remove('selected-slot');
@@ -518,7 +661,7 @@
 
         nextMonthBtn.addEventListener('click', debounce(() => {
             currentViewDate.setMonth(currentViewDate.getMonth() + 1);
-            renderCalendar();
+            fetchAvailableDates();
             hideTimeSlots();
             if (selectedTimeSlot) {
                 selectedTimeSlot.classList.remove('selected-slot');
@@ -526,27 +669,9 @@
             }
         }, 150));
 
-        // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
-            renderCalendar();
+            fetchAvailableDates();
 
-            // Handle time slot selection
-            const timeSlotButtons = document.querySelectorAll('.time-slot-btn');
-            timeSlotButtons.forEach(button => {
-                if (!button.disabled && !button.classList.contains('disabled-slot')) {
-                    button.addEventListener('click', function() {
-                        if (selectedTimeSlot) {
-                            selectedTimeSlot.classList.remove('selected-slot');
-                        }
-                        this.classList.add('selected-slot');
-                        selectedTimeSlot = this;
-                        console.log('Selected time:', this.dataset.time);
-                        updateBookingConfirmation();
-                    });
-                }
-            });
-
-            // Close time slots
             closeTimeSlotsBtn.addEventListener('click', () => {
                 hideTimeSlots();
                 const prevSelectedCell = document.querySelector('.date-cell.selected');
@@ -560,13 +685,12 @@
                 }
                 updateBookingConfirmation();
             });
-        });
 
-        // Add keyboard navigation
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !timeSlotsSection.classList.contains('hidden')) {
-                closeTimeSlotsBtn.click();
-            }
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !timeSlotsSection.classList.contains('hidden')) {
+                    closeTimeSlotsBtn.click();
+                }
+            });
         });
     </script>
 @endpush

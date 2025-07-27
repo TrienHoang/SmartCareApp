@@ -53,10 +53,10 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="name" class="form-label fw-semibold">
                                         <i class="fas fa-tag text-primary me-1"></i>
-                                        Tên dịch vụ
+                                        Tên dịch vụ <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" name="name" value="{{ old('name') }}"
-                                        class="form-control @error('name') is-invalid @enderror">
+                                        class="form-control @error('name') is-invalid @enderror" placeholder="Nhập tên dịch vụ...">
                                     @error('name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -66,7 +66,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="service_cate_id" class="form-label fw-semibold">
                                         <i class="fas fa-folder text-primary me-1"></i>
-                                        Danh mục
+                                        Danh mục <span class="text-danger">*</span>
                                     </label>
                                     <select name="service_cate_id"
                                         class="form-select @error('service_cate_id') is-invalid @enderror">
@@ -82,41 +82,21 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                             </div>
 
                             <div class="row">
-                                <!-- Room -->
-                                {{-- <div class=" col-md-6 mb-3">
-                                    <label for="room_id" class="form-label fw-semibold">
-                                        <i class="fas fa-door-open text-primary me-1"></i>
-                                        Phòng thực hiện
-                                    </label>
-                                    <select name="room_id" class="form-select @error('room_id') is-invalid @enderror">
-                                        <option value="">-- Chọn phòng --</option>
-                                        @foreach ($rooms as $room)
-                                            <option value="{{ $room->id }}"
-                                                {{ old('room_id') == $room->id ? 'selected' : '' }}>
-                                                {{ $room->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('room_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div> --}}
-
-                                <!-- Depatments -->
-                                <div class=" col-md-6 mb-3">
+                                <!-- Department -->
+                                <div class="col-md-6 mb-3">
                                     <label for="department_id" class="form-label fw-semibold">
-                                        <i class="fas fa-building text-info me-1"></i>Khoa phụ trách
+                                        <i class="fas fa-building text-info me-1"></i>
+                                        Khoa phụ trách <span class="text-danger">*</span>
                                     </label>
-                                    <select name="department_id"
+                                    <select name="department_id" id="department_id"
                                         class="form-select @error('department_id') is-invalid @enderror">
                                         <option value="">-- Chọn khoa --</option>
-                                        @foreach ($depatments as $dept)
+                                        @foreach ($departments as $dept)
                                             <option value="{{ $dept->id }}"
-                                                {{ old('department_id', isset($service) ? $service->department_id : '') == $dept->id ? 'selected' : '' }}>
+                                                {{ old('department_id') == $dept->id ? 'selected' : '' }}>
                                                 {{ $dept->name }}
                                             </option>
                                         @endforeach
@@ -126,21 +106,37 @@
                                     @enderror
                                 </div>
 
-                                <!-- Image -->
-                                <div class="mb-3">
-                                    <label for="image" class="form-label fw-semibold">
-                                        <i class="fas fa-image text-primary me-1"></i>
-                                        Ảnh dịch vụ
+                                <!-- Doctors -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="doctors" class="form-label fw-semibold">
+                                        <i class="fas fa-user-md text-primary me-1"></i>
+                                        Bác sĩ thực hiện
                                     </label>
-                                    <input type="file" name="image"
-                                        class="form-control @error('image') is-invalid @enderror">
-                                    @error('image')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="flex justify-between mb-2">
+                                        <button type="button" onclick="document.querySelectorAll('.doctors-container input[type=checkbox]').forEach(cb => cb.checked = true)" class="btn btn-sm btn-outline-primary">Chọn tất cả</button>
+                                        <button type="button" onclick="document.querySelectorAll('.doctors-container input[type=checkbox]').forEach(cb => cb.checked = false)" class="btn btn-sm btn-outline-secondary">Bỏ chọn tất cả</button>
+                                    </div>
+                                    <div class="doctors-container max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-4">
+                                        <p class="text-gray-500">Vui lòng chọn khoa để hiển thị danh sách bác sĩ.</p>
+                                    </div>
+                                    @error('doctors')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
 
-
+                            <!-- Image -->
+                            <div class="mb-3">
+                                <label for="image" class="form-label fw-semibold">
+                                    <i class="fas fa-image text-primary me-1"></i>
+                                    Ảnh dịch vụ
+                                </label>
+                                <input type="file" name="image"
+                                    class="form-control @error('image') is-invalid @enderror">
+                                @error('image')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
                             <!-- Description -->
                             <div class="mb-3">
@@ -148,7 +144,7 @@
                                     <i class="fas fa-align-left text-primary me-1"></i>
                                     Mô tả
                                 </label>
-                                <textarea name="description" class="form-control @error('description') is-invalid @enderror">{{ old('description') }}</textarea>
+                                <textarea name="description" class="form-control @error('description') is-invalid @enderror" placeholder="Nhập mô tả dịch vụ...">{{ old('description') }}</textarea>
                                 @error('description')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -171,10 +167,10 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="price" class="form-label fw-semibold">
                                         <i class="fas fa-dollar-sign text-success me-1"></i>
-                                        Giá (VNĐ)
+                                        Giá (VNĐ) <span class="text-danger">*</span>
                                     </label>
                                     <input type="number" name="price" value="{{ old('price') }}"
-                                        class="form-control @error('price') is-invalid @enderror">
+                                        class="form-control @error('price') is-invalid @enderror" placeholder="0">
                                     @error('price')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -184,10 +180,10 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="duration" class="form-label fw-semibold">
                                         <i class="fas fa-clock text-info me-1"></i>
-                                        Thời gian (phút)
+                                        Thời gian (phút) <span class="text-danger">*</span>
                                     </label>
                                     <input type="number" name="duration" value="{{ old('duration') }}"
-                                        class="form-control @error('duration') is-invalid @enderror">
+                                        class="form-control @error('duration') is-invalid @enderror" placeholder="0">
                                     @error('duration')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -197,13 +193,11 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="status" class="form-label fw-semibold">
                                         <i class="fas fa-toggle-on text-warning me-1"></i>
-                                        Trạng thái
+                                        Trạng thái <span class="text-danger">*</span>
                                     </label>
                                     <select name="status" class="form-select @error('status') is-invalid @enderror">
-                                        <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Hoạt động
-                                        </option>
-                                        <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Không
-                                            hoạt động</option>
+                                        <option value="active" {{ old('status', 'active') == 'active' ? 'selected' : '' }}>Hoạt động</option>
+                                        <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Không hoạt động</option>
                                     </select>
                                     @error('status')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -258,6 +252,10 @@
                                 <li class="mb-2">
                                     <i class="fas fa-check text-success me-2"></i>
                                     Thời gian thực hiện cần chính xác
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Chọn đúng bác sĩ theo chuyên khoa
                                 </li>
                             </ul>
                         </div>
@@ -324,11 +322,79 @@
         .invalid-feedback {
             display: block;
         }
+
+        .max-h-64 {
+            max-height: 16rem;
+        }
     </style>
+
     @push('scripts')
         <script src="https://cdn.ckeditor.com/4.20.2/standard/ckeditor.js"></script>
         <script>
             CKEDITOR.replace('content');
+
+            document.getElementById('department_id').addEventListener('change', function() {
+                const departmentId = this.value;
+                const doctorsContainer = document.querySelector('.doctors-container');
+                
+                if (!doctorsContainer) {
+                    console.error('Doctors container not found');
+                    return;
+                }
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                if (!csrfToken) {
+                    console.error('CSRF token not found');
+                    return;
+                }
+
+                doctorsContainer.innerHTML = '<p class="text-gray-500">Đang tải...</p>';
+
+                fetch(`/admin/doctors-by-department/${departmentId}`, {
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Doctors data:', data);
+                    doctorsContainer.innerHTML = '';
+
+                    if (data.length === 0) {
+                        doctorsContainer.innerHTML = '<p class="text-gray-500">Không có bác sĩ nào trong chuyên khoa này.</p>';
+                        return;
+                    }
+
+                    data.forEach(doctor => {
+                        const isChecked = {{ json_encode(old('doctors', [])) }}.includes(String(doctor.id)) ? 'checked' : '';
+                        doctorsContainer.innerHTML += `
+                            <label class="flex items-center mb-2">
+                                <input type="checkbox" name="doctors[]" value="${doctor.id}" ${isChecked}
+                                       class="form-check-input h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="ml-2 text-gray-700">${doctor.user.full_name || 'No name'}</span>
+                            </label>
+                        `;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching doctors:', error);
+                    doctorsContainer.innerHTML = '<p class="text-red-500">Lỗi khi tải danh sách bác sĩ.</p>';
+                });
+            });
+
+            // Khôi phục danh sách bác sĩ khi tải lại trang nếu có old('department_id')
+            document.addEventListener('DOMContentLoaded', function() {
+                const departmentId = document.getElementById('department_id').value;
+                if (departmentId) {
+                    document.getElementById('department_id').dispatchEvent(new Event('change'));
+                }
+            });
         </script>
     @endpush
 @endsection
