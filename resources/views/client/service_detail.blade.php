@@ -137,6 +137,9 @@
                         Khoa: {{ $service->department->name }}
                     </p>
                     <p class="text-gray-600 mb-2 flex items-start">
+                        <i data-lucide="clock" class="w-5 h-5 mr-2 text-blue-700"></i>
+                        Thời gian thực hiện: {{ $service->duration }} phút
+                    <p class="text-gray-600 mb-2 flex items-start">
                         {{ $service->description }}
                     </p>
                 </div>
@@ -144,11 +147,11 @@
                 <div class="w-full md:w-1/3 text-right flex flex-col items-end">
                     <span class="price-display mb-2 text-2xl font-bold text-red-600">{{ number_format($service->price) }}
                         đ</span>
-                    <form id="bookingForm" action="{{ route('booking.storeService') }}" method="POST">
+                    <form id="bookingForm" action="{{ route('booking.prepare') }}" method="POST">
                         @csrf
                         <input type="hidden" name="service_id" value="{{ $service->id }}">
                         <input type="hidden" name="doctor_id" id="doctor_id">
-                        <input type="hidden" name="doctor_option" id="doctor_option_input" value="auto">
+                        <input type="hidden" name="doctor_option" id="doctor_option_input" value="random">
                         <button type="submit"
                             class="inline-block px-6 py-2 rounded-md bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition">
                             Đặt khám ngay
@@ -175,12 +178,12 @@
                             <div class="flex flex-col space-y-2">
                                 <label
                                     class="flex items-center space-x-2 p-2 rounded-md cursor-pointer border border-transparent has-[:checked]:border-green-500 has-[:checked]:bg-green-100 has-[:checked]:text-black transition">
-                                    <input type="radio" name="doctor_option" value="auto" class="peer sr-only" checked>
+                                    <input type="radio" name="doctor_option" value="random" class="peer sr-only" checked>
                                     <span class="text-white font-medium">Tự động chọn bác sĩ phù hợp</span>
                                 </label>
                                 <label
                                     class="flex items-center space-x-2 p-2 rounded-md cursor-pointer border border-transparent has-[:checked]:border-green-500 has-[:checked]:bg-green-100 has-[:checked]:text-black transition">
-                                    <input type="radio" name="doctor_option" value="manual" class="peer sr-only">
+                                    <input type="radio" name="doctor_option" value="specific" class="peer sr-only">
                                     <span class="text-white font-medium">Tôi muốn lựa chọn bác sĩ</span>
                                 </label>
                             </div>
@@ -272,7 +275,7 @@
                 radio.addEventListener('change', function() {
                     doctorOptionInput.value = this.value;
 
-                    if (this.value === 'manual') {
+                    if (this.value === 'specific') {
                         doctorList.classList.remove('hidden');
                         doctorList.classList.add('opacity-100', 'translate-y-0');
                     } else {
@@ -293,7 +296,7 @@
             form.addEventListener('submit', function(event) {
                 const selectedOption = document.querySelector('input[name="doctor_option"]:checked')?.value;
 
-                if (selectedOption === 'manual' && !doctorIdInput.value) {
+                if (selectedOption === 'specific' && !doctorIdInput.value) {
                     event.preventDefault();
                     alert('Vui lòng chọn một bác sĩ trước khi đặt khám.');
                 }

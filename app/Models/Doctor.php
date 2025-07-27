@@ -64,9 +64,8 @@ class Doctor extends Model
 
     public function services()
     {
-        return $this->belongsToMany(Service::class, 'doctor_service');
+        return $this->belongsToMany(Service::class, 'doctor_service', 'doctor_id', 'service_id');
     }
-
     public function workingSchedules()
     {
         return $this->hasMany(WorkingSchedule::class);
