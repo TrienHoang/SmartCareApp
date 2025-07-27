@@ -264,7 +264,11 @@ class AppointmentController extends Controller
         foreach ($workings as $w) {
             $shift = $w->shift;
             if ($shift && $shift->start_time && $shift->end_time) {
-                if ($timeOnly >= $shift->start_time && $timeOnly < $shift->end_time) {
+                $appointmentTime = Carbon::createFromFormat('H:i', $timeOnly);
+                $shiftStart = Carbon::createFromFormat('H:i:s', $shift->start_time);
+                $shiftEnd = Carbon::createFromFormat('H:i:s', $shift->end_time);
+
+                if ($appointmentTime->betweenIncluded($shiftStart, $shiftEnd)) {
                     $isWithinWorkingTime = true;
                     break;
                 }
@@ -497,11 +501,17 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        // Kiểm tra giờ có nằm trong bất kỳ ca nào không
+        // Kiểm tra giờ có nằm trong bất kỳ ca nào không (so sánh bằng Carbon)
         $isWithinWorkingTime = $workings->contains(function ($w) use ($timeOnly) {
-            return isset($w->shift, $w->shift->start_time, $w->shift->end_time)
-                && $timeOnly >= $w->shift->start_time
-                && $timeOnly < $w->shift->end_time;
+            if (!isset($w->shift, $w->shift->start_time, $w->shift->end_time)) {
+                return false;
+            }
+
+            $appointmentTime = Carbon::createFromFormat('H:i', $timeOnly);
+            $shiftStart = Carbon::createFromFormat('H:i:s', $w->shift->start_time);
+            $shiftEnd = Carbon::createFromFormat('H:i:s', $w->shift->end_time);
+
+            return $appointmentTime->betweenIncluded($shiftStart, $shiftEnd);
         });
 
         if (!$isWithinWorkingTime) {

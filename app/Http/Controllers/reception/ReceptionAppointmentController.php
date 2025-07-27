@@ -90,9 +90,14 @@ class ReceptionAppointmentController extends Controller
 
     public function searchPatients(Request $request)
     {
+        $keyword = $request->q;
+        
         $patients = User::whereIn('role_id', [3, 5])
-            ->where('full_name', 'like', '%' . $request->q . '%')
-            ->get(['id', 'full_name', 'role_id']);
+            ->where(function ($q) use ($keyword) {
+                $q->where('full_name', 'like', "%$keyword%")
+                    ->orWhere('phone', 'like', "%$keyword%")
+                    ->orWhere('email', 'like', "%$keyword%");
+            })->get(['id', 'full_name', 'phone', 'email']);
 
         return response()->json($patients);
     }
@@ -331,7 +336,12 @@ class ReceptionAppointmentController extends Controller
             ])->withInput();
         }
 
-        if ($timeOnly < $working->shift->start_time || $timeOnly >= $working->shift->end_time) {
+        // So sánh giờ bằng Carbon để chính xác hơn
+        $appointmentTimeOnly = Carbon::createFromFormat('H:i', $timeOnly);
+        $shiftStart = Carbon::createFromFormat('H:i:s', $working->shift->start_time);
+        $shiftEnd   = Carbon::createFromFormat('H:i:s', $working->shift->end_time);
+
+        if (!$appointmentTimeOnly->betweenIncluded($shiftStart, $shiftEnd)) {
             return back()->withErrors([
                 'appointment_time' => 'Giờ hẹn ngoài khung giờ làm việc (' . $working->shift->start_time . ' - ' . $working->shift->end_time . ').'
             ])->withInput();
@@ -609,7 +619,11 @@ class ReceptionAppointmentController extends Controller
             ])->withInput();
         }
 
-        if ($timeOnly < $working->shift->start_time || $timeOnly >= $working->shift->end_time) {
+        $appointmentTimeOnly = Carbon::createFromFormat('H:i', $timeOnly);
+        $shiftStart = Carbon::createFromFormat('H:i:s', $working->shift->start_time);
+        $shiftEnd   = Carbon::createFromFormat('H:i:s', $working->shift->end_time);
+
+        if (!$appointmentTimeOnly->betweenIncluded($shiftStart, $shiftEnd)) {
             return back()->withErrors([
                 'appointment_time' => 'Giờ hẹn ngoài khung giờ làm việc (' . $working->shift->start_time . ' - ' . $working->shift->end_time . ').'
             ])->withInput();
