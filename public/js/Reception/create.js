@@ -12,8 +12,7 @@ $(document).ready(function () {
     let flatpickrDate;
 
     function resetForm() {
-        $doctor.val('').trigger('change.select2');
-        $serviceSelect.html('<option value="">Chọn dịch vụ</option>').trigger('change.select2');
+        $doctor.html('<option value="">-- Vui lòng chọn dịch vụ --</option>').trigger('change.select2');
         $servicePrice.val('');
         $slotSelect.html('<option value="">Chọn giờ</option>').prop('disabled', true);
         $dateInput.val('').prop('disabled', true);
@@ -39,54 +38,59 @@ $(document).ready(function () {
         }
     });
 
-    $doctor.on('change', function () {
-        const doctorId = $(this).val();
-
-        if (!doctorId) {
-            resetForm();
-            return;
-        }
-
-        loadServices(doctorId);
-        loadWorkingDays(doctorId);
-    });
-
+    // 👉 Chọn dịch vụ → Hiển thị giá + Load bác sĩ theo dịch vụ
     $serviceSelect.on('change', function () {
         const price = parseFloat($(this).find(':selected').data('price')) || 0;
         $('#service_price').val(price.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ₫');
-        loadAvailableSlots();
+
+        const serviceId = $(this).val();
+
+        if (!serviceId) {
+            $doctor.html('<option value="">-- Vui lòng chọn dịch vụ --</option>').trigger('change.select2');
+            return;
+        }
+
+        $.get(window.serviceDoctorsUrl.replace(':id', serviceId), data => {
+            const html = data.map(doc => `
+                <option value="${doc.id}">
+                    ${doc.user.full_name}
+                </option>`).join('');
+            $doctor.html('<option value="">Chọn bác sĩ</option>' + html).trigger('change.select2');
+        }).fail(() => toastr.error('Không thể tải danh sách bác sĩ'));
     });
 
-    function loadServices(doctorId) {
-        $.get(window.doctorServicesUrl.replace(':id', doctorId), data => {
-            const html = data.map(service => `
-                <option value="${service.id}" data-price="${service.price}">
-                    ${service.name} (${service.department?.name ?? 'Không rõ khoa'})
-                </option>`).join('');
-            $serviceSelect.html('<option value="">Chọn dịch vụ</option>' + html).trigger('change.select2');
-            $servicePrice.val('');
-        }).fail(() => toastr.error('Không thể tải danh sách dịch vụ'));
-    }
+    // 👉 Chọn bác sĩ → Load lịch làm việc và giờ khám
+    $doctor.on('change', function () {
+        const doctorId = $(this).val();
+        if (!doctorId) {
+            $dateInput.prop('disabled', true).val('');
+            $slotSelect.html('<option value="">Chọn giờ</option>').prop('disabled', true);
+            if (flatpickrDate) flatpickrDate.destroy();
+            return;
+        }
 
-    function loadWorkingDays(doctorId) {
-        $.get(window.doctorWorkingDaysUrl.replace(':id', doctorId), ({ vacationDates }) => {
+        $.get(window.doctorWorkingDaysUrl.replace(':id', doctorId), ({ specificDates, vacationDates }) => {
             $dateInput.prop('disabled', false);
 
             if (flatpickrDate) flatpickrDate.destroy();
 
+            // Chỉ cho phép chọn các ngày có trong specificDates, trừ ngày nghỉ phép
             flatpickrDate = flatpickr($dateInput[0], {
                 dateFormat: "Y-m-d",
                 minDate: "today",
                 disableMobile: true,
                 locale: 'vi',
                 disable: [
-                    ...vacationDates,
-                    date => date.getDay() === 0
+                    function (date) {
+                        const str = flatpickr.formatDate(date, 'Y-m-d');
+                        // disable nếu KHÔNG thuộc ngày bác sĩ đăng ký hoặc là ngày nghỉ
+                        return !specificDates.includes(str) || vacationDates.includes(str);
+                    }
                 ],
                 onChange: loadAvailableSlots
             });
 
-            if (vacationDates.length) {
+            if (vacationDates && vacationDates.length) {
                 const info = vacationDates.join(', ');
                 $vacationText.text(`Bác sĩ nghỉ: ${info}`);
                 $vacationNotice.removeClass('d-none');
@@ -94,7 +98,7 @@ $(document).ready(function () {
                 $vacationNotice.addClass('d-none');
             }
         }).fail(() => toastr.error('Không thể tải lịch làm việc'));
-    }
+    });
 
     function loadAvailableSlots() {
         const doctorId = $doctor.val();
@@ -124,6 +128,7 @@ $(document).ready(function () {
         });
     }
 
+    // Phương thức thanh toán
     $('#payment_method').on('change', function () {
         const val = $(this).val();
         let note = '';
@@ -142,9 +147,12 @@ $(document).ready(function () {
         $('input[name="status"]').val(status);
     }).trigger('change');
 
+    // ⚡ Reload dữ liệu cũ nếu có
+    if ($serviceSelect.val()) {
+        $serviceSelect.trigger('change');
 
-    // ⚡ Khởi tạo lại dữ liệu cũ
-    if ($doctor.val()) {
-        $doctor.trigger('change');
+        if ($doctor.val()) {
+            $doctor.trigger('change');
+        }
     }
 });

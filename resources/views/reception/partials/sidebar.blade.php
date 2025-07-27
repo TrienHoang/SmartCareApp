@@ -49,7 +49,7 @@
             </li>
 
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="{{ route('receptionist.doctors.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-calendar-edit"></i>
                     <div>Quản lý lịch làm việc bác sĩ</div>
                 </a>
