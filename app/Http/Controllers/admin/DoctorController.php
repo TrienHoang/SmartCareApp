@@ -149,8 +149,8 @@ class DoctorController extends Controller
             'department_id' => 'required|exists:departments,id',
             'biography' => 'nullable|string|max:1000',
         ], [
-            'specialization.required' => '💼 Vui lòng nhập chuyên môn.',
-            'department_id.required' => '🏥 Vui lòng chọn phòng ban.',
+            'specialization.required' => ' Vui lòng nhập chuyên môn.',
+            'department_id.required' => ' Vui lòng chọn phòng ban.',
         ]);
 
         if ($validator->fails()) {
@@ -170,12 +170,12 @@ class DoctorController extends Controller
             DB::commit();
 
             $name = $doctor->user->full_name ?? 'bác sĩ';
-            return redirect()->route('admin.doctors.index')->with('success', "✅ Đã cập nhật thông tin bác sĩ '{$name}' thành công!");
+            return redirect()->route('admin.doctors.index')->with('success', " Đã cập nhật thông tin bác sĩ '{$name}' thành công!");
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('❌ Lỗi khi cập nhật bác sĩ: ' . $e->getMessage());
+            Log::error(' Lỗi khi cập nhật bác sĩ: ' . $e->getMessage());
 
-            return back()->withInput()->with('error', '❌ Có lỗi xảy ra khi cập nhật. Vui lòng thử lại!');
+            return back()->withInput()->with('error', ' Có lỗi xảy ra khi cập nhật. Vui lòng thử lại!');
         }
     }
 
@@ -186,7 +186,7 @@ class DoctorController extends Controller
         try {
             if (Appointment::where('doctor_id', $doctor->id)->exists()) {
                 return redirect()->route('admin.doctors.index')
-                    ->with('error', "❌ Không thể xóa bác sĩ '{$userName}' vì đã có lịch hẹn!");
+                    ->with('error', " Không thể xóa bác sĩ '{$userName}' vì đã có lịch hẹn!");
             }
 
             $doctor->delete();
