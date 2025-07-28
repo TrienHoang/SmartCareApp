@@ -120,15 +120,18 @@
                 <!-- Doctor Info Tab -->
                 <div id="content-info" class="tab-content">
                     <!-- About Section -->
-                    <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 card-hover">
-                        <h2 class="text-2xl font-bold mb-6 gradient-text">Về Bác Sĩ</h2>
-                        <p class="text-gray-700 leading-relaxed mb-6">
-                            {{ $doctor->about ?? 'Thông tin về bác sĩ đang được cập nhật.' }}
-                        </p>
-                        <p class="text-gray-700 leading-relaxed">
-                            {{ $doctor->user->bio ?? 'Bác sĩ tận tâm với nhiều năm kinh nghiệm trong nghề.' }}
-                        </p>
-                    </div>
+                <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 card-hover">
+                    <h2 class="text-2xl font-bold mb-6 gradient-text">Về Bác Sĩ</h2>
+
+                    <p class="text-gray-700 leading-relaxed mb-6">
+                        {{ $doctor->biography ?? 'Thông tin về bác sĩ đang được cập nhật.' }}
+                    </p>
+
+                    <p class="text-gray-700 leading-relaxed">
+                        {{ $doctor->user->full_name ?? 'Bác sĩ tận tâm với nhiều năm kinh nghiệm trong nghề.' }}
+                    </p>
+                </div>
+
 
                     <!-- Education & Experience  học vấn cc-->
                     <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 card-hover">
