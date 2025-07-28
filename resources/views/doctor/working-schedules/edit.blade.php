@@ -19,21 +19,9 @@
         <div class="form-container">
             <h3 class="mb-4">Chỉnh sửa lịch làm việc</h3>
 
-            @if (session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
+            <div id="alert-area"></div>
 
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $err)
-                            <li>{{ $err }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form action="{{ route('doctor.working_schedules.update', $schedule->id) }}" method="POST">
+            <form id="updateScheduleForm">
                 @csrf
                 @method('PUT')
 
@@ -42,24 +30,20 @@
                     <input type="text" class="form-control" value="{{ Auth::user()->full_name }}" disabled>
                 </div>
 
-
                 <!-- Room select -->
                 <div class="mb-3">
                     <label for="room_id" class="form-label fw-semibold">
                         <i class="fas fa-door-open text-secondary me-1"></i>Phòng thực hiện
                     </label>
-                    <select name="room_id" class="form-select @error('room_id') is-invalid @enderror">
+                    <select name="room_id" id="room_id" class="form-select">
                         <option value="">-- Chọn phòng --</option>
                         @foreach ($rooms as $room)
                             <option value="{{ $room->id }}"
-                                {{ old('room_id', $schedule->room->id) == $room->id ? 'selected' : '' }}>
+                                {{ old('room_id', $schedule->room_id) == $room->id ? 'selected' : '' }}>
                                 {{ $room->name }}
                             </option>
                         @endforeach
                     </select>
-                    @error('room_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
                 </div>
 
                 <div class="mb-3">
@@ -103,19 +87,59 @@
         function updateWeekday() {
             const dayInput = document.getElementById('day');
             const weekdayInput = document.getElementById('weekday');
-
             const days = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
-
             const date = new Date(dayInput.value);
-            if (!isNaN(date.getTime())) {
-                const dayIndex = date.getDay();
-                weekdayInput.value = days[dayIndex];
-            } else {
-                weekdayInput.value = '';
-            }
+            weekdayInput.value = isNaN(date.getTime()) ? '' : days[date.getDay()];
         }
 
         document.getElementById('day').addEventListener('change', updateWeekday);
         window.addEventListener('DOMContentLoaded', updateWeekday);
+
+        document.getElementById('updateScheduleForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const formData = new FormData(form);
+            const alertArea = document.getElementById('alert-area');
+            alertArea.innerHTML = '';
+
+            // Lấy shift_id duy nhất từ checkbox được check
+            const shiftCheckbox = document.querySelector('input[name="shift_id"]:checked');
+            if (!shiftCheckbox) {
+                alertArea.innerHTML = `<div class="alert alert-danger">Vui lòng chọn một ca làm việc.</div>`;
+                return;
+            }
+            formData.set('shift_id', shiftCheckbox.value);
+
+            try {
+                const response = await fetch("{{ route('doctor.working_schedules.update', $schedule->id) }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    const errorMessages = result.errors
+                        ? Object.values(result.errors).flat().join('<br>')
+                        : result.error;
+                    alertArea.innerHTML = `<div class="alert alert-danger">${errorMessages}</div>`;
+                    return;
+                }
+
+                alertArea.innerHTML = `<div class="alert alert-success">${result.message}</div>`;
+                setTimeout(() => {
+                    window.location.href = "{{ route('doctor.working_schedules.index') }}";
+                }, 1500);
+
+            } catch (err) {
+                alertArea.innerHTML = `<div class="alert alert-danger">Lỗi gửi dữ liệu: ${err.message}</div>`;
+            }
+        });
     </script>
 @endsection

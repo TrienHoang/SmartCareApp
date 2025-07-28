@@ -111,9 +111,8 @@ Route::prefix('doctor')
                 Route::patch('treatment-plan-items/{itemId}/update-status', [TreatmentPlanController::class, 'updateItemStatus'])->name('treatment-plan-items.update-status');
             });
 
-            Route::post('/check-appointment', [DoctorAppointmentController::class, 'checkAppointmentAvailability'])
+        Route::post('/check-appointment', [DoctorAppointmentController::class, 'checkAppointmentAvailability'])
             ->name('check-appointment');
-
     });
 
 // Nhóm route dành riêng cho bác sĩ
@@ -139,7 +138,7 @@ Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'
     Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
     Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
 });
-//Lịch làm việc bác sĩ 
+//Lịch làm việc bác sĩ
 Route::prefix('doctor/working_schedules')->name('doctor.working_schedules.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
     Route::get('/', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'index'])->name('index');
     Route::get('/create', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'create'])->name('create');

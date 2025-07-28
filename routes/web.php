@@ -281,6 +281,12 @@ Route::group([
 
         Route::get('/treatment-plans/by-patient/{patient}', [AppointmentController::class, 'getTreatmentPlansByPatient'])
             ->name('treatment-plans.by-patient');
+
+        Route::get('/services/{service}/doctors', [AppointmentController::class, 'getDoctorsByService'])
+            ->name('service.doctors');
+
+        Route::get('/doctor/{doctor}/available-times', [AppointmentController::class, 'getAvailableTimesByDate'])
+            ->name('doctor.available-times');
     });
     // quản lý đơn thuốc
     Route::group([
@@ -449,6 +455,7 @@ Route::get('admin/services/{id}', [ServiceController::class, 'show'])->name('adm
 Route::get('admin/services/{id}/edit', [ServiceController::class, 'edit'])->name('admin.services.edit');
 Route::put('admin/services/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
 Route::delete('admin/services/{id}', [ServiceController::class, 'destroy'])->name('admin.services.destroy');
+Route::get('/admin/doctors-by-department/{departmentId}', [ServiceController::class, 'getDoctorsByDepartment'])->name('admin.doctors.byDepartment');
 
 
 // Quản lý đơn hàng
@@ -507,15 +514,15 @@ Route::prefix('admin/categories')->name('admin.categories.')->group(function () 
     Route::get('/show/{id}', [ServiceCategoryController::class, 'show'])->name('show');
 });
 // Quản lý dịch vụ
-Route::prefix('admin/services')->name('admin.services.')->group(function () {
-    Route::get('/', [ServiceController::class, 'index'])->name('index');
-    Route::get('/create', [ServiceController::class, 'create'])->name('create');
-    Route::post('/store', [ServiceController::class, 'store'])->name('store');
-    Route::get('/edit/{id}', [ServiceController::class, 'edit'])->name('edit');
-    Route::put('/update/{id}', [ServiceController::class, 'update'])->name('update');
-    Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])->name('destroy');
-    Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
-});
+// Route::prefix('admin/services')->name('admin.services.')->group(function () {
+//     Route::get('/', [ServiceController::class, 'index'])->name('index');
+//     Route::get('/create', [ServiceController::class, 'create'])->name('create');
+//     Route::post('/store', [ServiceController::class, 'store'])->name('store');
+//     Route::get('/edit/{id}', [ServiceController::class, 'edit'])->name('edit');
+//     Route::put('/update/{id}', [ServiceController::class, 'update'])->name('update');
+//     Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])->name('destroy');
+//     Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
+// });
 
 Route::group([
     'prefix' => 'admin',
@@ -574,24 +581,25 @@ Route::group([
 
 
     // Nhóm quản lý dịch vụ
-    Route::group([
-        'prefix' => 'services',
-        'as' => 'services.',
-        'middleware' => ['auth', 'checkAdmin', 'check_permission:view_services']
-    ], function () {
-        Route::get('/', [ServiceController::class, 'index'])->name('index');
-        Route::get('/create', [ServiceController::class, 'create'])
-            ->middleware('check_permission:create_services')->name('create');
-        Route::post('/store', [ServiceController::class, 'store'])
-            ->middleware('check_permission:create_services')->name('store');
-        Route::get('/edit/{id}', [ServiceController::class, 'edit'])
-            ->middleware('check_permission:edit_services')->name('edit');
-        Route::put('/edit/{id}', [ServiceController::class, 'update'])
-            ->middleware('check_permission:edit_services')->name('update');
-        Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])
-            ->middleware('check_permission:delete_services')->name('destroy');
-        Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
-    });
+    // Route::group([
+    //     'prefix' => 'services',
+    //     'as' => 'services.',
+    //     'middleware' => ['auth', 'checkAdmin', 'check_permission:view_services']
+    // ], function () {
+    //     Route::get('/', [ServiceController::class, 'index'])->name('index');
+    //     Route::get('/create', [ServiceController::class, 'create'])
+    //         ->middleware('check_permission:create_services')->name('create');
+    //     Route::post('/store', [ServiceController::class, 'store'])
+    //         ->middleware('check_permission:create_services')->name('store');
+    //     Route::get('/edit/{id}', [ServiceController::class, 'edit'])
+    //         ->middleware('check_permission:edit_services')->name('edit');
+    //     Route::put('/edit/{id}', [ServiceController::class, 'update'])
+    //         ->middleware('check_permission:edit_services')->name('update');
+    //     Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])
+    //         ->middleware('check_permission:delete_services')->name('destroy');
+    //     Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
+    // });
+
     // Quản lý câu hỏi thường gặp
     Route::group([
         'prefix' => 'faqs',

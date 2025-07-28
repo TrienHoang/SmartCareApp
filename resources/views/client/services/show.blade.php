@@ -117,7 +117,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                         @foreach ($category->services as $service)
                             <div class="group bg-white rounded-3xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden">
-                                <a href="{{ route('client.services.detail', $service->id) }}" class="block">
+                                <a href="{{ route('booking.showService', $service->id) }}" class="block">
                                     {{-- Service Header --}}
                                     <div class="p-8 pb-4">
                                         <div class="flex items-start justify-between mb-6">
@@ -168,10 +168,10 @@
                                 
                                 {{-- Service Footer --}}
                                 <div class="px-8 pb-8">
-                                    <button class="w-full bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white py-4 px-6 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center group/btn shadow-lg hover:shadow-xl text-lg">
-                                        <span class="mr-3">Đặt lịch khám</span>
+                                    <a href="{{ route('booking.showService', $service->id) }}" class="w-full bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white py-4 px-6 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center group/btn shadow-lg hover:shadow-xl text-lg">
+                                        <span class="mr-3">Xem chi tiết</span>
                                         <i data-lucide="calendar-plus" class="w-6 h-6 group-hover/btn:translate-x-1 transition-transform duration-300"></i>
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         @endforeach

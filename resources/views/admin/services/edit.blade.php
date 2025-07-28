@@ -1,7 +1,7 @@
 @extends('admin.dashboard')
 
 @section('content')
-    <div class="container-fluid px-4">
+    <div class="container-fluid">
         <!-- Header Section -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -46,7 +46,8 @@
                         </h5>
                     </div>
                     <div class="card-body p-4">
-                        <form action="{{ route('admin.services.update', $service->id) }}" method="POST"  enctype="multipart/form-data">
+                        <form action="{{ route('admin.services.update', $service->id) }}" method="POST"
+                            enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
@@ -89,7 +90,7 @@
                                 <label for="department_id" class="form-label fw-semibold">
                                     <i class="fas fa-building text-secondary me-1"></i>Khoa phụ trách
                                 </label>
-                                <select name="department_id"
+                                <select name="department_id" id="department_id"
                                     class="form-select @error('department_id') is-invalid @enderror">
                                     <option value="">-- Chọn khoa --</option>
                                     @foreach ($departments as $department)
@@ -104,24 +105,35 @@
                                 @enderror
                             </div>
 
-                            <!-- Room select -->
-                            {{-- <div class="mb-3">
-                                <label for="room_id" class="form-label fw-semibold">
-                                    <i class="fas fa-door-open text-secondary me-1"></i>Phòng thực hiện
+                            <!-- Doctors select -->
+                            <div class="mb-4">
+                                <label for="doctors" class="form-label fw-semibold">
+                                    <i class="fas fa-user-md me-2 text-primary"></i>
+                                    Bác sĩ thực hiện
                                 </label>
-                                <select name="room_id" class="form-select @error('room_id') is-invalid @enderror">
-                                    <option value="">-- Chọn phòng --</option>
-                                    @foreach ($rooms as $room)
-                                        <option value="{{ $room->id }}"
-                                            {{ old('room_id', $service->room_id) == $room->id ? 'selected' : '' }}>
-                                            {{ $room->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('room_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="flex justify-between mb-2">
+                                    <button type="button" onclick="document.querySelectorAll('.doctors-container input[type=checkbox]').forEach(cb => cb.checked = true)" class="btn btn-sm btn-outline-primary">Chọn tất cả</button>
+                                    <button type="button" onclick="document.querySelectorAll('.doctors-container input[type=checkbox]').forEach(cb => cb.checked = false)" class="btn btn-sm btn-outline-secondary">Bỏ chọn tất cả</button>
+                                </div>
+                                <div class="mt-2 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-4 doctors-container">
+                                    @forelse ($doctors as $doctor)
+                                        <label class="flex items-center mb-2">
+                                            <input type="checkbox" name="doctors[]" value="{{ $doctor->id }}"
+                                                   {{ in_array($doctor->id, $selectedDoctors) ? 'checked' : '' }}
+                                                   class="form-check-input h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                            <span class="ml-2 text-gray-700">{{ $doctor->user->full_name }}</span>
+                                        </label>
+                                    @empty
+                                        <p class="text-gray-500">Không có bác sĩ nào trong chuyên khoa này.</p>
+                                    @endforelse
+                                </div>
+                                @error('doctors')
+                                    <div class="invalid-feedback d-block">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ $message }}
+                                    </div>
                                 @enderror
-                            </div> --}}
+                            </div>
 
                             <!-- Image upload -->
                             <div class="mb-3">
@@ -133,7 +145,6 @@
                                 @error('image')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-
                                 @if ($service->image)
                                     <div class="mt-2">
                                         <img src="{{ asset('storage/' . $service->image) }}" alt="Ảnh hiện tại"
@@ -153,8 +164,6 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-
-
 
                             <!-- Price and Duration Row -->
                             <div class="row mb-4">
@@ -223,7 +232,7 @@
                             <!-- Status -->
                             <div class="mb-4">
                                 <label for="status" class="form-label fw-semibold">
-                                    <i class="fas fa-toggle-on me-2 text-secondary"></i>
+                                    <i class=" as fa-toggle-on me-2 text-secondary"></i>
                                     Trạng thái <span class="text-danger">*</span>
                                 </label>
                                 <select name="status" id="status"
@@ -260,7 +269,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Right Sidebar -->
             <div class="col-lg-4">
                 <!-- Service Info Card -->
@@ -305,7 +313,7 @@
 
                 <!-- Tips Card -->
                 <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-warning text-dark">
+                    <div class="card-header bg-warning text-dark mb-3">
                         <h6 class="mb-0">
                             <i class="fas fa-lightbulb me-2"></i>
                             Gợi ý
@@ -329,32 +337,13 @@
                                 <i class="fas fa-check text-success me-2"></i>
                                 <small>Thời gian thực hiện chính xác</small>
                             </li>
+                            <li class="mb-0">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <small>Chọn đúng bác sĩ theo chuyên khoa</small>
+                            </li>
                         </ul>
                     </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-secondary text-white">
-                        <h6 class="mb-0">
-                            <i class="fas fa-bolt me-2"></i>
-                            Thao tác nhanh
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <a href="{{ route('admin.services.index') }}" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-list me-2"></i>
-                                Danh sách dịch vụ
-                            </a>
-                            <button type="button" class="btn btn-outline-success btn-sm"
-                                onclick="document.querySelector('form').submit()">
-                                <i class="fas fa-save me-2"></i>
-                                Lưu thay đổi
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                </div>   
             </div>
         </div>
     </div>
@@ -431,10 +420,68 @@
             color: #667eea !important;
         }
     </style>
+
     @push('scripts')
         <script src="https://cdn.ckeditor.com/4.20.2/standard/ckeditor.js"></script>
         <script>
             CKEDITOR.replace('content');
+
+            document.getElementById('department_id').addEventListener('change', function() {
+                if (confirm('Thay đổi khoa sẽ làm mới danh sách bác sĩ và xóa các bác sĩ đã chọn trước đó. Tiếp tục?')) {
+                    const departmentId = this.value;
+                    const doctorsContainer = document.querySelector('.doctors-container');
+                    
+                    if (!doctorsContainer) {
+                        console.error('Doctors container not found');
+                        return;
+                    }
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                    if (!csrfToken) {
+                        console.error('CSRF token not found');
+                        return;
+                    }
+
+                    doctorsContainer.innerHTML = '<p class="text-gray-500">Đang tải...</p>';
+
+                    fetch(`/admin/doctors-by-department/${departmentId}`, {
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Doctors data:', data);
+                        doctorsContainer.innerHTML = '';
+
+                        if (data.length === 0) {
+                            doctorsContainer.innerHTML = '<p class="text-gray-500">Không có bác sĩ nào trong chuyên khoa này.</p>';
+                            return;
+                        }
+
+                        data.forEach(doctor => {
+                            // Không giữ trạng thái checked khi đổi khoa
+                            doctorsContainer.innerHTML += `
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" name="doctors[]" value="${doctor.id}"
+                                           class="form-check-input h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <span class="ml-2 text-gray-700">${doctor.user.full_name || 'No name'}</span>
+                                </label>
+                            `;
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching doctors:', error);
+                        doctorsContainer.innerHTML = '<p class="text-red-500">Lỗi khi tải danh sách bác sĩ.</p>';
+                    });
+                }
+            });
         </script>
     @endpush
 @endsection
