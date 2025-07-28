@@ -78,6 +78,11 @@
                             @enderror
                         </div>
 
+                        <!-- Giá dịch vụ -->
+                        <div class="col-12 col-md-6">
+                            <label for="service_price" class="form-label">Giá dịch vụ</label>
+                            <input type="text" id="service_price" name="service_price" class="form-control" readonly>
+                        </div>
 
                         <!-- Thời gian hẹn -->
                         <div class="col-12 col-md-6">
@@ -101,7 +106,6 @@
                             </select>
                             <input type="hidden" name="status" value="pending">
                         </div>
-
 
                         <!-- Lý do khám -->
                         <div class="col-12">

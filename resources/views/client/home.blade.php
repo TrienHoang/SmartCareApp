@@ -71,46 +71,50 @@
         <section class="py-20 bg-gray-50">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-4 gradient-text">Tại Sao Chọn SmartCare?</h2>
+                    <h2 class="text-4xl font-bold mb-4 text-blue-700">Tại Sao Chọn SmartCare?</h2>
                     <p class="text-xl text-gray-600">Chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe tốt nhất</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     @php
                         $features = [
                             [
-                                'icon' => 'calendar',
+                                'icon' => 'fas fa-calendar-check',
                                 'title' => 'Đặt Lịch Dễ Dàng',
                                 'desc' => 'Đặt lịch khám chỉ với vài thao tác đơn giản trên website',
                             ],
                             [
-                                'icon' => 'users',
+                                'icon' => 'fas fa-user-doctor',
                                 'title' => 'Đội Ngũ Chuyên Nghiệp',
                                 'desc' => 'Bác sĩ giàu kinh nghiệm, tận tâm với nghề',
                             ],
                             [
-                                'icon' => 'award',
+                                'icon' => 'fas fa-stethoscope',
                                 'title' => 'Chất Lượng Cao',
                                 'desc' => 'Trang thiết bị hiện đại, dịch vụ chất lượng quốc tế',
                             ],
                             [
-                                'icon' => 'clock',
+                                'icon' => 'fas fa-clock',
                                 'title' => 'Tiết Kiệm Thời Gian',
                                 'desc' => 'Không cần xếp hàng, đúng giờ hẹn đã có',
                             ],
                         ];
                     @endphp
                     @foreach ($features as $feature)
-                        <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow hover-scale">
-                            <i data-lucide="{{ $feature['icon'] }}" class="w-8 h-8 text-blue-600 mb-4"></i>
-                            <h3 class="text-xl font-semibold mb-3">{{ $feature['title'] }}</h3>
-                            <p class="text-gray-600">{{ $feature['desc'] }}</p>
+                        <div
+                            class="bg-white p-8 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-1 transition duration-300 text-center border border-blue-100">
+                            <div
+                                class="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 shadow-sm">
+                                <i class="{{ $feature['icon'] }} text-2xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-blue-800 mb-2">{{ $feature['title'] }}</h3>
+                            <p class="text-gray-600 text-sm">{{ $feature['desc'] }}</p>
                         </div>
                     @endforeach
                 </div>
             </div>
         </section>
 
-        {{-- hiển thị bác sĩ lên home ____ nhinhi => --}}
+
         {{-- Doctor Section --}}
         <section class="py-20 bg-white">
             <div class="container mx-auto px-4">
@@ -126,10 +130,9 @@
                                 <li class="splide__slide">
                                     <div
                                         class="bg-gray-50 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow hover-scale text-center">
-                                        <img src="{{ $doctor->user->avatar ? asset('storage/' . $doctor->user->avatar) : asset('images/default-doctor.png') }}"
+                                        <img src="{{ $doctor->user->avatar ?? asset('images/default-doctor.png') }}"
                                             alt="{{ $doctor->user->full_name }}"
                                             class="w-24 h-24 mx-auto rounded-full mb-4 object-cover">
-
                                         <h3 class="text-xl font-semibold mb-2">{{ $doctor->user->full_name }}</h3>
                                         <div class="text-blue-600 mb-2">{{ $doctor->department->name ?? 'Chuyên khoa' }}
                                         </div>
@@ -152,99 +155,137 @@
             </div>
         </section>
 
-        
+
 
         {{-- Stats Section --}}
         <section class="py-20 gradient-bg text-white">
             <div class="container mx-auto px-4">
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                    @php
-                        $stats = [
-                            ['number' => '10,000+', 'label' => 'Bệnh Nhân Tin Tưởng'],
-                            ['number' => '50+', 'label' => 'Bác Sĩ Chuyên Khoa'],
-                            ['number' => '15+', 'label' => 'Năm Kinh Nghiệm'],
-                            ['number' => '24/7', 'label' => 'Hỗ Trợ Khẩn Cấp'],
-                        ];
-                    @endphp
-                    @foreach ($stats as $stat)
-                        <div class="text-center">
-                            <div class="text-4xl md:text-5xl font-bold mb-2">{{ $stat['number'] }}</div>
-                            <div class="text-blue-200">{{ $stat['label'] }}</div>
+                    <div class="text-center">
+                        <div class="text-4xl md:text-5xl font-bold mb-2">
+                            <span class="counter" data-number="10000" data-step="300">0</span>+
                         </div>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-
-        {{-- Testimonials Section --}}
-        <section class="py-20 bg-gray-50">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-4 gradient-text">Ý Kiến Bệnh Nhân</h2>
-                    <p class="text-xl text-gray-600">Những chia sẻ chân thực từ bệnh nhân</p>
-                </div>
-
-                <div id="testimonial-slider" class="splide">
-                    <div class="splide__track">
-                        <ul class="splide__list">
-                            @forelse ($testimonials as $testimonial)
-                                <li class="splide__slide">
-                                    <div class="bg-white p-8 rounded-xl shadow-lg hover:scale-105 transition">
-                                        {{-- Stars --}}
-                                        <div class="flex items-center mb-4">
-                                            @for ($i = 0; $i < $testimonial->rating; $i++)
-                                                <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
-                                            @endfor
-                                        </div>
-
-                                        {{-- Nội dung đánh giá --}}
-                                        <p class="text-gray-600 mb-6 italic">
-                                            "{{ $testimonial->comment }}"
-                                        </p>
-
-                                        <div>
-                                            {{-- Bệnh nhân (ẩn danh) --}}
-                                            <div class="font-semibold">
-                                                @if ($testimonial->patient && $testimonial->patient->full_name)
-                                                    {{ Str::substr($testimonial->patient->full_name, 0, 1) . '.***' }}
-                                                @else
-                                                    Bệnh nhân
-                                                @endif
-                                            </div>
-
-                                            {{-- Bác sĩ --}}
-                                            <div class="text-sm text-gray-500">
-                                                @if ($testimonial->doctor && $testimonial->doctor->user->full_name)
-                                                    Bác sĩ: {{ $testimonial->doctor->user->full_name }}
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-                            @empty
-                                <li class="splide__slide">
-                                    <div class="text-gray-500">Chưa có đánh giá nào.</div>
-                                </li>
-                            @endforelse
-                        </ul>
+                        <div class="text-blue-200">Bệnh nhân tin tưởng</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl md:text-5xl font-bold mb-2">
+                            <span class="counter" data-number="50" data-step="1">0</span>+
+                        </div>
+                        <div class="text-blue-200">Bác sĩ chuyên khoa</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl md:text-5xl font-bold mb-2">
+                            <span class="counter" data-number="15" data-step="1">0</span>+
+                        </div>
+                        <div class="text-blue-200">Năm kinh nghiệm</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl md:text-5xl font-bold mb-2">
+                            <span>24/7</span>
+                        </div>
+                        <div class="text-blue-200">Hỗ Trợ Khẩn Cấp</div>
                     </div>
                 </div>
             </div>
         </section>
 
+        {{-- Services Section --}}
+        <section class="py-20 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold mb-4 gradient-text">Dịch Vụ Của Chúng Tôi</h2>
+                    <p class="text-xl text-gray-600">Các dịch vụ chăm sóc sức khỏe đa dạng và chuyên nghiệp</p>
+                </div>
 
-        {{-- CTA Section --}}
-        <section class="py-20 gradient-bg text-white">
-            <div class="container mx-auto px-4 text-center">
-                <h2 class="text-4xl font-bold mb-6">Sẵn Sàng Đặt Lịch Khám?</h2>
-                <p class="text-xl mb-8 text-blue-100">
-                    Đừng để sức khỏe chờ đợi. Đặt lịch ngay hôm nay để được chăm sóc tốt nhất!
-                </p>
-                <a href="{{ url('/dat-lich') }}"
-                    class="bg-white text-blue-600 px-8 py-4 rounded-full font-semibold hover:bg-blue-50 transition-colors hover-scale text-lg">
-                    Đặt Lịch Khám Ngay
-                </a>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    @foreach ($dich_vu as $service)
+                        <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow hover-scale">
+                            <img src="{{ asset('storage/' . $service->image) }}" alt="{{ $service->name }}"
+                                class="w-full h-60 object-cover rounded-t-lg mb-2">
+                            <h3 class="text-xl font-semibold mb-3">{{ $service->name }}</h3>
+                            <p class="text-gray-600">{{ $service->description }}</p>
+                            <div class="text-blue-600 font-semibold mt-4">
+                                Giá: {{ number_format($service->price, 0, ',', '.') }} VNĐ
+                            </div>
+                            <a href="{{ route('booking.showService', ['service_id' => $service->id]) }}"
+                                class="inline-block mt-4 bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition-colors">
+                                Xem Chi Tiết
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
             </div>
-        </section>
+
+            {{-- Testimonials Section --}}
+            <section class="py-20 bg-gray-50">
+                <div class="container mx-auto px-4">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl font-bold mb-4 gradient-text">Ý Kiến Bệnh Nhân</h2>
+                        <p class="text-xl text-gray-600">Những chia sẻ chân thực từ bệnh nhân</p>
+                    </div>
+
+                    <div id="testimonial-slider" class="splide">
+                        <div class="splide__track">
+                            <ul class="splide__list">
+                                @forelse ($testimonials as $testimonial)
+                                    <li class="splide__slide">
+                                        <div class="bg-white p-5 rounded-xl shadow-lg hover:scale-105 transition">
+                                            {{-- Stars --}}
+                                            <div class="flex items-center mb-4">
+                                                @for ($i = 0; $i < $testimonial->rating; $i++)
+                                                    <i data-lucide="star"
+                                                        class="w-5 h-5 text-yellow-400 fill-current"></i>
+                                                @endfor
+                                            </div>
+
+                                            {{-- Nội dung đánh giá --}}
+                                            <p class="text-gray-600 mb-6 italic">
+                                                "{{ $testimonial->comment }}"
+                                            </p>
+
+                                            <div>
+                                                {{-- Bệnh nhân (ẩn danh) --}}
+                                                <div class="font-semibold">
+                                                    @if ($testimonial->patient && $testimonial->patient->full_name)
+                                                        {{ Str::substr($testimonial->patient->full_name, 0, 1) . '.***' }}
+                                                    @else
+                                                        Bệnh nhân
+                                                    @endif
+                                                </div>
+
+                                                {{-- Bác sĩ --}}
+                                                <div class="text-sm text-gray-500">
+                                                    @if ($testimonial->doctor && $testimonial->doctor->user->full_name)
+                                                        Bác sĩ: {{ $testimonial->doctor->user->full_name }}
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                @empty
+                                    <li class="splide__slide">
+                                        <div class="text-gray-500">Chưa có đánh giá nào.</div>
+                                    </li>
+                                @endforelse
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            {{-- CTA Section --}}
+            <section class="py-20 gradient-bg text-white">
+                <div class="container mx-auto px-4 text-center">
+                    <h2 class="text-4xl font-bold mb-6">Sẵn Sàng Đặt Lịch Khám?</h2>
+                    <p class="text-xl mb-8 text-blue-100">
+                        Đừng để sức khỏe chờ đợi. Đặt lịch ngay hôm nay để được chăm sóc tốt nhất!
+                    </p>
+                    <a href="{{ url('/dat-lich') }}"
+                        class="bg-white text-blue-600 px-8 py-4 rounded-full font-semibold hover:bg-blue-50 transition-colors hover-scale text-lg">
+                        Đặt Lịch Khám Ngay
+                    </a>
+                </div>
+            </section>
     </div>
 @endsection

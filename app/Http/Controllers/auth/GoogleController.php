@@ -37,9 +37,12 @@ class GoogleController extends Controller
             /** ② Kiểm tra xem email đã tồn tại chưa */
             $userByEmail = User::where('email', $googleUser->getEmail())->first();
             if ($userByEmail) {
-                return redirect('/login')
-                    ->withErrors(['google' => 'Tài khoản đã tồn tại. Vui lòng đăng nhập bằng mật khẩu.'])
-                    ->withInput(['form_type' => 'login']);
+                // Cập nhật google_id để lần sau login nhanh hơn
+                $userByEmail->update([
+                    'google_id' => $googleUser->getId()
+                ]);
+                Auth::login($userByEmail);
+                return redirect('/')->with('message', 'Đăng nhập bằng Google thành công!');
             }
 
             /** ③ Tạo tài khoản mới */

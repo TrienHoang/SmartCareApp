@@ -235,9 +235,6 @@
                                         <i class="mr-1"></i>Mô tả
                                     </th>
                                     <th class="border-top-0">
-                                        <i class="mr-1"></i>Slug
-                                    </th>
-                                    <th class="border-top-0">
                                         <i class="mr-1"></i>Trạng thái
                                     </th>
                                     <th class="border-top-0">
@@ -277,9 +274,6 @@
                                             <small class="text-muted">
                                                 {{ Str::limit($category->description ?? 'Không có mô tả', 50) }}
                                             </small>
-                                        </td>
-                                        <td>
-                                            <code class="bg-light px-2 py-1 rounded">{{ $category->slug }}</code>
                                         </td>
                                         <td>
                                             @if ($category->status == 'active')

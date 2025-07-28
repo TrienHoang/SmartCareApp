@@ -106,12 +106,10 @@ class AdminFileController extends Controller
     public function destroy($id)
     {
         $file = FileUpload::findOrFail($id);
-        DB::beginTransaction();
 
+        DB::beginTransaction();
         try {
-            if (Storage::disk('public')->exists($file->file_path)) {
-                Storage::disk('public')->delete($file->file_path);
-            }
+            $file->delete();
 
             UploadHistory::create([
                 'file_upload_id' => $file->id,
@@ -119,13 +117,11 @@ class AdminFileController extends Controller
                 'timestamp' => now(),
             ]);
 
-            $file->delete();
             DB::commit();
-
             return redirect()->route('admin.files.index')->with('success', 'Đã xóa file thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->with('error', 'Đã xảy ra lỗi trong quá trình xóa file: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Đã xảy ra lỗi khi xóa file: ' . $e->getMessage());
         }
     }
 

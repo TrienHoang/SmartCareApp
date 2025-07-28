@@ -111,15 +111,26 @@ Route::prefix('doctor')
                 Route::patch('treatment-plan-items/{itemId}/update-status', [TreatmentPlanController::class, 'updateItemStatus'])->name('treatment-plan-items.update-status');
             });
 
+            Route::post('/check-appointment', [DoctorAppointmentController::class, 'checkAppointmentAvailability'])
+            ->name('check-appointment');
+
     });
 
-    // Nhóm route dành riêng cho bác sĩ
+// Nhóm route dành riêng cho bác sĩ
 Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
 
     Route::get('/', [DoctorController::class, 'index'])->name('index');
     Route::get('/list/{id}', [DoctorController::class, 'show'])->name('list.show');
     Route::get('/history', [DoctorController::class, 'history'])->name('history.index');
     Route::get('/history/{appointment}', [DoctorController::class, 'historyShow'])->name('history.show');
+    // Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+    // Route::patch('/reviews/{review}/toggle-visibility', [ReviewController::class, 'toggleVisibility'])->name('reviews.toggle');
+});
+
+Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
+    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
+    Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
+    Route::get('/calendar/test-database', [CalendarController::class, 'testDatabase'])->name('calendar.testDatabase');
 });
 
 
@@ -128,6 +139,16 @@ Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'
     Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
     Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
 });
+//Lịch làm việc bác sĩ 
+Route::prefix('doctor/working_schedules')->name('doctor.working_schedules.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'index'])->name('index');
+    Route::get('/create', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'create'])->name('create');
+    Route::post('/', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'update'])->name('update');
+    Route::delete('/{id}', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'destroy'])->name('destroy');
+});
+
 
 
 

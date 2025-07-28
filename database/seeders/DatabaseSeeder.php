@@ -9,8 +9,6 @@ use Database\Seeders\FileUploadSeeder;
 use Database\Seeders\StatisticSeeder;
 use Database\Seeders\ReviewSeeder;
 
-
-
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -19,54 +17,71 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            // RoleSeeder::class,
-            // PermissionSeeder::class,
-            // RolePermissionSeeder::class,
+            RoleSeeder::class,
+            PermissionSeeder::class,
+            RolePermissionSeeder::class,
 
-            // TaskSeeder::class, // đã bao gồm tạo Task + Comment + Log
-            // UserSeeder::class,
-            // DepartmentSeeder::class,
-            // RoomSeeder::class,
 
-            // DoctorSeeder::class,
-            // WorkingScheduleSeeder::class,
-            // DoctorLeaveSeeder::class,
+            TaskSeeder::class,
 
-            // ServiceCategorySeeder::class,
-            // ServiceSeeder::class,
+            UserSeeder::class,
+            DepartmentSeeder::class,
+            RoomSeeder::class,
 
-            // AppointmentSeeder::class,           
-            // AppointmentLogSeeder::class,
-            // StatisticSeeder::class,
+            DoctorSeeder::class,
+            WorkingScheduleSeeder::class,
+            DoctorLeaveSeeder::class,
 
-            // PromotionSeeder::class,
-            // PaymentSeeder::class,
-            // PaymentHistorySeeder::class,
+            DoctorDetailSeeder::class,
+            DoctorServiceSeeder::class,
 
-            // MedicineSeeder::class,
-            // MedicalRecordSeeder::class,
-            // PrescriptionSeeder::class,
-            // PrescriptionItemSeeder::class,
-            // // TreatmentPlanSeeder::class,
+            SpecialtySeeder::class,
 
-            // FileUploadSeeder::class,
-            // UploadHistorySeeder::class,
 
-            // BlogSeeder::class,
-            // // NotificationSeeder::class,
-            // FaqSeeder::class,
-            // OrderSeeder::class,
-            // // NotificationSeeder::class,
-            // //   FaqSeeder::class,
-            // ReviewSeeder::class,
-            // DoctorServiceSeeder::class,
-            // DoctorDetailSeeder::class,
+            ServiceCategorySeeder::class,
+            ServiceSeeder::class,
 
-        // SpecialtySeeder::class,
-        // DoctorSeeder::class,
-        // DoctorDetailSeeder::class,
+
+            AppointmentSeeder::class,
+
+            AppointmentLogSeeder::class,
+            StatisticSeeder::class,
+
+            PromotionSeeder::class,
+            PaymentSeeder::class,
+            PaymentHistorySeeder::class,
+
+            MedicineSeeder::class,
+            MedicalRecordSeeder::class,
+            PrescriptionSeeder::class,
+            PrescriptionItemSeeder::class,
+
+             TreatmentPlanSeeder::class,
+
+
+            FileUploadSeeder::class,
+            UploadHistorySeeder::class,
+
+            BlogSeeder::class,
+
+            ContactSeeder::class,
+      
+
+             NotificationSeeder::class,
+            FaqSeeder::class,
+            OrderSeeder::class,
+            NotificationSeeder::class,
+            FaqSeeder::class,
+            ReviewSeeder::class,
+            DoctorServiceSeeder::class,
+            DoctorDetailSeeder::class,
+
+        SpecialtySeeder::class,
+        DoctorSeeder::class,
+        DoctorDetailSeeder::class,
 
         ReviewReplySeeder::class
+
 
 
         ]);

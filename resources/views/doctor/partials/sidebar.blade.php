@@ -58,8 +58,8 @@
 
             <li class="menu-item">
                 <a href="{{ route('doctor.leaves.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-calendar-minus"></i>
-                    <div>Lịch nghỉ của bác sĩ</div>
+                    <i class="menu-icon tf-icons bx bx-calendar"></i>
+                    <div>Đăng kí nghỉ phép</div>
                 </a>
             </li>
 
@@ -97,14 +97,12 @@
                     <span>Lịch bác sĩ</span>
                 </a>
             </li>
-
             <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-user"></i>
-                    <div>Tài khoản</div>
+                <a href="{{ route('doctor.working_schedules.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-calendar"></i>
+                    <span>Lịch làm việc</span>
                 </a>
             </li>
         @endif
-
     </ul>
 </aside>

@@ -14,6 +14,7 @@ use App\Models\Appointment;
 use App\Models\Doctor;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
 class ReviewReplyController extends Controller
@@ -21,11 +22,11 @@ class ReviewReplyController extends Controller
     /**
      * Gửi đánh giá bác sĩ.
      */
-public function store(Request $request, $doctorId)
-{
-    try {
-        // ✅ Tìm bác sĩ
-        $doctor = Doctor::findOrFail($doctorId);
+    public function store(Request $request, $doctorId)
+    {
+        try {
+            // ✅ Tìm bác sĩ
+            $doctor = Doctor::findOrFail($doctorId);
 
         // ✅ Validate đầu vào
         $request->validate([
@@ -47,18 +48,18 @@ public function store(Request $request, $doctorId)
             ->where('patient_id', Auth::id())
             ->first();
 
-        if (!$appointment) {
-            return back()->with('error', 'Cuộc hẹn không hợp lệ hoặc không thuộc về bạn.');
-        }
+            if (!$appointment) {
+                return back()->with('error', 'Cuộc hẹn không hợp lệ hoặc không thuộc về bạn.');
+            }
 
         // ✅ Kiểm tra đã đánh giá chưa
         $alreadyReviewed = Review::where('appointment_id', $appointment->id)
             ->where('patient_id', Auth::id())
             ->exists();
 
-        if ($alreadyReviewed) {
-            return back()->with('error', 'Bạn đã đánh giá cuộc hẹn này rồi.');
-        }
+            if ($alreadyReviewed) {
+                return back()->with('error', 'Bạn đã đánh giá cuộc hẹn này rồi.');
+            }
 
         // ✅ Tạo đánh giá
         $review = Review::create([
@@ -86,22 +87,16 @@ public function store(Request $request, $doctorId)
             'user_id'   => Auth::id(),
         ]);
 
-        return back()->with('success', 'Đánh giá của bạn đã được gửi thành công.');
-    } catch (\Exception $e) {
-        Log::error('Lỗi khi tạo đánh giá: ' . $e->getMessage(), [
-            'user_id' => Auth::id(),
-            'request_data' => $request->all()
-        ]);
+            return back()->with('success', 'Đánh giá của bạn đã được gửi thành công.');
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi tạo đánh giá: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'request_data' => $request->all()
+            ]);
 
-        return back()->with('error', 'Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.');
+            return back()->with('error', 'Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.');
+        }
     }
-}
-
-
-
-
-
-
     /**
      * Đánh dấu đánh giá là hữu ích.
      */
