@@ -9,6 +9,7 @@ use App\Models\WorkingSchedule;
 use App\Models\Appointment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Log;
 
@@ -179,17 +180,16 @@ class BookingController extends Controller
                     ->where('status', '!=', 'cancelled')
                     ->exists();
 
-                // Nếu slot chưa được đặt, đánh dấu ngày đó là khả dụng và thoát vòng lặp slot (chỉ cần 1 slot trống)
+                // Nếu slot chưa được đặt, đánh dấu ngày đó là khả dụng và thoát vòng lặp slot
                 if (!$booked) {
                     $available_dates[$date->format('Y-m-d')] = true;
-                    break; // Thoát vòng lặp while để đi sang ngày tiếp theo
+                    break; 
                 }
 
                 $current->addMinutes($service->duration);
             }
         }
 
-        // Trả về đối tượng JSON của các ngày khả dụng
         return response()->json($available_dates);
     }
     public function getSlots(Request $request)
@@ -204,6 +204,7 @@ class BookingController extends Controller
         $service = Service::findOrFail($validated['service_id']);
         $doctor_id = $validated['doctor_id'];
         $current_datetime = Carbon::now();
+
 
         // Lấy danh sách bác sĩ và số lịch hẹn (nếu random)
         $doctor_appointments = [];
@@ -238,7 +239,6 @@ class BookingController extends Controller
         foreach ($schedules as $schedule) {
             $shift = $schedule->shift;
             if (!$shift) {
-                \Log::warning("No shift found for schedule ID {$schedule->id}");
                 continue;
             }
 
@@ -246,7 +246,6 @@ class BookingController extends Controller
                 $start = Carbon::parse($shift->start_time);
                 $end = Carbon::parse($shift->end_time);
             } catch (\Exception $e) {
-                \Log::error("Invalid shift time for schedule ID {$schedule->id}: Start: {$shift->start_time}, End: {$shift->end_time}");
                 continue;
             }
 
@@ -260,10 +259,11 @@ class BookingController extends Controller
                     break;
                 }
 
-                $slot_full_datetime = $selected_date->copy()->setTimeFromTimeString($current_slot_time->format('H:i'));
+                $slot_full_datetime = $selected_date->copy()->setTimeFrom($current_slot_time);
 
-                // Bỏ qua slot trong quá khứ
-                if ($slot_full_datetime->lt($current_datetime)) {
+                // Kiểm tra thời gian đặt tối thiểu và thời gian quá khứ
+                $hours_diff = $current_datetime->diffInHours($slot_full_datetime, false);
+                if ($hours_diff < $service->min_booking_hours || $slot_full_datetime->lt($current_datetime)) {
                     $current_slot_time->addMinutes($service->duration);
                     continue;
                 }
@@ -361,52 +361,112 @@ class BookingController extends Controller
 
     public function confirm(Request $request)
     {
+
         $booking_data = $request->session()->get('booking_data');
+        // dd($request->session()->get('booking_data'));
         $booking_confirm = $request->session()->get('booking_confirm');
 
         if (!$booking_data || !$booking_confirm) {
-            return redirect()->route('services.index')->with('error', 'Dữ liệu đặt lịch không hợp lệ.');
+            return redirect()->route('client.services')->with('error', 'Dữ liệu đặt lịch không hợp lệ.');
         }
 
         $service = Service::findOrFail($booking_data['service_id']);
-        $doctor = Doctor::findOrFail($booking_confirm['doctor_id']);
+        $doctor = Doctor::with('user')->findOrFail($booking_confirm['doctor_id']);
         $appointment_time = Carbon::parse($booking_confirm['appointment_time']);
         $user = auth()->user();
 
-        return view('booking.confirm', compact('service', 'doctor', 'appointment_time', 'user', 'booking_confirm'));
+        return view('client.booking.confirm', compact('service', 'doctor', 'appointment_time', 'user', 'booking_confirm'));
     }
 
     public function save(Request $request)
     {
+        // Lấy dữ liệu đặt lịch từ session
         $booking_data = $request->session()->get('booking_data');
         $booking_confirm = $request->session()->get('booking_confirm');
 
+        // Kiểm tra dữ liệu session có hợp lệ không
         if (!$booking_data || !$booking_confirm) {
-            return redirect()->route('services.index')->with('error', 'Dữ liệu đặt lịch không hợp lệ.');
+            return redirect()->route('services.index')->with('error', 'Dữ liệu đặt lịch không hợp lệ hoặc đã hết hạn. Vui lòng bắt đầu lại.');
         }
 
-        $service = Service::findOrFail($booking_data['service_id']);
-        $appointment_time = Carbon::parse($booking_confirm['appointment_time']);
+        // Validate dữ liệu từ form xác nhận (thông tin người dùng và các trường ẩn)
+        $validated = $request->validate([
+            // Dữ liệu đặt lịch (từ input ẩn trong form)
+            'service_id' => 'required|exists:services,id',
+            'doctor_id' => 'required|exists:doctors,id', // Doctor_id là bắt buộc ở bước này
+            'appointment_time' => 'required|date_format:Y-m-d H:i:s', // Định dạng đầy đủ
+            'reason' => 'nullable|string|max:255',
+            // Thông tin người dùng (từ form)
+            'full_name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'gender' => 'nullable|string|in:Nam,Nữ,Khác',
+            'date_of_birth' => 'nullable|date',
+            'address' => 'nullable|string|max:500',
+        ],[
+            'full_name.required' => 'Họ và tên là bắt buộc.',
+            'full_name.string' => 'Họ và tên phải là chuỗi ký tự.',
+            'phone.required' => 'Số điện thoại là bắt buộc.',
+            'phone.string' => 'Số điện thoại phải là chuỗi ký tự.'
+        ]);
+
+        // Lấy thông tin dịch vụ và thời gian hẹn
+        $service = Service::findOrFail($validated['service_id']); // Sử dụng $validated['service_id']
+        $appointment_time = Carbon::parse($validated['appointment_time']); // Sử dụng $validated['appointment_time']
+        $user = Auth::user(); // Sử dụng Auth::user() để lấy người dùng đã đăng nhập
 
         DB::beginTransaction();
         try {
+            // 1. Cập nhật thông tin người dùng nếu có thay đổi
+            // Chỉ cập nhật nếu người dùng đã đăng nhập
+            if ($user) {
+                $user->full_name = $validated['full_name'];
+                $user->phone = $validated['phone'];
+                $user->gender = $validated['gender'];
+                $user->date_of_birth = $validated['date_of_birth'];
+                $user->address = $validated['address'];
+                $user->save(); // Lưu các thay đổi vào DB
+            } else {
+                throw new \Exception('Người dùng chưa đăng nhập hoặc không tìm thấy.');
+            }
+
+            // 2. Kiểm tra lại slot có còn trống không (tránh race condition)
+            $booked = Appointment::where('doctor_id', $validated['doctor_id'])
+                ->where('appointment_time', $appointment_time)
+                ->where('status', '!=', 'cancelled')
+                ->exists();
+
+            if ($booked) {
+                DB::rollBack(); // Rollback các thay đổi nếu slot đã bị đặt
+                return redirect()->route('booking.showService',$booking_confirm['service_id'])->with('error', 'Khung giờ này đã có người khác đặt hoặc không còn khả dụng.');
+            }
+
+            // 3. Tạo bản ghi đặt lịch mới
             $appointment = Appointment::create([
-                'patient_id' => auth()->id(),
-                'doctor_id' => $booking_confirm['doctor_id'],
-                'service_id' => $booking_data['service_id'],
+                'patient_id' => $user->id, // Sử dụng user->id của người dùng hiện tại
+                'doctor_id' => $validated['doctor_id'], // Sử dụng $validated['doctor_id']
+                'service_id' => $validated['service_id'], // Sử dụng $validated['service_id']
                 'appointment_time' => $appointment_time,
                 'end_time' => $appointment_time->copy()->addMinutes($service->duration),
-                'status' => 'pending',
-                'reason' => $booking_confirm['reason'],
-                'created_by' => auth()->id(),
+                'status' => 'pending', // Trạng thái mặc định sau khi đặt
+                'reason' => $validated['reason'] ?? null, // Sử dụng $validated['reason']
+                'created_by' => $user->id, // Người tạo là người dùng hiện tại
+                // 'created_at' và 'updated_at' sẽ tự động được Laravel thêm vào nếu bạn không tắt timestamps
             ]);
+
+            // 4. Xóa dữ liệu đặt lịch tạm thời khỏi session
             $request->session()->forget(['booking_data', 'booking_confirm']);
+
+            // Commit transaction nếu mọi thứ thành công
             DB::commit();
 
-            return redirect()->route('booking.success')->with('success', 'Đặt lịch thành công!');
+            // Chuyển hướng đến trang thành công
+            return redirect()->route('booking.success')->with('success', 'Bạn đã đặt lịch thành công! Vui lòng chờ xác nhận từ phòng khám.');
+
         } catch (\Exception $e) {
+            // Rollback transaction nếu có bất kỳ lỗi nào xảy ra
             DB::rollBack();
-            return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+            \Log::error("Booking save failed: " . $e->getMessage() . " - User ID: " . ($user ? $user->id : 'N/A'));
+            return back()->with('error', 'Có lỗi xảy ra khi hoàn tất đặt lịch: ' . $e->getMessage());
         }
     }
 }

@@ -139,6 +139,7 @@
                     <p class="text-gray-600 mb-2 flex items-start">
                         <i data-lucide="clock" class="w-5 h-5 mr-2 text-blue-700"></i>
                         Thời gian thực hiện: {{ $service->duration }} phút
+                    </p>
                     <p class="text-gray-600 mb-2 flex items-start">
                         {{ $service->description }}
                     </p>

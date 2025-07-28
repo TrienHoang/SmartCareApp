@@ -164,7 +164,7 @@
 
                             <div class="row">
                                 <!-- Price -->
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-6 mb-3">
                                     <label for="price" class="form-label fw-semibold">
                                         <i class="fas fa-dollar-sign text-success me-1"></i>
                                         Giá (VNĐ) <span class="text-danger">*</span>
@@ -177,7 +177,7 @@
                                 </div>
 
                                 <!-- Duration -->
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-6 mb-3">
                                     <label for="duration" class="form-label fw-semibold">
                                         <i class="fas fa-clock text-info me-1"></i>
                                         Thời gian (phút) <span class="text-danger">*</span>
@@ -189,8 +189,21 @@
                                     @enderror
                                 </div>
 
+                                <!-- Min booking time -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="min_booking_hours" class="form-label fw-semibold">
+                                        <i class="fas fa-clock text-info me-1"></i>
+                                        Thời gian đặt trước tối thiểu (giờ) <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" name="min_booking_hours" value="{{ old('min_booking_hours', 30) }}"
+                                        class="form-control @error('min_booking_hours') is-invalid @enderror" placeholder="30">
+                                    @error('min_booking_hours')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
                                 <!-- Status -->
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-6 mb-3">
                                     <label for="status" class="form-label fw-semibold">
                                         <i class="fas fa-toggle-on text-warning me-1"></i>
                                         Trạng thái <span class="text-danger">*</span>
