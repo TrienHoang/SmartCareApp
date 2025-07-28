@@ -205,6 +205,22 @@
                                 </div>
                             </div>
 
+                            <!-- Min booking time -->
+                            <div class="mb-4">
+                                <label for="min_booking_hours" class="form-label fw-semibold">
+                                    <i class="fas fa-clock text-info me-1"></i>
+                                    Thời gian đặt trước tối thiểu (Giờ) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" name="min_booking_hours" value="{{ old('min_booking_hours',$service->min_booking_hours) }}"
+                                    class="form-control @error('min_booking_hours') is-invalid @enderror" placeholder="30">
+                                @error('min_booking_hours')
+                                <div class="invalid-feedback">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+
                             <!-- Category -->
                             <div class="mb-4">
                                 <label for="service_cate_id" class="form-label fw-semibold">

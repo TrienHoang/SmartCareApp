@@ -210,6 +210,10 @@
                                 <i data-lucide="map-pin" class="w-5 h-5 mr-3 mt-0.5 text-blue-600 flex-shrink-0"></i>
                                 <span><strong>Khoa:</strong> {{ $service->department->name }}</span>
                             </p>
+                            <p class="text-gray-600 mb-2 flex items-start">
+                                <i data-lucide="clock" class="w-5 h-5 mr-2 text-blue-700"></i>
+                                <strong>Thời gian thực hiện</strong>: {{ $service->duration }} phút
+                            </p>
                             <p class="text-gray-600 text-sm leading-relaxed mt-4 p-3 bg-gray-50 rounded-lg">
                                 <i data-lucide="info" class="w-4 h-4 mr-2 text-blue-600 inline"></i>
                                 {{ $service->description }}
@@ -217,12 +221,13 @@
                         </div>
                     </div>
                 </div>
-                {{-- <div class="mt-6">
-                    <a href="{{ route('booking.showService') }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline text-base font-medium transition-colors duration-200">
+                <div class="ms-6 mt-6">
+                    <a href="{{ route('booking.showService', $service->id) }}"
+                        class="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline text-base font-medium transition-colors duration-200">
                         <i class="bi bi-arrow-left mr-2"></i>
-                        Quay lại danh sách dịch vụ
+                        Quay lại
                     </a>
-                </div> --}}
+                </div>
             </div>
 
             {{-- Right Column: Chọn ngày khám --}}
@@ -496,6 +501,7 @@
                         }
                     });
 
+
                     morning.forEach(slot => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
@@ -527,6 +533,15 @@
                         });
                         afternoonSlots.appendChild(btn);
                     });
+
+                    console.log(`Morning slots: ${morning.length}, Afternoon slots: ${afternoon.length}`);
+
+                    if (morning.length == 0) {
+                        morningSlots.innerHTML = '<p class="text-gray-500">Không còn khung giờ trống.</p>';
+                    } else if (afternoon.length == 0) {
+                        morningSlots.innerHTML = '<p class="text-gray-500">Không còn khung giờ trống.</p>';
+
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching slots:', error);
@@ -582,7 +597,7 @@
                     const dateStr = formatDateToString(fullDate);
 
                     // Debug: In ra console để kiểm tra
-                    console.log(`Checking date: ${dateStr}, Available: ${availableDates[dateStr]}`);
+                    // console.log(`Checking date: ${dateStr}, Available: ${availableDates[dateStr]}`);
 
                     if (fullDate.getDate() === today.getDate() &&
                         fullDate.getMonth() === today.getMonth() &&
@@ -601,9 +616,6 @@
                         fullDate.getFullYear() === selectedDate.getFullYear()) {
                         cell.classList.add('selected');
                     }
-
-                    // Disable past dates or unavailable dates
-                    // Sửa đổi điều kiện kiểm tra: kiểm tra xem ngày có trong availableDates và có giá trị true không
                     if (fullDate.getTime() < today.getTime() || !availableDates.hasOwnProperty(dateStr) || !
                         availableDates[dateStr]) {
                         cell.classList.add('disabled');

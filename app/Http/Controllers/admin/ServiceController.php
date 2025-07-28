@@ -66,6 +66,9 @@ class ServiceController extends Controller
         $validated['slug'] = str()->slug($validated['name']);
         $validated['content'] = $request->input('content');
         $validated['department_id'] = $request->input('department_id');
+        $validated['min_booking_hours'] = $request->input('min_booking_hours');
+        $validated['status'] = $request->input('status', 'active');
+        $validated['duration'] = $request->input('duration')    ; 
 
         // Xử lý ảnh nếu có
         if ($request->hasFile('image')) {
@@ -119,9 +122,11 @@ class ServiceController extends Controller
         $validated['description'] = $validated['description'] ? trim($validated['description']) : null;
         $validated['price'] = round($validated['price'], 0);
         $validated['slug'] = str()->slug($validated['name']);
-        $validated['content'] = $request->input('content'); // ✅ thêm dòng này
+        $validated['content'] = $request->input('content'); 
         $validated['department_id'] = $request->input('department_id');
-        // $validated['room_id'] = $request->input('room_id');
+        $validated['min_booking_hours'] = $request->input('min_booking_hours');
+        $validated['status'] = $request->input('status', 'active');
+        $validated['duration'] = $request->input('duration');
 
         $service = Service::findOrFail($id);
 
@@ -192,6 +197,7 @@ class ServiceController extends Controller
             'content' => 'nullable|string', // ✅ thêm dòng này
             'price' => 'required|numeric|min:1000|max:99999999',
             'duration' => 'required|integer|min:5|max:600',
+            'min_booking_hours' => 'nullable|integer|min:1|max:168',
             'status' => ['required', Rule::in(['active', 'inactive'])]
         ];
     }
@@ -207,6 +213,7 @@ class ServiceController extends Controller
             'department_id' => 'required|exists:departments,id',
             'price' => 'required|numeric|min:1000|max:99999999',
             'duration' => 'required|integer|min:5|max:600',
+            'min_booking_hours' => 'nullable|integer|min:1|max:168',
             'status' => ['required', Rule::in(['active', 'inactive'])]
         ];
     }
@@ -232,6 +239,17 @@ class ServiceController extends Controller
             'duration.integer' => 'Thời gian phải là số nguyên.',
             'duration.min' => 'Thời gian tối thiểu là :min phút.',
             'duration.max' => 'Thời gian tối đa là :max phút.',
+
+            'min_booking_hours.integer' => 'Số giờ đặt trước phải là số nguyên.',
+            'min_booking_hours.min' => 'Số giờ đặt trước tối thiểu là :min giờ.',
+            'min_booking_hours.max' => 'Thời gian đặt trước tối thiểu không quá 7 ngày.',
+
+            'image.image' => 'Ảnh dịch vụ phải là một tệp hình ảnh.',
+            'image.mimes' => 'Ảnh dịch vụ phải có định dạng: jpeg, png, jpg, gif, webp.',
+            'image.max' => 'Ảnh dịch vụ không được vượt quá :max KB.',
+
+            'department_id.required' => 'Vui lòng chọn chuyên khoa.',
+            'department_id.exists' => 'Chuyên khoa đã chọn không tồn tại.',
 
             'service_cate_id.required' => 'Vui lòng chọn danh mục.',
             'service_cate_id.exists' => 'Danh mục đã chọn không tồn tại.',
