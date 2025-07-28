@@ -18,6 +18,7 @@ class Service extends Model
         'duration',
         'status',
         'content',
+        'min_booking_hours',
         'department_id',
         'room_id', 
         'image',
