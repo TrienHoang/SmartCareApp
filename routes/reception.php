@@ -65,9 +65,5 @@ Route::prefix('receptionist')
             // Trang chọn ngày
             Route::get('/working-schedule', [WorkingScheduleController::class, 'index'])
                 ->name('index');
-
-            // Trang hiển thị lịch làm việc theo ngày
-            Route::get('/working-schedule/{date}', [WorkingScheduleController::class, 'show'])
-                ->name('show');
         });
     });

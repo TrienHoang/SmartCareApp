@@ -61,6 +61,19 @@
             </div>
         </div>
 
+        {{-- Lặp lại hàng tuần --}}
+        <div class="mb-3 form-check">
+            <input class="form-check-input" type="checkbox" id="repeat_weekly" name="repeat_weekly" value="1">
+            <label class="form-check-label" for="repeat_weekly">
+                Lặp lại mỗi tuần
+            </label>
+        </div>
+
+        <div class="mb-3" id="repeat_weeks_container" style="display:none;">
+            <label class="form-label" for="repeat_weeks">Số tuần lặp <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" name="repeat_weeks" id="repeat_weeks" min="1" max="52" value="1">
+        </div>
+
         {{-- Nút gửi --}}
         <button type="submit" class="btn btn-primary">Tạo lịch</button>
         <a href="{{ route('doctor.working_schedules.index') }}" class="btn btn-secondary">Quay lại</a>
@@ -79,6 +92,13 @@
         dayOfWeekInput.value = weekdays[day.getDay()];
     });
 
+    // Hiện/ẩn ô số tuần lặp
+    document.getElementById('repeat_weekly').addEventListener('change', function () {
+        const container = document.getElementById('repeat_weeks_container');
+        container.style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Submit form bằng fetch API
     document.getElementById('working-schedule-form').addEventListener('submit', async function (e) {
         e.preventDefault();
 
@@ -117,6 +137,7 @@
             alertArea.innerHTML = messageHTML;
             form.reset();
             dayOfWeekInput.value = '';
+            document.getElementById('repeat_weeks_container').style.display = 'none';
 
         } catch (error) {
             let msg = error?.message ?? 'Lỗi không xác định';

@@ -14,36 +14,23 @@
                                 <i class="bx bx-calendar text-white"></i>
                             </div>
                             <div>
-                                <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý Lịch làm việc
-                                </h2>
+                                <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý Lịch làm việc</h2>
                                 <p class="text-muted mb-0">Quản lý và theo dõi tất cả lịch làm việc trong hệ thống</p>
                             </div>
                         </div>
                         <div class="breadcrumb-wrapper col-12">
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb bg-transparent p-0">
-                                    <li class="">
-                                        <a href="{{ route('admin.dashboard.index') }}" class="text-decoration-none">
-                                            Trang chủ >
-                                        </a>
+                                    <li class="breadcrumb-item">
+                                        <a href="{{ route('admin.dashboard.index') }}" class="text-decoration-none">Trang chủ</a>
                                     </li>
-                                    <li class="breadcrumb-item active text-primary font-weight-semibold">
-                                        Lịch làm việc
-                                    </li>
+                                    <li class="breadcrumb-item active text-primary font-weight-semibold">Lịch làm việc</li>
                                 </ol>
                             </nav>
                         </div>
                     </div>
                 </div>
             </div>
-            {{-- <div class="content-header-right col-md-4 col-12 text-md-right">
-                <div class="form-group breadcrum-right">
-                    <a href="{{ route('admin.schedules.create') }}"
-                        class="btn btn-gradient-primary btn-lg waves-effect waves-light shadow-lg text-white">
-                        Tạo lịch làm việc mới
-                    </a>
-                </div>
-            </div> --}}
         </div>
 
         <div class="content-body">
@@ -53,6 +40,15 @@
                     <div class="d-flex align-items-center">
                         <i class="bx bx-check-circle mr-2"></i>
                         <strong>Thành công! </strong> {{ session('success') }}
+                    </div>
+                </div>
+            @endif
+
+            @if (session('info'))
+                <div class="alert alert-info alert-dismissible fade show border-0 shadow-sm" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bx bx-info-circle mr-2"></i>
+                        <strong>Thông báo! </strong> {{ session('info') }}
                     </div>
                 </div>
             @endif
@@ -84,7 +80,8 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white mb-0">
-                                        {{ $workingSchedules->where('status', 'Đã xét duyệt')->count() }}</h4>
+                                        {{ $workingSchedules->where('status', 'Đã duyệt')->count() }}
+                                    </h4>
                                     <small class="text-white">Đã duyệt</small>
                                 </div>
                             </div>
@@ -102,8 +99,9 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white mb-0">
-                                        {{ $workingSchedules->where('status', 'Chờ xét duyệt')->count() }}</h4>
-                                    <small class="text-white">Chờ duyệt</small>
+                                        {{ $workingSchedules->where('status', 'Chờ xét duyệt')->count() }}
+                                    </h4>
+                                    <small class="text-white">Chờ xét duyệt</small>
                                 </div>
                             </div>
                         </div>
@@ -174,7 +172,7 @@
                                     </label>
                                     <div class="input-group">
                                         <input type="text" name="search" class="form-control border-left-0"
-                                            placeholder="Tên ca, nhân viên..." value="{{ request('search') }}">
+                                            placeholder="Tên ca, bác sĩ..." value="{{ request('search') }}">
                                     </div>
                                 </div>
                                 <div class="col-lg-2 col-md-6 mb-2">
@@ -201,9 +199,9 @@
                                             {{ request('status') == 'Chờ xét duyệt' ? 'selected' : '' }}>
                                             Chờ xét duyệt
                                         </option>
-                                        <option value="Đã xét duyệt"
-                                            {{ request('status') == 'Đã xét duyệt' ? 'selected' : '' }}>
-                                            Đã xét duyệt
+                                        <option value="Đã duyệt"
+                                            {{ request('status') == 'Đã duyệt' ? 'selected' : '' }}>
+                                            Đã duyệt
                                         </option>
                                     </select>
                                 </div>
@@ -263,13 +261,12 @@
                                                     for="schedule-{{ $schedule->id }}"></label>
                                             </div>
                                         </td>
-
                                         <td class="font-weight-bold text-primary">
-                                            {{ $workingSchedules->firstItem() + $index }}</td>
+                                            {{ $workingSchedules->firstItem() + $index }}
+                                        </td>
                                         <td>
-                                            <div class=" text-blue ">
-                                                <span
-                                                    class="font-weight-bold">{{ $schedule->doctor->user->full_name ?? 'N/A' }}</span>
+                                            <div class="text-blue">
+                                                <span class="font-weight-bold">{{ $schedule->doctor->user->full_name ?? 'N/A' }}</span>
                                             </div>
                                         </td>
                                         <td>
@@ -313,7 +310,7 @@
                                             </div>
                                         </td>
                                         <td>
-                                            @if ($schedule->status === 'Đã xét duyệt')
+                                           @if ($schedule->status === 'Đã xét duyệt')
                                                 <span class="badge badge-success badge-pill">
                                                     <i class="bx bx-check-circle mr-1"></i>
                                                     Đã duyệt
@@ -321,7 +318,7 @@
                                             @elseif($schedule->status === 'Chờ xét duyệt')
                                                 <span class="badge badge-warning badge-pill">
                                                     <i class="bx bx-time mr-1"></i>
-                                                    Chờ duyệt
+                                                    Chờ xét duyệt
                                                 </span>
                                             @else
                                                 <span class="badge badge-secondary badge-pill">
@@ -337,7 +334,6 @@
                                                     title="Xem chi tiết">
                                                     <i class='bx bx-show-alt'></i>
                                                 </a>
-
                                                 @if ($schedule->status === 'Chờ xét duyệt')
                                                     <button type="button" class="btn btn-outline-success"
                                                         data-toggle="tooltip" title="Duyệt lịch"
@@ -350,12 +346,11 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center py-5">
+                                        <td colspan="8" class="text-center py-5">
                                             <div class="empty-state">
                                                 <i class="bx bx-calendar-x text-muted" style="font-size: 48px;"></i>
                                                 <h5 class="mt-3 text-muted">Không có lịch làm việc nào</h5>
-                                                <p class="text-muted">Chưa có lịch làm việc nào được tạo hoặc không tìm
-                                                    thấy
+                                                <p class="text-muted">Chưa có lịch làm việc nào được tạo hoặc không tìm thấy
                                                     kết quả phù hợp.</p>
                                                 <a href="{{ route('admin.schedules.create') }}" class="btn btn-primary">
                                                     <i class="bx bx-plus mr-1"></i>Tạo lịch làm việc đầu tiên
