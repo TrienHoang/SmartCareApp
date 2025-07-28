@@ -211,12 +211,14 @@ class AppointmentController extends Controller
         $workings = WorkingSchedule::with('shift')
             ->where('doctor_id', $request->doctor_id)
             ->whereDate('day', $day)
+            ->where('status', 'Đã xét duyệt')
             ->get();
 
         if ($workings->isEmpty()) {
             $workings = WorkingSchedule::with('shift')
                 ->where('doctor_id', $request->doctor_id)
                 ->where('day_of_week', $dayOfWeekVN)
+                ->where('status', 'Đã xét duyệt')
                 ->get();
         }
 
@@ -468,6 +470,7 @@ class AppointmentController extends Controller
         // Tìm theo ngày cụ thể
         $workings = WorkingSchedule::with('shift')
             ->where('doctor_id', $request->doctor_id)
+            ->where('status', 'Đã xét duyệt')
             ->whereDate('day', $day)
             ->whereNotNull('shift_id')
             ->get()
@@ -478,6 +481,7 @@ class AppointmentController extends Controller
             // Tìm theo thứ trong tuần
             $workings = WorkingSchedule::with('shift')
                 ->where('doctor_id', $request->doctor_id)
+                ->where('status', 'Đã xét duyệt')
                 ->where('day_of_week', $dayOfWeek)
                 ->whereNotNull('shift_id')
                 ->get()
@@ -1265,25 +1269,31 @@ class AppointmentController extends Controller
         $dayOfWeek = Carbon::parse($date)->format('l');
 
         // Lấy lịch làm việc (nếu có)
-        $working = WorkingSchedule::with('shift')
+        $workings = WorkingSchedule::with('shift')
             ->where('doctor_id', $doctor->id)
+            ->where('status', 'Đã xét duyệt')
             ->where(function ($q) use ($dayOfWeek, $date) {
                 $q->where('day_of_week', $dayOfWeek)
                     ->orWhereDate('day', $date);
             })
-            ->first();
+            ->get();
 
-        // Nếu không có → mặc định làm việc cả ngày
         $workingPeriods = [];
-        if ($working && $working->shift) {
-            $workingPeriods[] = [
-                'start' => $working->shift->start_time,
-                'end'   => $working->shift->end_time,
-            ];
+
+        if ($workings->isNotEmpty()) {
+            foreach ($workings as $w) {
+                if ($w->shift) {
+                    $workingPeriods[] = [
+                        'start' => $w->shift->start_time,
+                        'end'   => $w->shift->end_time,
+                    ];
+                }
+            }
         } else {
+            // fallback mặc định khi không có lịch
             $workingPeriods = [
-                ['start' => '07:00', 'end' => '12:00'], // sáng
-                ['start' => '13:00', 'end' => '17:00'], // chiều
+                ['start' => '07:00', 'end' => '12:00'],
+                ['start' => '13:00', 'end' => '17:00'],
             ];
         }
 
