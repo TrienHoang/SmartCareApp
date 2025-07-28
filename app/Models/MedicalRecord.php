@@ -28,5 +28,10 @@ public function getCodeAttribute()
 {
     return 'SM-' . str_pad($this->id, 2, '0', STR_PAD_LEFT);
 }
+// app/Models/MedicalRecord.php
+public function doctor()
+{
+    return $this->belongsTo(Doctor::class);
+}
 }
 

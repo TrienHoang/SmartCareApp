@@ -139,9 +139,6 @@ class AdminNotificationController extends Controller
             } elseif ($request->boolean('send_now_checkbox')) { // Nếu chọn gửi ngay
                 $status = 'sending';
             }
-
-
-            
             $adminNotification = Admin_notification::create([
                 'title' => $request->title,
                 'content' => $request->content,

@@ -704,6 +704,7 @@ Route::prefix('doctor')->name('doctor.')->middleware('auth')->group(function () 
     Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
     // Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
 });
+
 require __DIR__ . '/client.php';
 
 
