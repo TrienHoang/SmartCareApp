@@ -4,11 +4,10 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Client\ServiceController;
 use App\Http\Controllers\client\ClientFileController;
-use App\Http\Controllers\Client\PaymentHistoryClientController; // Đúng namespace, đúng chữ hoa/thường
+use App\Http\Controllers\Client\PaymentHistoryClientController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Client\PaymentController;
 use Illuminate\Support\Facades\Route;
-
 
 use App\Http\Controllers\Client\ReviewReplyController;
 use App\Http\Controllers\Client\AppointmentController;
@@ -26,9 +25,11 @@ Route::get('/dich-vu/{id}', [ServiceController::class, 'show'])->name('client.se
 Route::get('/dich-vu/chi-tiet/{id}', [ServiceController::class, 'detail'])->name('client.services.detail');
 
 // Tin tức
-Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news');
+// Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news');
 Route::get('/tin-tuc/danh-muc/{id}', [NewsController::class, 'category'])->name('client.news.category');
 Route::get('/tin-tuc/{slug}', [NewsController::class, 'show'])->name('client.news.show');
+Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news.index');
+
 
 
 
@@ -102,13 +103,35 @@ Route::prefix('client/payment_history')->name('client.payment_history.')->middle
     Route::get('/', [PaymentHistoryClientController::class, 'index'])->name('index');
     Route::get('/{id}', [PaymentHistoryClientController::class, 'show'])->name('show');
 });
-Route::prefix('client/payment')->name('client.payment.')->middleware(['auth'])->group(function () {
-    Route::get('/', [PaymentController::class, 'create'])->name('create');
-    Route::get('/return', [PaymentController::class, 'return'])->name('return');
-    Route::get('/ipn', [PaymentController::class, 'ipn'])->name('ipn');
+Route::get('/test-payment', function () {
+    return view('test-payment');
+});
+
+// VNPAY routes
+Route::post('/test-payment/process', [PaymentController::class, 'create'])->name('test.payment');
+Route::get('/vnpay-return', [PaymentController::class, 'return'])->name('vnpay.return');
+Route::post('/vnpay-ipn', [PaymentController::class, 'ipn'])->name('vnpay.ipn');
+
+// Danh sách bình luận của người dùng (client)
+Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->group(function () {
+    Route::get('/', [ReviewReplyController::class, 'index'])->name('index');
+    Route::get('show/{id}', [ReviewReplyController::class, 'show'])->name('show');
 });
 
 // Danh sách bình luận của người dùng (client)
 Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->group(function () {
     Route::get('/', [ReviewReplyController::class, 'index'])->name('index');
+});
+
+Route::get('/chi-tiet-dich-vu/{service_id}', [BookingController::class, 'show'])->name('booking.showService');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/luu-dich-vu', [BookingController::class, 'storeService'])->name('booking.storeService');
+    Route::get('/chon-ngay', [BookingController::class, 'chonNgay'])->name('booking.chonNgay');
+});
+
+
+
+Route::get('/abc', function () {
+    return view('client.note');
 });

@@ -37,7 +37,6 @@ class DoctorController extends Controller
         return view('admin.doctors.index', compact('doctors', 'departments'));
     }
 
-
     public function create()
     {
         $existingDoctorUserIds = Doctor::pluck('user_id')->toArray();

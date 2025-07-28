@@ -35,6 +35,14 @@
 
             <li class="menu-header small text-uppercase"><span class="menu-header-text">Bác sĩ</span></li>
 
+<li class="menu-item">
+    <a href="{{ route('doctor.profile.show') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-user-circle"></i>
+        <div>Thông tin cá nhân</div>
+    </a>
+</li>
+
+
             <li class="menu-item">
                 <a href="{{ route('doctor.appointments.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-calendar"></i>
@@ -58,8 +66,8 @@
 
             <li class="menu-item">
                 <a href="{{ route('doctor.leaves.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-calendar-minus"></i>
-                    <div>Lịch nghỉ của bác sĩ</div>
+                    <i class="menu-icon tf-icons bx bx-calendar"></i>
+                    <div>Đăng kí nghỉ phép</div>
                 </a>
             </li>
 
@@ -95,13 +103,6 @@
                 <a href="{{ route('doctor.calendar.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-calendar"></i>
                     <span>Lịch bác sĩ</span>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-user"></i>
-                    <div>Tài khoản</div>
                 </a>
             </li>
         @endif

@@ -11,8 +11,8 @@ class DoctorLeaveFactory extends Factory
     {
         return [
             'doctor_id' => Doctor::inRandomOrder()->first()?->id ?? 1,
-            'start_date' => fake()->dateTimeBetween('-1 month', 'now'),
-            'end_date' => fake()->dateTimeBetween('now', '+1 month'),
+            'start_date' => fake()->dateTimeBetween('-1 week', 'now'),
+            'end_date' => fake()->dateTimeBetween('now', '+1 week'),
             'reason' => fake()->sentence(),
             'created_at' => now(),
             'approved' => fake()->boolean()

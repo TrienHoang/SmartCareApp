@@ -12,11 +12,19 @@ use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
-    public function index()
-    {
-        $posts = Post::with('serviceCategory')->orderByDesc('created_at')->paginate(10); // ✅ sửa quan hệ
-        return view('admin.posts.index', compact('posts'));
+    public function index(Request $request)
+{
+    $query = Post::with('serviceCategory')->orderByDesc('created_at');
+
+    if ($request->filled('category')) {
+        $query->where('service_cate_id', $request->category);
     }
+
+    $posts = $query->paginate(10);
+    $categories = ServiceCategory::where('status', 'active')->get();
+
+    return view('admin.posts.index', compact('posts', 'categories'));
+}
 
     public function create()
     {
