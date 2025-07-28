@@ -18,6 +18,9 @@
     <!-- SplideJS CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/css/splide.min.css">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+
     <!-- App Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -62,10 +65,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/js/splide.min.js"></script>
 
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script> 
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- AlpineJS -->   
+    <!-- AlpineJS -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -109,8 +116,29 @@
                 }
             }).mount();
 
+            $(document).ready(function() {
+                @if (session('success'))
+                    toastr.success("{{ session('success') }}");
+                @endif
+                @if (session('error'))
+                    toastr.error("{{ session('error') }}");
+                @endif
+                @if (session('warning'))
+                    toastr.warning("{{ session('warning') }}", "Cảnh báo");
+                @endif
+                @if ($errors->any())
+                    @foreach ($errors->all() as $error)
+                        toastr.error("{{ $error }}");
+                    @endforeach
+                @endif
+                @if (session('date_swapped'))
+                    toastr.warning(
+                        "Ngày bắt đầu lớn hơn ngày kết thúc. Hệ thống đã tự động hoán đổi giúp bạn.",
+                        "Cảnh báo");
+                @endif
+            });
 
-
+            toastr.success('Toastr hoạt động ngon lành rồi nè!');
             // animation Count Number hẹ hẹ hẹ
 
             const counters = document.querySelectorAll(".counter");
