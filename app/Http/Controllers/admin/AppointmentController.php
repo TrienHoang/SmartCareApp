@@ -724,7 +724,7 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::with('payment')->findOrFail($id);
 
-        // Đã hoàn thành hoặc đã hủy ⇒ không cho hủy
+        // 1. Không cho hủy nếu đã hoàn thành hoặc đã hủy
         if (in_array($appointment->status, ['completed', 'cancelled'])) {
             return redirect()->route('admin.appointments.index')->withErrors([
                 'status' => 'Không thể hủy lịch hẹn đã hoàn thành hoặc đã hủy trước đó.',
@@ -733,38 +733,66 @@ class AppointmentController extends Controller
 
         $payment = $appointment->payment;
 
-        // Nếu đã thanh toán
+        /**
+         * 2. Nếu đã thanh toán
+         */
         if ($payment && $payment->status === 'paid') {
+
+            // 2.1 Đã xác nhận
             if ($appointment->status === 'confirmed') {
-                // Đã thanh toán và đã xác nhận ⇒ Hủy nhưng không hoàn tiền
+
+                // Kiểm tra xem bác sĩ có nghỉ đột xuất (urgent) và không có người thay thế hay không
+                if ($this->checkDoctorUnavailable($appointment)) {
+
+                    // Trường hợp do lỗi của phòng khám => hủy và HOÀN TIỀN
+                    $appointment->status = 'cancelled';
+                    $appointment->save();
+
+                    $result = $this->performVnpayRefund($payment);
+                    $this->logRefundResult($payment, $result, 'Hủy do bác sĩ nghỉ đột xuất');
+
+                    if ($result['success']) {
+                        return redirect()->route('admin.appointments.index')
+                            ->with('success', 'Hủy lịch hẹn do bác sĩ nghỉ đột xuất và đã hoàn tiền qua VNPay.');
+                    }
+
+                    return redirect()->route('admin.appointments.index')
+                        ->withErrors(['error' => 'Hủy thành công nhưng hoàn tiền thất bại: ' . $result['message']]);
+                }
+
+                // Nếu không phải do lỗi phòng khám => hủy nhưng KHÔNG HOÀN TIỀN
                 $appointment->status = 'cancelled';
                 $appointment->save();
 
-                $payment->refund_status = 'none'; // hoặc 'failed'
+                $payment->refund_status = 'none';
                 $payment->note = 'Hủy nhưng không hoàn tiền do lịch đã xác nhận';
                 $payment->save();
 
-                return redirect()->route('admin.appointments.index')->with('success', 'Hủy lịch hẹn thành công. Không hoàn tiền.');
+                return redirect()->route('admin.appointments.index')
+                    ->with('success', 'Hủy lịch hẹn thành công. Không hoàn tiền.');
             }
 
+            // 2.2 Đã thanh toán nhưng chưa xác nhận => hủy và hoàn tiền
             if ($appointment->status === 'pending') {
-                // Đã thanh toán nhưng chưa xác nhận ⇒ hoàn tiền
                 $appointment->status = 'cancelled';
                 $appointment->save();
 
                 $result = $this->performVnpayRefund($payment);
+                $this->logRefundResult($payment, $result, 'Hủy do chưa xác nhận');
 
                 if ($result['success']) {
                     return redirect()->route('admin.appointments.index')
                         ->with('success', 'Hủy lịch hẹn thành công và đã hoàn tiền qua VNPay.');
-                } else {
-                    return redirect()->route('admin.appointments.index')
-                        ->withErrors(['error' => 'Hủy thành công nhưng hoàn tiền thất bại: ' . $result['message']]);
                 }
+
+                return redirect()->route('admin.appointments.index')
+                    ->withErrors(['error' => 'Hủy thành công nhưng hoàn tiền thất bại: ' . $result['message']]);
             }
         }
 
-        // Trường hợp chưa thanh toán ⇒ hủy bình thường
+        /**
+         * 3. Nếu chưa thanh toán => hủy bình thường
+         */
         if (in_array($appointment->status, ['pending', 'confirmed'])) {
             $appointment->status = 'cancelled';
             $appointment->save();
@@ -776,6 +804,37 @@ class AppointmentController extends Controller
             'status' => 'Không thể hủy lịch hẹn.',
         ]);
     }
+
+    /**
+     * Kiểm tra bác sĩ có nghỉ đột xuất không (urgent + approved)
+     */
+    protected function checkDoctorUnavailable($appointment)
+    {
+        $date = Carbon::parse($appointment->appointment_time)->toDateString();
+
+        return DoctorLeave::where('doctor_id', $appointment->doctor_id)
+            ->where('approved', 1)
+            ->where('urgent', 1)
+            ->whereDate('start_date', '<=', $date)
+            ->whereDate('end_date', '>=', $date)
+            ->exists();
+    }
+
+    /**
+     * Ghi lại kết quả refund vào payment
+     */
+    protected function logRefundResult($payment, $result, $reason)
+    {
+        if ($result['success']) {
+            $payment->refund_status = 'success';
+            $payment->note = $reason . ' - Hoàn tiền thành công';
+        } else {
+            $payment->refund_status = 'failed';
+            $payment->note = $reason . ' - Hoàn tiền thất bại: ' . $result['message'];
+        }
+        $payment->save();
+    }
+
 
     public function show($id)
     {
@@ -1126,6 +1185,14 @@ class AppointmentController extends Controller
                 $payment->refunded_at = now();
                 $payment->save();
 
+                // Ghi log lịch sử hoàn tiền
+                PaymentHistory::create([
+                    'payment_id' => $payment->id,
+                    'amount' => -1 * $payment->amount, // số âm để biểu thị hoàn lại
+                    'payment_method' => 'vnpay_refund',
+                    'payment_date' => now(),
+                ]);
+
                 return back()->with('success', 'Hoàn tiền thành công qua VNPay.');
             }
 
@@ -1212,6 +1279,14 @@ class AppointmentController extends Controller
                 $payment->refund_status = 'completed';
                 $payment->refunded_at = now();
                 $payment->save();
+
+                // Ghi log lịch sử hoàn tiền
+                PaymentHistory::create([
+                    'payment_id' => $payment->id,
+                    'amount' => -1 * $payment->amount,
+                    'payment_method' => 'vnpay_refund',
+                    'payment_date' => now(),
+                ]);
 
                 return ['success' => true];
             }

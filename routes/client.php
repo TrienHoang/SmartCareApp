@@ -119,6 +119,8 @@ Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->gr
 });
 
 
+Route::get('/payment/return', [BookingController::class, 'paymentReturn'])->name('payment.return');
+Route::match(['get', 'post'], '/payment/ipn', [BookingController::class, 'paymentIpn'])->name('payment.ipn');
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/booking/prepare', [BookingController::class, 'prepare'])->name('booking.prepare');
@@ -128,8 +130,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
     Route::get('/booking/confirm', [BookingController::class, 'confirm'])->name('booking.confirm');
     Route::post('/booking/confirm', [BookingController::class, 'save'])->name('booking.save');
-    Route::get('/payment/return', [BookingController::class, 'paymentReturn'])->name('payment.return');
-    Route::post('/payment/ipn', [BookingController::class, 'paymentIpn'])->name('payment.ipn');
+    // Route::get('/payment/return', [BookingController::class, 'paymentReturn'])->name('payment.return');
+    // Route::match(['get', 'post'], '/payment/ipn', [BookingController::class, 'paymentIpn'])->name('payment.ipn');
     Route::get('/booking/success', [BookingController::class, 'success'])->name('booking.success');
 });
 

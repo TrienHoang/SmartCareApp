@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\DoctorLeave;
+use App\Models\PaymentHistory;
 use App\Models\User;
 use App\Models\WorkingSchedule;
 use App\Notifications\DoctorLeaveCreated;
@@ -423,6 +424,21 @@ class DoctorLeaveController extends Controller
             } else {
                 $appointment->status = 'cancelled';
                 $appointment->save();
+
+                if ($appointment->payment && $appointment->payment->status === 'paid') {
+                    $payment = $appointment->payment;
+
+                    $payment->refund_status = 'completed';
+                    $payment->status = 'refunded';
+                    $payment->save();
+
+                    PaymentHistory::create([
+                        'payment_id' => $payment->id,
+                        'amount' => $payment->amount,
+                        'payment_method' => $payment->payment_method,
+                        'payment_date' => now(),
+                    ]);
+                }
 
                 $message = "Cuộc hẹn bị hủy do bác sĩ {$doctor->name} nghỉ đột xuất và không có bác sĩ thay thế. Bạn có thể đặt lịch lại hoặc hủy lịch tại: ...";
                 $appointment->user->notify(new \App\Notifications\AppointmentCancelledWithSuggestion($appointment, $message));
