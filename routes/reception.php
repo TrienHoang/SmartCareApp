@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Controllers\Reception\ReceptionAppointmentController;
 use App\Http\Controllers\reception\ReceptionistController;
+use App\Http\Controllers\Reception\WorkingScheduleController;
 
 // ✅ Dashboard và thống kê
 Route::prefix('receptionist')
@@ -55,5 +56,14 @@ Route::prefix('receptionist')
             Route::get('/doctor/{doctor}/services', [ReceptionAppointmentController::class, 'getDoctorServices'])->name('doctor.services');
 
             Route::get('/doctor/{doctor}/working-days', [ReceptionAppointmentController::class, 'getDoctorWorkingDays'])->name('doctor.working-days');
+
+            Route::get('/services/{service}/doctors', [ReceptionAppointmentController::class, 'getDoctorsByService'])->name('services.doctors');
+        });
+
+        // Lịch làm việc của bác sĩ
+        Route::prefix('doctors')->name('doctors.')->group(function () {
+            // Trang chọn ngày
+            Route::get('/working-schedule', [WorkingScheduleController::class, 'index'])
+                ->name('index');
         });
     });

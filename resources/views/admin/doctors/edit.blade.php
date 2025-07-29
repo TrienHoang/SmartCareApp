@@ -108,7 +108,7 @@
                         </div>
 
                         {{-- Phòng khám --}}
-                        <div class="mb-4">
+                        {{-- <div class="mb-4">
                             <label class="section-title">🏨 Phòng khám</label>
                             <select name="room_id" class="form-select @error('room_id') is-invalid @enderror">
                                 <option value="">-- Chọn phòng khám --</option>
@@ -122,7 +122,7 @@
                             @error('room_id')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
-                        </div>
+                        </div> --}}
 
                         {{-- Tiểu sử --}}
                         <div class="mb-4">

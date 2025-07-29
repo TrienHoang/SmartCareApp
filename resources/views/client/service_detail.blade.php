@@ -117,8 +117,6 @@
 @endpush
 
 @section('content')
-
-
     <div class="hero-background-image"></div>
     {{-- Main Content Wrapper --}}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -139,6 +137,10 @@
                         Khoa: {{ $service->department->name }}
                     </p>
                     <p class="text-gray-600 mb-2 flex items-start">
+                        <i data-lucide="clock" class="w-5 h-5 mr-2 text-blue-700"></i>
+                        Thời gian thực hiện: {{ $service->duration }} phút
+                    </p>
+                    <p class="text-gray-600 mb-2 flex items-start">
                         {{ $service->description }}
                     </p>
                 </div>
@@ -146,11 +148,11 @@
                 <div class="w-full md:w-1/3 text-right flex flex-col items-end">
                     <span class="price-display mb-2 text-2xl font-bold text-red-600">{{ number_format($service->price) }}
                         đ</span>
-                    <form id="bookingForm" action="{{ route('booking.storeService') }}" method="POST">
+                    <form id="bookingForm" action="{{ route('booking.prepare') }}" method="POST">
                         @csrf
                         <input type="hidden" name="service_id" value="{{ $service->id }}">
                         <input type="hidden" name="doctor_id" id="doctor_id">
-                        <input type="hidden" name="doctor_option" id="doctor_option_input" value="auto">
+                        <input type="hidden" name="doctor_option" id="doctor_option_input" value="random">
                         <button type="submit"
                             class="inline-block px-6 py-2 rounded-md bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition">
                             Đặt khám ngay
@@ -165,65 +167,7 @@
             <div id="content" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {{-- Left Column: Package Details --}}
                 <div class="lg:col-span-8">
-                    <h3 class="package-title text-xl font-semibold text-gray-800">1. Tên gói khám: Gói Khám Chuyên Sâu Bệnh
-                        Lý Dạ Dày & Đại Tràng</h3>
-                    <p class="package-value text-blue-600 font-medium mt-1">Trị giá gói khám: 200.000VNĐ</p>
-
-                    <h3 class="package-title text-xl font-semibold text-gray-800 mt-6">2. Lợi ích gói khám bệnh lý dạ dày &
-                        đại tràng là gì?</h3>
-                    <ul class="list-benefits mt-2 space-y-2 text-gray-700">
-                        <li class="flex items-start">
-                            <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                            Hiện nay, bệnh ở dạ dày & đại tràng là bệnh lý dễ tái phát nếu không tìm ra chính xác nguyên
-                            nhân gây bệnh. Khi đó các triệu chứng tiêu hoá dai dẳng gây ảnh hưởng rất lớn đến chất lượng
-                            cuộc sống của bạn.
-                        </li>
-                        <li class="flex items-start">
-                            <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                            Bác sĩ Doctor Check sẽ giúp Bạn Khám Ra Bệnh - Trị Hết Bệnh & Ngừa Ung Thư.
-                        </li>
-                        {{-- Add more benefits as needed --}}
-                    </ul>
-
-                    <h3 class="package-title text-xl font-semibold text-gray-800 mt-6">3. Quy trình thực hiện gói khám nội
-                        soi dạ dày và đại tràng gồm những bước nào?</h3>
-                    <ul class="list-benefits mt-2 space-y-2 text-gray-700">
-                        <li class="flex items-start">
-                            <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                            Bước 1: Đặt lịch khám ưu tiên qua Medpro để được khám nhanh, không chờ đợi.
-                        </li>
-                        <li class="flex items-start">
-                            <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                            Bước 2: Đến phòng khám Doctor Check, báo mã đặt khám cho lễ tân và vào khám ngay.
-                        </li>
-                        <li class="flex items-start">
-                            <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                            Bước 3: Gặp bác sĩ chuyên khoa tiêu hoá, thực hiện nội soi theo hướng dẫn và nhận kết quả, tư
-                            vấn điều trị.
-                        </li>
-                        {{-- Add more steps as needed --}}
-                    </ul>
-
-                    {{-- Additional services in the package --}}
-                    <div class="mt-8">
-                        <h3 class="package-title text-xl font-semibold text-gray-800">Các dịch vụ có trong gói khám là gì?
-                        </h3>
-                        <ul class="list-benefits mt-2 space-y-2 text-gray-700">
-                            <li class="flex items-start">
-                                <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                                Đo dấu hiệu sinh tồn (mạch, huyết áp, nhiệt độ, SPO2, chiều cao, cân nặng, BMI).
-                            </li>
-                            <li class="flex items-start">
-                                <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                                Bảng câu hỏi sàng lọc chuyên sâu bệnh lý dạ dày & đại tràng (tiền sử gia đình, thói quen
-                                sinh hoạt, triệu chứng...).
-                            </li>
-                            <li class="flex items-start">
-                                <i data-lucide="chevron-right" class="w-4 h-4 mr-2 mt-1 shrink-0"></i>
-                                Bác sĩ chuyên khoa tiêu hóa đọc và chẩn đoán, đưa ra phác đồ điều trị phù hợp (nếu có).
-                            </li>
-                        </ul>
-                    </div>
+                    {!! $service->content !!}
                 </div>
 
                 {{-- Right Column: Doctor Selection --}}
@@ -235,12 +179,12 @@
                             <div class="flex flex-col space-y-2">
                                 <label
                                     class="flex items-center space-x-2 p-2 rounded-md cursor-pointer border border-transparent has-[:checked]:border-green-500 has-[:checked]:bg-green-100 has-[:checked]:text-black transition">
-                                    <input type="radio" name="doctor_option" value="auto" class="peer sr-only" checked>
+                                    <input type="radio" name="doctor_option" value="random" class="peer sr-only" checked>
                                     <span class="text-white font-medium">Tự động chọn bác sĩ phù hợp</span>
                                 </label>
                                 <label
                                     class="flex items-center space-x-2 p-2 rounded-md cursor-pointer border border-transparent has-[:checked]:border-green-500 has-[:checked]:bg-green-100 has-[:checked]:text-black transition">
-                                    <input type="radio" name="doctor_option" value="manual" class="peer sr-only">
+                                    <input type="radio" name="doctor_option" value="specific" class="peer sr-only">
                                     <span class="text-white font-medium">Tôi muốn lựa chọn bác sĩ</span>
                                 </label>
                             </div>
@@ -295,7 +239,8 @@
                     {{-- Loop to simulate multiple packages --}}
                     <div
                         class="h-full bg-white rounded-lg shadow-sm transition duration-300 ease-in-out hover:shadow-lg flex flex-col">
-                        <img src="#" alt="Gói khám liên quan" class="w-full h-40 object-cover rounded-t-lg">
+                        <img src="{{ asset('storage/' . $service->image) }}" alt="{{ $service->name }}"
+                            class="w-full h-60 object-cover rounded-t-lg mb-3">
                         <div class="p-4 flex flex-col flex-1">
                             <h5 class="text-lg font-semibold mb-2">{{ $service->name }}</h5>
                             <p class="text-sm text-gray-600 flex-grow">
@@ -317,46 +262,46 @@
 @endsection
 
 @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const form = document.getElementById('bookingForm');
-                const doctorRadios = document.querySelectorAll('input[name="selected_doctor"]');
-                const doctorIdInput = document.getElementById('doctor_id');
-                const doctorOptionInput = document.getElementById('doctor_option_input');
-                const doctorOptionRadios = document.querySelectorAll('input[name="doctor_option"]');
-                const doctorList = document.getElementById('doctor-list');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('bookingForm');
+            const doctorRadios = document.querySelectorAll('input[name="selected_doctor"]');
+            const doctorIdInput = document.getElementById('doctor_id');
+            const doctorOptionInput = document.getElementById('doctor_option_input');
+            const doctorOptionRadios = document.querySelectorAll('input[name="doctor_option"]');
+            const doctorList = document.getElementById('doctor-list');
 
-                // Cập nhật doctor_option_input khi người dùng chọn radio
-                doctorOptionRadios.forEach(radio => {
-                    radio.addEventListener('change', function() {
-                        doctorOptionInput.value = this.value;
+            // Cập nhật doctor_option_input khi người dùng chọn radio
+            doctorOptionRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    doctorOptionInput.value = this.value;
 
-                        if (this.value === 'manual') {
-                            doctorList.classList.remove('hidden');
-                            doctorList.classList.add('opacity-100', 'translate-y-0');
-                        } else {
-                            doctorList.classList.add('hidden');
-                            doctorIdInput.value = ''; 
-                        }
-                    });
-                });
-
-                // Cập nhật doctor_id khi chọn bác sĩ
-                doctorRadios.forEach(radio => {
-                    radio.addEventListener('change', function() {
-                        doctorIdInput.value = this.value;
-                    });
-                });
-
-                // Validate trước khi submit
-                form.addEventListener('submit', function(event) {
-                    const selectedOption = document.querySelector('input[name="doctor_option"]:checked')?.value;
-
-                    if (selectedOption === 'manual' && !doctorIdInput.value) {
-                        event.preventDefault();
-                        alert('Vui lòng chọn một bác sĩ trước khi đặt khám.');
+                    if (this.value === 'specific') {
+                        doctorList.classList.remove('hidden');
+                        doctorList.classList.add('opacity-100', 'translate-y-0');
+                    } else {
+                        doctorList.classList.add('hidden');
+                        doctorIdInput.value = '';
                     }
                 });
             });
-        </script>
-    @endpush
+
+            // Cập nhật doctor_id khi chọn bác sĩ
+            doctorRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    doctorIdInput.value = this.value;
+                });
+            });
+
+            // Validate trước khi submit
+            form.addEventListener('submit', function(event) {
+                const selectedOption = document.querySelector('input[name="doctor_option"]:checked')?.value;
+
+                if (selectedOption === 'specific' && !doctorIdInput.value) {
+                    event.preventDefault();
+                    alert('Vui lòng chọn một bác sĩ trước khi đặt khám.');
+                }
+            });
+        });
+    </script>
+@endpush

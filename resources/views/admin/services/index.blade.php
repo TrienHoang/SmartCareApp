@@ -154,7 +154,7 @@
                                     <label class="form-label font-weight-semibold">
                                         <i class="bx bx-search mr-1 text-primary"></i>Tìm kiếm
                                     </label>
-                                    <input type="text" name="search" class="form-control" 
+                                    <input type="text" name="search" class="form-control"
                                         placeholder="Tìm theo tên, mô tả..." value="{{ request('search') }}">
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
@@ -163,8 +163,9 @@
                                     </label>
                                     <select name="category" class="form-control custom-select">
                                         <option value="">-- Tất cả danh mục --</option>
-                                        @foreach($categories as $cate)
-                                            <option value="{{ $cate->id }}" {{ request('category') == $cate->id ? 'selected' : '' }}>
+                                        @foreach ($categories as $cate)
+                                            <option value="{{ $cate->id }}"
+                                                {{ request('category') == $cate->id ? 'selected' : '' }}>
                                                 {{ $cate->name }}
                                             </option>
                                         @endforeach
@@ -176,8 +177,10 @@
                                     </label>
                                     <select name="status" class="form-control custom-select">
                                         <option value="">-- Tất cả trạng thái --</option>
-                                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Hoạt động</option>
-                                        <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Không hoạt động</option>
+                                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Hoạt
+                                            động</option>
+                                        <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>
+                                            Không hoạt động</option>
                                     </select>
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
@@ -187,9 +190,10 @@
                                         </button>
                                         <a href="{{ route('admin.services.index') }}" class="btn btn-outline-secondary">
                                             <i class="bx bx-refresh-cw mr-1"></i>Reset
-                                        <a href="{{ route('admin.services.index') }}" class="btn btn-outline-secondary">
-                                            <i class="bx bx-refresh mr-1"></i>Reset
-                                        </a>
+                                            <a href="{{ route('admin.services.index') }}"
+                                                class="btn btn-outline-secondary">
+                                                <i class="bx bx-refresh mr-1"></i>Reset
+                                            </a>
                                     </div>
                                 </div>
                             </div>
@@ -206,9 +210,12 @@
                                             <input type="checkbox" class="custom-control-input" id="select-all">
                                             <label class="custom-control-label" for="select-all"></label>
                                         </div>
-                                    </th>
+                                    </th>                            
                                     <th class="border-top-0">
                                         <i class="bx bx-service mr-1"></i>Tên dịch vụ
+                                    </th>
+                                    <th class="border-top-0">
+                                        <i class="bx bx-category mr-1"></i>Chuyên khoa
                                     </th>
                                     <th class="border-top-0">
                                         <i class="bx bx-category mr-1"></i>Danh mục
@@ -236,8 +243,7 @@
                                                     id="service-{{ $service->id }}" value="{{ $service->id }}">
                                                 <label class="custom-control-label"
                                                     for="service-{{ $service->id }}"></label>
-                                                    id="service-{{ $service->id }}" value="{{ $service->id }}">
-                                                <label class="custom-control-label" for="service-{{ $service->id }}"></label>
+
                                             </div>
                                         </td>
                                         <td>
@@ -251,17 +257,19 @@
                                         </td>
                                         <td>
                                             <span class="badge badge-info badge-pill">
+                                                {{ $service->department->name ?? '(Không có)' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-info badge-pill">
                                                 {{ $service->category->name ?? '(Không có)' }}
                                             </span>
                                         </td>
                                         <td>
                                             <div class="price-info">
-                                                <span
-                                                    class="font-weight-bold text-success">{{ number_format($service->price) }}đ</span>
-                                            </div>
-                                            <span class="font-weight-bold text-success">
-                                                {{ number_format($service->price, 0, ',', '.') }}₫
-                                            </span>
+                                                <span class="font-weight-bold text-success">
+                                                    {{ number_format($service->price, 0, ',', '.') }}₫
+                                                </span>
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">
@@ -270,52 +278,39 @@
                                             </div>
                                         </td>
                                         <td>
-                                            @php
-                                                $statusConfig = [
-                                                    'active' => ['class' => 'success', 'icon' => 'check-circle'],
-                                                    'inactive' => ['class' => 'danger', 'icon' => 'x-circle'],
-                                                ];
-                                                $config = $statusConfig[$service->status] ?? [
-                                                    'class' => 'secondary',
-                                                    'icon' => 'help-circle',
-                                                ];
-                                            @endphp
-                                            <span class="badge badge-{{ $config['class'] }} badge-pill">
-                                                <i class="bx bx-{{ $config['icon'] }} mr-1"></i>
-                                                {{ ucfirst($service->status) }}
-                                            </span>
-                                            @if($service->status === 'active')
+                                            @if ($service->status === 'active')
                                                 <span class="badge badge-success badge-pill">
-                                                    <i class="bx bx-check-circle mr-1"></i>Hoạt động
+                                                    <i class="bx bx-check-circle "></i>Hoạt động
                                                 </span>
                                             @else
                                                 <span class="badge badge-danger badge-pill">
-                                                    <i class="bx bx-x-circle mr-1"></i>Không hoạt động
+                                                    <i class="bx bx-x-circle "></i>Không hoạt động
                                                 </span>
                                             @endif
                                         </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm" role="group">
 
                                         <td class="text-center">
                                             <div class="btn-group-sm" role="group">
                                                 <a href="{{ route('admin.services.show', $service->id) }}"
-                                                    class="btn btn-outline-info btn-sm" data-toggle="tooltip" title="Xem chi tiết">
+                                                    class="btn btn-outline-info btn-sm" data-toggle="tooltip"
+                                                    title="Xem chi tiết">
                                                     <i class="bx bx-show-alt"></i>
                                                 </a>
                                                 <a href="{{ route('admin.services.edit', $service->id) }}"
-                                                    class="btn btn-outline-warning btn-sm" data-toggle="tooltip" title="Chỉnh sửa">
+                                                    class="btn btn-outline-warning btn-sm" data-toggle="tooltip"
+                                                    title="Chỉnh sửa">
                                                     <i class="bx bx-edit"></i>
                                                 </a>
                                                 <button type="button" class="btn btn-outline-danger btn-sm"
-                                                    data-toggle="tooltip" title="Xóa" onclick="deleteService({{ $service->id }})">
+                                                    data-toggle="tooltip" title="Xóa"
+                                                    onclick="deleteService({{ $service->id }})">
                                                     <i class="bx bx-trash"></i>
                                                 </button>
                                             </div>
 
                                             <!-- Hidden form for delete -->
-                                            <form id="delete-form-{{ $service->id }}" 
-                                                action="{{ route('admin.services.destroy', $service->id) }}" 
+                                            <form id="delete-form-{{ $service->id }}"
+                                                action="{{ route('admin.services.destroy', $service->id) }}"
                                                 method="POST" style="display: none;">
                                                 @csrf
                                                 @method('DELETE')
@@ -331,10 +326,12 @@
                                                 <p class="text-muted">Chưa có dịch vụ nào được tạo hoặc không tìm thấy
                                                     kết quả phù hợp.</p>
                                                 <a href="{{ route('admin.services.create') }}" class="btn btn-primary">
-                                                <p class="text-muted">Chưa có dịch vụ nào được tạo hoặc không tìm thấy kết quả phù hợp.</p>
-                                                <a href="{{ route('admin.services.create') }}" class="btn btn-primary">
-                                                    <i class="bx bx-plus mr-1"></i>Tạo dịch vụ đầu tiên
-                                                </a>
+                                                    <p class="text-muted">Chưa có dịch vụ nào được tạo hoặc không tìm thấy
+                                                        kết quả phù hợp.</p>
+                                                    <a href="{{ route('admin.services.create') }}"
+                                                        class="btn btn-primary">
+                                                        <i class="bx bx-plus mr-1"></i>Tạo dịch vụ đầu tiên
+                                                    </a>
                                             </div>
                                         </td>
                                     </tr>

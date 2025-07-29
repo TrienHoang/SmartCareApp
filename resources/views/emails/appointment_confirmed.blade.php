@@ -23,8 +23,7 @@
         <li><strong>Trạng thái:</strong> Đã xác nhận</li>
     </ul>
 
-    <p>Quý khách vui lòng đến đúng giờ để được phục vụ tốt nhất. Nếu có bất kỳ thay đổi hoặc câu hỏi nào, xin vui lòng
-        liên hệ với chúng tôi qua email hoặc hotline hỗ trợ.</p>
+    <p>Quý khách vui lòng đến đúng giờ để được phục vụ tốt nhất.</p>
 
     <p>Xin cảm ơn Quý khách đã tin tưởng sử dụng dịch vụ của <strong>SmartCare</strong>.</p>
 

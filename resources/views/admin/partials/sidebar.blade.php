@@ -73,6 +73,13 @@
         </li>
 
         <li class="menu-item">
+            <a href="{{ route('admin.rooms.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-home-alt"></i>
+                <div>Quản lý phòng</div>
+            </a>
+        </li>
+
+        <li class="menu-item">
             <a href="{{ route('admin.departments.index') }}" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-building-house"></i>
                 <div>Quản lý phòng ban</div>
@@ -102,34 +109,39 @@
             </ul>
         </li>
 
-<li class="menu-item">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bx-task"></i>
-        <div>Quản lý công việc</div>
-    </a>
-    <ul class="menu-sub">
         <li class="menu-item">
-            <a href="{{ route('admin.tasks.index') }}" class="menu-link">
-                <div>Danh sách công việc</div>
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-task"></i>
+                <div>Quản lý công việc</div>
             </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ route('admin.tasks.index') }}" class="menu-link">
+                        <div>Danh sách công việc</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.tasks.create') }}" class="menu-link">
+                        <div>Thêm công việc</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.calendar') }}" class="menu-link">
+                        <div>Lịch làm việc</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.shifts.index') }}" class="menu-link">
+                        <div>Ca làm việc</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.system_notifications.index') }}" class="menu-link">
+                        <div>Thông báo hệ thống</div>
+                    </a>
+                </li>
+            </ul>
         </li>
-        <li class="menu-item">
-            <a href="{{ route('admin.tasks.create') }}" class="menu-link">
-                <div>Thêm công việc</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="{{ route('admin.calendar') }}" class="menu-link">
-                <div>Lịch làm việc</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="{{ route('admin.system_notifications.index') }}" class="menu-link">
-                <div>Thông báo hệ thống</div>
-            </a>
-        </li>
-    </ul>
-</li>
 
 
 
@@ -267,6 +279,7 @@
                 <div>Chat</div>
             </a>
         </li>
+
 
     </ul>
 </aside>

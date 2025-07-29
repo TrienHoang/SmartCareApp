@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\Admin\PaymentHistoryController;
 use App\Http\Controllers\admin\SchedulesController;
+use App\Http\Controllers\Admin\ShiftsController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\VoucherController;
 use App\Http\Controllers\admin\PrescriptionController;
@@ -31,6 +32,7 @@ use App\Http\Controllers\admin\FaqController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\TreatmentPlanController;
+use App\Http\Controllers\Admin\RoomController;
 use App\Models\Admin_notification;
 use App\Models\Role;
 use App\Models\User;
@@ -279,6 +281,12 @@ Route::group([
 
         Route::get('/treatment-plans/by-patient/{patient}', [AppointmentController::class, 'getTreatmentPlansByPatient'])
             ->name('treatment-plans.by-patient');
+
+        Route::get('/services/{service}/doctors', [AppointmentController::class, 'getDoctorsByService'])
+            ->name('service.doctors');
+
+        Route::get('/doctor/{doctor}/available-times', [AppointmentController::class, 'getAvailableTimesByDate'])
+            ->name('doctor.available-times');
     });
     // quản lý đơn thuốc
     Route::group([
@@ -368,7 +376,30 @@ Route::group([
     });
 
 
+    Route::group([
+        'prefix' => 'rooms',
+        'as' => 'rooms.',
+        'middleware' => 'check_permission:view_rooms'
+    ], function () {
+        Route::get('/', [RoomController::class, 'index'])->name('index');
 
+        Route::get('/create', action: [RoomController::class, 'create'])
+            ->middleware('check_permission:create_rooms')->name('create');
+
+        Route::post('/create', [RoomController::class, 'store'])
+            ->middleware('check_permission:create_rooms')->name('store');
+
+        Route::get('/edit/{id}', [RoomController::class, 'edit'])
+            ->middleware('check_permission:edit_rooms')->name('edit');
+
+        Route::put('/edit/{id}', [RoomController::class, 'update'])
+            ->middleware('check_permission:edit_rooms')->name('update');
+
+        Route::delete('/destroy/{id}', [RoomController::class, 'destroy'])
+            ->middleware('check_permission:delete_rooms')->name('destroy');
+
+        Route::get('/show/{id}', [RoomController::class, 'show'])->name('show');
+    });
 
 
     // lịch sử thanh toán
@@ -424,6 +455,7 @@ Route::get('admin/services/{id}', [ServiceController::class, 'show'])->name('adm
 Route::get('admin/services/{id}/edit', [ServiceController::class, 'edit'])->name('admin.services.edit');
 Route::put('admin/services/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
 Route::delete('admin/services/{id}', [ServiceController::class, 'destroy'])->name('admin.services.destroy');
+Route::get('/admin/doctors-by-department/{departmentId}', [ServiceController::class, 'getDoctorsByDepartment'])->name('admin.doctors.byDepartment');
 
 
 // Quản lý đơn hàng
@@ -452,12 +484,9 @@ Route::delete('admin/vouchers/destroy/{id}', [VoucherController::class, 'destroy
 Route::get('admin/vouchers/show/{id}', [VoucherController::class, 'show'])->name('admin.vouchers.show');
 // quản lý lịch làm việc
 Route::get('admin/schedules', [SchedulesController::class, 'index'])->name('admin.schedules.index');
-Route::get('admin/schedules/create', [SchedulesController::class, 'create'])->name('admin.schedules.create');
-Route::post('admin/schedules/create', [SchedulesController::class, 'store'])->name('admin.schedules.store');
-Route::get('admin/schedules/edit/{id}', [SchedulesController::class, 'edit'])->name('admin.schedules.edit');
-Route::put('admin/schedules/edit/{id}', [SchedulesController::class, 'update'])->name('admin.schedules.update');
-Route::delete('admin/schedules/destroy/{id}', [SchedulesController::class, 'destroy'])->name('admin.schedules.destroy');
 Route::get('admin/schedules/show/{id}', [SchedulesController::class, 'show'])->name('admin.schedules.show');
+Route::post('/admin/schedules/{id}/status', [SchedulesController::class, 'status'])->name('admin.schedules.status');
+
 
 // Quản lý đánh giá bác sĩ
 Route::group([
@@ -485,15 +514,15 @@ Route::prefix('admin/categories')->name('admin.categories.')->group(function () 
     Route::get('/show/{id}', [ServiceCategoryController::class, 'show'])->name('show');
 });
 // Quản lý dịch vụ
-Route::prefix('admin/services')->name('admin.services.')->group(function () {
-    Route::get('/', [ServiceController::class, 'index'])->name('index');
-    Route::get('/create', [ServiceController::class, 'create'])->name('create');
-    Route::post('/store', [ServiceController::class, 'store'])->name('store');
-    Route::get('/edit/{id}', [ServiceController::class, 'edit'])->name('edit');
-    Route::put('/update/{id}', [ServiceController::class, 'update'])->name('update');
-    Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])->name('destroy');
-    Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
-});
+// Route::prefix('admin/services')->name('admin.services.')->group(function () {
+//     Route::get('/', [ServiceController::class, 'index'])->name('index');
+//     Route::get('/create', [ServiceController::class, 'create'])->name('create');
+//     Route::post('/store', [ServiceController::class, 'store'])->name('store');
+//     Route::get('/edit/{id}', [ServiceController::class, 'edit'])->name('edit');
+//     Route::put('/update/{id}', [ServiceController::class, 'update'])->name('update');
+//     Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])->name('destroy');
+//     Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
+// });
 
 Route::group([
     'prefix' => 'admin',
@@ -552,24 +581,25 @@ Route::group([
 
 
     // Nhóm quản lý dịch vụ
-    Route::group([
-        'prefix' => 'services',
-        'as' => 'services.',
-        'middleware' => ['auth', 'checkAdmin', 'check_permission:view_services']
-    ], function () {
-        Route::get('/', [ServiceController::class, 'index'])->name('index');
-        Route::get('/create', [ServiceController::class, 'create'])
-            ->middleware('check_permission:create_services')->name('create');
-        Route::post('/store', [ServiceController::class, 'store'])
-            ->middleware('check_permission:create_services')->name('store');
-        Route::get('/edit/{id}', [ServiceController::class, 'edit'])
-            ->middleware('check_permission:edit_services')->name('edit');
-        Route::put('/edit/{id}', [ServiceController::class, 'update'])
-            ->middleware('check_permission:edit_services')->name('update');
-        Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])
-            ->middleware('check_permission:delete_services')->name('destroy');
-        Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
-    });
+    // Route::group([
+    //     'prefix' => 'services',
+    //     'as' => 'services.',
+    //     'middleware' => ['auth', 'checkAdmin', 'check_permission:view_services']
+    // ], function () {
+    //     Route::get('/', [ServiceController::class, 'index'])->name('index');
+    //     Route::get('/create', [ServiceController::class, 'create'])
+    //         ->middleware('check_permission:create_services')->name('create');
+    //     Route::post('/store', [ServiceController::class, 'store'])
+    //         ->middleware('check_permission:create_services')->name('store');
+    //     Route::get('/edit/{id}', [ServiceController::class, 'edit'])
+    //         ->middleware('check_permission:edit_services')->name('edit');
+    //     Route::put('/edit/{id}', [ServiceController::class, 'update'])
+    //         ->middleware('check_permission:edit_services')->name('update');
+    //     Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])
+    //         ->middleware('check_permission:delete_services')->name('destroy');
+    //     Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
+    // });
+
     // Quản lý câu hỏi thường gặp
     Route::group([
         'prefix' => 'faqs',
@@ -743,16 +773,18 @@ Route::get('/test-email', function () {
 //     return view('doctor.dashboard');
 // })->name('doctor.dashboard');
 
-Route::prefix('doctor')->name('doctor.')->middleware('auth')->group(function () {
-    Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
-    // Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
-});
+// Route::prefix('doctor')->name('doctor.')->middleware('auth')->group(function () {
+//     Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
+//     Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
+// });
 
 Route::middleware(['auth', 'checkAdmin'])->group(function () {
     Route::get('/admin/system-notifications', [AdminNotificationController::class, 'index'])
         ->name('admin.system_notifications.index');
 });
-
+Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+    Route::resource('shifts', ShiftsController::class);
+});
 
 require __DIR__ . '/client.php';
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Client\ServiceController;
 use App\Http\Controllers\client\ClientFileController;
 use App\Http\Controllers\Client\PaymentHistoryClientController;
+
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Client\PaymentController;
 use Illuminate\Support\Facades\Route;
@@ -22,7 +23,8 @@ Route::get('/gioi-thieu', function () {
 // Dịch vụ
 Route::get('/dich-vu', [ServiceController::class, 'index'])->name('client.services');
 Route::get('/dich-vu/{id}', [ServiceController::class, 'show'])->name('client.services.show');
-Route::get('/dich-vu/chi-tiet/{id}', [ServiceController::class, 'detail'])->name('client.services.detail');
+Route::get('/chi-tiet-dich-vu/{service_id}', [BookingController::class, 'show'])->name('booking.showService');
+// Route::get('/dich-vu/chi-tiet/{id}', [ServiceController::class, 'detail'])->name('client.services.detail');
 
 // Tin tức
 // Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news');
@@ -123,11 +125,16 @@ Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->gr
     Route::get('/', [ReviewReplyController::class, 'index'])->name('index');
 });
 
-Route::get('/chi-tiet-dich-vu/{service_id}', [BookingController::class, 'show'])->name('booking.showService');
+
 
 Route::middleware(['auth'])->group(function () {
-    Route::post('/luu-dich-vu', [BookingController::class, 'storeService'])->name('booking.storeService');
-    Route::get('/chon-ngay', [BookingController::class, 'chonNgay'])->name('booking.chonNgay');
+    Route::post('/booking/prepare', [BookingController::class, 'prepare'])->name('booking.prepare');
+    Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
+    Route::post('/booking/available-dates', [BookingController::class, 'getAvailableDates'])->name('booking.available-dates');
+    Route::post('/booking/slots', [BookingController::class, 'getSlots'])->name('booking.slots');
+    Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+    Route::get('/booking/confirm', [BookingController::class, 'confirm'])->name('booking.confirm');
+    Route::post('/booking/confirm', [BookingController::class, 'save'])->name('booking.save');
 });
 
 

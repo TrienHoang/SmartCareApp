@@ -18,7 +18,9 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RolePermissionSeeder::class,
 
+
             TaskSeeder::class,
+
             UserSeeder::class,
             DepartmentSeeder::class,
             RoomSeeder::class,
@@ -28,12 +30,19 @@ class DatabaseSeeder extends Seeder
             DoctorServiceSeeder::class,
             WorkingScheduleSeeder::class,
             DoctorLeaveSeeder::class,
+
+            DoctorDetailSeeder::class,
+            DoctorServiceSeeder::class,
+
             SpecialtySeeder::class,
+
 
             ServiceCategorySeeder::class,
             ServiceSeeder::class,
 
+
             AppointmentSeeder::class,
+
             AppointmentLogSeeder::class,
             StatisticSeeder::class,
 
@@ -45,19 +54,35 @@ class DatabaseSeeder extends Seeder
             MedicalRecordSeeder::class,
             PrescriptionSeeder::class,
             PrescriptionItemSeeder::class,
-            TreatmentPlanSeeder::class,
+
+             TreatmentPlanSeeder::class,
+
 
             FileUploadSeeder::class,
             UploadHistorySeeder::class,
 
             BlogSeeder::class,
-            FaqSeeder::class,
-            OrderSeeder::class,
-            ReviewSeeder::class,
-            ReviewReplySeeder::class,
 
             ContactSeeder::class,
+      
+
+             NotificationSeeder::class,
+            FaqSeeder::class,
+            OrderSeeder::class,
             NotificationSeeder::class,
+            FaqSeeder::class,
+            ReviewSeeder::class,
+            DoctorServiceSeeder::class,
+            DoctorDetailSeeder::class,
+
+        SpecialtySeeder::class,
+        DoctorSeeder::class,
+        DoctorDetailSeeder::class,
+
+        ReviewReplySeeder::class
+
+
+
         ]);
     }
 }

@@ -3,145 +3,94 @@
 namespace App\Http\Controllers\Doctor;
 
 use App\Http\Controllers\Controller;
-use App\Models\Task;
 use App\Models\Appointment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Route;
 
 class CalendarController extends Controller
 {
-    public function index()
+public function index()
     {
         return view('doctor.calendar.index');
     }
 
-    public function events(Request $request)
+public function events(Request $request)
     {
-        Log::info('Yêu cầu sự kiện lịch bác sĩ:', [
-            'doctor_id' => Auth::id(),
-            'start' => $request->input('start'),
-            'end' => $request->input('end'),
-        ]);
-
-        if (!Auth::check()) {
-            Log::error('Không tìm thấy người dùng đã xác thực');
-            return response()->json(['error' => 'Người dùng chưa đăng nhập'], 401);
+        if (!Auth::check() || Auth::user()->role_id != 2) {
+            Log::warning('Truy cập events không hợp lệ: ' . (Auth::check() ? Auth::user()->email : 'Chưa đăng nhập'));
+            return response()->json(['error' => 'Bạn không có quyền truy cập. Chỉ có bác sĩ mới xem được.'], 403);
         }
 
-        $start = $request->input('start');
-        $end = $request->input('end');
-        $doctorId = Auth::id();
-
-        // Lấy công việc của bác sĩ
-        $tasksQuery = Task::query()
-            ->select('id', 'title', 'deadline')
-            ->whereNotNull('deadline')
-            ->where('assigned_to', $doctorId);
-
-        if ($start && $end) {
-            $tasksQuery->whereBetween('deadline', [$start, $end]);
+        $doctor = Auth::user()->doctor;
+        if (!$doctor) {
+            Log::warning('Không tìm thấy thông tin bác sĩ cho user: ' . Auth::id());
+            return response()->json(['error' => 'Không tìm thấy thông tin bác sĩ.'], 403);
         }
+        $doctorId = $doctor->id;
 
-        Log::info('Truy vấn SQL công việc:', [
-            'sql' => $tasksQuery->toSql(),
-            'bindings' => $tasksQuery->getBindings()
+        $start = Carbon::parse($request->input('start'))->timezone('Asia/Ho_Chi_Minh');
+        $end = Carbon::parse($request->input('end'))->timezone('Asia/Ho_Chi_Minh')->endOfDay();
+
+        Log::info('Yêu cầu lịch hẹn:', [
+            'doctor_id' => $doctorId,
+            'start' => $start->toDateTimeString(),
+            'end' => $end->toDateTimeString()
         ]);
 
-        $tasks = $tasksQuery->get();
+        $appointments = Appointment::with(['patient', 'service'])
+            ->where('doctor_id', $doctorId)
+            ->whereBetween('appointment_time', [$start, $end])
+            ->get();
 
-        Log::info('Công việc tìm thấy:', [
-            'count' => $tasks->count(),
-            'tasks' => $tasks->toArray()
-        ]);
+        Log::info('Danh sách cuộc hẹn:', $appointments->toArray());
 
-        $taskEvents = $tasks->map(function ($task) {
-            // Kiểm tra xem tuyến đường có tồn tại không
-            $taskUrl = Route::has('doctor.tasks.show') ? route('doctor.tasks.show', $task->id) : '#';
+        $events = $appointments->map(function ($appointment) {
+            $statusColor = match ($appointment->status) {
+                'pending' => '#ffc107',
+                'confirmed' => '#28a745',
+                'completed' => '#007bff',
+                'cancelled' => '#dc3545',
+                default => '#6c757d',
+            };
+
             return [
-                'id' => 'task_' . $task->id,
-                'title' => '🗂️ ' . $task->title,
-                'start' => $task->deadline,
-                'color' => '#0d6efd',
-                'url' => $taskUrl,
+                'id' => 'appt_' . $appointment->id,
+                'title' => '🩺 ' . ($appointment->patient->full_name ?? 'Bệnh nhân') . ' - ' . ($appointment->service->name ?? 'Dịch vụ'),
+                'start' => $appointment->appointment_time->timezone('Asia/Ho_Chi_Minh')->toIso8601String(),
+                'end' => $appointment->end_time
+                    ? $appointment->end_time->timezone('Asia/Ho_Chi_Minh')->toIso8601String()
+                    : $appointment->appointment_time->addMinutes(30)->toIso8601String(),
+                'color' => $statusColor,
+                'url' => route('doctor.appointments.show', $appointment->id),
+                'extendedProps' => [
+                    'status' => $appointment->status_text ?? $appointment->status,
+                    'reason' => $appointment->reason,
+                    'check_in_time' => $appointment->check_in_time,
+                    'patient' => $appointment->patient->full_name ?? null,
+                    'service' => $appointment->service->name ?? null,
+                    'cancel_reason' => $appointment->cancel_reason,
+                ],
             ];
         });
 
-        // Lấy lịch hẹn của bác sĩ
-        $appointmentsQuery = Appointment::query()
-            ->select('id', 'appointment_time', 'patient_id', 'service_id')
-            ->where('doctor_id', $doctorId);
-
-        if ($start && $end) {
-            $appointmentsQuery->whereBetween('appointment_time', [$start, $end]);
-        }
-
-        Log::info('Truy vấn SQL lịch hẹn:', [
-            'sql' => $appointmentsQuery->toSql(),
-            'bindings' => $appointmentsQuery->getBindings()
-        ]);
-
-        $appointments = $appointmentsQuery->get();
-
-        Log::info('Lịch hẹn tìm thấy:', [
-            'count' => $appointments->count(),
-            'appointments' => $appointments->toArray()
-        ]);
-
-        $appointmentEvents = $appointments->map(function ($appt) {
-            // Kiểm tra xem tuyến đường có tồn tại không
-            $apptUrl = Route::has('doctor.appointments.show') ? route('doctor.appointments.show', $appt->id) : '#';
-            return [
-                'id' => 'appt_' . $appt->id,
-                'title' => '🩺 Lịch khám #' . $appt->id,
-                'start' => $appt->appointment_time,
-                'color' => '#198754',
-                'url' => $apptUrl,
-            ];
-        });
-
-        $finalEvents = $taskEvents->merge($appointmentEvents);
-
-        Log::info('Sự kiện cuối cùng:', [
-            'count' => $finalEvents->count(),
-            'events' => $finalEvents->toArray()
-        ]);
-
-        return response()->json($finalEvents);
+        return response()->json($events->toArray());
     }
 
-    public function testDatabase()
+    public function testDb()
     {
-        try {
-            DB::connection()->getPdo();
-            $doctorId = Auth::id();
+        $appointments = Appointment::with(['patient', 'service'])
+            ->latest()
+            ->take(5)
+            ->get();
 
-            $tasksCount = Task::where('assigned_to', $doctorId)->count();
-            $tasksSample = Task::where('assigned_to', $doctorId)->limit(5)->get();
+        Log::info('Kiểm tra dữ liệu lịch hẹn:', $appointments->toArray());
 
-            $appointmentsCount = Appointment::where('doctor_id', $doctorId)->count();
-            $appointmentsSample = Appointment::where('doctor_id', $doctorId)->limit(5)->get();
-
-            return response()->json([
-                'database_connection' => 'OK',
-                'tasks' => [
-                    'count' => $tasksCount,
-                    'sample' => $tasksSample,
-                    'table_structure' => DB::select('DESCRIBE tasks')
-                ],
-                'appointments' => [
-                    'count' => $appointmentsCount,
-                    'sample' => $appointmentsSample,
-                    'table_structure' => DB::select('DESCRIBE appointments')
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Kết nối cơ sở dữ liệu thất bại',
-                'message' => $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Dữ liệu đã được truy xuất',
+            'data' => $appointments,
+        ]);
     }
 }

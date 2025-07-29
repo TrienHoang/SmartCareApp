@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
+use App\Models\Doctor;
+use App\Models\Room;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Http\Request;
@@ -13,7 +16,7 @@ class ServiceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Service::with('category');
+        $query = Service::with('category', 'department');
 
         if ($request->filled('search')) {
             $search = $request->get('search');
@@ -43,7 +46,9 @@ class ServiceController extends Controller
     public function create()
     {
         $categories = ServiceCategory::where('status', 'active')->orderBy('name')->get();
-        return view('admin.services.create', compact('categories'));
+        $departments = Department::where('is_active', '1')->orderBy('name')->get();
+
+        return view('admin.services.create', compact('categories', 'departments'));
     }
 
     public function store(Request $request)
@@ -59,24 +64,49 @@ class ServiceController extends Controller
         $validated['description'] = $validated['description'] ? trim($validated['description']) : null;
         $validated['price'] = round($validated['price'], 0);
         $validated['slug'] = str()->slug($validated['name']);
-        $validated['content'] = $request->input('content'); // ✅ thêm dòng này
+        $validated['content'] = $request->input('content');
+        $validated['department_id'] = $request->input('department_id');
+        $validated['min_booking_hours'] = $request->input('min_booking_hours');
+        $validated['status'] = $request->input('status', 'active');
+        $validated['duration'] = $request->input('duration')    ; 
+
+        // Xử lý ảnh nếu có
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $path = $image->storeAs('services', $filename, 'public');
+            $validated['image'] = $path;
+        }
+
+        // Validate danh sách bác sĩ
+        $doctors = $request->input('doctors', []);
+        $request->validate([
+            'doctors' => 'nullable|array',
+            'doctors.*' => 'exists:doctors,id,department_id,' . $validated['department_id'],
+        ], [
+            'doctors.*.exists' => 'Bác sĩ được chọn không thuộc chuyên khoa của dịch vụ.',
+        ]);
 
         DB::beginTransaction();
         try {
-            Service::create($validated);
+            $service = Service::create($validated);
+            $service->doctors()->sync($doctors);
             DB::commit();
             return redirect()->route('admin.services.index')->with('success', 'Thêm dịch vụ thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Có lỗi xảy ra. Vui lòng thử lại.');
+            return back()->withInput()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
-
     public function edit($id)
     {
         $service = Service::findOrFail($id);
         $categories = ServiceCategory::where('status', 'active')->orderBy('name')->get();
-        return view('admin.services.edit', compact('service', 'categories'));
+        $departments = Department::where('is_active', '1')->orderBy('name')->get();
+        $doctors = Doctor::where('department_id', $service->department_id)->with('user')->get();
+        $selectedDoctors = $service->doctors()->pluck('doctors.id')->toArray();
+
+        return view('admin.services.edit', compact('service', 'categories', 'departments', 'doctors', 'selectedDoctors'));
     }
 
     public function update(Request $request, $id)
@@ -92,17 +122,55 @@ class ServiceController extends Controller
         $validated['description'] = $validated['description'] ? trim($validated['description']) : null;
         $validated['price'] = round($validated['price'], 0);
         $validated['slug'] = str()->slug($validated['name']);
-        $validated['content'] = $request->input('content'); // ✅ thêm dòng này
+        $validated['content'] = $request->input('content'); 
+        $validated['department_id'] = $request->input('department_id');
+        $validated['min_booking_hours'] = $request->input('min_booking_hours');
+        $validated['status'] = $request->input('status', 'active');
+        $validated['duration'] = $request->input('duration');
 
         $service = Service::findOrFail($id);
+
+        // Kiểm tra xem department_id có thay đổi không
+        $departmentChanged = $service->department_id != $validated['department_id'];
+
+        // Nếu có ảnh mới → xử lý upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $path = $image->storeAs('services', $filename, 'public');
+            $validated['image'] = $path;
+        } else {
+            // Nếu không có ảnh mới → giữ nguyên ảnh cũ
+            $validated['image'] = $service->image;
+        }
+
         $service->update($validated);
+
+        $doctors = $request->input('doctors', []);
+        $request->validate([
+            'doctors' => 'nullable|array',
+            'doctors.*' => 'exists:doctors,id,department_id,' . $service->department_id,
+        ], [
+            'doctors.*.exists' => 'Bác sĩ được chọn không thuộc chuyên khoa của dịch vụ.',
+        ]);
+
+        // Nếu department_id thay đổi, xóa tất cả bác sĩ cũ và đồng bộ danh sách mới
+        if ($departmentChanged) {
+            $service->doctors()->sync($doctors); // Xóa bác sĩ cũ và thêm bác sĩ mới
+        } else {
+            // Nếu không đổi department_id, chỉ đồng bộ nếu danh sách bác sĩ thay đổi
+            $currentDoctors = $service->doctors()->pluck('doctors.id')->toArray();
+            if ($doctors !== $currentDoctors) {
+                $service->doctors()->sync($doctors);
+            }
+        }
 
         return redirect()->route('admin.services.index')->with('success', 'Cập nhật dịch vụ thành công!');
     }
 
     public function show($id)
     {
-        $service = Service::with('category')->findOrFail($id);
+        $service = Service::with('category', 'room', 'department')->findOrFail($id);
         return view('admin.services.show', compact('service'));
     }
 
@@ -124,9 +192,12 @@ class ServiceController extends Controller
             'service_cate_id' => 'required|exists:service_categories,id',
             'name' => 'required|string|min:3|max:255|unique:services,name|regex:/^[\p{L}\p{N}\s\-_.,()]+$/u',
             'description' => 'nullable|string|max:2000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'department_id' => 'required|exists:departments,id',
             'content' => 'nullable|string', // ✅ thêm dòng này
             'price' => 'required|numeric|min:1000|max:99999999',
             'duration' => 'required|integer|min:5|max:600',
+            'min_booking_hours' => 'nullable|integer|min:1|max:168',
             'status' => ['required', Rule::in(['active', 'inactive'])]
         ];
     }
@@ -137,9 +208,12 @@ class ServiceController extends Controller
             'service_cate_id' => 'required|exists:service_categories,id',
             'name' => ['required', 'string', 'min:3', 'max:255', Rule::unique('services', 'name')->ignore($id), 'regex:/^[\p{L}\p{N}\s\-_.,()]+$/u'],
             'description' => 'nullable|string|max:2000',
-            'content' => 'nullable|string', // ✅ thêm dòng này
+            'content' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'department_id' => 'required|exists:departments,id',
             'price' => 'required|numeric|min:1000|max:99999999',
             'duration' => 'required|integer|min:5|max:600',
+            'min_booking_hours' => 'nullable|integer|min:1|max:168',
             'status' => ['required', Rule::in(['active', 'inactive'])]
         ];
     }
@@ -165,6 +239,17 @@ class ServiceController extends Controller
             'duration.integer' => 'Thời gian phải là số nguyên.',
             'duration.min' => 'Thời gian tối thiểu là :min phút.',
             'duration.max' => 'Thời gian tối đa là :max phút.',
+
+            'min_booking_hours.integer' => 'Số giờ đặt trước phải là số nguyên.',
+            'min_booking_hours.min' => 'Số giờ đặt trước tối thiểu là :min giờ.',
+            'min_booking_hours.max' => 'Thời gian đặt trước tối thiểu không quá 7 ngày.',
+
+            'image.image' => 'Ảnh dịch vụ phải là một tệp hình ảnh.',
+            'image.mimes' => 'Ảnh dịch vụ phải có định dạng: jpeg, png, jpg, gif, webp.',
+            'image.max' => 'Ảnh dịch vụ không được vượt quá :max KB.',
+
+            'department_id.required' => 'Vui lòng chọn chuyên khoa.',
+            'department_id.exists' => 'Chuyên khoa đã chọn không tồn tại.',
 
             'service_cate_id.required' => 'Vui lòng chọn danh mục.',
             'service_cate_id.exists' => 'Danh mục đã chọn không tồn tại.',
@@ -195,5 +280,11 @@ class ServiceController extends Controller
         }
 
         return $errors;
+    }
+
+    public function getDoctorsByDepartment($departmentId)
+    {
+        $doctors = Doctor::where('department_id', $departmentId)->with('user')->get();
+        return response()->json($doctors);
     }
 }

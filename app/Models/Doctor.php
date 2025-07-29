@@ -22,10 +22,9 @@ class Doctor extends Model
     // --------------------
     // Relationships
     // --------------------
-
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function doctor()
@@ -65,9 +64,8 @@ class Doctor extends Model
 
     public function services()
     {
-        return $this->belongsToMany(Service::class, 'doctor_service');
+        return $this->belongsToMany(Service::class, 'doctor_service', 'doctor_id', 'service_id');
     }
-
     public function workingSchedules()
     {
         return $this->hasMany(WorkingSchedule::class);
@@ -107,10 +105,4 @@ class Doctor extends Model
     {
         return $this->belongsToMany(Specialty::class, 'doctor_specialty');
     }
-
-    
-
-    
-
-    
 }
