@@ -107,11 +107,6 @@ Route::get('/test-payment', function () {
     return view('test-payment');
 });
 
-// VNPAY routes
-Route::post('/test-payment/process', [PaymentController::class, 'create'])->name('test.payment');
-Route::get('/vnpay-return', [PaymentController::class, 'return'])->name('vnpay.return');
-Route::post('/vnpay-ipn', [PaymentController::class, 'ipn'])->name('vnpay.ipn');
-
 // Danh sách bình luận của người dùng (client)
 Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->group(function () {
     Route::get('/', [ReviewReplyController::class, 'index'])->name('index');
@@ -133,6 +128,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
     Route::get('/booking/confirm', [BookingController::class, 'confirm'])->name('booking.confirm');
     Route::post('/booking/confirm', [BookingController::class, 'save'])->name('booking.save');
+    Route::get('/payment/return', [BookingController::class, 'paymentReturn'])->name('payment.return');
+    Route::post('/payment/ipn', [BookingController::class, 'paymentIpn'])->name('payment.ipn');
+    Route::get('/booking/success', [BookingController::class, 'success'])->name('booking.success');
 });
 
 

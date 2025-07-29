@@ -2,394 +2,102 @@
 
 @section('title', 'Chi tiết khám bệnh')
 
+
 @section('content')
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #83ccde 30%, #b4e0f5 50%);
-    min-height: 100vh;
-    color: #333;
-}
+            <!-- Sidebar -->
+            <div class="md:col-span-1">
+                <div class="bg-white rounded-xl shadow-lg p-6 sticky top-6">
+                    <!-- Avatar -->
+                    <div class="text-center mb-6">
+                        <div class="relative inline-block">
+                            <img id="profile-avatar" src="{{ auth()->user()->avatar ?? '/images/default-avatar.png' }}"
+                                alt="Avatar"
+                                class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-100 object-cover">
+                            <button onclick="openAvatarModal()"
+                                class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 hover:bg-blue-700 shadow">
+                                <i class="bx bx-camera text-white text-sm"></i>
+                            </button>
+                        </div>
+                        <h3 class="text-lg font-semibold">{{ auth()->user()->name ?? 'Người dùng' }}</h3>
+                        <p class="text-sm text-gray-500">{{ auth()->user()->email ?? 'email@example.com' }}</p>
+                    </div>
 
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
+                    <!-- Menu -->
+                    <nav class="space-y-2">
+                        <a href="#thong-tin-ca-nhan"
+                            class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 text-blue-600 border-l-4 border-blue-600">
+                            <i class="bx bx-user text-lg"></i>
+                            <span class="font-medium">Thông Tin Cá Nhân</span>
+                        </a>
+                        <a href="{{ route('client.appointments.history') }}"
+                            class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-blue-600">
+                            <i class="bx bx-calendar text-lg"></i>
+                            <span>Lịch Sử Khám</span>
+                        </a>
+                        <a href="#lich-hen"
+                            class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-blue-600">
+                            <i class="bx bx-time text-lg"></i>
+                            <span>Lịch Hẹn</span>
+                        </a>
+                        <a href="#ho-so-y-te"
+                            class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-blue-600">
+                            <i class="bx bx-file text-lg"></i>
+                            <span>Hồ Sơ Y Tế</span>
+                        </a>
+                        <a href="{{ route('client.uploads.index') }}"
+                            class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-blue-600">
+                            <i class="bx bx-upload text-lg"></i>
+                            <span>Upload File</span>
+                        </a>
+                        <a href="#thong-bao"
+                            class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-blue-600">
+                            <i class="bx bx-bell text-lg"></i>
+                            <span>Thông Báo</span>
+                        </a>
+                        <a href="#cai-dat"
+                            class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-blue-600">
+                            <i class="bx bx-cog text-lg"></i>
+                            <span>Cài Đặt</span>
+                        </a>
+                        <a href="{{ route('client.payment_history.index') }}"
+                            class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-blue-600">
+                            <i class="bx bx-receipt text-lg"></i>
+                            <span>Lịch sử thanh toán</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
 
-    .page-header {
-        text-align: center;
-        margin-bottom: 3rem;
-        color: white;
-    }
-
-    .page-header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        animation: fadeInDown 0.8s ease;
-    }
-
-    .page-header p {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        animation: fadeInUp 0.8s ease 0.2s both;
-    }
-
-    .appointment-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    @media (max-width: 768px) {
-        .appointment-grid {
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-    }
-
-    .info-card {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.2);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        animation: slideInUp 0.6s ease;
-    }
-
-    .info-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 30px 60px rgba(0,0,0,0.15);
-    }
-
-    .info-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #667eea, #764ba2);
-    }
-
-    .card-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #f8f9fa;
-    }
-
-    .card-icon {
-        font-size: 2rem;
-        margin-right: 1rem;
-        color: #667eea;
-        animation: pulse 2s infinite;
-    }
-
-    .card-title {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #333;
-        margin: 0;
-    }
-
-    .info-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding: 0.75rem;
-        background: rgba(102, 126, 234, 0.05);
-        border-radius: 10px;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-
-    .info-item:hover {
-        background: rgba(102, 126, 234, 0.1);
-        transform: translateX(5px);
-    }
-
-    .info-item i {
-        font-size: 1.2rem;
-        margin-right: 0.75rem;
-        color: #667eea;
-        width: 25px;
-        text-align: center;
-    }
-
-    .info-label {
-        font-weight: 600;
-        color: #555;
-        margin-right: 0.5rem;
-    }
-
-    .info-value {
-        color: #333;
-        flex: 1;
-    }
-
-    .prescription-item {
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: 15px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        border-left: 4px solid #28a745;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-
-    .prescription-item:hover {
-        background: rgba(255, 255, 255, 0.95);
-        transform: translateX(5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-
-    .medicine-name {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #28a745;
-        margin-bottom: 0.5rem;
-    }
-
-    .medicine-details {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-top: 0.5rem;
-    }
-
-    .medicine-detail {
-        display: flex;
-        align-items: center;
-        font-size: 0.9rem;
-        color: #666;
-    }
-
-    .medicine-detail i {
-        margin-right: 0.5rem;
-        color: #28a745;
-    }
-
-    .payment-status {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-    }
-
-    .payment-paid {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-
-    .payment-pending {
-        background: #fff3cd;
-        color: #856404;
-        border: 1px solid #ffeaa7;
-    }
-
-    .rating-stars {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        margin-bottom: 1rem;
-    }
-
-    .star {
-        color: #ffc107;
-        font-size: 1.2rem;
-    }
-
-    .rating-text {
-        margin-left: 0.5rem;
-        font-weight: 600;
-        color: #333;
-    }
-
-    .review-comment {
-        background: rgba(255, 193, 7, 0.1);
-        border-radius: 10px;
-        padding: 1rem;
-        border-left: 4px solid #ffc107;
-        font-style: italic;
-        color: #333;
-    }
-
-    .back-button {
-        background: linear-gradient(45deg, #667eea, #764ba2);
-        color: white;
-        border: none;
-        padding: 1rem 2rem;
-        border-radius: 50px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-    }
-
-    .back-button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
-        color: white;
-        text-decoration: none;
-    }
-
-    .back-button:active {
-        transform: translateY(-1px);
-    }
-
-    .amount-display {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #28a745;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-    }
-
-    .full-width-card {
-        grid-column: 1 / -1;
-    }
-
-    /* Animations */
-    @keyframes fadeInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes slideInUp {
-        from {
-            opacity: 0;
-            transform: translateY(50px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes pulse {
-        0%, 100% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.05);
-        }
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .container {
-            padding: 1rem;
-        }
-        
-        .page-header h1 {
-            font-size: 2rem;
-        }
-        
-        .info-card {
-            padding: 1.5rem;
-        }
-        
-        .medicine-details {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-
-<div class="container">
-    <div class="page-header">
-        <h1><i class="bx bx-clipboard"></i> Chi tiết khám bệnh</h1>
-        <p>Thông tin chi tiết về cuộc hẹn khám bệnh của bạn</p>
-    </div>
-
-    <div class="appointment-grid">
+<!-- Main Content -->
+<div class="md:col-span-3" style="padding: 20px;">
+    <div style="display: flex; flex-direction: column; gap: 24px;">
         <!-- Thông tin cuộc hẹn -->
-        <div class="info-card">
-            <div class="card-header">
-                <i class="bx bx-calendar-check card-icon"></i>
-                <h3 class="card-title">Thông tin cuộc hẹn</h3>
+        <div style="background-color: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 20px;">
+            <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                <i class="bx bx-calendar-check" style="font-size: 24px; margin-right: 8px;"></i>
+                <h3 style="font-weight: 600;">Thông tin cuộc hẹn</h3>
             </div>
-            <div class="info-item">
-                <i class="bx bx-medical"></i>
-                <span class="info-label">Dịch vụ:</span>
-                <span class="info-value">{{ $appointment->service->name ?? 'Dịch vụ khám' }}</span>
-            </div>
-            <div class="info-item">
-                <i class="bx bx-time"></i>
-                <span class="info-label">Thời gian:</span>
-                <span class="info-value">{{ $appointment->appointment_time->format('d/m/Y H:i') }}</span>
-            </div>
-            <div class="info-item">
-                <i class="bx bx-user-circle"></i>
-                <span class="info-label">Bác sĩ:</span>
-                <span class="info-value">{{ $appointment->doctor->user->full_name ?? 'Chưa rõ' }}</span>
-            </div>
-            <div class="info-item">
-                <i class="bx bx-note"></i>
-                <span class="info-label">Lý do khám:</span>
-                <span class="info-value">{{ $appointment->reason ?? 'Không có ghi chú' }}</span>
-            </div>
+            <div style="margin-bottom: 10px;"><i class="bx bx-medical"></i> <strong>Dịch vụ:</strong> {{ $appointment->service->name ?? 'Dịch vụ khám' }}</div>
+            <div style="margin-bottom: 10px;"><i class="bx bx-time"></i> <strong>Thời gian:</strong> {{ $appointment->appointment_time->format('d/m/Y H:i') }}</div>
+            <div style="margin-bottom: 10px;"><i class="bx bx-user-circle"></i> <strong>Bác sĩ:</strong> {{ $appointment->doctor->user->full_name ?? 'Chưa rõ' }}</div>
+            <div><i class="bx bx-note"></i> <strong>Lý do khám:</strong> {{ $appointment->reason ?? 'Không có ghi chú' }}</div>
         </div>
 
         <!-- Thông tin thanh toán -->
         @if ($appointment->payment)
-        <div class="info-card">
-            <div class="card-header">
-                <i class="bx bx-credit-card card-icon"></i>
-                <h3 class="card-title">Thanh toán</h3>
+        <div style="background-color: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 20px;">
+            <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                <i class="bx bx-credit-card" style="font-size: 24px; margin-right: 8px;"></i>
+                <h3 style="font-weight: 600;">Thanh toán</h3>
             </div>
-            <div class="info-item">
-                <i class="bx bx-money"></i>
-                <span class="info-label">Số tiền:</span>
-                <span class="info-value amount-display">{{ number_format($appointment->payment->amount, 0, ',', '.') }} đ</span>
-            </div>
-            <div class="info-item">
-                <i class="bx bx-wallet"></i>
-                <span class="info-label">Phương thức:</span>
-                <span class="info-value">{{ $appointment->payment->payment_method ?? 'Không rõ' }}</span>
-            </div>
-            <div class="info-item">
-                <i class="bx bx-check-circle"></i>
-                <span class="info-label">Trạng thái:</span>
-                <span class="payment-status {{ $appointment->payment->status == 'paid' ? 'payment-paid' : 'payment-pending' }}">
+            <div style="margin-bottom: 10px;"><i class="bx bx-money"></i> <strong>Số tiền:</strong> <span>{{ number_format($appointment->payment->amount, 0, ',', '.') }} đ</span></div>
+            <div style="margin-bottom: 10px;"><i class="bx bx-wallet"></i> <strong>Phương thức:</strong> {{ $appointment->payment->payment_method ?? 'Không rõ' }}</div>
+            <div>
+                <i class="bx bx-check-circle"></i> <strong>Trạng thái:</strong>
+                <span style="color: {{ $appointment->payment->status == 'paid' ? '#16a34a' : '#f59e0b' }}; font-weight: bold;">
                     {{ $appointment->payment->status ?? 'Chưa thanh toán' }}
                 </span>
             </div>
@@ -398,91 +106,73 @@ body {
 
         <!-- Hồ sơ khám -->
         @if ($appointment->medicalRecord)
-        <div class="info-card full-width-card">
-            <div class="card-header">
-                <i class="bx bx-file-medical card-icon"></i>
-                <h3 class="card-title">Hồ sơ khám bệnh</h3>
+        <div style="background-color: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 20px;">
+            <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                <i class="bx bx-file-medical" style="font-size: 24px; margin-right: 8px;"></i>
+                <h3 style="font-weight: 600;">Hồ sơ khám bệnh</h3>
             </div>
-            <div class="info-item">
-                <i class="bx bx-body"></i>
-                <span class="info-label">Triệu chứng:</span>
-                <span class="info-value">{{ $appointment->medicalRecord->symptoms }}</span>
-            </div>
-            <div class="info-item">
-                <i class="bx bx-search-alt"></i>
-                <span class="info-label">Chẩn đoán:</span>
-                <span class="info-value">{{ $appointment->medicalRecord->diagnosis }}</span>
-            </div>
-            <div class="info-item">
-                <i class="bx bx-first-aid"></i>
-                <span class="info-label">Hướng điều trị:</span>
-                <span class="info-value">{{ $appointment->medicalRecord->treatment }}</span>
-            </div>
+            <div style="margin-bottom: 10px;"><i class="bx bx-body"></i> <strong>Triệu chứng:</strong> {{ $appointment->medicalRecord->symptoms }}</div>
+            <div style="margin-bottom: 10px;"><i class="bx bx-search-alt"></i> <strong>Chẩn đoán:</strong> {{ $appointment->medicalRecord->diagnosis }}</div>
+            <div><i class="bx bx-first-aid"></i> <strong>Hướng điều trị:</strong> {{ $appointment->medicalRecord->treatment }}</div>
         </div>
         @endif
 
         <!-- Đơn thuốc -->
-<!-- Đơn thuốc -->
-@if (
-    $appointment->medicalRecord &&
-    $appointment->medicalRecord->prescription &&
-    $appointment->medicalRecord->prescription->items->count()
-)
-    <div class="info-card full-width-card">
-        <div class="card-header">
-            <i class="bx bx-capsule card-icon"></i>
-            <h3 class="card-title">Đơn thuốc</h3>
-        </div>
-        @foreach ($appointment->medicalRecord->prescription->items as $item)
-            <div class="prescription-item">
-                <div class="medicine-name">
-                    <i class="bx bx-plus-medical"></i>
-                    {{ $item->medicine->name ?? 'Không rõ' }}
-                </div>
-                <div class="medicine-details">
-                    <div class="medicine-detail">
-                        <i class="bx bx-hash"></i>
-                        <strong>Số lượng:</strong> {{ $item->quantity }}
-                    </div>
-                    <div class="medicine-detail">
-                        <i class="bx bx-info-circle"></i>
-                        <strong>Cách dùng:</strong> {{ $item->usage_instructions }}
-                    </div>
+        @if (
+            $appointment->medicalRecord &&
+            $appointment->medicalRecord->prescription &&
+            $appointment->medicalRecord->prescription->items->count()
+        )
+        <div style="background-color: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 20px;">
+            <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                <i class="bx bx-capsule" style="font-size: 24px; margin-right: 8px;"></i>
+                <h3 style="font-weight: 600;">Đơn thuốc</h3>
+            </div>
+            @foreach ($appointment->medicalRecord->prescription->items as $item)
+            <div style="margin-bottom: 12px; padding-left: 12px; border-left: 3px solid #93c5fd;">
+                <div><i class="bx bx-plus-medical"></i> <strong>{{ $item->medicine->name ?? 'Không rõ' }}</strong></div>
+                <div style="font-size: 14px; margin-left: 20px;">
+                    <div><i class="bx bx-hash"></i> <strong>Số lượng:</strong> {{ $item->quantity }}</div>
+                    <div><i class="bx bx-info-circle"></i> <strong>Cách dùng:</strong> {{ $item->usage_instructions }}</div>
                 </div>
             </div>
-        @endforeach
-    </div>
-@endif
-
+            @endforeach
+        </div>
+        @endif
 
         <!-- Đánh giá -->
         @if ($appointment->review)
-        <div class="info-card full-width-card">
-            <div class="card-header">
-                <i class="bx bx-star card-icon"></i>
-                <h3 class="card-title">Đánh giá dịch vụ</h3>
+        <div style="background-color: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 20px;">
+            <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                <i class="bx bx-star" style="font-size: 24px; margin-right: 8px;"></i>
+                <h3 style="font-weight: 600;">Đánh giá dịch vụ</h3>
             </div>
-            <div class="rating-stars">
+            <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 8px;">
                 @for ($i = 1; $i <= 5; $i++)
-                    <i class="bx {{ $i <= $appointment->review->rating ? 'bxs-star' : 'bx-star' }} star"></i>
+                <i class="bx {{ $i <= $appointment->review->rating ? 'bxs-star' : 'bx-star' }}" style="color: #facc15;"></i>
                 @endfor
-                <span class="rating-text">{{ $appointment->review->rating }}/5</span>
+                <span style="margin-left: 8px;">{{ $appointment->review->rating }}/5</span>
             </div>
-            <div class="review-comment">
+            <div style="font-style: italic; color: #4b5563;">
                 <i class="bx bx-quote-alt-left"></i>
                 {{ $appointment->review->comment }}
                 <i class="bx bx-quote-alt-right"></i>
             </div>
         </div>
         @endif
-    </div>
 
-    <!-- Nút quay lại -->
-    <div class="text-center mt-4">
-        <a href="{{ route('client.appointments.history') }}" class="back-button">
-            <i class="bx bx-arrow-back"></i>
-            Quay lại lịch sử khám
-        </a>
+        <div style="text-align: center;">
+            <a href="{{ route('client.appointments.history') }}"
+               style="display: inline-block; margin-top: 20px; background-color: #3b82f6; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none;">
+                <i class="bx bx-arrow-back"></i> Quay lại lịch sử khám
+            </a>
+        </div>
     </div>
 </div>
+
+        </div>
+    </div>
+
+    {{-- Boxicons --}}
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 @endsection

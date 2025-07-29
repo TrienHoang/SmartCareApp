@@ -7,6 +7,7 @@ use App\Models\Service;
 use App\Models\Doctor;
 use App\Models\WorkingSchedule;
 use App\Models\Appointment;
+use App\Models\Payment; // Assumed Payment model
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,10 +16,8 @@ use Log;
 
 class BookingController extends Controller
 {
-
     public function show($service_id)
     {
-
         $service = Service::with(['category', 'department', 'doctors.user', 'doctors.reviews'])
             ->where('id', $service_id)
             ->firstOrFail();
@@ -32,8 +31,6 @@ class BookingController extends Controller
 
     public function prepare(Request $request)
     {
-        // dd($request->all());
-
         $validated = $request->validate([
             'service_id' => 'required|exists:services,id',
             'doctor_option' => 'required|in:random,specific',
@@ -41,7 +38,6 @@ class BookingController extends Controller
         ]);
 
         if ($validated['doctor_option'] === 'specific') {
-            // Kiểm tra bác sĩ thuộc dịch vụ
             $exists = DB::table('doctor_service')
                 ->where('doctor_id', $validated['doctor_id'])
                 ->where('service_id', $validated['service_id'])
@@ -64,7 +60,7 @@ class BookingController extends Controller
     {
         $booking_data = $request->session()->get('booking_data');
         if (!$booking_data) {
-            return redirect()->route('services.index')->with('error', 'Vui lòng chọn dịch vụ trước.');
+            return redirect()->route('client.services')->with('error', 'Vui lòng chọn dịch vụ trước.');
         }
 
         $service = Service::findOrFail($booking_data['service_id']);
@@ -80,31 +76,24 @@ class BookingController extends Controller
         $validated = $request->validate([
             'service_id' => 'required|exists:services,id',
             'doctor_id' => 'nullable|exists:doctors,id',
-            // Thêm month và year vào validation
-            'month' => 'required|integer|min:0|max:11', // 0-indexed month (0 for Jan, 11 for Dec)
+            'month' => 'required|integer|min:0|max:11',
             'year' => 'required|integer|min:2020',
         ]);
 
         $service = Service::findOrFail($validated['service_id']);
         $doctor_id = $validated['doctor_id'];
-
-        // Lấy tháng và năm từ request của frontend
-        $queryMonth = $validated['month']; // Month là 0-indexed từ JS (0-11)
+        $queryMonth = $validated['month'];
         $queryYear = $validated['year'];
 
         $start_of_month = Carbon::create($queryYear, $queryMonth + 1, 1)->startOfDay();
-
         $end_of_month = Carbon::create($queryYear, $queryMonth + 1, 1)->endOfMonth()->endOfDay();
-
-        $search_start_date = $start_of_month->copy()->subWeeks(1); // Lùi lại 1 tuần
-        $search_end_date = $end_of_month->copy()->addWeeks(1);    // Tiến lên 1 tuần
-
+        $search_start_date = $start_of_month->copy()->subWeeks(1);
+        $search_end_date = $end_of_month->copy()->addWeeks(1);
         $current_today = Carbon::today()->startOfDay();
 
         if ($doctor_id) {
             $doctor_ids = [$doctor_id];
         } else {
-            // Random: Lấy bác sĩ ít lịch nhất trong khoảng thời gian ĐANG ĐƯỢC XEM
             $doctor_ids = Doctor::where('department_id', $service->department_id)
                 ->whereIn('id', function ($query) use ($service) {
                     $query->select('doctor_id')
@@ -128,14 +117,12 @@ class BookingController extends Controller
 
         $doctor_ids = collect($doctor_ids);
 
-        // Nếu không tìm thấy bác sĩ nào khớp, trả về mảng rỗng
         if ($doctor_ids->isEmpty()) {
             return response()->json([]);
         }
 
-        // Lấy ngày khả dụng cho các bác sĩ đã chọn trong khoảng thời gian tìm kiếm
         $schedules = WorkingSchedule::whereIn('doctor_id', $doctor_ids)
-            ->where('status', 'Đã xét duyệt') // Đảm bảo status khớp với DB của bạn
+            ->where('status', 'Đã xét duyệt')
             ->whereBetween('day', [$search_start_date->toDateString(), $search_end_date->toDateString()])
             ->with('shift')
             ->get();
@@ -146,10 +133,9 @@ class BookingController extends Controller
             $shift = $schedule->shift;
 
             if (!$shift) {
-                continue; // Bỏ qua nếu không có shift liên quan
+                continue;
             }
 
-            // Đảm bảo start_time và end_time là chuỗi thời gian hợp lệ
             $start_time_str = $shift->start_time;
             $end_time_str = $shift->end_time;
 
@@ -157,7 +143,6 @@ class BookingController extends Controller
                 $start = Carbon::parse($start_time_str);
                 $end = Carbon::parse($end_time_str);
             } catch (\Exception $e) {
-                // Log lỗi nếu parse thời gian thất bại
                 \Log::error("Invalid shift time for schedule ID {$schedule->id}: Start: {$start_time_str}, End: {$end_time_str}");
                 continue;
             }
@@ -165,14 +150,12 @@ class BookingController extends Controller
             $current = $start->copy();
 
             while ($current->lessThan($end)) {
-                $slot_start = $current->format('H:i'); // Ví dụ: "09:00"
-                // Tạo đối tượng Carbon cho thời gian slot vào đúng ngày làm việc
+                $slot_start = $current->format('H:i');
                 $slot_full_datetime = $date->copy()->setTimeFromTimeString($slot_start);
 
-                // Kiểm tra xem slot này có phải là trong quá khứ so với THỜI ĐIỂM HIỆN TẠI không
                 if ($slot_full_datetime->lt(Carbon::now())) {
                     $current->addMinutes($service->duration);
-                    continue; // Bỏ qua các slot trong quá khứ
+                    continue;
                 }
 
                 $booked = Appointment::where('doctor_id', $schedule->doctor_id)
@@ -180,10 +163,9 @@ class BookingController extends Controller
                     ->where('status', '!=', 'cancelled')
                     ->exists();
 
-                // Nếu slot chưa được đặt, đánh dấu ngày đó là khả dụng và thoát vòng lặp slot
                 if (!$booked) {
                     $available_dates[$date->format('Y-m-d')] = true;
-                    break; 
+                    break;
                 }
 
                 $current->addMinutes($service->duration);
@@ -192,6 +174,7 @@ class BookingController extends Controller
 
         return response()->json($available_dates);
     }
+
     public function getSlots(Request $request)
     {
         $validated = $request->validate([
@@ -205,8 +188,6 @@ class BookingController extends Controller
         $doctor_id = $validated['doctor_id'];
         $current_datetime = Carbon::now();
 
-
-        // Lấy danh sách bác sĩ và số lịch hẹn (nếu random)
         $doctor_appointments = [];
         if (!$doctor_id) {
             $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(7)])
@@ -254,21 +235,18 @@ class BookingController extends Controller
             while ($current_slot_time->lessThan($end)) {
                 $slot_end_time = $current_slot_time->copy()->addMinutes($service->duration);
 
-                // Kiểm tra slot kết thúc không vượt quá end_time
                 if ($slot_end_time->greaterThan($end)) {
                     break;
                 }
 
                 $slot_full_datetime = $selected_date->copy()->setTimeFrom($current_slot_time);
 
-                // Kiểm tra thời gian đặt tối thiểu và thời gian quá khứ
                 $hours_diff = $current_datetime->diffInHours($slot_full_datetime, false);
                 if ($hours_diff < $service->min_booking_hours || $slot_full_datetime->lt($current_datetime)) {
                     $current_slot_time->addMinutes($service->duration);
                     continue;
                 }
 
-                // Kiểm tra slot đã được đặt
                 $booked = Appointment::where('doctor_id', $schedule->doctor_id)
                     ->where('appointment_time', $slot_full_datetime)
                     ->where('status', '!=', 'cancelled')
@@ -281,7 +259,6 @@ class BookingController extends Controller
 
                 $slot_key = $current_slot_time->format('H:i') . '-' . $slot_end_time->format('H:i');
 
-                // Kiểm tra slot đã tồn tại
                 if (!isset($available_slots[$slot_key])) {
                     $available_slots[$slot_key] = [
                         'start' => $current_slot_time->format('H:i'),
@@ -290,7 +267,6 @@ class BookingController extends Controller
                         'appointment_count' => $doctor_id ? 0 : ($doctor_appointments[$schedule->doctor_id] ?? 0),
                     ];
                 } else {
-                    // Nếu slot đã tồn tại và là random, ưu tiên bác sĩ có ít lịch hẹn hơn
                     if (!$doctor_id) {
                         $current_count = $doctor_appointments[$schedule->doctor_id] ?? 0;
                         $existing_count = $available_slots[$slot_key]['appointment_count'];
@@ -305,13 +281,11 @@ class BookingController extends Controller
             }
         }
 
-        // Chuyển mảng kết quả về dạng danh sách
         $result = array_values($available_slots);
         usort($result, function ($a, $b) {
             return strtotime($a['start']) - strtotime($b['start']);
         });
 
-        // Loại bỏ appointment_count khỏi kết quả
         $result = array_map(function ($slot) {
             unset($slot['appointment_count']);
             return $slot;
@@ -324,7 +298,7 @@ class BookingController extends Controller
     {
         $booking_data = $request->session()->get('booking_data');
         if (!$booking_data) {
-            return redirect()->route('services.index')->with('error', 'Vui lòng chọn dịch vụ trước.');
+            return redirect()->route('client.services')->with('error', 'Vui lòng chọn dịch vụ trước.');
         }
 
         $validated = $request->validate([
@@ -334,11 +308,10 @@ class BookingController extends Controller
         ]);
 
         $service = Service::findOrFail($booking_data['service_id']);
-        $doctor_id = $booking_data['doctor_id'] ?? $request->input('doctor_id'); // Nếu random, chọn từ slot
+        $doctor_id = $booking_data['doctor_id'] ?? $request->input('doctor_id');
 
         $appointment_time = Carbon::parse($validated['date'])->setTimeFromTimeString($validated['slot_start']);
 
-        // Kiểm tra slot còn trống
         $booked = Appointment::where('doctor_id', $doctor_id)
             ->where('appointment_time', $appointment_time)
             ->where('status', '!=', 'cancelled')
@@ -348,7 +321,6 @@ class BookingController extends Controller
             return back()->withErrors(['slot_start' => 'Khung giờ này đã được đặt.']);
         }
 
-        // Lưu tạm để xác nhận
         $request->session()->put('booking_confirm', [
             'service_id' => $booking_data['service_id'],
             'doctor_id' => $doctor_id,
@@ -361,9 +333,7 @@ class BookingController extends Controller
 
     public function confirm(Request $request)
     {
-
         $booking_data = $request->session()->get('booking_data');
-        // dd($request->session()->get('booking_data'));
         $booking_confirm = $request->session()->get('booking_confirm');
 
         if (!$booking_data || !$booking_confirm) {
@@ -380,70 +350,61 @@ class BookingController extends Controller
 
     public function save(Request $request)
     {
-        // Lấy dữ liệu đặt lịch từ session
         $booking_data = $request->session()->get('booking_data');
         $booking_confirm = $request->session()->get('booking_confirm');
 
-        // Kiểm tra dữ liệu session có hợp lệ không
         if (!$booking_data || !$booking_confirm) {
-            return redirect()->route('services.index')->with('error', 'Dữ liệu đặt lịch không hợp lệ hoặc đã hết hạn. Vui lòng bắt đầu lại.');
+            return redirect()->route('client.services')->with('error', 'Dữ liệu đặt lịch không hợp lệ hoặc đã hết hạn. Vui lòng bắt đầu lại.');
         }
 
-        // Validate dữ liệu từ form xác nhận (thông tin người dùng và các trường ẩn)
         $validated = $request->validate([
             'service_id' => 'required|exists:services,id',
             'doctor_id' => 'required|exists:doctors,id', 
             'appointment_time' => 'required|date_format:Y-m-d H:i:s', 
             'reason' => 'nullable|string|max:255',
-            // Thông tin người dùng (từ form)
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'gender' => 'nullable|string|in:Nam,Nữ,Khác',
             'date_of_birth' => 'nullable|date',
             'address' => 'nullable|string|max:500',
-        ],[
+        ], [
             'full_name.required' => 'Họ và tên là bắt buộc.',
             'full_name.string' => 'Họ và tên phải là chuỗi ký tự.',
             'phone.required' => 'Số điện thoại là bắt buộc.',
             'phone.string' => 'Số điện thoại phải là chuỗi ký tự.'
         ]);
 
-        // Lấy thông tin dịch vụ và thời gian hẹn
-        $service = Service::findOrFail($validated['service_id']); // Sử dụng $validated['service_id']
-        $appointment_time = Carbon::parse($validated['appointment_time']); // Sử dụng $validated['appointment_time']
-        $user = Auth::user(); // Sử dụng Auth::user() để lấy người dùng đã đăng nhập
+        $service = Service::findOrFail($validated['service_id']);
+        $appointment_time = Carbon::parse($validated['appointment_time']);
+        $user = Auth::user();
 
         DB::beginTransaction();
         try {
-            // 1. Cập nhật thông tin người dùng nếu có thay đổi
-            // Chỉ cập nhật nếu người dùng đã đăng nhập
             if ($user) {
                 $user->full_name = $validated['full_name'];
                 $user->phone = $validated['phone'];
                 $user->gender = $validated['gender'];
                 $user->date_of_birth = $validated['date_of_birth'];
                 $user->address = $validated['address'];
-                $user->save(); // Lưu các thay đổi vào DB
+                $user->save();
             } else {
                 throw new \Exception('Người dùng chưa đăng nhập hoặc không tìm thấy.');
             }
 
-            // 2. Kiểm tra lại slot có còn trống không (tránh race condition)
             $booked = Appointment::where('doctor_id', $validated['doctor_id'])
                 ->where('appointment_time', $appointment_time)
                 ->where('status', '!=', 'cancelled')
                 ->exists();
 
             if ($booked) {
-                DB::rollBack(); // Rollback các thay đổi nếu slot đã bị đặt
-                return redirect()->route('booking.showService',$booking_confirm['service_id'])->with('error', 'Khung giờ này đã có người khác đặt hoặc không còn khả dụng.');
+                DB::rollBack();
+                return redirect()->route('booking.showService', $booking_confirm['service_id'])->with('error', 'Khung giờ này đã có người khác đặt hoặc không còn khả dụng.');
             }
 
-            // 3. Tạo bản ghi đặt lịch mới
             $appointment = Appointment::create([
-                'patient_id' => $user->id, // Sử dụng user->id của người dùng hiện tại
-                'doctor_id' => $validated['doctor_id'], // Sử dụng $validated['doctor_id']
-                'service_id' => $validated['service_id'], // Sử dụng $validated['service_id']
+                'patient_id' => $user->id,
+                'doctor_id' => $validated['doctor_id'],
+                'service_id' => $validated['service_id'],
                 'appointment_time' => $appointment_time,
                 'end_time' => $appointment_time->copy()->addMinutes($service->duration),
                 'status' => 'pending', // Trạng thái mặc định sau khi đặt
@@ -454,17 +415,194 @@ class BookingController extends Controller
             // 4. Xóa dữ liệu đặt lịch tạm thời khỏi session
             $request->session()->forget(['booking_data', 'booking_confirm']);
 
-            // Commit transaction nếu mọi thứ thành công
             DB::commit();
 
-            // Chuyển hướng đến trang thành công
-            return redirect()->route('home')->with('success', 'Bạn đã đặt lịch thành công! Vui lòng chờ xác nhận từ phòng khám.');
-
+            // Initiate VNPay payment after successful booking
+            $vnpayUrl = $this->initiateVNPayPayment($appointment, $service);
+            return redirect($vnpayUrl);
         } catch (\Exception $e) {
-            // Rollback transaction nếu có bất kỳ lỗi nào xảy ra
             DB::rollBack();
             \Log::error("Booking save failed: " . $e->getMessage() . " - User ID: " . ($user ? $user->id : 'N/A'));
             return back()->with('error', 'Có lỗi xảy ra khi hoàn tất đặt lịch: ' . $e->getMessage());
         }
+    }
+
+    // New method to initiate VNPay payment
+    protected function initiateVNPayPayment($appointment, $service)
+    {
+        $vnp_TmnCode = env('VNPAY_TMNCODE', '21XQVOEK');
+        $vnp_HashSecret = env('VNPAY_HASH_SECRET', 'HSDJ58ZKRZ24ZSYULQGO0ISQ4205JON1');
+        $vnp_Url = env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html');
+        $vnp_ReturnUrl = env('VNPAY_RETURN_URL', 'http://localhost:8000/payment/return');
+
+        $vnp_TxnRef = $appointment->id . '_' . time();
+        $vnp_Amount = $service->price * 100; // VNPay requires amount * 100 (VND)
+        $vnp_Locale = 'vn';
+        $vnp_BankCode = '';
+        $vnp_IpAddr = request()->ip();
+        $vnp_OrderInfo = "Thanh toán lịch hẹn #{$appointment->id} cho dịch vụ {$service->name}";
+        $vnp_OrderType = 'billpayment';
+        $vnp_CreateDate = now()->format('YmdHis');
+        $vnp_ExpireDate = now()->addMinutes(15)->format('YmdHis');
+
+        $inputData = [
+            "vnp_Version" => "2.1.0",
+            "vnp_TmnCode" => $vnp_TmnCode,
+            "vnp_Amount" => $vnp_Amount,
+            "vnp_Command" => "pay",
+            "vnp_CreateDate" => $vnp_CreateDate,
+            "vnp_CurrCode" => "VND",
+            "vnp_IpAddr" => $vnp_IpAddr,
+            "vnp_Locale" => $vnp_Locale,
+            "vnp_OrderInfo" => $vnp_OrderInfo,
+            "vnp_OrderType" => $vnp_OrderType,
+            "vnp_ReturnUrl" => $vnp_ReturnUrl,
+            "vnp_TxnRef" => $vnp_TxnRef,
+            "vnp_ExpireDate" => $vnp_ExpireDate,
+        ];
+
+        if (!empty($vnp_BankCode)) {
+            $inputData['vnp_BankCode'] = $vnp_BankCode;
+        }
+
+        ksort($inputData);
+        $query = http_build_query($inputData);
+        $hashdata = $query;
+        $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+        $vnp_Url .= '?' . $query . '&vnp_SecureHash=' . $vnpSecureHash;
+
+        // Create payment record
+        Payment::create([
+            'appointment_id' => $appointment->id,
+            'promotion_id' => null,
+            'amount' => $service->price,
+            'payment_method' => 'vnpay',
+            'status' => 'pending',
+            'paid_at' => null,
+        ]);
+
+        return $vnp_Url;
+    }
+
+    // New method to handle VNPay return URL
+    public function paymentReturn(Request $request)
+    {
+        $vnp_HashSecret = env('VNPAY_HASH_SECRET', 'HSDJ58ZKRZ24ZSYULQGO0ISQ4205JON1');
+        $vnp_SecureHash = $request->vnp_SecureHash;
+        $inputData = $request->all();
+        unset($inputData['vnp_SecureHash']);
+
+        ksort($inputData);
+        $hashData = http_build_query($inputData);
+        $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
+
+        $txnRef = $request->vnp_TxnRef;
+        $responseCode = $request->vnp_ResponseCode;
+        $appointmentId = explode('_', $txnRef)[0];
+        $payment = Payment::where('appointment_id', $appointmentId)->first();
+        $appointment = Appointment::find($appointmentId);
+
+        if (!$payment || !$appointment) {
+            return redirect()->route('client.services')->with('error', 'Giao dịch không hợp lệ hoặc không tìm thấy.');
+        }
+
+        if ($secureHash === $vnp_SecureHash && $responseCode === '00') {
+            DB::beginTransaction();
+            try {
+                $payment->update([
+                    'status' => 'paid',
+                    'paid_at' => Carbon::createFromFormat('YmdHis', $request->vnp_PayDate),
+                ]);
+
+                $appointment->update([
+                    'status' => 'confirmed',
+                ]);
+
+                DB::commit();
+                return redirect()->route('booking.success')
+                    ->with('success', 'Thanh toán thành công! Lịch hẹn của bạn đã được xác nhận.');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                \Log::error("Payment confirmation failed: " . $e->getMessage());
+                return redirect()->route('client.services')
+                    ->with('error', 'Có lỗi xảy ra khi xác nhận thanh toán.');
+            }
+        } else {
+            $payment->update([
+                'status' => 'unpaid',
+            ]);
+
+            $appointment->update([
+                'status' => 'cancelled',
+            ]);
+
+            return redirect()->route('booking.showService', $appointment->service_id)
+                ->with('error', 'Thanh toán không thành công. Vui lòng thử lại.');
+        }
+    }
+
+    // New method to handle VNPay IPN
+    public function paymentIpn(Request $request)
+    {
+        $vnp_HashSecret = env('VNPAY_HASH_SECRET', 'HSDJ58ZKRZ24ZSYULQGO0ISQ4205JON1');
+        $vnp_SecureHash = $request->vnp_SecureHash;
+        $inputData = $request->all();
+        unset($inputData['vnp_SecureHash']);
+
+        ksort($inputData);
+        $hashData = http_build_query($inputData);
+        $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
+
+        $txnRef = $request->vnp_TxnRef;
+        $responseCode = $request->vnp_ResponseCode;
+        $appointmentId = explode('_', $txnRef)[0];
+        $payment = Payment::where('appointment_id', $appointmentId)->first();
+        $appointment = Appointment::find($appointmentId);
+
+        if (!$payment || !$appointment) {
+            return response()->json(['RspCode' => '01', 'Message' => 'Transaction not found']);
+        }
+
+        if ($secureHash === $vnp_SecureHash && $responseCode === '00') {
+            if ($payment->status !== 'paid') {
+                DB::beginTransaction();
+                try {
+                    $payment->update([
+                        'status' => 'paid',
+                        'paid_at' => Carbon::createFromFormat('YmdHis', $request->vnp_PayDate),
+                    ]);
+
+                    $appointment->update([
+                        'status' => 'confirmed',
+                    ]);
+
+                    DB::commit();
+                    return response()->json(['RspCode' => '00', 'Message' => 'Confirm Success']);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    \Log::error("IPN processing failed: " . $e->getMessage());
+                    return response()->json(['RspCode' => '99', 'Message' => 'Unknown error']);
+                }
+            } else {
+                return response()->json(['RspCode' => '02', 'Message' => 'Transaction already confirmed']);
+            }
+        } else {
+            if ($payment->status !== 'unpaid') {
+                $payment->update([
+                    'status' => 'unpaid',
+                ]);
+
+                $appointment->update([
+                    'status' => 'cancelled',
+                ]);
+            }
+            return response()->json(['RspCode' => '01', 'Message' => 'Transaction failed']);
+        }
+    }
+
+    // New method for success page
+    public function success()
+    {
+        return view('client.booking.success');
     }
 }
