@@ -60,7 +60,7 @@ class BookingController extends Controller
     {
         $booking_data = $request->session()->get('booking_data');
         if (!$booking_data) {
-            return redirect()->route('services.index')->with('error', 'Vui lòng chọn dịch vụ trước.');
+            return redirect()->route('client.services')->with('error', 'Vui lòng chọn dịch vụ trước.');
         }
 
         $service = Service::findOrFail($booking_data['service_id']);
@@ -298,7 +298,7 @@ class BookingController extends Controller
     {
         $booking_data = $request->session()->get('booking_data');
         if (!$booking_data) {
-            return redirect()->route('services.index')->with('error', 'Vui lòng chọn dịch vụ trước.');
+            return redirect()->route('client.services')->with('error', 'Vui lòng chọn dịch vụ trước.');
         }
 
         $validated = $request->validate([
@@ -354,13 +354,13 @@ class BookingController extends Controller
         $booking_confirm = $request->session()->get('booking_confirm');
 
         if (!$booking_data || !$booking_confirm) {
-            return redirect()->route('services.index')->with('error', 'Dữ liệu đặt lịch không hợp lệ hoặc đã hết hạn. Vui lòng bắt đầu lại.');
+            return redirect()->route('client.services')->with('error', 'Dữ liệu đặt lịch không hợp lệ hoặc đã hết hạn. Vui lòng bắt đầu lại.');
         }
 
         $validated = $request->validate([
             'service_id' => 'required|exists:services,id',
-            'doctor_id' => 'required|exists:doctors,id',
-            'appointment_time' => 'required|date_format:Y-m-d H:i:s',
+            'doctor_id' => 'required|exists:doctors,id', 
+            'appointment_time' => 'required|date_format:Y-m-d H:i:s', 
             'reason' => 'nullable|string|max:255',
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
@@ -407,11 +407,12 @@ class BookingController extends Controller
                 'service_id' => $validated['service_id'],
                 'appointment_time' => $appointment_time,
                 'end_time' => $appointment_time->copy()->addMinutes($service->duration),
-                'status' => 'pending',
-                'reason' => $validated['reason'] ?? null,
-                'created_by' => $user->id,
+                'status' => 'pending', // Trạng thái mặc định sau khi đặt
+                'reason' => $validated['reason'] ?? null, // Sử dụng $validated['reason']
+                'created_by' => $user->id, // Người tạo là người dùng hiện tại
             ]);
 
+            // 4. Xóa dữ liệu đặt lịch tạm thời khỏi session
             $request->session()->forget(['booking_data', 'booking_confirm']);
 
             DB::commit();
@@ -502,7 +503,7 @@ class BookingController extends Controller
         $appointment = Appointment::find($appointmentId);
 
         if (!$payment || !$appointment) {
-            return redirect()->route('services.index')->with('error', 'Giao dịch không hợp lệ hoặc không tìm thấy.');
+            return redirect()->route('client.services')->with('error', 'Giao dịch không hợp lệ hoặc không tìm thấy.');
         }
 
         if ($secureHash === $vnp_SecureHash && $responseCode === '00') {
@@ -523,7 +524,7 @@ class BookingController extends Controller
             } catch (\Exception $e) {
                 DB::rollBack();
                 \Log::error("Payment confirmation failed: " . $e->getMessage());
-                return redirect()->route('services.index')
+                return redirect()->route('client.services')
                     ->with('error', 'Có lỗi xảy ra khi xác nhận thanh toán.');
             }
         } else {
