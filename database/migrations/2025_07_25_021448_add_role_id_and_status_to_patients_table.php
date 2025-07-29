@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('patients', function (Blueprint $table) {
-            $table->unsignedBigInteger('role_id')->nullable()->after('address');
-            $table->enum('status', ['online', 'offline'])->default('online')->after('role_id');
+            $table->unsignedBigInteger('role_id')->nullable();
+            $table->enum('status', ['online', 'offline'])->default('online');
         });
     }
 

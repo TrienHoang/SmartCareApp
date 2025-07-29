@@ -25,4 +25,5 @@ class Order extends Model
                     ->withTimestamps();
     }
 
+    
 }

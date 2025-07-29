@@ -185,6 +185,7 @@ class FileUploadController extends Controller
     {
         $doctorId = Auth::user()->doctor->id;
 
+        // Kiểm tra file có thuộc lịch hẹn của bác sĩ hiện tại không
         $file = FileUpload::whereHas('appointment', function ($q) use ($doctorId) {
             $q->where('doctor_id', $doctorId);
         })->findOrFail($id);
@@ -192,9 +193,8 @@ class FileUploadController extends Controller
         DB::beginTransaction();
 
         try {
-            if (Storage::disk('public')->exists($file->file_path)) {
-                Storage::disk('public')->delete($file->file_path);
-            }
+            // ❌ KHÔNG xóa file vật lý trong xóa mềm
+            $file->delete(); // soft delete
 
             UploadHistory::create([
                 'file_upload_id' => $file->id,
@@ -202,10 +202,7 @@ class FileUploadController extends Controller
                 'timestamp' => now(),
             ]);
 
-            $file->delete();
-
             DB::commit();
-
             return redirect()->route('doctor.files.index')->with('success', 'Đã xóa file thành công!');
         } catch (\Exception $e) {
             DB::rollBack();

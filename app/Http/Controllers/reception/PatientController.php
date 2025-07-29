@@ -58,6 +58,7 @@ class PatientController extends Controller
         );
 
         Patient::create([
+            'user_id'        => Auth::id(), // Lưu ID người dùng hiện tại
             'full_name'      => $validated['full_name'],
             'phone'          => $validated['phone'],
             'email'          => $validated['email'] ?? null,

@@ -88,7 +88,7 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white mb-0">{{ $orders->where('status', 'paid')->count() }}</h4>
-                                    <small class="text-white">Đã thanh toán</small>
+                                    <small class="text-white">Đã xác nhận</small>
                                 </div>
                             </div>
                         </div>
@@ -172,7 +172,7 @@
                                         @php
                                             $statusLabels = [
                                                 'pending' => 'Chờ xác nhận',
-                                                'paid' => 'Đã thanh toán',
+                                                'paid' => 'Đã xác nhận',
                                                 'completed' => 'Hoàn tất',
                                                 'cancelled' => 'Đã hủy',
                                             ];

@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Http\Controllers\Client\ServiceController;
+use App\Http\Controllers\client\ClientFileController;
 use App\Http\Controllers\Client\PaymentHistoryClientController;
+
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Client\PaymentController;
 use Illuminate\Support\Facades\Route;
@@ -12,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Client\ReviewReplyController;
 use App\Http\Controllers\Client\AppointmentController;
 use App\Http\Controllers\Client\DoctorController;
-use App\Http\Controllers\Client\ClientFileController;
+
 use App\Http\Controllers\Client\AppointmentHistoryController;
 use App\Http\Controllers\Client\UserController;
 use App\Http\Controllers\Client\ProfileController;
@@ -24,9 +27,22 @@ Route::get('/gioi-thieu', function () {
     return view('client.about');
 })->name('about');
 
-Route::get('/dich-vu', function () {
-    return view('client.services');
-})->name('services');
+// Dịch vụ
+Route::get('/dich-vu', [ServiceController::class, 'index'])->name('client.services');
+Route::get('/dich-vu/{id}', [ServiceController::class, 'show'])->name('client.services.show');
+Route::get('/chi-tiet-dich-vu/{service_id}', [BookingController::class, 'show'])->name('booking.showService');
+// Route::get('/dich-vu/chi-tiet/{id}', [ServiceController::class, 'detail'])->name('client.services.detail');
+
+// Tin tức
+Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news');
+Route::get('/tin-tuc/danh-muc/{id}', [NewsController::class, 'category'])->name('client.news.category');
+Route::get('/tin-tuc/{slug}', [NewsController::class, 'show'])->name('client.news.show');
+
+
+
+// liên hệ
+Route::get('/contact', [ContactController::class, 'showForm'])->name('contact.form');
+Route::post('/contact', [ContactController::class, 'submitForm'])->name('contact.submit');
 
 Route::get('/dat-lich', function () {
     return view('client.booking');
@@ -36,9 +52,9 @@ Route::get('/lien-he', function () {
     return view('client.contact');
 })->name('contact');
 
-Route::get('/tin-tuc', function () {
-    return view('client.news');
-})->name('news');
+// Route::get('/tin-tuc', function () {
+//     return view('client.news');
+// })->name('news');
 
 Route::get('/chi-tiet-tin-tuc/{id}', function ($id) {
     return view('client.news_detail', ['id' => $id]);
@@ -93,14 +109,40 @@ Route::prefix('client/payment_history')->name('client.payment_history.')->middle
     Route::get('/', [PaymentHistoryClientController::class, 'index'])->name('index');
     Route::get('/{id}', [PaymentHistoryClientController::class, 'show'])->name('show');
 });
-Route::prefix('client/payment')->name('client.payment.')->middleware(['auth'])->group(function () {
-    Route::get('/', [PaymentController::class, 'create'])->name('create');
-    Route::get('/return', [PaymentController::class, 'return'])->name('return');
-    Route::get('/ipn', [PaymentController::class, 'ipn'])->name('ipn');
+Route::get('/test-payment', function () {
+    return view('test-payment');
+});
+
+// Danh sách bình luận của người dùng (client)
+Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->group(function () {
+    Route::get('/', [ReviewReplyController::class, 'index'])->name('index');
+    Route::get('show/{id}', [ReviewReplyController::class, 'show'])->name('show');
+});
+
+// Danh sách bình luận của người dùng (client)
+Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->group(function () {
+    Route::get('/', [ReviewReplyController::class, 'index'])->name('index');
 });
 
 
-Route::middleware(['auth'])->prefix('client/profile')->name('client.profile.')->group(function () {
-    Route::get('/', [ProfileController::class, 'show'])->name('show');
-    Route::patch('/update', [ProfileController::class, 'update'])->name('update');
+Route::get('/payment/return', [BookingController::class, 'paymentReturn'])->name('payment.return');
+Route::match(['get', 'post'], '/payment/ipn', [BookingController::class, 'paymentIpn'])->name('payment.ipn');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/booking/prepare', [BookingController::class, 'prepare'])->name('booking.prepare');
+    Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
+    Route::post('/booking/available-dates', [BookingController::class, 'getAvailableDates'])->name('booking.available-dates');
+    Route::post('/booking/slots', [BookingController::class, 'getSlots'])->name('booking.slots');
+    Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+    Route::get('/booking/confirm', [BookingController::class, 'confirm'])->name('booking.confirm');
+    Route::post('/booking/confirm', [BookingController::class, 'save'])->name('booking.save');
+    // Route::get('/payment/return', [BookingController::class, 'paymentReturn'])->name('payment.return');
+    // Route::match(['get', 'post'], '/payment/ipn', [BookingController::class, 'paymentIpn'])->name('payment.ipn');
+    Route::get('/booking/success', [BookingController::class, 'success'])->name('booking.success');
+});
+
+
+
+Route::get('/abc', function () {
+    return view('client.note');
 });

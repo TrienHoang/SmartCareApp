@@ -6,20 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'SmartCare - Hệ thống Y tế')</title>
 
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- Google Fonts -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
-
+    <!-- SplideJS CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/css/splide.min.css">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+
+
+    <!-- App Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
@@ -59,9 +62,21 @@
     @include('client.partials.footer')
 
     <!-- Đặt sau lucide -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/js/splide.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- AlpineJS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         lucide.createIcons();
         document.addEventListener('DOMContentLoaded', function() {
@@ -102,20 +117,68 @@
                 }
             }).mount();
 
-            // banner slider
-            new Splide('#hero-slider', {
-                type: 'fade',
-                rewind: true,
-                autoplay: true,
-                interval: 5000,
-                pauseOnHover: false,
-                arrows: false,
-                pagination: true,
-            }).mount();
+            $(document).ready(function() {
+                @if (session('success'))
+                    toastr.success("{{ session('success') }}");
+                @endif
+                @if (session('error'))
+                    toastr.error("{{ session('error') }}");
+                @endif
+                @if (session('warning'))
+                    toastr.warning("{{ session('warning') }}", "Cảnh báo");
+                @endif
+                @if ($errors->any())
+                    @foreach ($errors->all() as $error)
+                        toastr.error("{{ $error }}");
+                    @endforeach
+                @endif
+                @if (session('date_swapped'))
+                    toastr.warning(
+                        "Ngày bắt đầu lớn hơn ngày kết thúc. Hệ thống đã tự động hoán đổi giúp bạn.",
+                        "Cảnh báo");
+                @endif
+            });
 
-            if (window.lucide) {
-                lucide.createIcons();
+
+            // animation Count Numb
+            const counters = document.querySelectorAll(".counter");
+
+            function animateCounter(counter) {
+                const target = +counter.getAttribute("data-number");
+                const step = +counter.getAttribute("data-step") || 1;
+                const duration = 1500; // thời gian tổng cộng
+                const incrementTime = Math.max(duration / (target / step), 10);
+                let current = 0;
+
+                counter.textContent = "0";
+
+                const run = () => {
+                    current += step;
+                    if (current >= target) {
+                        counter.textContent = target;
+                    } else {
+                        counter.textContent = current;
+                        setTimeout(run, incrementTime);
+                    }
+                };
+
+                run();
             }
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        animateCounter(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.6
+            });
+
+            counters.forEach(counter => {
+                observer.observe(counter);
+            });
+
         });
     </script>
     @stack('scripts')

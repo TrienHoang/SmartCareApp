@@ -219,7 +219,7 @@
                                         <br>
                                         <small class="text-muted">
                                             <i class="bx bx-credit-card me-1"></i>
-                                            Hình thức: 
+                                            Hình thức:
                                             @if ($appointment->payment->payment_method === 'cash')
                                                 Tiền mặt
                                             @elseif ($appointment->payment->payment_method === 'bank')
@@ -249,6 +249,10 @@
                         <!-- Timestamps -->
                         <div class="border-top pt-3">
                             <div class="row g-3">
+                                <div class="col-12">
+                                    <small class="text-muted d-block">Được tạo bởi</small>
+                                    <span class="text-dark">{{ $appointment->creator->full_name ?? 'N/A' }}</span>
+                                </div>
                                 <div class="col-12">
                                     <small class="text-muted d-block">Ngày tạo</small>
                                     <span class="text-dark">{{ $appointment->created_at->format('d/m/Y H:i') }}</span>

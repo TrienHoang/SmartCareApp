@@ -42,32 +42,32 @@
                             @enderror
                         </div>
 
-                        <!-- Bác sĩ -->
-                        <div class="col-12 col-md-6">
-                            <label for="doctor_id" class="form-label">Bác sĩ</label>
-                            <select name="doctor_id" id="doctor_id"
-                                class="form-select @error('doctor_id') is-invalid @enderror">
-                                <option value="">Chọn bác sĩ</option>
-                                @foreach ($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}"
-                                        {{ old('doctor_id') == $doctor->id ? 'selected' : '' }}>
-                                        {{ $doctor->user->full_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('doctor_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
                         <!-- Dịch vụ -->
                         <div class="col-12 col-md-6">
                             <label for="service_id" class="form-label">Dịch vụ</label>
                             <select name="service_id" id="service_id" data-old="{{ old('service_id') }}"
                                 class="form-select @error('service_id') is-invalid @enderror">
-                                <option value="">-- Vui lòng chọn bác sĩ --</option>
+                                <option value="">-- Chọn dịch vụ --</option>
+                                @foreach ($services as $service)
+                                    <option value="{{ $service->id }}" data-price="{{ $service->price }}"
+                                        {{ old('service_id') == $service->id ? 'selected' : '' }}>
+                                        {{ $service->name }} ({{ $service->department->name ?? 'Không rõ khoa' }})
+                                    </option>
+                                @endforeach
                             </select>
                             @error('service_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Bác sĩ -->
+                        <div class="col-12 col-md-6">
+                            <label for="doctor_id" class="form-label">Bác sĩ</label>
+                            <select name="doctor_id" id="doctor_id"
+                                class="form-select @error('doctor_id') is-invalid @enderror">
+                                <option value="">-- Vui lòng chọn dịch vụ --</option>
+                            </select>
+                            @error('doctor_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -160,6 +160,7 @@
     <script>
         window.doctorServicesUrl = '{{ url('receptionist/appointments/doctor') }}/:id/services';
         window.doctorWorkingDaysUrl = '{{ url('receptionist/appointments/doctor') }}/:id/working-days';
+        window.serviceDoctorsUrl = '{{ url('receptionist/appointments/services') }}/:id/doctors';
     </script>
 
     {{-- JS Logic --}}

@@ -83,7 +83,16 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div class="bg-white rounded-xl shadow-lg p-8">
                     <h2 class="text-3xl font-bold mb-8 gradient-text">Gửi Tin Nhắn</h2>
-                    <form id="contactForm" class="space-y-6">
+
+                    @if (session('success'))
+                        <div class="alert alert-success text-green-600 mb-4">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+
+                    <form id="contactForm" method="POST" action="{{ route('contact.submit') }}" class="space-y-6">
+                        @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
@@ -91,16 +100,22 @@
                                 </label>
                                 <input type="text" id="name" name="name"
                                     class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Nhập họ và tên" required>
+                                    placeholder="Nhập họ và tên">
+                                @error('name')
+                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <div>
                                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                     Email <span class="text-red-500">*</span>
                                 </label>
-                                <input type="email" id="email" name="email"
+                                <input type="text" id="email" name="email"
                                     class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Nhập email" required>
+                                    placeholder="Nhập email">
+                                @error('email')
+                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
@@ -111,19 +126,26 @@
                                 <input type="tel" id="phone" name="phone"
                                     class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     placeholder="Nhập số điện thoại">
+                                @error('phone')
+                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <div>
-                                <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">Chủ đề</label>
-                                <select id="subject" name="subject"
+                                <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Chủ đề <span
+                                        class="text-red-500">*</span></label>
+                                <select id="title" name="title"
                                     class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                     <option value="">Chọn chủ đề</option>
-                                    <option value="appointment">Đặt lịch hẹn</option>
-                                    <option value="consultation">Tư vấn y khoa</option>
-                                    <option value="complaint">Khiếu nại</option>
-                                    <option value="suggestion">Góp ý</option>
-                                    <option value="other">Khác</option>
+                                    <option value="Đặt lịch hẹn">Đặt lịch hẹn</option>
+                                    <option value="Tư vấn y khoa">Tư vấn y khoa</option>
+                                    <option value="Khiếu nại">Khiếu nại</option>
+                                    <option value="Góp ý">Góp ý</option>
+                                    <option value="Khác">Khác</option>
                                 </select>
+                                @error('title')
+                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
@@ -133,15 +155,17 @@
                             </label>
                             <textarea id="message" name="message" rows="6"
                                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Nhập nội dung tin nhắn..." required></textarea>
+                                placeholder="Nhập nội dung tin nhắn..."></textarea>
+                            @error('message')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <button type="submit"
-                            class="w-full gradient-bg text-white py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center justify-center">
-                            <span class="mr-2" id="sendIcon"></span>
-                            Gửi Tin Nhắn
-                        </button>
+                            class="w-full gradient-bg text-white py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center justify-center">Gửi
+                            Tin Nhắn</button>
                     </form>
+
                 </div>
 
                 <div class="space-y-8">
@@ -159,7 +183,7 @@
                         <div class="text-center">
                             <a href="tel:0987654321"
                                 class="inline-block bg-red-600 text-white px-8 py-4 rounded-full font-bold text-xl hover:bg-red-700 transition-colors">
-                                📞 0987.654.321
+                                📞 0999.889.998
                             </a>
                         </div>
                         <p class="text-sm text-red-600 mt-4 text-center">
@@ -198,32 +222,35 @@
                 <div class="bg-white rounded-xl shadow-lg p-8">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div>
-                            <h3 class="text-xl font-bold mb-4">Hướng Dẫn Đi Lại</h3>
+                            <h3 class="text-xl font-bold mb-4">Hướng Dẫn Di Chuyển</h3>
                             <div class="space-y-4">
                                 <div>
-                                    <h4 class="font-semibold text-blue-600">🚗 Bằng ô tô:</h4>
-                                    <p class="text-gray-600">Có bãi đỗ xe miễn phí cho bệnh nhân</p>
+                                    <h4 class="font-semibold text-blue-600">🚗 Di chuyển bằng ô tô:</h4>
+                                    <p class="text-gray-600">Phòng khám có bãi đỗ xe ô tô miễn phí dành cho bệnh nhân, thuận
+                                        tiện và dễ tìm.</p>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-blue-600">🚌 Bằng xe buýt:</h4>
-                                    <p class="text-gray-600">Tuyến 01, 08, 19 dừng ngay trước cửa</p>
+                                    <h4 class="font-semibold text-blue-600">🚌 Di chuyển bằng xe buýt:</h4>
+                                    <p class="text-gray-600">Các tuyến xe buýt số 01, 08, 19 dừng ngay trước cửa phòng khám.
+                                    </p>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-blue-600">🚇 Bằng metro:</h4>
-                                    <p class="text-gray-600">Ga Metro ABC cách 200m</p>
+                                    <h4 class="font-semibold text-blue-600">🚇 Di chuyển bằng tàu điện ngầm (metro):</h4>
+                                    <p class="text-gray-600">Ga Metro số 1 chỉ cách phòng khám khoảng 200m, thuận tiện cho
+                                        việc đi lại.</p>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-blue-600">🏍️ Bằng xe máy:</h4>
-                                    <p class="text-gray-600">Chỗ để xe máy rộng rãi, an toàn</p>
+                                    <h4 class="font-semibold text-blue-600">🏍️ Di chuyển bằng xe máy:</h4>
+                                    <p class="text-gray-600">Khu vực để xe máy rộng rãi, an toàn, có người trông giữ.</p>
                                 </div>
                             </div>
+
                         </div>
-                        <div class="bg-gray-100 rounded-lg h-64 flex items-center justify-center">
-                            <div class="text-center text-gray-500">
-                                <span id="mapPinIcon" class="block mx-auto mb-2"></span>
-                                <p>Bản đồ sẽ được hiển thị tại đây</p>
-                                <p class="text-sm">123 Đường ABC, Quận 1, TP.HCM</p>
-                            </div>
+                        <div class="rounded-lg overflow-hidden shadow-lg">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.804950433347!2d105.73387658047295!3d21.04048903740518!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3134550ab1db2433%3A0x9febb50e17509deb!2zMTMgUC4gVHLhu4tuaCBWxINuIELDtCwgWHXDom4gUGjGsMahbmcsIE5hbSBU4burIExpw6ptLCBIw6AgTuG7mWksIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1753007264074!5m2!1svi!2s"
+                                width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade"></iframe>
                         </div>
                     </div>
                 </div>
@@ -302,17 +329,15 @@
                     iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin w-8 h-8 text-blue-600"><path d="M12 2v20M18 10a6 6 0 0 0-12 0c0 1.58 1.15 3.03 2.5 4.14V17l.5.5c.34.34.8.5 1.3.5h.4a2 2 0 0 0 2-2V13h2v2a2 2 0 0 0 2 2h.4c.5 0 .96-.16 1.3-.5l.5-.5v-2.86c1.35-1.11 2.5-2.56 2.5-4.14Z"/><circle cx="12" cy="10" r="3"/></svg>',
                     title: 'Địa Chỉ',
                     details: [
-                        '123 Đường ABC, Phường XYZ',
-                        'Quận 1, TP. Hồ Chí Minh',
-                        'Việt Nam'
+                        '13 Trịnh Văn Bô, Quận Nam Từ Liêm, Hà Nội',
                     ]
                 },
                 {
                     iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone w-8 h-8 text-blue-600"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2 3.18 2 2 0 0 1 4.08 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-1.18 2.19l-.7.68a19 19 0 0 0 6 6l.68-.7a2 2 0 0 1 2.19-1.18 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
                     title: 'Điện Thoại',
                     details: [
-                        'Hotline: 0123.456.789',
-                        'Khẩn cấp: 0987.654.321',
+                        'Hotline: 0999.988.988',
+                        'Khẩn cấp: 0936.636.363',
                         'Tư vấn: 0111.222.333'
                     ]
                 },
@@ -320,17 +345,16 @@
                     iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail w-8 h-8 text-blue-600"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
                     title: 'Email',
                     details: [
-                        'info@medcare.com',
+                        'smartcare@gmai.com',
                         'support@medcare.com',
-                        'appointment@medcare.com'
+                        'tuvan@medcare.com'
                     ]
                 },
                 {
                     iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock w-8 h-8 text-blue-600"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
                     title: 'Giờ Làm Việc',
                     details: [
-                        'Thứ 2 - Thứ 6: 7:00 - 20:00',
-                        'Thứ 7 - Chủ nhật: 8:00 - 17:00',
+                        'Thứ 2 - Thứ 7: 7:00 - 17:00',
                         'Khẩn cấp: 24/7'
                     ]
                 }
@@ -338,27 +362,27 @@
 
             const departments = [{
                     name: 'Tổng Đài',
-                    phone: '0123.456.789'
+                    phone: '0999.383.838'
                 },
                 {
                     name: 'Đặt Lịch Hẹn',
-                    phone: '0123.456.790'
+                    phone: '0666.456.789'
                 },
                 {
                     name: 'Khẩn Cấp',
-                    phone: '0123.456.791'
+                    phone: '0363.366.666'
                 },
                 {
                     name: 'Tư Vấn Y Khoa',
-                    phone: '0123.456.792'
+                    phone: '0122.242.222'
                 },
                 {
                     name: 'Kế Toán',
-                    phone: '0123.456.793'
+                    phone: '0355.456.553'
                 },
                 {
                     name: 'Khiếu Nại',
-                    phone: '0123.456.794'
+                    phone: '0677.767.766'
                 }
             ];
 
