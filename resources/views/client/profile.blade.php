@@ -37,6 +37,11 @@
                                 <i data-lucide="calendar" class="w-5 h-5"></i>
                                 <span>Lịch Sử Khám</span>
                             </a>
+                            <a href="{{ route('client.prescriptions.index') }}"
+                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
+                                <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                                <span>Đơn Thuốc</span>
+                            </a>
 
                             <a href="#lich-hen"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
@@ -53,10 +58,21 @@
                                 <i data-lucide="upload" class="w-5 h-5"></i>
                                 <span>Upload File</span>
                             </a>
-                            <a href="#thong-bao"
+                            <a href="{{ route('client.notifications.index') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="bell" class="w-5 h-5"></i>
                                 <span>Thông Báo</span>
+                                @php
+                                    $currentUnreadCount = $notifications
+                                        ->where('userStatuses.0.is_read', false)
+                                        ->count();
+                                @endphp
+                                @if ($currentUnreadCount > 0)
+                                    <span id="unreadCount"
+                                        class="ml-2 px-2 py-0.5 bg-red-500 text-white rounded-full text-xs font-semibold">
+                                        {{ $currentUnreadCount }}
+                                    </span>
+                                @endif
                             </a>
                             <a href="#cai-dat"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
@@ -168,7 +184,8 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Người Liên Hệ Khẩn Cấp</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Người Liên Hệ Khẩn
+                                    Cấp</label>
                                 <div class="p-3 bg-gray-50 rounded-lg">
                                     <p class="text-gray-900">
                                         {{ auth()->user()->emergency_contact ?? 'Nguyễn Thị B - 0987654321' }}</p>
@@ -524,309 +541,309 @@
         </div>
     </div>
     @push('scripts')
-            <script>
-        // Smooth scrolling for sidebar links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
+        <script>
+            // Smooth scrolling for sidebar links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
             });
-        });
 
-        // Active menu item highlighting
-        const menuItems = document.querySelectorAll('nav a');
-        menuItems.forEach(item => {
-            item.addEventListener('click', function() {
-                // Remove active class from all items
-                menuItems.forEach(mi => {
-                    mi.classList.remove('bg-blue-50', 'text-blue-600', 'border-l-4',
-                        'border-blue-600');
-                    mi.classList.add('text-gray-700');
+            // Active menu item highlighting
+            const menuItems = document.querySelectorAll('nav a');
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    menuItems.forEach(mi => {
+                        mi.classList.remove('bg-blue-50', 'text-blue-600', 'border-l-4',
+                            'border-blue-600');
+                        mi.classList.add('text-gray-700');
+                    });
+
+                    // Add active class to clicked item
+                    this.classList.remove('text-gray-700');
+                    this.classList.add('bg-blue-50', 'text-blue-600', 'border-l-4', 'border-blue-600');
+                });
+            });
+
+            // Modal functions
+            function openEditModal() {
+                document.getElementById('editModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeEditModal() {
+                document.getElementById('editModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            function openMedicalModal() {
+                document.getElementById('medicalModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMedicalModal() {
+                document.getElementById('medicalModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            function openAvatarModal() {
+                document.getElementById('avatarModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeAvatarModal() {
+                document.getElementById('avatarModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            // Toast functions
+            function showToast(type, message) {
+                const toast = document.getElementById(type + 'Toast');
+                const messageElement = document.getElementById(type + 'Message');
+
+                messageElement.textContent = message;
+                toast.classList.remove('hidden');
+
+                // Animate in
+                setTimeout(() => {
+                    toast.classList.remove('translate-x-full');
+                }, 100);
+
+                // Auto hide after 3 seconds
+                setTimeout(() => {
+                    toast.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        toast.classList.add('hidden');
+                    }, 300);
+                }, 3000);
+            }
+
+            function showLoading() {
+                document.getElementById('loadingOverlay').classList.remove('hidden');
+            }
+
+            function hideLoading() {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+
+            // Form validation
+            function validateForm(formId) {
+                const form = document.getElementById(formId);
+                const requiredFields = form.querySelectorAll('[required]');
+                let isValid = true;
+
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.classList.add('border-red-500');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('border-red-500');
+                    }
                 });
 
-                // Add active class to clicked item
-                this.classList.remove('text-gray-700');
-                this.classList.add('bg-blue-50', 'text-blue-600', 'border-l-4', 'border-blue-600');
-            });
-        });
+                return isValid;
+            }
 
-        // Modal functions
-        function openEditModal() {
-            document.getElementById('editModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
+            // Handle profile form submission
+            document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
 
-        function closeEditModal() {
-            document.getElementById('editModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
+                if (!validateForm('editProfileForm')) {
+                    showToast('error', 'Vui lòng điền đầy đủ thông tin bắt buộc!');
+                    return;
+                }
 
-        function openMedicalModal() {
-            document.getElementById('medicalModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
+                showLoading();
 
-        function closeMedicalModal() {
-            document.getElementById('medicalModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
+                try {
+                    const formData = new FormData(this);
 
-        function openAvatarModal() {
-            document.getElementById('avatarModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
 
-        function closeAvatarModal() {
-            document.getElementById('avatarModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
+                    // Here you would make the actual API call
+                    // const response = await fetch('/api/profile/update', {
+                    //     method: 'POST',
+                    //     body: formData
+                    // });
 
-        // Toast functions
-        function showToast(type, message) {
-            const toast = document.getElementById(type + 'Toast');
-            const messageElement = document.getElementById(type + 'Message');
+                    // if (!response.ok) throw new Error('Update failed');
 
-            messageElement.textContent = message;
-            toast.classList.remove('hidden');
+                    // Update UI with new data
+                    updateProfileUI(formData);
 
-            // Animate in
-            setTimeout(() => {
-                toast.classList.remove('translate-x-full');
-            }, 100);
+                    hideLoading();
+                    closeEditModal();
+                    showToast('success', 'Cập nhật thông tin cá nhân thành công!');
 
-            // Auto hide after 3 seconds
-            setTimeout(() => {
-                toast.classList.add('translate-x-full');
-                setTimeout(() => {
-                    toast.classList.add('hidden');
-                }, 300);
-            }, 3000);
-        }
-
-        function showLoading() {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-        }
-
-        // Form validation
-        function validateForm(formId) {
-            const form = document.getElementById(formId);
-            const requiredFields = form.querySelectorAll('[required]');
-            let isValid = true;
-
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    field.classList.add('border-red-500');
-                    isValid = false;
-                } else {
-                    field.classList.remove('border-red-500');
+                } catch (error) {
+                    hideLoading();
+                    showToast('error', 'Có lỗi xảy ra khi cập nhật thông tin!');
                 }
             });
 
-            return isValid;
-        }
+            // Handle medical form submission
+            document.getElementById('editMedicalForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
 
-        // Handle profile form submission
-        document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+                showLoading();
 
-            if (!validateForm('editProfileForm')) {
-                showToast('error', 'Vui lòng điền đầy đủ thông tin bắt buộc!');
-                return;
-            }
+                try {
+                    const formData = new FormData(this);
 
-            showLoading();
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
 
-            try {
-                const formData = new FormData(this);
+                    // Here you would make the actual API call
+                    // const response = await fetch('/api/profile/medical-update', {
+                    //     method: 'POST',
+                    //     body: formData
+                    // });
 
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                    // if (!response.ok) throw new Error('Update failed');
 
-                // Here you would make the actual API call
-                // const response = await fetch('/api/profile/update', {
-                //     method: 'POST',
-                //     body: formData
-                // });
+                    hideLoading();
+                    closeMedicalModal();
+                    showToast('success', 'Cập nhật thông tin y tế thành công!');
 
-                // if (!response.ok) throw new Error('Update failed');
+                } catch (error) {
+                    hideLoading();
+                    showToast('error', 'Có lỗi xảy ra khi cập nhật thông tin y tế!');
+                }
+            });
 
-                // Update UI with new data
-                updateProfileUI(formData);
+            // Handle avatar form submission
+            document.getElementById('avatarForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
 
-                hideLoading();
-                closeEditModal();
-                showToast('success', 'Cập nhật thông tin cá nhân thành công!');
+                const fileInput = document.getElementById('avatar-input');
+                if (!fileInput.files[0]) {
+                    showToast('error', 'Vui lòng chọn ảnh để upload!');
+                    return;
+                }
 
-            } catch (error) {
-                hideLoading();
-                showToast('error', 'Có lỗi xảy ra khi cập nhật thông tin!');
-            }
-        });
+                // Validate file size (5MB max)
+                if (fileInput.files[0].size > 5 * 1024 * 1024) {
+                    showToast('error', 'Kích thước ảnh không được vượt quá 5MB!');
+                    return;
+                }
 
-        // Handle medical form submission
-        document.getElementById('editMedicalForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+                showLoading();
 
-            showLoading();
+                try {
+                    const formData = new FormData(this);
 
-            try {
-                const formData = new FormData(this);
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 2000));
 
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                    // Here you would make the actual API call
+                    // const response = await fetch('/api/profile/avatar-update', {
+                    //     method: 'POST',
+                    //     body: formData
+                    // });
 
-                // Here you would make the actual API call
-                // const response = await fetch('/api/profile/medical-update', {
-                //     method: 'POST',
-                //     body: formData
-                // });
+                    // if (!response.ok) throw new Error('Upload failed');
 
-                // if (!response.ok) throw new Error('Update failed');
+                    // Update avatar in UI
+                    const newAvatarUrl = URL.createObjectURL(fileInput.files[0]);
+                    document.getElementById('profile-avatar').src = newAvatarUrl;
 
-                hideLoading();
-                closeMedicalModal();
-                showToast('success', 'Cập nhật thông tin y tế thành công!');
+                    hideLoading();
+                    closeAvatarModal();
+                    showToast('success', 'Cập nhật avatar thành công!');
 
-            } catch (error) {
-                hideLoading();
-                showToast('error', 'Có lỗi xảy ra khi cập nhật thông tin y tế!');
-            }
-        });
+                } catch (error) {
+                    hideLoading();
+                    showToast('error', 'Có lỗi xảy ra khi cập nhật avatar!');
+                }
+            });
 
-        // Handle avatar form submission
-        document.getElementById('avatarForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+            // Avatar preview
+            document.getElementById('avatar-input').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('avatar-preview').src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
 
-            const fileInput = document.getElementById('avatar-input');
-            if (!fileInput.files[0]) {
-                showToast('error', 'Vui lòng chọn ảnh để upload!');
-                return;
-            }
-
-            // Validate file size (5MB max)
-            if (fileInput.files[0].size > 5 * 1024 * 1024) {
-                showToast('error', 'Kích thước ảnh không được vượt quá 5MB!');
-                return;
-            }
-
-            showLoading();
-
-            try {
-                const formData = new FormData(this);
-
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                // Here you would make the actual API call
-                // const response = await fetch('/api/profile/avatar-update', {
-                //     method: 'POST',
-                //     body: formData
-                // });
-
-                // if (!response.ok) throw new Error('Upload failed');
-
-                // Update avatar in UI
-                const newAvatarUrl = URL.createObjectURL(fileInput.files[0]);
-                document.getElementById('profile-avatar').src = newAvatarUrl;
-
-                hideLoading();
-                closeAvatarModal();
-                showToast('success', 'Cập nhật avatar thành công!');
-
-            } catch (error) {
-                hideLoading();
-                showToast('error', 'Có lỗi xảy ra khi cập nhật avatar!');
-            }
-        });
-
-        // Avatar preview
-        document.getElementById('avatar-input').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('avatar-preview').src = e.target.result;
+            // Update profile UI after successful form submission
+            function updateProfileUI(formData) {
+                const updates = {
+                    name: formData.get('name'),
+                    email: formData.get('email'),
+                    phone: formData.get('phone'),
+                    birth_date: formData.get('birth_date'),
+                    gender: formData.get('gender'),
+                    id_card: formData.get('id_card'),
+                    address: formData.get('address')
                 };
-                reader.readAsDataURL(file);
-            }
-        });
 
-        // Update profile UI after successful form submission
-        function updateProfileUI(formData) {
-            const updates = {
-                name: formData.get('name'),
-                email: formData.get('email'),
-                phone: formData.get('phone'),
-                birth_date: formData.get('birth_date'),
-                gender: formData.get('gender'),
-                id_card: formData.get('id_card'),
-                address: formData.get('address')
-            };
-
-            // Update display values (this would normally be handled by a page reload or AJAX update)
-            for (const [key, value] of Object.entries(updates)) {
-                if (value) {
-                    // Update form values for next edit
-                    const formField = document.querySelector(`[name="${key}"]`);
-                    if (formField) {
-                        formField.value = value;
+                // Update display values (this would normally be handled by a page reload or AJAX update)
+                for (const [key, value] of Object.entries(updates)) {
+                    if (value) {
+                        // Update form values for next edit
+                        const formField = document.querySelector(`[name="${key}"]`);
+                        if (formField) {
+                            formField.value = value;
+                        }
                     }
                 }
             }
-        }
 
-        // Close modals when clicking outside
-        document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
-                closeEditModal();
-                closeMedicalModal();
-                closeAvatarModal();
-            }
-        });
-
-        // Close modals with ESC key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeEditModal();
-                closeMedicalModal();
-                closeAvatarModal();
-            }
-        });
-
-        // Phone number formatting
-        document.querySelector('input[name="phone"]').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 10) {
-                value = value.slice(0, 10);
-            }
-            e.target.value = value;
-        });
-
-        // ID card formatting
-        document.querySelector('input[name="id_card"]').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 12) {
-                value = value.slice(0, 12);
-            }
-            e.target.value = value;
-        });
-
-        // Auto-resize textareas
-        document.querySelectorAll('textarea').forEach(textarea => {
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = (this.scrollHeight) + 'px';
+            // Close modals when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
+                    closeEditModal();
+                    closeMedicalModal();
+                    closeAvatarModal();
+                }
             });
-        });
-    </script>
+
+            // Close modals with ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeEditModal();
+                    closeMedicalModal();
+                    closeAvatarModal();
+                }
+            });
+
+            // Phone number formatting
+            document.querySelector('input[name="phone"]').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 10) {
+                    value = value.slice(0, 10);
+                }
+                e.target.value = value;
+            });
+
+            // ID card formatting
+            document.querySelector('input[name="id_card"]').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 12) {
+                    value = value.slice(0, 12);
+                }
+                e.target.value = value;
+            });
+
+            // Auto-resize textareas
+            document.querySelectorAll('textarea').forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
+            });
+        </script>
     @endpush
 @endsection
