@@ -14,9 +14,6 @@ return new class extends Migration
     Schema::table('services', function (Blueprint $table) {
         $table->longText('content')->nullable()->after('description');
         $table->string('image')->nullable()->after('description'); 
-        $table->unsignedBigInteger('room_id')->after('image');
-
-        $table->foreign('room_id')->references('id')->on('rooms')->onDelete('set null');
     });
 }
 

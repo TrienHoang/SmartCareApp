@@ -13,10 +13,9 @@ return new class extends Migration
 {
     Schema::table('contacts', function (Blueprint $table) {
         $table->softDeletes(); // tạo cột deleted_at
-        $table->boolean('is_hidden')->default(0)->after('status');
+        $table->boolean('is_hidden')->default(0);
     });
 }
-
 public function down(): void
 {
     Schema::table('contacts', function (Blueprint $table) {
