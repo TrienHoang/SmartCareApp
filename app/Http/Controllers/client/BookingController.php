@@ -391,10 +391,9 @@ class BookingController extends Controller
 
         // Validate dữ liệu từ form xác nhận (thông tin người dùng và các trường ẩn)
         $validated = $request->validate([
-            // Dữ liệu đặt lịch (từ input ẩn trong form)
             'service_id' => 'required|exists:services,id',
-            'doctor_id' => 'required|exists:doctors,id', // Doctor_id là bắt buộc ở bước này
-            'appointment_time' => 'required|date_format:Y-m-d H:i:s', // Định dạng đầy đủ
+            'doctor_id' => 'required|exists:doctors,id', 
+            'appointment_time' => 'required|date_format:Y-m-d H:i:s', 
             'reason' => 'nullable|string|max:255',
             // Thông tin người dùng (từ form)
             'full_name' => 'required|string|max:255',
@@ -450,7 +449,6 @@ class BookingController extends Controller
                 'status' => 'pending', // Trạng thái mặc định sau khi đặt
                 'reason' => $validated['reason'] ?? null, // Sử dụng $validated['reason']
                 'created_by' => $user->id, // Người tạo là người dùng hiện tại
-                // 'created_at' và 'updated_at' sẽ tự động được Laravel thêm vào nếu bạn không tắt timestamps
             ]);
 
             // 4. Xóa dữ liệu đặt lịch tạm thời khỏi session
@@ -460,7 +458,7 @@ class BookingController extends Controller
             DB::commit();
 
             // Chuyển hướng đến trang thành công
-            return redirect()->route('booking.success')->with('success', 'Bạn đã đặt lịch thành công! Vui lòng chờ xác nhận từ phòng khám.');
+            return redirect()->route('home')->with('success', 'Bạn đã đặt lịch thành công! Vui lòng chờ xác nhận từ phòng khám.');
 
         } catch (\Exception $e) {
             // Rollback transaction nếu có bất kỳ lỗi nào xảy ra
