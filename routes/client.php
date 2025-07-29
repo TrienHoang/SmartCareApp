@@ -42,7 +42,7 @@ Route::get('/contact', [ContactController::class, 'showForm'])->name('contact.fo
 Route::post('/contact', [ContactController::class, 'submitForm'])->name('contact.submit');
 
 Route::get('/dat-lich', function () {
-    return view('client.booking');
+    return view('client.booking.');
 })->name('booking');
 
 Route::get('/lien-he', function () {
