@@ -137,7 +137,7 @@
 
                 <!-- Action Buttons -->
                 <div class="flex justify-between mt-6">
-                    <a href="{{ route('booking.showService',$booking_confirm['service_id']) }}"
+                    <a href="{{ route('booking.showService', $booking_confirm['service_id']) }}"
                         class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                             fill="currentColor" aria-hidden="true">
