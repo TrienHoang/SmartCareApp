@@ -71,6 +71,7 @@ class WorkingScheduleController extends Controller
         // Lấy dữ liệu lịch làm việc nếu có điều kiện lọc
         if ($startDate && $endDate) {
             $query = WorkingSchedule::with(['doctor.user', 'doctor.department', 'shift', 'room'])
+                ->where('status', 'Đã xét duyệt')
                 ->whereBetween('day', [$startDate, $endDate]);
 
             if ($departmentId) {
@@ -85,7 +86,8 @@ class WorkingScheduleController extends Controller
 
             $schedules = $query->orderBy('day', 'desc')
                 ->orderBy('shift_id')
-                ->paginate(10);
+                ->paginate(10)
+                ->withQueryString();
 
             // Lấy thông tin nghỉ phép cho khoảng thời gian
             $leaves = DoctorLeave::where('approved', 1)
