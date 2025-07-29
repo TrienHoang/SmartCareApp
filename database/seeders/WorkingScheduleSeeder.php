@@ -9,7 +9,7 @@ class WorkingScheduleSeeder extends Seeder
 {
     public function run(): void
     {
-        WorkingSchedule::factory()->count(20)->create();
+        WorkingSchedule::factory()->count(10)->create();
     }
 }
 

@@ -56,7 +56,7 @@
                                 <i data-lucide="upload" class="w-5 h-5"></i>
                                 <span>Upload File</span>
                             </a>
-                                 <a href="{{ route('client.notifications.index') }}"
+                            <a href="{{ route('client.notifications.index') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="bell" class="w-5 h-5"></i>
                                 <span>Thông Báo</span>
@@ -86,11 +86,13 @@
                     <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
                         {{-- Tiêu đề --}}
                         <div class="page-header-content mb-6">
-                            <h1 class="page-title-main flex items-center gap-2 text-xl font-bold text-blue-600" style="font-size: 2rem;">
+                            <h1 class="page-title-main flex items-center gap-2 text-xl font-bold text-blue-600"
+                                style="font-size: 2rem;">
                                 <i data-lucide="clock" class="w-7 h-7"></i>
                                 Lịch Hẹn Của Bạn
                             </h1>
-                            <p class="text-gray-600 mt-2">Quản lý và xem lại tất cả các lịch hẹn khám bệnh của bạn.</p>
+                            <p class="text-gray-600 mt-2">Lưu ý: bạn chỉ có thể hủy lịch hẹn trong trạng thái đang chờ xác
+                                nhận</p>
                         </div>
 
                         {{-- Tìm kiếm --}}
@@ -126,79 +128,115 @@
                                     </a>
                                 </div>
                             @else
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full bg-white border-collapse rounded-lg shadow-sm">
-                                        <thead>
-                                            <tr
-                                                class="bg-gray-100 border-b border-gray-200 text-left text-sm font-semibold text-gray-700 uppercase">
-                                                <th class="py-3 px-4">Ngày & Giờ</th>
-                                                <th class="py-3 px-4">Dịch vụ</th>
-                                                <th class="py-3 px-4">Bác sĩ</th>
-                                                <th class="py-3 px-4">Trạng thái</th>
-                                                <th class="py-3 px-4">Hành động</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($appointments as $item)
-                                                <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                                                    <td class="py-3 px-4 flex items-center gap-2 text-gray-700 text-sm">
-                                                        <i data-lucide="calendar" class="w-4 h-4 text-gray-500"></i>
-                                                        {{ $item->formatted_time }}
-                                                    </td>
-                                                    <td class="py-3 px-4 text-gray-700 text-sm">
-                                                        <span
-                                                            class="service-badge">{{ $item->service->name ?? '---' }}</span>
-                                                    </td>
-                                                    <td class="py-3 px-4 flex items-center gap-2 text-gray-700 text-sm">
-                                                        <i data-lucide="user" class="w-4 h-4 text-gray-500"></i>
-                                                        {{ $item->doctor_name }}
-                                                    </td>
-                                                    <td class="py-3 px-4 text-sm">
-                                                        @php
-                                                            $statusClass = match ($item->status) {
-                                                                'pending' => 'status-pending',
-                                                                'confirmed' => 'status-confirmed',
-                                                                'completed' => 'status-completed',
-                                                                'cancelled' => 'status-canceled',
-                                                                default => 'status-info',
-                                                            };
-                                                        @endphp
-                                                        <span class="status-badge-appointments {{ $statusClass }}">
-                                                            {{ $item->status_text }}
-                                                        </span>
-                                                    </td>
-                                                    <td class="py-3 px-4 text-sm">
-                                                        <div class="flex items-center gap-2">
-                                                            <a href="{{ route('client.appointments.show', $item) }}"
-                                                                class="action-btn-view" title="Xem chi tiết">
-                                                                <i data-lucide="eye" class="w-4 h-4"></i>
-                                                            </a>
-                                                            @if ($item->status === 'pending')
-                                                                <a href="{{ route('client.appointments.edit', $item) }}"
-                                                                    class="action-btn-edit" title="Chỉnh sửa">
-                                                                    <i data-lucide="edit" class="w-4 h-4"></i>
-                                                                </a>
-                                                                <form method="POST"
-                                                                    action="{{ route('client.appointments.destroy', $item) }}"
-                                                                    class="inline-block"
-                                                                    onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này không?')">
-                                                                    @csrf
-                                                                    @method('DELETE')
-                                                                    <button type="submit" class="action-btn-cancel"
-                                                                        title="Hủy lịch hẹn">
-                                                                        <i data-lucide="x-circle" class="w-4 h-4"></i>
-                                                                    </button>
-                                                                </form>
-                                                            @endif
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
+                                <div class="grid gap-6">
+                                    @foreach ($appointments as $item)
+                                        @php
+                                            $statusClass = match ($item->status) {
+                                                'pending' => 'text-yellow-600 bg-yellow-100',
+                                                'confirmed' => 'text-blue-600 bg-blue-100',
+                                                'completed' => 'text-green-600 bg-green-100',
+                                                'cancelled' => 'text-red-600 bg-red-100',
+                                                default => 'text-gray-600 bg-gray-100',
+                                            };
+                                        @endphp
+
+                                        <div class="border border-gray-200 rounded-lg p-5 shadow-sm bg-white">
+                                            {{-- Z --}}
+                                            <div class="text-lg font-semibold text-blue-600 mb-2 uppercase">
+                                                {{ $item->patient->full_name ?? auth()->user()->name }}
+                                            </div>
+                                            <div class="mb-2 text-sm">
+                                                <span class="font-medium text-gray-700">Chuyên khoa:</span>
+                                                {{ $item->doctor->specialization ?? '---' }}
+                                            </div>
+                                            <div class="mb-2 text-sm">
+                                                <span class="font-medium text-gray-700">Dịch vụ:</span>
+                                                {{ $item->service->name ?? '---' }}
+                                            </div>
+                                            <div class="mb-2 text-sm">
+                                                <span class="font-medium text-gray-700">Ngày khám:</span>
+                                                {{ \Carbon\Carbon::parse($item->appointment_time)->format('d/m/Y') }}
+                                            </div>
+                                            <div class="mb-2 text-sm">
+                                                <span class="font-medium text-gray-700">Giờ khám dự kiến:</span>
+                                                {{ \Carbon\Carbon::parse($item->appointment_time)->format('H:i') }}
+                                            </div>
+                                            <div class="mb-4 text-sm">
+                                                <span class="font-medium text-gray-700">Trạng thái:</span>
+                                                <span
+                                                    class="px-2 py-1 rounded-full text-xs font-semibold {{ $statusClass }}">
+                                                    {{ $item->status_text ?? ucfirst($item->status) }}
+                                                </span>
+                                            </div>
+                                            <div class="flex gap-3 items-center">
+                                                <a href="{{ route('client.appointments.show', $item) }}"
+                                                    title="Xem chi tiết" class="text-blue-600 hover:underline text-sm">
+                                                    Xem chi tiết
+                                                </a>
+                                                @if ($item->status === 'pending')
+                                                    <a href="{{ route('client.appointments.edit', $item) }}"
+                                                        title="Chỉnh sửa" class="text-yellow-600 hover:underline text-sm">
+                                                        Chỉnh sửa
+                                                    </a>
+                                                    <button type="button" onclick="openCancelModal({{ $item->id }})"
+                                                        class="action-btn-cancel">
+                                                        xóa
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
                             @endif
                         </div>
+
+                        <div id="cancelModal"
+                            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                            <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                                <h2 class="text-lg font-semibold mb-4">Chọn lý do hủy lịch hẹn</h2>
+
+                                <form id="cancelForm" method="POST" action="">
+                                    @csrf
+                                    @method('DELETE')
+
+                                    @php
+                                        $cancelReasons = [
+                                            'Tôi có việc đột xuất',
+                                            'Tôi đặt nhầm lịch',
+                                            'Tôi đã khỏi bệnh',
+                                            'Thời gian không phù hợp',
+                                            'Tôi muốn đổi bác sĩ/dịch vụ',
+                                            'Lý do khác',
+                                        ];
+                                    @endphp
+
+                                    <div class="space-y-2">
+                                        @foreach ($cancelReasons as $reason)
+                                            <label class="flex items-center space-x-2">
+                                                <input type="radio" name="reason_option" value="{{ $reason }}"
+                                                    class="form-radio" onchange="toggleCustomReason(this)">
+                                                <span>{{ $reason }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+
+                                    <div id="customReasonContainer" class="mt-4 hidden">
+                                        <label class="block mb-1 font-medium">Vui lòng ghi rõ lý do:</label>
+                                        <textarea name="cancel_reason" id="customReason" class="w-full border rounded p-2" rows="3"></textarea>
+                                    </div>
+
+                                    <input type="hidden" name="cancel_reason_final" id="cancel_reason_final" required>
+
+                                    <div class="flex justify-end mt-4 space-x-2">
+                                        <button type="button" onclick="closeCancelModal()"
+                                            class="px-4 py-2 bg-gray-300 rounded">Huỷ</button>
+                                        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded">Xác nhận
+                                            huỷ</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -475,4 +513,52 @@
             }
         </script>
     @endpush
+   <script>
+    function openCancelModal(appointmentId) {
+        // Hiển thị modal
+        const modal = document.getElementById('cancelModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            // Gán appointment_id cho form
+            const form = document.getElementById('cancelForm');
+            form.action = `/client/appointments/${appointmentId}/cancel`; // Cập nhật URL
+
+            // Reset các lựa chọn
+            document.getElementById('customReasonContainer').classList.add('hidden');
+            document.getElementById('customReason').value = '';
+            document.getElementById('cancel_reason_final').value = '';
+        }
+    }
+
+    function closeCancelModal() {
+        const modal = document.getElementById('cancelModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    function toggleCustomReason(radio) {
+        const customContainer = document.getElementById('customReasonContainer');
+        const finalReasonInput = document.getElementById('cancel_reason_final');
+
+        if (radio.value === 'Lý do khác') {
+            customContainer.classList.remove('hidden');
+            finalReasonInput.value = '';
+        } else {
+            customContainer.classList.add('hidden');
+            finalReasonInput.value = radio.value;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const customReasonTextarea = document.getElementById('customReason');
+        customReasonTextarea?.addEventListener('input', function () {
+            const finalReasonInput = document.getElementById('cancel_reason_final');
+            finalReasonInput.value = this.value;
+        });
+    });
+</script>
+
 @endsection

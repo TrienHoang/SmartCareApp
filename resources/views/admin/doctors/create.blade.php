@@ -1,108 +1,125 @@
 @extends('admin.dashboard')
 
+@section('title', 'Thêm bác sĩ mới')
+
 @section('content')
 <div class="container my-4">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-8">
-            <div class="card border-0 shadow">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-user-md me-2"></i> Thêm bác sĩ mới
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ route('admin.doctors.store') }}">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="user_id" class="form-label fw-semibold">
-                                <i class="fas fa-user me-1"></i> Chọn người dùng <span class="text-danger">*</span>
-                            </label>
-                            <select name="user_id" id="user_id" 
-                                class="form-select @error('user_id') is-invalid @enderror">
-                                <option value="">-- Chọn người dùng --</option>
-                                @foreach($availableUsers as $user)
-                                    <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                                        {{ $user->full_name }} (ID: {{ $user->id }})
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('user_id')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
+    <h3 class="mb-4">➕ Thêm bác sĩ mới</h3>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="specialization" class="form-label fw-semibold">
-                                    Chuyên môn <span class="text-danger">*</span>
-                                </label>
-                                <input type="text" id="specialization" name="specialization"
-                                    class="form-control @error('specialization') is-invalid @enderror"
-                                    value="{{ old('specialization') }}" placeholder="Nhập chuyên môn...">
-                                @error('specialization')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div>
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
 
-                            <div class="col-md-6 mb-3">
-                                <label for="department_id" class="form-label fw-semibold">
-                                    Phòng ban <span class="text-danger">*</span>
-                                </label>
-                                <select name="department_id" id="department_id"
-                                    class="form-select @error('department_id') is-invalid @enderror">
-                                    <option value="">-- Chọn phòng ban --</option>
-                                    @foreach($departments as $dept)
-                                        <option value="{{ $dept->id }}" {{ old('department_id') == $dept->id ? 'selected' : '' }}>
-                                            {{ $dept->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('department_id')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div>
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
 
-                            <div class="col-md-6 mb-3">
-                                <label for="room_id" class="form-label fw-semibold">
-                                    Phòng khám <span class="text-danger">*</span>
-                                </label>
-                                <select name="room_id" id="room_id"
-                                    class="form-select @error('room_id') is-invalid @enderror">
-                                    <option value="">-- Chọn phòng khám --</option>
-                                    @foreach($rooms as $room)
-                                        <option value="{{ $room->id }}" {{ old('room_id') == $room->id ? 'selected' : '' }}>
-                                            {{ $room->name ?? 'Phòng ' . $room->room_number }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('room_id')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div>
+    {{-- THÊM multipart/form-data để upload ảnh --}}
+    <form method="POST" action="{{ route('admin.doctors.store') }}" enctype="multipart/form-data">
+        @csrf
 
-                            <div class="col-12 mb-3">
-                                <label for="biography" class="form-label fw-semibold">Tiểu sử</label>
-                                <textarea name="biography" id="biography" rows="4"
-                                    class="form-control @error('biography') is-invalid @enderror"
-                                    placeholder="Nhập tiểu sử bác sĩ...">{{ old('biography') }}</textarea>
-                                @error('biography')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
+        {{-- Tạo user mới nếu không chọn user sẵn --}}
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">👨‍⚕️ Họ tên bác sĩ mới</label>
+                <input type="text" name="full_name" class="form-control @error('full_name') is-invalid @enderror"
+                    value="{{ old('full_name') }}" placeholder="VD: Nguyễn Văn A">
+                @error('full_name')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </div>
 
-                        <div class="d-flex justify-content-center gap-2 mt-4">
-                            <button type="submit" class="btn btn-success px-4">
-                                <i class="fas fa-plus-circle me-1"></i> Thêm bác sĩ
-                            </button>
-                            <a href="{{ route('admin.doctors.index') }}" class="btn btn-secondary px-4">
-                                <i class="fas fa-arrow-left me-1"></i> Quay lại
-                            </a>
-                        </div>
-                    </form>
-                </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">📧 Email bác sĩ mới</label>
+                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+                    value="{{ old('email') }}" placeholder="VD: bacsi@email.com">
+                @error('email')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">🔒 Mật khẩu</label>
+                <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
+                    placeholder="Nhập mật khẩu...">
+                @error('password')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </div>
+
+            {{-- UPLOAD AVATAR --}}
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">🖼️ Ảnh đại diện</label>
+                <input type="file" name="avatar" class="form-control @error('avatar') is-invalid @enderror">
+                @error('avatar')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
             </div>
         </div>
-    </div>
+
+        <hr class="my-3">
+
+        {{-- Thông tin chuyên môn bác sĩ --}}
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">💼 Chuyên môn <span class="text-danger">*</span></label>
+                <input type="text" name="specialization"
+                    class="form-control @error('specialization') is-invalid @enderror"
+                    value="{{ old('specialization') }}" placeholder="VD: Nội tổng quát">
+                @error('specialization')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">🏥 Phòng ban <span class="text-danger">*</span></label>
+                <select name="department_id"
+                    class="form-select @error('department_id') is-invalid @enderror">
+                    <option value="">-- Chọn phòng ban --</option>
+                    @foreach($departments as $dept)
+                        <option value="{{ $dept->id }}" {{ old('department_id') == $dept->id ? 'selected' : '' }}>
+                            {{ $dept->name }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('department_id')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </div>
+
+            {{-- <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">🏨 Phòng khám <span class="text-danger">*</span></label>
+                <select name="room_id" class="form-select @error('room_id') is-invalid @enderror">
+                    <option value="">-- Chọn phòng khám --</option>
+                    @foreach($rooms as $room)
+                        <option value="{{ $room->id }}" {{ old('room_id') == $room->id ? 'selected' : '' }}>
+                            {{ $room->name ?? 'Phòng ' . $room->room_number }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('room_id')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </div> --}}
+
+            <div class="col-12 mb-3">
+                <label class="form-label fw-semibold">📝 Tiểu sử</label>
+                <textarea name="biography" class="form-control @error('biography') is-invalid @enderror"
+                    rows="4" placeholder="Nhập tiểu sử...">{{ old('biography') }}</textarea>
+                @error('biography')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <button type="submit" class="btn btn-success px-4">
+                <i class="fas fa-plus-circle me-1"></i> Thêm bác sĩ
+            </button>
+            <a href="{{ route('admin.doctors.index') }}" class="btn btn-secondary px-4">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại
+            </a>
+        </div>
+    </form>
 </div>
 @endsection

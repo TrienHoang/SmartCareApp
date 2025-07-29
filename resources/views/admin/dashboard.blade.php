@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Dashboard')</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 
@@ -161,6 +162,9 @@
             @endif
             @if (session('error'))
                 toastr.error("{{ session('error') }}");
+            @endif
+            @if (session('warning'))
+                toastr.warning("{{ session('warning') }}", "Cảnh báo");
             @endif
             @if ($errors->any())
                 @foreach ($errors->all() as $error)

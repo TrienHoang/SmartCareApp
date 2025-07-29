@@ -227,7 +227,7 @@ class AppointmentClientController extends Controller
 
 
     // Hủy lịch hẹn
-    public function destroy(Appointment $appointment)
+    public function cancel(Request $request, Appointment $appointment)
     {
         if ($appointment->patient_id !== Auth::id()) {
             abort(403, 'Bạn không có quyền hủy lịch hẹn này.');
@@ -238,10 +238,15 @@ class AppointmentClientController extends Controller
                 ->with('error', 'Chỉ có thể hủy lịch hẹn khi đang chờ xác nhận.');
         }
 
+        $request->validate([
+            'cancel_reason_final' => 'required|string|max:1000',
+        ]);
+
         $appointment->update([
             'status' => 'cancelled',
-            'cancel_reason' => 'Người dùng đã hủy lịch hẹn.'
+            'cancel_reason' => $request->cancel_reason_final,
         ]);
+
 
         return redirect()->route('client.appointments.index')
             ->with('success', 'Hủy lịch hẹn thành công.');

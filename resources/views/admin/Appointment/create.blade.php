@@ -48,39 +48,45 @@
                             @enderror
                         </div>
 
-                        <!-- Bác sĩ -->
-                        <div class="col-12 col-md-6">
-                            <label for="doctor_id" class="form-label">Bác sĩ</label>
-                            <select name="doctor_id" id="doctor_id"
-                                class="form-select @error('doctor_id') is-invalid @enderror">
-                                <option value="">Chọn bác sĩ</option>
-                                @foreach ($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}"
-                                        {{ old('doctor_id') == $doctor->id ? 'selected' : '' }}>
-                                        {{ $doctor->user->full_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('doctor_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
                         <!-- Dịch vụ -->
                         <div class="col-12 col-md-6">
                             <label for="service_id" class="form-label">Dịch vụ</label>
                             <select name="service_id" id="service_id" data-old="{{ old('service_id') }}"
                                 class="form-select @error('service_id') is-invalid @enderror">
-                                <option value="">-- Vui lòng chọn bác sĩ --</option>
+                                <option value="">-- Chọn dịch vụ --</option>
+                                @foreach ($services as $service)
+                                    <option value="{{ $service->id }}" data-price="{{ $service->price }}"
+                                        {{ old('service_id') == $service->id ? 'selected' : '' }}>
+                                        {{ $service->name }} - {{ $service->department?->name }}
+                                    </option>
+                                @endforeach
                             </select>
                             @error('service_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
+                        <!-- Bác sĩ -->
+                        <div class="col-12 col-md-6">
+                            <label for="doctor_id" class="form-label">Bác sĩ</label>
+                            <select name="doctor_id" id="doctor_id" data-old="{{ old('doctor_id') }}"
+                                class="form-select @error('doctor_id') is-invalid @enderror">
+                                <option value="">Chọn bác sĩ</option>
+                            </select>
+                            @error('doctor_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+
+                        <!-- Giá dịch vụ -->
+                        <div class="col-12 col-md-6">
+                            <label for="service_price" class="form-label">Giá dịch vụ</label>
+                            <input type="text" id="service_price" name="service_price" class="form-control" readonly>
+                        </div>
 
                         <!-- Thời gian hẹn -->
-                        <div class="col-12 col-md-6">
+                        {{-- <div class="col-12 col-md-6">
                             <label for="appointment_time" class="form-label">Thời gian hẹn</label>
                             <input type="text" id="appointment_time" name="appointment_time"
                                 class="form-control @error('appointment_time') is-invalid @enderror"
@@ -89,6 +95,19 @@
                             @error('appointment_time')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div> --}}
+
+                        <div class="col-12 col-md-6">
+                            <label for="appointment_date" class="form-label">Ngày khám</label>
+                            <input type="text" id="appointment_date" name="appointment_date" class="form-control"
+                                placeholder="Chọn ngày khám" readonly>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="appointment_slot" class="form-label">Giờ khám</label>
+                            <select id="appointment_slot" name="appointment_time" class="form-select">
+                                <option value="">Chọn giờ</option>
+                            </select>
                         </div>
 
                         <!-- Trạng thái -->
@@ -101,7 +120,6 @@
                             </select>
                             <input type="hidden" name="status" value="pending">
                         </div>
-
 
                         <!-- Lý do khám -->
                         <div class="col-12">
@@ -128,11 +146,14 @@
 @push('scripts')
     {{-- Truyền URL cho JS --}}
     <script>
+        // window.allServices = @json($services);
         window.doctorServicesUrl = '{{ url('admin/appointments/doctor') }}/:id/services';
         window.doctorWorkingDaysUrl = '{{ url('admin/appointments/doctor') }}/:id/working-days';
         window.treatmentPlanDetailsUrl = '{{ route('admin.appointments.treatment-plan.details', ['id' => '__ID__']) }}';
 
         window.treatmentPlansByPatientUrl = '{{ route('admin.appointments.treatment-plans.by-patient', ':id') }}';
+        window.doctorAvailableTimesUrl =
+            '{{ route('admin.appointments.doctor.available-times', ['doctor' => '__DOCTOR__']) }}';
     </script>
 
     {{-- Flatpickr Vietnamese --}}

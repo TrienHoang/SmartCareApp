@@ -112,8 +112,28 @@
 
                             <small class="text-info d-block mt-1">
                                 <i class="fas fa-info-circle me-1"></i>
-                                Kế hoạch điều trị sẽ tự động chuyển sang <strong>Hoàn thành</strong> khi tất cả lịch hẹn thuộc kế hoạch đã hoàn tất.
+                                Kế hoạch điều trị sẽ tự động chuyển sang <strong>Hoàn thành</strong> khi tất cả lịch hẹn
+                                thuộc kế hoạch đã hoàn tất.
                             </small>
+                        </div>
+
+                        {{-- Dịch vụ --}}
+                        <div class="col-12 col-md-6">
+                            <label for="service_id" class="form-label">Dịch vụ</label>
+                            <select name="service_id" id="service_id" class="form-select"
+                                data-old="{{ old('service_id', $appointment->service_id) }}">
+                                <option value="">Chọn dịch vụ</option>
+                                @foreach ($services as $service)
+                                    <option value="{{ $service->id }}" data-price="{{ $service->price }}"
+                                        {{ $appointment->service_id == $service->id ? 'selected' : '' }}>
+                                        {{ $service->name }} - {{ $service->department?->name ?? 'Không rõ khoa' }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            @error('service_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         {{-- Bác sĩ --}}
@@ -123,12 +143,6 @@
                                 class="form-select @error('doctor_id') is-invalid @enderror"
                                 @if ($appointment->treatment_plan_id) disabled @endif>
                                 <option value="">Chọn bác sĩ</option>
-                                @foreach ($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}"
-                                        {{ old('doctor_id', $appointment->doctor_id) == $doctor->id ? 'selected' : '' }}>
-                                        {{ $doctor->user->full_name }}
-                                    </option>
-                                @endforeach
                             </select>
                             @error('doctor_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -138,36 +152,47 @@
                             @endif
                         </div>
 
-                        {{-- Dịch vụ --}}
+                        <!-- Giá dịch vụ -->
                         <div class="col-12 col-md-6">
-                            <label for="service_id" class="form-label">Dịch vụ</label>
-                            <select name="service_id" id="service_id"
-                                class="form-select @error('service_id') is-invalid @enderror"
-                                data-old="{{ old('service_id', $appointment->service_id) }}">
-                                <option value="">Chọn dịch vụ</option>
-                            </select>
-                            @error('service_id')
+                            <label for="service_price" class="form-label">Giá dịch vụ</label>
+                            <input type="text" id="service_price" class="form-control" readonly
+                                value="{{ number_format($appointment->service->price) }} ₫">
+                        </div>
+
+                        {{-- Ngày khám --}}
+                        <div class="col-12 col-md-6">
+                            <label for="appointment_date" class="form-label">Ngày khám</label>
+                            <input type="text" id="appointment_date" name="appointment_date"
+                                class="form-control @error('appointment_date') is-invalid @enderror"
+                                placeholder="Chọn ngày khám" readonly
+                                value="{{ old('appointment_date', \Carbon\Carbon::parse($appointment->appointment_time)->format('Y-m-d')) }}">
+                            @error('appointment_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
-                        {{-- Thời gian hẹn --}}
+                        {{-- Giờ khám --}}
                         <div class="col-12 col-md-6">
-                            <label for="appointment_time" class="form-label">Thời gian hẹn</label>
-                            <input type="text" name="appointment_time" id="appointment_time"
-                                class="form-control @error('appointment_time') is-invalid @enderror"
-                                value="{{ old('appointment_time', \Carbon\Carbon::parse($appointment->appointment_time)->format('Y-m-d H:i')) }}"
-                                data-old="{{ old('appointment_time', \Carbon\Carbon::parse($appointment->appointment_time)->format('Y-m-d H:i')) }}"
-                                placeholder="Chọn ngày và giờ">
+                            <label for="appointment_slot" class="form-label">Giờ khám</label>
+                            <select id="appointment_slot" name="appointment_time"
+                                class="form-select @error('appointment_time') is-invalid @enderror">
+                                <option value="">Chọn giờ</option>
+                                @php
+                                    $selectedTime = \Carbon\Carbon::parse($appointment->appointment_time)->format(
+                                        'H:i',
+                                    );
+                                @endphp
+                                @if (old('appointment_date') === null)
+                                    <option value="{{ $appointment->appointment_time }}" selected>{{ $selectedTime }}
+                                    </option>
+                                @elseif(old('appointment_time'))
+                                    <option value="{{ old('appointment_time') }}" selected>
+                                        {{ \Carbon\Carbon::parse(old('appointment_time'))->format('H:i') }}</option>
+                                @endif
+                            </select>
                             @error('appointment_time')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <div class="form-text">
-                                <small class="text-muted">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Các ngày nghỉ phép của bác sĩ sẽ không thể chọn được
-                                </small>
-                            </div>
                         </div>
 
                         {{-- Trạng thái --}}
@@ -225,5 +250,6 @@
     <script src="{{ asset('js/Appointment/edit.js') }}"></script>
     <script>
         window.selectedPlanId = '{{ $appointment->treatment_plan_id }}';
+        window.selectedDoctorId = '{{ $appointment->doctor_id }}';
     </script>
 @endpush

@@ -228,7 +228,7 @@
                                         <div>
                                             <div class="text-sm text-gray-500">Chuyên khoa</div>
                                             <div class="font-medium text-gray-800">
-                                                {{ $appointment->doctor->speciality ?? 'Nội tổng quát' }}</div>
+                                                {{ $appointment->doctor->specialization ?? 'Nội tổng quát' }}</div>
                                         </div>
                                     </div>
 

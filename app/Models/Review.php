@@ -17,6 +17,7 @@ class Review extends Model
         'rating',
         'comment',
         'is_visible',
+        'useful_count'
     ];
 
     protected $casts = [
@@ -55,4 +56,13 @@ class Review extends Model
     {
         return $this->belongsTo(Appointment::class, 'appointment_id');
     }
+
+    public function replies()
+    {
+        return $this->hasMany(ReviewReply::class);
+    }
+
+    
+
+    
 }

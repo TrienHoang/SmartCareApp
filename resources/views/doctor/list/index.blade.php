@@ -122,7 +122,7 @@
                                         <td class="text-start px-2">{{ \Illuminate\Support\Str::limit($doctor->biography, 60) }}
                                         </td>
                                         <td>
-                                            <a href="{{ route('doctor.show', $doctor->id) }}" class="btn btn-outline-primary btn-sm"
+                                            <a href="{{ route('doctor.list.show', ['id' => $doctor->id]) }}" class="btn btn-outline-primary btn-sm"
                                                 data-bs-toggle="tooltip" title="Xem chi tiết">
                                                 <i class="bx bx-show"></i>
                                             </a>

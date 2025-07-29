@@ -16,15 +16,15 @@ class Doctor extends Model
         'room_id',
         'specialization',
         'biography',
+        'status', // Thêm trường status
     ];
 
     // --------------------
     // Relationships
     // --------------------
-
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function doctor()
@@ -60,13 +60,12 @@ class Doctor extends Model
     {
         return $this->hasMany(TreatmentPlan::class);
     }
-    
+
 
     public function services()
     {
-        return $this->belongsToMany(Service::class, 'doctor_service');
+        return $this->belongsToMany(Service::class, 'doctor_service', 'doctor_id', 'service_id');
     }
-
     public function workingSchedules()
     {
         return $this->hasMany(WorkingSchedule::class);
@@ -75,7 +74,35 @@ class Doctor extends Model
     public function leaves()
     {
         return $this->hasMany(DoctorLeave::class)
-            ->where('approved', true)
-            ->whereNull('deleted_at');
+            ->where('approved', true);
+            // ->whereNull('deleted_at');
+    }
+
+    public function isOnLeaveToday()
+    {
+        return $this->leaves()
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->exists();
+    }
+
+    public function educations()
+    {
+        return $this->hasMany(Education::class);
+    }
+
+    public function experiences()
+    {
+        return $this->hasMany(Experience::class);
+    }
+
+    public function achievements()
+    {
+        return $this->hasMany(Achievement::class);
+    }
+
+    public function specialties()
+    {
+        return $this->belongsToMany(Specialty::class, 'doctor_specialty');
     }
 }

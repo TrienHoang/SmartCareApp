@@ -73,16 +73,18 @@
         </li>
 
         <li class="menu-item">
+            <a href="{{ route('admin.rooms.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-home-alt"></i>
+                <div>Quản lý phòng</div>
+            </a>
+        </li>
+
+        <li class="menu-item">
             <a href="{{ route('admin.departments.index') }}" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-building-house"></i>
                 <div>Quản lý phòng ban</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ route('admin.departments.index') }}" class="menu-link">
-                        <div>Danh sách phòng ban</div>
-                    </a>
-                </li>
                 <li class="menu-item"><a href="{{ route('admin.departments.index') }}" class="menu-link">
                         <div>Danh sách</div>
                     </a></li>
@@ -110,17 +112,17 @@
         <li class="menu-item">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-task"></i>
-                <div>Quản Lý Làm Việc</div>
+                <div>Quản lý công việc</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
                     <a href="{{ route('admin.tasks.index') }}" class="menu-link">
-                        <div>Danh sách</div>
+                        <div>Danh sách công việc</div>
                     </a>
                 </li>
                 <li class="menu-item">
                     <a href="{{ route('admin.tasks.create') }}" class="menu-link">
-                        <div>Thêm mới</div>
+                        <div>Thêm công việc</div>
                     </a>
                 </li>
                 <li class="menu-item">
@@ -128,9 +130,19 @@
                         <div>Lịch làm việc</div>
                     </a>
                 </li>
-
+                <li class="menu-item">
+                    <a href="{{ route('admin.shifts.index') }}" class="menu-link">
+                        <div>Ca làm việc</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.system_notifications.index') }}" class="menu-link">
+                        <div>Thông báo hệ thống</div>
+                    </a>
+                </li>
             </ul>
         </li>
+
 
 
         <li class="menu-item">
@@ -205,6 +217,14 @@
         </li>
 
         <li class="menu-item">
+            <a href="{{ route('admin.posts.index') }}" class="menu-link">
+                <i class="menu-icon fas fa-newspaper"></i>
+                <div> Quản lý tin tức</div>
+            </a>
+        </li>
+
+
+        <li class="menu-item">
             <a href="{{ route('admin.faqs.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-help-circle"></i>
                 <div>Quản lý FAQ</div>
@@ -228,11 +248,9 @@
                 <div>lịch sử thanh toán</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
-                        <div>Danh Sách</div>
-                    </a>
-                </li>
+                <li class="menu-item"><a href="{{ route('admin.payment_histories.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
             </ul>
         </li>
 
@@ -247,11 +265,21 @@
         </li>
 
         <li class="menu-item">
+            <a href="{{ route('admin.contacts.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-envelope"></i>
+                <div>Quản lý liên hệ</div>
+            </a>
+        </li>
+
+
+
+        <li class="menu-item">
             <a href="app-chat.html" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-chat"></i>
                 <div>Chat</div>
             </a>
         </li>
+
 
     </ul>
 </aside>
