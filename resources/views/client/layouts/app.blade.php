@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
 
+
     <!-- App Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -138,9 +139,8 @@
                 @endif
             });
 
-            toastr.success('Toastr hoạt động ngon lành rồi nè!');
-            // animation Count Number hẹ hẹ hẹ
 
+            // animation Count Numb
             const counters = document.querySelectorAll(".counter");
 
             function animateCounter(counter) {
