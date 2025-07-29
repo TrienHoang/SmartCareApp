@@ -251,11 +251,11 @@
                                 <div class="col-lg-2 col-md-4 mb-2">
                                     <div class="btn-group w-100" role="group">
                                         <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-search mr-1"></i>Lọc
+                                            <i class="fas fa-search mr-1"></i>
                                         </button>
                                         <a href="{{ route('receptionist.appointments.index') }}"
                                             class="btn btn-outline-secondary">
-                                            <i class="fas fa-redo mr-1"></i>Reset
+                                            <i class="fas fa-redo mr-1"></i>
                                         </a>
                                     </div>
                                 </div>

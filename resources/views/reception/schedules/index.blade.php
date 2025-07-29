@@ -562,12 +562,12 @@
                     </div>
 
                     <div class="col-lg-2 col-md-6 d-flex align-items-center gap-2">
-                        <button type="submit" class="btn btn-search px-3" style="height: 65px;">
-                            <i class="fas fa-search me-2"></i>Lọc
+                        <button type="submit" class="btn btn-search px-3">
+                            <i class="fas fa-search me-2"></i>
                         </button>
-                        <button type="button" class="btn btn-reset px-3" style="height: 65px;"
+                        <button type="button" class="btn btn-reset px-3"
                             onclick="resetFilters()">
-                            <i class="fas fa-redo me-2"></i>Làm mới
+                            <i class="fas fa-redo me-2"></i>
                         </button>
                     </div>
                 </div>
@@ -687,7 +687,7 @@
                                             </span>
                                         @else
                                             <span class="status-badge status-available">
-                                                Có mặt
+                                                Làm việc
                                             </span>
                                         @endif
                                     </td>
