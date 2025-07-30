@@ -35,11 +35,12 @@
                         </div>
 
 
-                        <!-- Dịch vụ -->
+                        {{-- Dịch vụ --}}
+                        <input type="hidden" name="service_id" value="{{ $appointment->service_id }}">
                         <div class="col-12 col-md-6">
-                            <label for="service_id" class="form-label">Dịch vụ</label>
-                            <select name="service_id" id="service_id" class="form-select"
-                                data-old="{{ old('service_id', $appointment->service_id) }}">
+                            <label for="service_id_display" class="form-label">Dịch vụ</label>
+                            <select id="service_id_display" class="form-select" disabled
+                                data-selected="{{ $appointment->service_id }}">
                                 <option value="">Chọn dịch vụ</option>
                                 @foreach ($services as $service)
                                     <option value="{{ $service->id }}" data-price="{{ $service->price }}"
@@ -48,10 +49,6 @@
                                     </option>
                                 @endforeach
                             </select>
-
-                            @error('service_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
                         </div>
 
                         <!-- Bác sĩ -->
