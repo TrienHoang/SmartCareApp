@@ -89,24 +89,18 @@
 @endpush
 
 @section('content')
-    <div class="container mx-auto px-4 py-8 max-w-5xl">
+    <div class="container mx-auto my-10 m-5 p-4 py-8 max-w-6xl rounded-xl shadow-lg hover:shadow-xl transition-shadow">
         <div class="page-header">
             <div class="flex items-center justify-center mb-4">
-                {{-- <svg class="w-12 h-12 mr-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                </svg> --}}
-                <h1 class="text-4xl font-bold">Xác nhận đặt lịch khám bệnh</h1>
+                <h1 class="text-4xl m-4 font-bold">Xác nhận đặt lịch khám bệnh</h1>
             </div>
-            <p class="text-blue-500 text-lg">Vui lòng kiểm tra thông tin và xác nhận lịch hẹn của bạn</p>
+            <p class="text-blue-500 m-3 text-lg">Vui lòng kiểm tra thông tin và xác nhận lịch hẹn của bạn</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
                 <div class="info-card floating-element">
                     <div class="section-header text-2xl font-bold m-2">
-                        {{-- <svg class="w-6 h-6 mr-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg> --}}
                         Dịch vụ đã chọn
                     </div>
                     <div class="space-y-3">

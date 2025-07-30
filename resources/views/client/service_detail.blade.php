@@ -178,12 +178,12 @@
                             <p class="text-lg font-semibold mb-2">Lựa chọn bác sĩ</p>
                             <div class="flex flex-col space-y-2">
                                 <label
-                                    class="flex items-center space-x-2 p-2 rounded-md cursor-pointer border border-transparent has-[:checked]:border-green-500 has-[:checked]:bg-green-100 has-[:checked]:text-black transition">
+                                    class="flex items-center space-x-2 p-2 rounded-md cursor-pointer border border-transparent has-[:checked]:border-green-500  has-[:checked]:bg-[#FFB340] transition">
                                     <input type="radio" name="doctor_option" value="random" class="peer sr-only" checked>
                                     <span class="text-white font-medium">Tự động chọn bác sĩ phù hợp</span>
                                 </label>
                                 <label
-                                    class="flex items-center space-x-2 p-2 rounded-md cursor-pointer border border-transparent has-[:checked]:border-green-500 has-[:checked]:bg-green-100 has-[:checked]:text-black transition">
+                                    class="flex items-center space-x-2 p-2 rounded-md cursor-pointer border border-transparent has-[:checked]:border-green-500  has-[:checked]:bg-[#FFB340] transition">
                                     <input type="radio" name="doctor_option" value="specific" class="peer sr-only">
                                     <span class="text-white font-medium">Tôi muốn lựa chọn bác sĩ</span>
                                 </label>
@@ -195,7 +195,7 @@
                                 <label for="doctor_{{ $doctor->id }}"
                                     class="transform cursor-pointer m-1 transition duration-300 hover:scale-105 ">
                                     <div
-                                        class="doctor-card transform bg-white rounded-lg shadow p-4 flex items-center space-x-4 hover:shadow-md transition border-2 border-transparent duration-300 hover:scale-105 focus-within:border-blue-500 has-[:checked]:border-green-500 has-[:checked]:bg-green-100">
+                                        class="doctor-card transform bg-white rounded-lg shadow p-4 flex items-center space-x-4 hover:shadow-md transition border-2 border-transparent duration-300 hover:scale-105 focus-within:border-blue-500  has-[:checked]:bg-[#FFB340]">
                                         <input type="radio" id="doctor_{{ $doctor->id }}" name="selected_doctor"
                                             value="{{ $doctor->id }}" class="sr-only" hidden>
                                         <img src="{{ $doctor->user->avatar }}" alt="{{ $doctor->user->full_name }}"
