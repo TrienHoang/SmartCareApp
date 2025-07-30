@@ -65,7 +65,7 @@ class PromotionController extends Controller
         $request->session()->put('selected_promotion_id', $promotion->id);
         $request->session()->put('selected_promotion_discount', $promotion->discount_percentage);
         
-        return redirect()->route('client.booking.confirm')->with('success', 'Áp dụng mã giảm giá thành công!');
+        return redirect()->route('booking.confirm')->with('success', 'Áp dụng mã giảm giá thành công!');
 
     }
     
