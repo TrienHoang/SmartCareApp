@@ -11,18 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('services', function (Blueprint $table) {
-            $table->integer('min_booking_hours')->after('duration'); 
+        Schema::table('contacts', function (Blueprint $table) {
+            // tạo cột deleted_at
+            $table->boolean('is_hidden')->default(0);
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('services', function (Blueprint $table) {
-            $table->dropColumn('min_booking_hours');
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->dropColumn('is_hidden');
         });
     }
 };

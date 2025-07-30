@@ -20,7 +20,6 @@ class Service extends Model
         'content',
         'min_booking_hours',
         'department_id',
-        'room_id', 
         'image',
     ];
 
