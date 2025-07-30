@@ -193,3 +193,19 @@ Route::prefix('client/notifications')->middleware('auth')->name('client.notifica
     Route::get('/{notification}', [ClientNotificationController::class, 'show'])->name('show');
     Route::post('/{notification}/mark-as-read', [ClientNotificationController::class, 'markAsRead'])->name('mark-as-read');
 });
+
+// giảm kịch khung
+// Thêm vào file routes/web.php
+
+Route::middleware(['auth'])->group(function () {
+    // Routes cho promotion (phù hợp với view có sẵn)
+    Route::get('/promotions', [PromotionController::class, 'index'])->name('client.promotions.index');
+    Route::post('/promotions/apply/{promotion}', [PromotionController::class, 'apply'])->name('client.promotions.apply');
+    Route::post('/promotions/remove', [PromotionController::class, 'remove'])->name('client.promotions.remove');
+});
+
+
+
+
+
+
