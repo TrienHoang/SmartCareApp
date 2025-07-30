@@ -35,8 +35,11 @@
                 <label class="block font-medium text-gray-700">Giới tính</label>
                 <select name="gender"
                     class="w-full mt-1 px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400">
-                    <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Nam</option>
-                    <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Nữ</option>
+                    <option value="">-- Chọn giới tính --</option>
+                    <option value="Nam" {{ old('gender', $patient->gender ?? '') == 'Nam' ? 'selected' : '' }}>Nam
+                    </option>
+                    <option value="Nữ" {{ old('gender', $patient->gender ?? '') == 'Nữ' ? 'selected' : '' }}>Nữ
+                    </option>
                 </select>
             </div>
 

@@ -42,15 +42,16 @@
                 <select name="gender"
                     class="w-full mt-1 px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400">
                     <option value="">-- Chọn giới tính --</option>
-                    <option value="male" {{ old('gender', $patient->gender) == 'male' ? 'selected' : '' }}>Nam</option>
-                    <option value="female" {{ old('gender', $patient->gender) == 'female' ? 'selected' : '' }}>Nữ</option>
+                    <option value="Nam" {{ old('gender', $patient->gender) == 'Nam' ? 'selected' : '' }}>Nam</option>
+                    <option value="Nữ" {{ old('gender', $patient->gender) == 'Nữ' ? 'selected' : '' }}>Nữ</option>
                 </select>
             </div>
 
             {{-- Ngày sinh --}}
             <div>
                 <label class="block font-medium text-gray-700">Ngày sinh</label>
-                <input type="date" name="date_of_birth" value="{{ old('date_of_birth', $patient->date_of_birth) }}"
+                <input type="date" name="date_of_birth"
+                    value="{{ old('date_of_birth', optional($patient->date_of_birth)->format('Y-m-d')) }}"
                     class="w-full mt-1 px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400">
             </div>
 
