@@ -28,7 +28,7 @@
 
                         {{-- Menu --}}
                         <nav class="space-y-2">
-                            <a href="#thong-tin-ca-nhan"
+                            <a href="{{ route('client.profile.show') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 text-blue-600 border-l-4 border-blue-600">
                                 <i data-lucide="user" class="w-5 h-5"></i>
                                 <span class="font-semibold">Thông Tin Cá Nhân</span>
@@ -131,14 +131,20 @@
                                     <select name="gender"
                                         class="form-select mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
                                         <option value="">-- Chọn giới tính --</option>
-                                        <option value="male"
-                                            {{ old('gender', $user->gender) == 'male' ? 'selected' : '' }}>Nam
+                                        <option value="Nam" {{ old('Nam', $user->gender) == 'Nam' ? 'selected' : '' }}>
+                                            Nam
                                         </option>
-                                        <option value="female"
-                                            {{ old('gender', $user->gender) == 'female' ? 'selected' : '' }}>Nữ
+                                        <option value="Nữ
+                                        "
+                                            {{ old('gender', $user->gender) ==
+                                            'Nữ
+                                                                                                                                                                                                                                                                                                                    '
+                                                ? 'selected'
+                                                : '' }}>
+                                            Nữ
                                         </option>
-                                        <option value="other"
-                                            {{ old('gender', $user->gender) == 'other' ? 'selected' : '' }}>
+                                        <option value="Khác"
+                                            {{ old('gender', $user->gender) == 'Khác' ? 'selected' : '' }}>
                                             Khác</option>
                                     </select>
                                     @error('gender')
@@ -150,7 +156,7 @@
                                 <div>
                                     <label class="block font-medium text-gray-700">Ngày sinh</label>
                                     <input type="date" name="date_of_birth"
-                                        value="{{ old('date_of_birth', $user->date_of_birth) }}"
+                                        value="{{ old('date_of_birth', optional($user->date_of_birth)->format('Y-m-d')) }}"
                                         class="form-input mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
                                     @error('date_of_birth')
                                         <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -169,63 +175,6 @@
                             </div>
                         </form>
                     </div>
-
-                    {{-- Medical Information - Now takes full width --}}
-                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-xl font-bold gradient-text">Thông Tin Y Tế</h2>
-                            <button onclick="openMedicalModal()"
-                                class="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition-colors flex items-center space-x-2 text-sm">
-                                <i data-lucide="edit" class="w-4 h-4"></i>
-                                <span>Chỉnh Sửa</span>
-                            </button>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Nhóm Máu</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">{{ $user->blood_type ?? 'A+' }}</p>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Chiều Cao (cm)</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">{{ $user->height ?? '170' }}</p>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Cân Nặng (kg)</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900">{{ $user->weight ?? '65' }}</p>
-                                </div>
-                            </div>
-                            <div class="md:col-span-3">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Liên Hệ Khẩn Cấp</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900 text-sm">
-                                        {{ $user->emergency_contact ?? 'Nguyễn Thị B - 0987654321' }}
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="md:col-span-3">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Tiền Sử Bệnh Án</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900 text-sm">
-                                        {{ $user->medical_history ?? 'Không có tiền sử bệnh lý đặc biệt' }}
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="md:col-span-3">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Dị Ứng</label>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-gray-900 text-sm">
-                                        {{ $user->allergies ?? 'Không có dị ứng đã biết' }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     {{-- Quick Actions - Moved to bottom --}}
                     <div class="bg-white rounded-xl shadow-lg p-8">
                         <h2 class="text-2xl font-bold mb-6 gradient-text">Thao Tác Nhanh</h2>
@@ -240,7 +189,7 @@
                                     </div>
                                 </div>
                             </a>
-                            <a href="{{ url('/lich-su-kham') }}"
+                            <a href="{{ route('client.appointments.history') }}"
                                 class="p-6 bg-gradient-to-r from-green-50 to-green-100 rounded-lg hover:from-green-100 hover:to-green-200 transition-all hover-scale">
                                 <div class="flex items-center space-x-3">
                                     <i data-lucide="file-text" class="w-8 h-8 text-green-600"></i>
@@ -277,38 +226,53 @@
                         </button>
                     </div>
                 </div>
-                <form id="editProfileForm" class="p-6">
+                @if (session('success'))
+                    <div class="text-green-500">{{ session('success') }}</div>
+                @endif
+                @if (session('error'))
+                    <div class="text-red-500">{{ session('error') }}</div>
+                @endif
+
+
+                <form method="POST" action="{{ route('client.profile.update') }}" enctype="multipart/form-data">
+
                     @csrf
+                    @method('PATCH')
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Họ và Tên *</label>
-                            <input type="text" name="name" value="{{ $user->name ?? '' }}"
+                            <input type="text" name="full_name"
+                                value="{{ old('full_name', $user->full_name ?? '') }}"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                                 required>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
-                            <input type="email" name="email" value="{{ $user->email ?? '' }}"
+                            <input type="email" name="email" value="{{ old('email', $user->email ?? '') }}"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                                 required>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Số Điện Thoại *</label>
-                            <input type="tel" name="phone" value="{{ $user->phone ?? '' }}"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                required>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Số Điện Thoại</label>
+                            <input type="tel" name="phone" value="{{ old('phone', $user->phone ?? '') }}"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Ngày Sinh</label>
-                            <input type="date" name="birth_date" value="{{ $user->birth_date ?? '' }}"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                            <input type="date" name="date_of_birth"
+                                value="{{ old('date_of_birth', optional($user->date_of_birth)->format('Y-m-d')) }}">
+
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Giới Tính</label>
                             <select name="gender"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
-                                <option value="Nam" {{ ($user->gender ?? '') == 'Nam' ? 'selected' : '' }}>Nam</option>
-                                <option value="Nữ" {{ ($user->gender ?? '') == 'Nữ' ? 'selected' : '' }}>Nữ</option>
+                                <option value="">-- Chọn giới tính --</option>
+                                <option value="Nam" {{ ($user->gender ?? '') == 'Nam' ? 'selected' : '' }}>Nam
+                                </option>
+                                <option value="Nữ" {{ ($user->gender ?? '') == 'Nữ' ? 'selected' : '' }}>Nữ
+                                </option>
                                 <option value="Khác" {{ ($user->gender ?? '') == 'Khác' ? 'selected' : '' }}>Khác
                                 </option>
                             </select>
@@ -317,9 +281,16 @@
                         <div class="md:col-span-2">
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Địa Chỉ</label>
                             <textarea name="address" rows="3"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">{{ $user->address ?? '' }}</textarea>
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">{{ old('address', $user->address ?? '') }}</textarea>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Ảnh Đại Diện</label>
+                            <input type="file" name="avatar" accept="image/*"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                         </div>
                     </div>
+
                     <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
                         <button type="button" onclick="closeEditModal()"
                             class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
@@ -335,84 +306,8 @@
             </div>
         </div>
 
-        {{-- Edit Medical Info Modal --}}
-        <div id="medicalModal"
-            class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                <div class="sticky top-0 bg-white p-6 border-b border-gray-200 rounded-t-2xl">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-2xl font-bold gradient-text">Chỉnh Sửa Thông Tin Y Tế</h2>
-                        <button onclick="closeMedicalModal()" class="text-gray-500 hover:text-gray-700 transition-colors">
-                            <i data-lucide="x" class="w-6 h-6"></i>
-                        </button>
-                    </div>
-                </div>
-                <form id="editMedicalForm" class="p-6">
-                    @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nhóm Máu</label>
-                            <select name="blood_type"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">
-                                <option value="">Chọn nhóm máu</option>
-                                <option value="A+" {{ ($user->blood_type ?? '') == 'A+' ? 'selected' : '' }}>A+
-                                </option>
-                                <option value="A-" {{ ($user->blood_type ?? '') == 'A-' ? 'selected' : '' }}>A-
-                                </option>
-                                <option value="B+" {{ ($user->blood_type ?? '') == 'B+' ? 'selected' : '' }}>B+
-                                </option>
-                                <option value="B-" {{ ($user->blood_type ?? '') == 'B-' ? 'selected' : '' }}>B-
-                                </option>
-                                <option value="O+" {{ ($user->blood_type ?? '') == 'O+' ? 'selected' : '' }}>O+
-                                </option>
-                                <option value="O-" {{ ($user->blood_type ?? '') == 'O-' ? 'selected' : '' }}>O-
-                                </option>
-                                <option value="AB+" {{ ($user->blood_type ?? '') == 'AB+' ? 'selected' : '' }}>AB+
-                                </option>
-                                <option value="AB-" {{ ($user->blood_type ?? '') == 'AB-' ? 'selected' : '' }}>AB-
-                                </option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Chiều Cao (cm)</label>
-                            <input type="number" name="height" value="{{ $user->height ?? '' }}"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Cân Nặng (kg)</label>
-                            <input type="number" name="weight" value="{{ $user->weight ?? '' }}"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Liên Hệ Khẩn Cấp</label>
-                            <input type="text" name="emergency_contact" value="{{ $user->emergency_contact ?? '' }}"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tiền Sử Bệnh Án</label>
-                            <textarea name="medical_history" rows="3"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">{{ $user->medical_history ?? '' }}</textarea>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Dị Ứng</label>
-                            <textarea name="allergies" rows="3"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">{{ $user->allergies ?? '' }}</textarea>
-                        </div>
-                    </div>
-                    <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
-                        <button type="button" onclick="closeMedicalModal()"
-                            class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
-                            Hủy
-                        </button>
-                        <button type="submit"
-                            class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
-                            <i data-lucide="save" class="w-4 h-4"></i>
-                            <span>Lưu</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+
+
 
         <script>
             function openEditModal() {
