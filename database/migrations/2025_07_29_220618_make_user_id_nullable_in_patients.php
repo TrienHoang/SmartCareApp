@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
-            // tạo cột deleted_at
-            $table->boolean('is_hidden')->default(0);
+        Schema::table('patients', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id')->nullable()->change();
         });
     }
+
     public function down(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
-            $table->dropColumn('is_hidden');
+        Schema::table('patients', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id')->nullable(false)->change();
         });
     }
 };

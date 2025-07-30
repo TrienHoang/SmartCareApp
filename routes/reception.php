@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Reception\ReceptionAppointmentController;
 use App\Http\Controllers\reception\ReceptionistController;
 use App\Http\Controllers\Reception\WorkingScheduleController;
+use App\Http\Controllers\Reception\PatientController;
+
 
 // ✅ Dashboard và thống kê
 Route::prefix('receptionist')
@@ -69,5 +71,18 @@ Route::prefix('receptionist')
             // Trang chọn ngày
             Route::get('/working-schedule', [WorkingScheduleController::class, 'index'])
                 ->name('index');
+        });
+        // 🟦 Quản lý bệnh nhân (patients)
+        Route::prefix('patients')->name('patients.')->group(function () {
+            // Danh sách + tìm kiếm
+            Route::get('/', [PatientController::class, 'index'])->name('index');
+            // Tạo mới
+            Route::get('/create', [PatientController::class, 'create'])->name('create');
+            Route::post('/', [PatientController::class, 'store'])->name('store');
+            // Sửa
+            Route::get('/edit/{id}', [PatientController::class, 'edit'])->name('edit');
+            Route::put('/update/{id}', [PatientController::class, 'update'])->name('update');
+            // Xem lịch sử đặt lịch
+            Route::get('/{id}/appointments', [PatientController::class, 'appointments'])->name('appointments');
         });
     });

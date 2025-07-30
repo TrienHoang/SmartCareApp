@@ -11,12 +11,19 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Client\PaymentController;
 use Illuminate\Support\Facades\Route;
 
+
+
 use App\Http\Controllers\Client\ReviewReplyController;
 use App\Http\Controllers\Client\AppointmentController;
 use App\Http\Controllers\Client\DoctorController;
 use App\Http\Controllers\Client\AppointmentClientController;
 use chillerlan\QRCode\{QRCode, QROptions};
 use Illuminate\Support\Facades\Response;
+
+use App\Http\Controllers\Client\AppointmentHistoryController;
+use App\Http\Controllers\Client\UserController;
+use App\Http\Controllers\Client\ProfileController;
+
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -57,10 +64,11 @@ Route::get('/chi-tiet-tin-tuc/{id}', function ($id) {
     return view('client.news_detail', ['id' => $id]);
 })->name('news_detail');
 
-Route::get('/thong-tin-ca-nhan', function () {
-    return view('client.profile');
-})->name('profile');
-
+// Thông tin cá nhân
+Route::middleware(['auth'])->prefix('client/profile')->name('client.profile.')->group(function () {
+    Route::get('/', [ProfileController::class, 'show'])->name('show');
+    Route::patch('/update', [ProfileController::class, 'update'])->name('update');
+});
 // Route::get('/thong-tin-bac-si', function () {
 //     return view('client.doctors_detail');
 // })->name('doctors_detail');
@@ -75,11 +83,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Gửi phản hồi đánh giá
     Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
+    Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
 
     // Đánh dấu đánh giá là hữu ích
     Route::post('/reviews/{review}/useful', [ReviewReplyController::class, 'markUseful'])->name('reviews.useful');
-
-    Route::put('/thong-tin-bac-si/{doctor}/reviews/{id}', [ReviewReplyController::class, 'update'])->name('reviews.update');
 });
 
 // Route hiển thị chi tiết bác sĩ (không yêu cầu đăng nhập)
@@ -145,12 +152,11 @@ Route::middleware(['auth'])->group(function () {
             'scale'      => 3,
             'imageBase64'  => false,
         ]);
-    
+
         $image = (new QRCode($options))->render($data);
-    
+
         return Response::make($image, 200, ['Content-Type' => 'image/png']);
     })->name('qr.generate');
-    
 });
 
 
