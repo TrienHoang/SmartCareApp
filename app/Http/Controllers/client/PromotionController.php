@@ -65,7 +65,8 @@ class PromotionController extends Controller
         $request->session()->put('selected_promotion_id', $promotion->id);
         $request->session()->put('selected_promotion_discount', $promotion->discount_percentage);
         
-        return redirect()->route('booking.confirm')->with('success', 'Áp dụng mã giảm giá thành công!');
+        return redirect()->route('client.booking.confirm')->with('success', 'Áp dụng mã giảm giá thành công!');
+
     }
     
     /**
@@ -83,16 +84,11 @@ class PromotionController extends Controller
     public static function confirmUsage($userId, $promotionId)
     {
         if ($promotionId) {
-            $promotion = Promotion::find($promotionId);
-            
-            // Chỉ lưu lịch sử sử dụng cho mã dành cho người mới
-            if (self::isNewUserPromotion($promotion)) {
-                PromotionUserUsage::create([
-                    'user_id' => $userId,
-                    'promotion_id' => $promotionId,
-                    'used_at' => Carbon::now(),
-                ]);
-            }
+            PromotionUserUsage::create([
+                'user_id' => $userId,
+                'promotion_id' => $promotionId,
+                'used_at' => Carbon::now(),
+            ]);
         }
     }
     
@@ -101,25 +97,22 @@ class PromotionController extends Controller
      */
     private function canUserUsePromotion($user, $promotion)
     {
-        // Kiểm tra nếu là mã cho người mới
-        if ($this->isNewUserPromotion($promotion)) {
-            // Kiểm tra user có phải là người mới không (chưa có appointment nào)
-            $appointmentCount = $user->appointments()->count();
-            if ($appointmentCount > 0) {
-                return false; // Không phải người mới
-            }
+        // Kiểm tra mã đã được user này sử dụng chưa
+        $hasUsed = PromotionUserUsage::where('user_id', $user->id)
+            ->where('promotion_id', $promotion->id)
+            ->exists();
             
-            // Kiểm tra mã đã được user này sử dụng chưa (chỉ áp dụng cho mã người mới)
-            $hasUsed = PromotionUserUsage::where('user_id', $user->id)
-                ->where('promotion_id', $promotion->id)
-                ->exists();
-                
-            if ($hasUsed) {
-                return false; // Đã sử dụng mã người mới rồi
-            }
+        if ($hasUsed) {
+            return false;
         }
         
-        // Các mã khác có thể sử dụng nhiều lần
+        // Kiểm tra nếu là mã cho người mới (discount = 20% hoặc chứa "NEW")
+        if ($promotion->discount_percentage == 20 || stripos($promotion->code, 'NEW') !== false) {
+            // Kiểm tra user có phải là người mới không (chưa có appointment nào)
+            $appointmentCount = $user->appointments()->count();
+            return $appointmentCount == 0;
+        }
+        
         return true;
     }
     
@@ -128,39 +121,23 @@ class PromotionController extends Controller
      */
     private function getUnavailableReason($user, $promotion)
     {
+        // Kiểm tra đã sử dụng
+        $hasUsed = PromotionUserUsage::where('user_id', $user->id)
+            ->where('promotion_id', $promotion->id)
+            ->exists();
+            
+        if ($hasUsed) {
+            return 'Bạn đã sử dụng mã này rồi';
+        }
+        
         // Kiểm tra mã cho người mới
-        if ($this->isNewUserPromotion($promotion)) {
+        if ($promotion->discount_percentage == 20 || stripos($promotion->code, 'NEW') !== false) {
             $appointmentCount = $user->appointments()->count();
             if ($appointmentCount > 0) {
                 return 'Mã chỉ dành cho khách hàng mới';
-            }
-            
-            // Kiểm tra đã sử dụng mã người mới
-            $hasUsed = PromotionUserUsage::where('user_id', $user->id)
-                ->where('promotion_id', $promotion->id)
-                ->exists();
-                
-            if ($hasUsed) {
-                return 'Bạn đã sử dụng mã người mới này rồi';
             }
         }
         
         return 'Không đủ điều kiện sử dụng';
     }
-    
-    /**
-     * Kiểm tra xem có phải mã dành cho người mới không
-     */
-    private function isNewUserPromotion($promotion)
-    {
-        return $promotion->discount_percentage == 20 || stripos($promotion->code, 'NEW') !== false;
-    }
-    
-    /**
-     * Kiểm tra xem có phải mã dành cho người mới không (static method)
-     */
-    // private static function isNewUserPromotion($promotion)
-    // {
-    //     return $promotion->discount_percentage == 20 || stripos($promotion->code, 'NEW') !== false;
-    // }
 }
