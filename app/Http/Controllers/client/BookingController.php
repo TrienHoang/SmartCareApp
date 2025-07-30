@@ -191,7 +191,7 @@ class BookingController extends Controller
 
         $doctor_appointments = [];
         if (!$doctor_id) {
-            $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(7)])
+            $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(20)])
                 ->where('status', '!=', 'cancelled')
                 ->groupBy('doctor_id')
                 ->select('doctor_id', \DB::raw('count(*) as appointment_count'))
@@ -303,7 +303,7 @@ class BookingController extends Controller
         }
 
         $validated = $request->validate([
-            'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(7)->toDateString(),
+            'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(20)->toDateString(),
             'slot_start' => 'required|date_format:H:i',
             'reason' => 'nullable|string|max:255',
         ]);
