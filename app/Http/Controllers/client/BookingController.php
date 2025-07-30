@@ -517,16 +517,7 @@ class BookingController extends Controller
 
         // QUAN TRỌNG: Xóa session sau khi commit thành công
         $request->session()->forget(['booking_data', 'booking_confirm']);
-        $appointment = Appointment::create([
-            'patient_id' => $user->id,
-            'doctor_id' => $validated['doctor_id'],
-            'service_id' => $validated['service_id'],
-            'appointment_time' => $appointment_time,
-            'end_time' => $appointment_time->copy()->addMinutes($service->duration),
-            'status' => 'pending',
-            'reason' => $validated['reason'] ?? null,
-            'created_by' => $user->id,
-        ]);
+
 
         // === Xử lý mã giảm giá nếu có ===
         $discountAmount = 0;
@@ -636,11 +627,9 @@ class BookingController extends Controller
 
 
     // New method to handle VNPay return URL
-    public function paymentReturn(Request $request)
+     public function paymentReturn(Request $request)
     {
-        // \Log::info('VNPay RETURN callback:', $request->all());
-
-        $vnp_HashSecret = env('VNPAY_HASH_SECRET');
+        $vnp_HashSecret = env('VNPAY_HASH_SECRET', 'HSDJ58ZKRZ24ZSYULQGO0ISQ4205JON1');
         $vnp_SecureHash = $request->vnp_SecureHash;
         $inputData = $request->all();
         unset($inputData['vnp_SecureHash']);
@@ -652,7 +641,6 @@ class BookingController extends Controller
         $txnRef = $request->vnp_TxnRef;
         $responseCode = $request->vnp_ResponseCode;
         $appointmentId = explode('_', $txnRef)[0];
-
         $payment = Payment::where('appointment_id', $appointmentId)->first();
         $appointment = Appointment::find($appointmentId);
 
@@ -660,46 +648,47 @@ class BookingController extends Controller
             return redirect()->route('client.services')->with('error', 'Giao dịch không hợp lệ hoặc không tìm thấy.');
         }
 
-        // Nếu checksum hợp lệ và thanh toán thành công
         if ($secureHash === $vnp_SecureHash && $responseCode === '00') {
-            if ($payment->status !== 'paid') {
-                DB::beginTransaction();
-                try {
-                    $payDate = Carbon::createFromFormat('YmdHis', $request->vnp_PayDate);
+            DB::beginTransaction();
+            try {
+                $payment->update([
+                    'status' => 'confirmed',
+                    'paid_at' => Carbon::createFromFormat('YmdHis', $request->vnp_PayDate),
+                ]);
 
-                    $payment->update([
-                        'status'              => 'paid',
-                        'paid_at'             => $payDate,
-                        'vnp_txn_ref'         => $request->vnp_TxnRef,
-                        'vnp_transaction_no'  => $request->vnp_TransactionNo,
-                        'vnp_response_code'   => $request->vnp_ResponseCode,
-                    ]);
+                $appointment->update([
+                    'status' => 'confirmed',
+                ]);
 
-                    PaymentHistory::create([
-                        'payment_id'     => $payment->id,
-                        'amount'         => $request->vnp_Amount / 100,
-                        'payment_method' => 'vnpay',
-                        'payment_date'   => $payDate,
-                    ]);
-
-                    $appointment->update([
-                        'status' => 'confirmed',
-                    ]);
-
-                    DB::commit();
-                    return redirect()->route('booking.success')
-                        ->with('success', 'Thanh toán thành công! Lịch hẹn của bạn đã được xác nhận.');
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    \Log::error("Payment confirmation failed: " . $e->getMessage());
-                    return redirect()->route('client.services')
-                        ->with('error', 'Có lỗi xảy ra khi xác nhận thanh toán.');
-                }
+                DB::commit();
+                return redirect()->route('booking.success')
+                    ->with('success', 'Thanh toán thành công! Lịch hẹn của bạn đã được xác nhận.');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                \Log::error("Payment confirmation failed: " . $e->getMessage());
+                return redirect()->route('client.services')
+                    ->with('error', 'Có lỗi xảy ra khi xác nhận thanh toán.');
+            }
+        } elseif ($secureHash === $vnp_SecureHash && $responseCode === '24') {
+            // Handle user cancellation
+            DB::beginTransaction();
+            try {
+                $payment->delete(); // Delete the payment record
+                $appointment->delete(); // Delete the appointment record
+                DB::commit();
+                return redirect()->route('booking.showService', $appointment->service_id)
+                    ->with('error', 'Bạn đã hủy thanh toán. Lịch hẹn đã được xóa.');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                \Log::error("Payment cancellation and appointment deletion failed: " . $e->getMessage());
+                return redirect()->route('client.services')
+                    ->with('error', 'Có lỗi xảy ra khi hủy thanh toán và xóa lịch hẹn.');
             }
         } else {
             $payment->update([
-                'status' => 'unpaid',
+                'status' => 'cancelled',
             ]);
+
             $appointment->update([
                 'status' => 'cancelled',
             ]);
@@ -715,9 +704,7 @@ class BookingController extends Controller
      */
     public function paymentIpn(Request $request)
     {
-        // \Log::info('VNPay IPN callback:', $request->all());
-
-        $vnp_HashSecret = env('VNPAY_HASH_SECRET');
+        $vnp_HashSecret = env('VNPAY_HASH_SECRET', 'HSDJ58ZKRZ24ZSYULQGO0ISQ4205JON1');
         $vnp_SecureHash = $request->vnp_SecureHash;
         $inputData = $request->all();
         unset($inputData['vnp_SecureHash']);
@@ -729,7 +716,6 @@ class BookingController extends Controller
         $txnRef = $request->vnp_TxnRef;
         $responseCode = $request->vnp_ResponseCode;
         $appointmentId = explode('_', $txnRef)[0];
-
         $payment = Payment::where('appointment_id', $appointmentId)->first();
         $appointment = Appointment::find($appointmentId);
 
@@ -738,28 +724,12 @@ class BookingController extends Controller
         }
 
         if ($secureHash === $vnp_SecureHash && $responseCode === '00') {
-            if ($payment->status !== 'paid') {
+            if ($payment->status !== 'confirmed') {
                 DB::beginTransaction();
                 try {
-                    $payDate = Carbon::createFromFormat('YmdHis', $request->vnp_PayDate);
-
-                    \Log::info('Updating payment record', ['payment_id' => $payment->id]);
-
                     $payment->update([
-                        'status'              => 'paid',
-                        'paid_at'             => $payDate,
-                        'vnp_txn_ref'         => $request->vnp_TxnRef,
-                        'vnp_transaction_no'  => $request->vnp_TransactionNo,
-                        'vnp_response_code'   => $request->vnp_ResponseCode,
-                    ]);
-
-                    \Log::info('Payment updated', $payment->fresh()->toArray());
-
-                    PaymentHistory::create([
-                        'payment_id'     => $payment->id,
-                        'amount'         => $request->vnp_Amount / 100,
-                        'payment_method' => 'vnpay',
-                        'payment_date'   => $payDate,
+                        'status' => 'confirmed',
+                        'paid_at' => Carbon::createFromFormat('YmdHis', $request->vnp_PayDate),
                     ]);
 
                     $appointment->update([
@@ -776,15 +746,36 @@ class BookingController extends Controller
             } else {
                 return response()->json(['RspCode' => '02', 'Message' => 'Transaction already confirmed']);
             }
+        } elseif ($secureHash === $vnp_SecureHash && $responseCode === '24') {
+            // Handle user cancellation
+            if ($payment->status !== 'cancelled') {
+                DB::beginTransaction();
+                try {
+                    $payment->delete(); // Delete the payment record
+                    $appointment->delete(); // Delete the appointment record
+                    DB::commit();
+                    return response()->json(['RspCode' => '00', 'Message' => 'Cancellation processed']);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    \Log::error("IPN cancellation processing failed: " . $e->getMessage());
+                    return response()->json(['RspCode' => '99', 'Message' => 'Unknown error']);
+                }
+            }
+            return response()->json(['RspCode' => '01', 'Message' => 'Transaction already processed']);
         } else {
-            // Giao dịch thất bại
-            if ($payment->status !== 'unpaid') {
-                $payment->update(['status' => 'unpaid']);
-                $appointment->update(['status' => 'cancelled']);
+            if ($payment->status !== 'cancelled') {
+                $payment->update([
+                    'status' => 'cancelled',
+                ]);
+
+                $appointment->update([
+                    'status' => 'cancelled',
+                ]);
             }
             return response()->json(['RspCode' => '01', 'Message' => 'Transaction failed']);
         }
     }
+
 
     // New method for success page
     public function success()
