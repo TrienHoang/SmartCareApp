@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\Http;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\RefundSuccessfulMail;
 
 class AppointmentController extends Controller
 {
@@ -726,7 +727,7 @@ class AppointmentController extends Controller
 
     public function cancel($id)
     {
-        $appointment = Appointment::with('payment')->findOrFail($id);
+        $appointment = Appointment::with(['payment', 'patient'])->findOrFail($id);
 
         // 1. Không cho hủy nếu đã hoàn thành hoặc đã hủy
         if (in_array($appointment->status, ['completed', 'cancelled'])) {
@@ -1103,7 +1104,7 @@ class AppointmentController extends Controller
 
     public function refund($id)
     {
-        $appointment = Appointment::with('payment')->findOrFail($id);
+        $appointment = Appointment::with(['payment', 'patient'])->findOrFail($id);
         $payment = $appointment->payment;
 
         if (!$payment || $payment->status !== 'paid') {
@@ -1190,6 +1191,25 @@ class AppointmentController extends Controller
                         'payment_date' => now(),
                     ]);
 
+                    try {
+                        // Xác định lý do gửi
+                        if ($appointment->status === 'cancelled') {
+                            $reason = 'Lịch hẹn đã bị huỷ. Chúng tôi xin lỗi nếu có sự bất tiện xảy ra.';
+                        } elseif ($appointment->cancel_reason === 'doctor_unavailable') {
+                            $reason = 'Bác sĩ xin nghỉ đột xuất. Chúng tôi xin lỗi vì sự bất tiện này.';
+                        } else {
+                            $reason = 'Hoàn tiền theo chính sách hoặc yêu cầu từ phía quý khách.';
+                        }
+
+                        Mail::to($appointment->patient->email)
+                            ->send(new RefundSuccessfulMail($appointment, $reason));
+                    } catch (\Throwable $e) {
+                        Log::error('Lỗi gửi mail hoàn tiền', [
+                            'appointment_id' => $appointment->id,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+
                     return back()->with('success', '✅ [Giả lập] Hoàn tiền thành công qua VNPay (sandbox).');
                 }
 
@@ -1216,6 +1236,25 @@ class AppointmentController extends Controller
                     'payment_method' => 'vnpay_refund',
                     'payment_date' => now(),
                 ]);
+
+                try {
+                    // Xác định lý do gửi
+                    if ($appointment->status === 'cancelled') {
+                        $reason = 'Lịch hẹn đã bị huỷ. Chúng tôi xin lỗi nếu có sự bất tiện xảy ra.';
+                    } elseif ($appointment->cancel_reason === 'doctor_unavailable') {
+                        $reason = 'Bác sĩ xin nghỉ đột xuất. Chúng tôi xin lỗi vì sự bất tiện này.';
+                    } else {
+                        $reason = 'Hoàn tiền theo chính sách hoặc yêu cầu từ phía quý khách.';
+                    }
+
+                    Mail::to($appointment->patient->email)
+                        ->send(new RefundSuccessfulMail($appointment, $reason));
+                } catch (\Throwable $e) {
+                    Log::error('Lỗi gửi mail hoàn tiền', [
+                        'appointment_id' => $appointment->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
 
                 return back()->with('success', 'Hoàn tiền thành công qua VNPay.');
             }
@@ -1313,6 +1352,28 @@ class AppointmentController extends Controller
                     'payment_method' => 'vnpay_refund',
                     'payment_date' => now(),
                 ]);
+
+                try {
+                    $appointment = $payment->appointment;
+
+                    // Xác định lý do nếu có cột cancellation_reason
+                    if ($appointment->status === 'cancelled') {
+                        $reason = 'Lịch hẹn đã bị huỷ. Chúng tôi xin lỗi nếu có sự bất tiện xảy ra.';
+                    } elseif ($appointment->cancel_reason === 'doctor_unavailable') {
+                        $reason = 'Bác sĩ xin nghỉ đột xuất. Chúng tôi xin lỗi vì sự bất tiện này.';
+                    } else {
+                        $reason = 'Hoàn tiền theo chính sách hoặc yêu cầu từ phía quý khách.';
+                    }
+
+                    Mail::to($appointment->patient->email)
+                        ->send(new RefundSuccessfulMail($appointment, $reason));
+                } catch (\Throwable $e) {
+                    Log::error('Lỗi gửi mail hoàn tiền (performVnpayRefund)', [
+                        'appointment_id' => $payment->appointment_id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+
 
                 return ['success' => true];
             }
