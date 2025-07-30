@@ -97,7 +97,7 @@ class ReceptionAppointmentController extends Controller
                 $q->where('full_name', 'like', "%$keyword%")
                     ->orWhere('phone', 'like', "%$keyword%")
                     ->orWhere('email', 'like', "%$keyword%");
-            })->get(['id', 'full_name', 'phone', 'email']);
+            })->get(['id', 'full_name', 'phone', 'email', 'role_id']);
 
         return response()->json($patients);
     }

@@ -4,15 +4,16 @@ namespace App\Http\Controllers\reception;
 
 use App\Http\Controllers\Controller;
 use App\Models\Patient;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class PatientController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Patient::all();
-        $query = Patient::query();
+        $query = User::where('role_id', 5);
 
         if ($search = $request->input('search')) {
             $query->where('full_name', 'like', "%$search%")
@@ -30,6 +31,13 @@ class PatientController extends Controller
         return view('reception.patients.create');
     }
 
+    private function generateUsername($fullName)
+    {
+        $slug = Str::slug($fullName);
+        $random = rand(1000, 9999);
+        return $slug . $random;
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate(
@@ -41,7 +49,7 @@ class PatientController extends Controller
                     'unique:patients,phone',
                 ],
                 'email'          => ['nullable', 'email', 'unique:patients,email'],
-                'gender'         => ['nullable', 'in:male,female'],
+                'gender' => ['nullable', 'in:Nam,Nữ'],
                 'date_of_birth'  => ['nullable', 'date', 'before:today'],
                 'address'        => ['nullable', 'string', 'max:255'],
             ],
@@ -57,16 +65,17 @@ class PatientController extends Controller
             ]
         );
 
-        Patient::create([
-            'user_id'        => Auth::id(), // Lưu ID người dùng hiện tại
-            'full_name'      => $validated['full_name'],
-            'phone'          => $validated['phone'],
-            'email'          => $validated['email'] ?? null,
-            'gender'         => $validated['gender'] ?? null,
-            'date_of_birth'  => $validated['date_of_birth'] ?? null,
+        User::create([
+            'full_name'     => $validated['full_name'],
+            'username'      => $this->generateUsername($validated['full_name']),
+            'phone'         => $validated['phone'],
+            'email'         => $validated['email'] ?? null,
+            'gender'        => $validated['gender'] ?? null,
+            'date_of_birth' => $validated['date_of_birth'] ?? null,
             'address'       => $validated['address'] ?? null,
-            'role_id'      => '5',
-            'status'       => 'online',
+            'role_id'       => 5, // bệnh nhân không tài khoản
+            'status'        => 'online',
+            'password'      => bcrypt(Str::random(8)),
         ]);
 
         return redirect()->route('receptionist.patients.index')->with('success', 'Tạo hồ sơ thành công!');
@@ -74,13 +83,15 @@ class PatientController extends Controller
 
     public function edit($id)
     {
-        $patient = Patient::findOrFail($id);
+        $patient = User::where('role_id', 5)->findOrFail($id);
+
         return view('reception.patients.edit', compact('patient'));
     }
 
     public function update(Request $request, $id)
     {
-        $patient = Patient::findOrFail($id);
+        $patient = User::where('role_id', 5)->findOrFail($id);
+
 
         $validated = $request->validate(
             [
