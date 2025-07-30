@@ -152,12 +152,11 @@ Route::middleware(['auth'])->group(function () {
             'scale'      => 3,
             'imageBase64'  => false,
         ]);
-    
+
         $image = (new QRCode($options))->render($data);
-    
+
         return Response::make($image, 200, ['Content-Type' => 'image/png']);
     })->name('qr.generate');
-    
 });
 
 
