@@ -248,7 +248,7 @@ class TreatmentPlanController extends Controller
     public function history($id)
     {
         $plan = TreatmentPlan::findOrFail($id);
-        $histories = $plan->histories()->with('changedBy:id,full_name')->get();
+        $histories = $plan->histories()->with('changedBy:id')->get();
 
         return view('admin.treatment_plans.history', compact('plan', 'histories'));
     }
