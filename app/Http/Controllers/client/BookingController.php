@@ -631,12 +631,12 @@ class BookingController extends Controller
             DB::beginTransaction();
             try {
                 $payment->update([
-                    'status' => 'paid',
+                    'status' => 'pending',
                     'paid_at' => Carbon::createFromFormat('YmdHis', $request->vnp_PayDate),
                 ]);
 
                 $appointment->update([
-                    'status' => 'confirmed',
+                    'status' => 'pending', // Assuming 'pending' means confirmed in this context
                 ]);
 
                 DB::commit();
