@@ -6,7 +6,7 @@ use App\Http\Controllers\Client\ServiceController;
 use App\Http\Controllers\client\PrescriptionClientController;
 use App\Http\Controllers\client\ClientFileController;
 use App\Http\Controllers\Client\PaymentHistoryClientController;
-
+use App\Http\Controllers\Client\BookingController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Client\PaymentController;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +15,8 @@ use App\Http\Controllers\Client\ReviewReplyController;
 use App\Http\Controllers\Client\AppointmentController;
 use App\Http\Controllers\Client\DoctorController;
 use App\Http\Controllers\Client\AppointmentClientController;
+use chillerlan\QRCode\{QRCode, QROptions};
+use Illuminate\Support\Facades\Response;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -135,6 +137,20 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/payment/return', [BookingController::class, 'paymentReturn'])->name('payment.return');
     // Route::match(['get', 'post'], '/payment/ipn', [BookingController::class, 'paymentIpn'])->name('payment.ipn');
     Route::get('/booking/success', [BookingController::class, 'success'])->name('booking.success');
+
+    Route::get('/qr-code/{data}', function ($data) {
+        $options = new QROptions([
+            'outputType' => QRCode::OUTPUT_IMAGE_PNG,
+            'eccLevel'   => QRCode::ECC_L,
+            'scale'      => 3,
+            'imageBase64'  => false,
+        ]);
+    
+        $image = (new QRCode($options))->render($data);
+    
+        return Response::make($image, 200, ['Content-Type' => 'image/png']);
+    })->name('qr.generate');
+    
 });
 
 
@@ -155,14 +171,14 @@ Route::prefix('client/appointments')->name('client.appointments.')->middleware([
     Route::get('/{appointment}', [AppointmentClientController::class, 'show'])->name('show'); // Chi tiết lịch hẹn
     Route::get('/{appointment}/edit', [AppointmentClientController::class, 'edit'])->name('edit'); // Sửa lịch hẹn
     Route::put('/{appointment}', [AppointmentClientController::class, 'update'])->name('update'); // Cập nhật
-Route::delete('/{appointment}/cancel', [AppointmentClientController::class, 'cancel'])->name('cancel');
-// Hủy lịch hẹn
+    Route::delete('/{appointment}/cancel', [AppointmentClientController::class, 'cancel'])->name('cancel');
+    // Hủy lịch hẹn
 });
 // Sửa lại routes của bạn như sau:
 
 Route::prefix('client/notifications')->middleware('auth')->name('client.notifications.')->group(function () {
     Route::get('/', [ClientNotificationController::class, 'index'])->name('index');
-    
+
     // 👇 Các route tĩnh (string) phải để TRƯỚC
     Route::delete('/delete-all', [ClientNotificationController::class, 'deleteAll'])->name('deleteAll');
     Route::post('/mark-all-as-read', [ClientNotificationController::class, 'markAllAsRead'])->name('mark-all-as-read');

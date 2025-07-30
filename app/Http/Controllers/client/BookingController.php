@@ -9,6 +9,7 @@ use App\Models\Service;
 use App\Models\Doctor;
 use App\Models\WorkingSchedule;
 use App\Models\Appointment;
+use App\Models\DoctorLeave;
 use App\Models\Payment; // Assumed Payment model
 use App\Models\PaymentHistory;
 use Carbon\Carbon;
@@ -16,6 +17,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Log;
+use Illuminate\Support\Str;
+use chillerlan\QRCode\{QRCode, QROptions};
+use Illuminate\Support\Facades\Response;
 
 class BookingController extends Controller
 {
@@ -92,7 +96,7 @@ class BookingController extends Controller
         $end_of_month = Carbon::create($queryYear, $queryMonth + 1, 1)->endOfMonth()->endOfDay();
         $search_start_date = $start_of_month->copy()->subWeeks(1);
         $search_end_date = $end_of_month->copy()->addWeeks(1);
-        $current_today = Carbon::today()->startOfDay();
+        $current_datetime = Carbon::now();
 
         if ($doctor_id) {
             $doctor_ids = [$doctor_id];
@@ -124,6 +128,20 @@ class BookingController extends Controller
             return response()->json([]);
         }
 
+        // Lấy lịch nghỉ của bác sĩ
+        $leaves = DoctorLeave::whereIn('doctor_id', $doctor_ids)
+            ->where('approved', true)
+            ->whereNull('deleted_at')
+            ->where(function ($query) use ($search_start_date, $search_end_date) {
+                $query->whereBetween('start_date', [$search_start_date, $search_end_date])
+                    ->orWhereBetween('end_date', [$search_start_date, $search_end_date])
+                    ->orWhere(function ($query) use ($search_start_date, $search_end_date) {
+                        $query->where('start_date', '<=', $search_start_date)
+                            ->where('end_date', '>=', $search_end_date);
+                    });
+            })
+            ->get();
+
         $schedules = WorkingSchedule::whereIn('doctor_id', $doctor_ids)
             ->where('status', 'Đã xét duyệt')
             ->whereBetween('day', [$search_start_date->toDateString(), $search_end_date->toDateString()])
@@ -133,20 +151,28 @@ class BookingController extends Controller
         $available_dates = [];
         foreach ($schedules as $schedule) {
             $date = Carbon::parse($schedule->day);
-            $shift = $schedule->shift;
 
+            // Kiểm tra xem ngày có nằm trong lịch nghỉ không
+            $is_on_leave = $leaves->contains(function ($leave) use ($date, $schedule) {
+                $leave_start = Carbon::parse($leave->start_date);
+                $leave_end = Carbon::parse($leave->end_date);
+                return $date->between($leave_start, $leave_end) && $leave->doctor_id == $schedule->doctor_id;
+            });
+
+            if ($is_on_leave) {
+                continue;
+            }
+
+            $shift = $schedule->shift;
             if (!$shift) {
                 continue;
             }
 
-            $start_time_str = $shift->start_time;
-            $end_time_str = $shift->end_time;
-
             try {
-                $start = Carbon::parse($start_time_str);
-                $end = Carbon::parse($end_time_str);
+                $start = Carbon::parse($shift->start_time);
+                $end = Carbon::parse($shift->end_time);
             } catch (\Exception $e) {
-                \Log::error("Invalid shift time for schedule ID {$schedule->id}: Start: {$start_time_str}, End: {$end_time_str}");
+                \Log::error("Invalid shift time for schedule ID {$schedule->id}: Start: {$shift->start_time}, End: {$shift->end_time}");
                 continue;
             }
 
@@ -156,7 +182,9 @@ class BookingController extends Controller
                 $slot_start = $current->format('H:i');
                 $slot_full_datetime = $date->copy()->setTimeFromTimeString($slot_start);
 
-                if ($slot_full_datetime->lt(Carbon::now())) {
+                // Kiểm tra thời gian đặt tối thiểu và thời gian quá khứ
+                $hours_diff = $current_datetime->diffInHours($slot_full_datetime, false);
+                if ($hours_diff < $service->min_booking_hours || $slot_full_datetime->lt($current_datetime)) {
                     $current->addMinutes($service->duration);
                     continue;
                 }
@@ -167,7 +195,10 @@ class BookingController extends Controller
                     ->exists();
 
                 if (!$booked) {
-                    $available_dates[$date->format('Y-m-d')] = true;
+                    $date_str = $date->format('Y-m-d');
+                    if (!in_array($date_str, $available_dates)) {
+                        $available_dates[] = $date_str;
+                    }
                     break;
                 }
 
@@ -191,6 +222,7 @@ class BookingController extends Controller
         $doctor_id = $validated['doctor_id'];
         $current_datetime = Carbon::now();
 
+        // Lấy danh sách bác sĩ và số lịch hẹn (nếu random)
         $doctor_appointments = [];
         if (!$doctor_id) {
             $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(7)])
@@ -218,6 +250,20 @@ class BookingController extends Controller
             ->with('shift')
             ->get();
 
+        // Lấy lịch nghỉ của bác sĩ cho ngày được chọn
+        $leaves = DoctorLeave::whereIn('doctor_id', $schedules->pluck('doctor_id'))
+            ->where('approved', true)
+            ->whereNull('deleted_at')
+            ->where(function ($query) use ($selected_date) {
+                $query->whereBetween('start_date', [$selected_date, $selected_date->copy()->endOfDay()])
+                    ->orWhereBetween('end_date', [$selected_date, $selected_date->copy()->endOfDay()])
+                    ->orWhere(function ($query) use ($selected_date) {
+                        $query->where('start_date', '<=', $selected_date)
+                            ->where('end_date', '>=', $selected_date);
+                    });
+            })
+            ->get();
+
         $available_slots = [];
 
         foreach ($schedules as $schedule) {
@@ -230,26 +276,41 @@ class BookingController extends Controller
                 $start = Carbon::parse($shift->start_time);
                 $end = Carbon::parse($shift->end_time);
             } catch (\Exception $e) {
+                \Log::error("Invalid shift time for schedule ID {$schedule->id}: Start: {$shift->start_time}, End: {$shift->end_time}");
                 continue;
             }
 
             $current_slot_time = $start->copy();
-
             while ($current_slot_time->lessThan($end)) {
                 $slot_end_time = $current_slot_time->copy()->addMinutes($service->duration);
 
+                // Kiểm tra slot kết thúc không vượt quá end_time
                 if ($slot_end_time->greaterThan($end)) {
                     break;
                 }
 
                 $slot_full_datetime = $selected_date->copy()->setTimeFrom($current_slot_time);
 
+                // Kiểm tra lịch nghỉ
+                $is_on_leave = $leaves->contains(function ($leave) use ($slot_full_datetime) {
+                    $leave_start = Carbon::parse($leave->start_date);
+                    $leave_end = Carbon::parse($leave->end_date);
+                    return $slot_full_datetime->between($leave_start, $leave_end) && $leave->doctor_id == $schedule->doctor_id;
+                });
+
+                if ($is_on_leave) {
+                    $current_slot_time->addMinutes($service->duration);
+                    continue;
+                }
+
+                // Kiểm tra thời gian đặt tối thiểu và thời gian quá khứ
                 $hours_diff = $current_datetime->diffInHours($slot_full_datetime, false);
                 if ($hours_diff < $service->min_booking_hours || $slot_full_datetime->lt($current_datetime)) {
                     $current_slot_time->addMinutes($service->duration);
                     continue;
                 }
 
+                // Kiểm tra slot đã được đặt
                 $booked = Appointment::where('doctor_id', $schedule->doctor_id)
                     ->where('appointment_time', $slot_full_datetime)
                     ->where('status', '!=', 'cancelled')
@@ -262,6 +323,7 @@ class BookingController extends Controller
 
                 $slot_key = $current_slot_time->format('H:i') . '-' . $slot_end_time->format('H:i');
 
+                // Kiểm tra slot đã tồn tại
                 if (!isset($available_slots[$slot_key])) {
                     $available_slots[$slot_key] = [
                         'start' => $current_slot_time->format('H:i'),
@@ -270,6 +332,7 @@ class BookingController extends Controller
                         'appointment_count' => $doctor_id ? 0 : ($doctor_appointments[$schedule->doctor_id] ?? 0),
                     ];
                 } else {
+                    // Nếu slot đã tồn tại và là random, ưu tiên bác sĩ có ít lịch hẹn hơn
                     if (!$doctor_id) {
                         $current_count = $doctor_appointments[$schedule->doctor_id] ?? 0;
                         $existing_count = $available_slots[$slot_key]['appointment_count'];
@@ -284,11 +347,13 @@ class BookingController extends Controller
             }
         }
 
+        // Chuyển mảng kết quả về dạng danh sách
         $result = array_values($available_slots);
         usort($result, function ($a, $b) {
             return strtotime($a['start']) - strtotime($b['start']);
         });
 
+        // Loại bỏ appointment_count khỏi kết quả
         $result = array_map(function ($slot) {
             unset($slot['appointment_count']);
             return $slot;
@@ -429,6 +494,29 @@ class BookingController extends Controller
             return redirect()->route('booking.showService', $booking_confirm['service_id'])->with('error', 'Khung giờ này đã có người khác đặt hoặc không còn khả dụng.');
         }
 
+        // Tạo một mã QR duy nhất (UUID) cho cuộc hẹn
+        $qrCodeData = (string) Str::uuid();
+        if ($booked) {
+            DB::rollBack();
+            return redirect()->route('booking.showService', $booking_confirm['service_id'])->with('error', 'Khung giờ này đã có người khác đặt hoặc không còn khả dụng.');
+        }
+
+        $appointment = Appointment::create([
+            'patient_id' => $user->id,
+            'doctor_id' => $validated['doctor_id'],
+            'service_id' => $validated['service_id'],
+            'appointment_time' => $appointment_time,
+            'end_time' => $appointment_time->copy()->addMinutes($service->duration),
+            'status' => 'pending',
+            'reason' => $validated['reason'] ?? null,
+            'created_by' => $user->id,
+            'qr_code' => $qrCodeData,
+        ]);
+
+        DB::commit();
+
+        // QUAN TRỌNG: Xóa session sau khi commit thành công
+        $request->session()->forget(['booking_data', 'booking_confirm']);
         $appointment = Appointment::create([
             'patient_id' => $user->id,
             'doctor_id' => $validated['doctor_id'],
@@ -484,7 +572,8 @@ class BookingController extends Controller
             'selected_promotion_discount'
         ]);
 
-        DB::commit();
+        // Redirect với flash session data
+
 
         // Gọi VNPay kèm giá đã giảm
         $vnpayUrl = $this->initiateVNPayPayment($appointment, $service, $finalPrice, $promotion);
@@ -544,7 +633,6 @@ class BookingController extends Controller
 
         return $vnp_Url;
     }
-
 
 
     // New method to handle VNPay return URL
