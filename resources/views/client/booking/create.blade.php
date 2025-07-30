@@ -346,7 +346,7 @@
         let currentViewDate = new Date();
         let selectedDate = null;
         let selectedTimeSlot = null;
-        let availableDates = [];
+        let availableDates = []; // Khởi tạo là mảng rỗng, phù hợp với dữ liệu nhận được
 
         const monthYearDisplay = document.getElementById('monthYearDisplay');
         const calendarGrid = document.getElementById('calendarGrid');
@@ -441,7 +441,6 @@
                 })
                 .then(response => {
                     if (!response.ok) {
-                        // Xử lý lỗi HTTP nếu có
                         return response.json().then(errorData => {
                             throw new Error(errorData.message || 'Server responded with an error');
                         });
@@ -449,6 +448,7 @@
                     return response.json();
                 })
                 .then(data => {
+                    // availableDates bây giờ là một MẢNG các chuỗi ngày
                     availableDates = data;
                     // Debug: In ra console để kiểm tra dữ liệu
                     console.log('Available dates received:', availableDates);
@@ -457,7 +457,6 @@
                 .catch(error => {
                     console.error('Error fetching available dates:', error);
                     calendarGrid.classList.remove('loading');
-                    // Hiển thị thông báo lỗi cho người dùng nếu cần
                 });
         }
 
@@ -501,7 +500,6 @@
                         }
                     });
 
-
                     morning.forEach(slot => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
@@ -536,11 +534,12 @@
 
                     console.log(`Morning slots: ${morning.length}, Afternoon slots: ${afternoon.length}`);
 
-                    if (morning.length == 0) {
+                    // Logic hiển thị thông báo "Không còn khung giờ trống"
+                    if (morning.length === 0) { // Sử dụng === 0 thay vì == 0
                         morningSlots.innerHTML = '<p class="text-gray-500">Không còn khung giờ trống.</p>';
-                    } else if (afternoon.length == 0) {
-                        morningSlots.innerHTML = '<p class="text-gray-500">Không còn khung giờ trống.</p>';
-
+                    }
+                    if (afternoon.length === 0) { // Sử dụng === 0 thay vì == 0
+                        afternoonSlots.innerHTML = '<p class="text-gray-500">Không còn khung giờ trống.</p>';
                     }
                 })
                 .catch(error => {
@@ -556,14 +555,14 @@
             setTimeout(() => {
                 calendarGrid.innerHTML = '';
                 calendarGrid.innerHTML += `
-            <div class="font-bold text-gray-600 py-3 text-sm text-red-600">CN</div>
-            <div class="font-bold text-gray-600 py-3 text-sm">Hai</div>
-            <div class="font-bold text-gray-600 py-3 text-sm">Ba</div>
-            <div class="font-bold text-gray-600 py-3 text-sm">Tư</div>
-            <div class="font-bold text-gray-600 py-3 text-sm">Năm</div>
-            <div class="font-bold text-gray-600 py-3 text-sm">Sáu</div>
-            <div class="font-bold text-gray-600 py-3 text-sm text-yellow-600">Bảy</div>
-        `;
+                <div class="font-bold text-gray-600 py-3 text-sm text-red-600">CN</div>
+                <div class="font-bold text-gray-600 py-3 text-sm">Hai</div>
+                <div class="font-bold text-gray-600 py-3 text-sm">Ba</div>
+                <div class="font-bold text-gray-600 py-3 text-sm">Tư</div>
+                <div class="font-bold text-gray-600 py-3 text-sm">Năm</div>
+                <div class="font-bold text-gray-600 py-3 text-sm">Sáu</div>
+                <div class="font-bold text-gray-600 py-3 text-sm text-yellow-600">Bảy</div>
+            `;
                 const year = currentViewDate.getFullYear();
                 const month = currentViewDate.getMonth();
                 monthYearDisplay.textContent = `${monthNames[month]} - ${year}`;
@@ -571,14 +570,14 @@
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
                 const daysInPrevMonth = new Date(year, month, 0).getDate();
                 const today = new Date();
-                today.setHours(0, 0, 0, 0);
+                today.setHours(0, 0, 0, 0); // Chuẩn hóa today về 00:00:00
 
                 // Add leading days (from previous month)
                 for (let i = 0; i < firstDayOfMonth; i++) {
                     const day = daysInPrevMonth - firstDayOfMonth + i + 1;
                     const cell = document.createElement('div');
                     cell.classList.add('date-cell', 'disabled', 'p-3', 'bg-gray-50', 'rounded-lg', 'text-gray-400',
-                        'text-base', 'font-medium');
+                        'text-base', 'font-medium', 'pointer-events-none'); // Thêm pointer-events-none
                     cell.textContent = day;
                     calendarGrid.appendChild(cell);
                 }
@@ -591,35 +590,42 @@
                     cell.textContent = day;
 
                     const fullDate = new Date(year, month, day);
-                    fullDate.setHours(0, 0, 0, 0);
+                    fullDate.setHours(0, 0, 0, 0); // Chuẩn hóa fullDate về 00:00:00
 
                     // Sử dụng hàm helper để format ngày
                     const dateStr = formatDateToString(fullDate);
 
                     // Debug: In ra console để kiểm tra
-                    // console.log(`Checking date: ${dateStr}, Available: ${availableDates[dateStr]}`);
+                    // console.log(`Checking date: ${dateStr}, Available: ${availableDates.includes(dateStr)}`);
 
+                    // Kiểm tra ngày hôm nay
                     if (fullDate.getDate() === today.getDate() &&
                         fullDate.getMonth() === today.getMonth() &&
                         fullDate.getFullYear() === today.getFullYear()) {
                         cell.classList.add('today');
                     }
+                    // Kiểm tra thứ 7, Chủ Nhật
                     if (fullDate.getDay() === 6) {
                         cell.classList.add('saturday-text');
                     }
                     if (fullDate.getDay() === 0) {
                         cell.classList.add('sunday-text');
                     }
+                    // Kiểm tra ngày được chọn
                     if (selectedDate &&
                         fullDate.getDate() === selectedDate.getDate() &&
                         fullDate.getMonth() === selectedDate.getMonth() &&
                         fullDate.getFullYear() === selectedDate.getFullYear()) {
                         cell.classList.add('selected');
                     }
-                    if (fullDate.getTime() < today.getTime() || !availableDates.hasOwnProperty(dateStr) || !
-                        availableDates[dateStr]) {
+
+                    // === LOGIC QUAN TRỌNG ĐÃ SỬA ĐỔI ===
+                    // Vô hiệu hóa ngày trong quá khứ HOẶC ngày không có trong availableDates
+                    // availableDates bây giờ là một MẢNG, nên dùng .includes()
+                    if (fullDate.getTime() < today.getTime() || !availableDates.includes(dateStr)) {
                         cell.classList.add('disabled');
                         cell.classList.remove('cursor-pointer', 'hover:border-blue-300');
+                        cell.classList.add('pointer-events-none'); // Đảm bảo không thể click
                     } else {
                         cell.classList.add('cursor-pointer', 'border', 'border-gray-200', 'hover:border-blue-300');
                         cell.addEventListener('click', debounce(() => {
@@ -651,7 +657,7 @@
                 for (let i = 1; i <= remainingCells; i++) {
                     const cell = document.createElement('div');
                     cell.classList.add('date-cell', 'disabled', 'p-3', 'bg-gray-50', 'rounded-lg', 'text-gray-400',
-                        'text-base', 'font-medium');
+                        'text-base', 'font-medium', 'pointer-events-none'); // Thêm pointer-events-none
                     cell.textContent = i;
                     calendarGrid.appendChild(cell);
                 }
