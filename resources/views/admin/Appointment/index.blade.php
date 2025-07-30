@@ -247,12 +247,66 @@
                                     </span>
                                 </td>
                                 <td data-label="Thanh toán">
-                                    @if (
-                                        ($appointment->payment && $appointment->payment->status === 'paid') ||
-                                            ($appointment->order && $appointment->order->status === 'completed'))
-                                        <span class="badge bg-success">Hoàn tất</span>
+                                    @php
+                                        $payment = optional($appointment->payment);
+                                    @endphp
+
+                                    {{-- Nếu đã hoàn tiền toàn bộ thì ưu tiên hiển thị --}}
+                                    @if ($payment && $payment->refund_status === 'completed')
+                                        <span class="badge bg-success">
+                                            <i class="bx bx-check-circle me-1"></i>
+                                            Đã hoàn tiền
+                                        </span>
                                     @else
-                                        <span class="badge bg-danger">Chưa thanh toán</span>
+                                        {{-- Nếu chưa hoàn tiền toàn bộ thì hiển thị theo status thanh toán --}}
+                                        @switch($payment->status)
+                                            @case('paid')
+                                                <span class="badge bg-success">
+                                                    <i class="bx bx-check-circle me-1"></i>
+                                                    Đã thanh toán
+                                                </span>
+                                            @break
+
+                                            @case('overpaid')
+                                                <span class="badge bg-info text-dark">
+                                                    <i class="bx bx-money me-1"></i>
+                                                    Đã thanh toán (dư)
+                                                </span>
+                                            @break
+
+                                            @case('underpaid')
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="bx bx-error-circle me-1"></i>
+                                                    Chưa thanh toán đủ
+                                                </span>
+                                            @break
+
+                                            @default
+                                                <span class="badge bg-danger">
+                                                    <i class="bx bx-x-circle me-1"></i>
+                                                    Chưa thanh toán
+                                                </span>
+                                        @endswitch
+                                    @endif
+
+                                    {{-- Nếu refund_status khác rỗng và chưa completed thì hiển thị thêm dòng bên dưới --}}
+                                    @if ($payment && $payment->status === 'underpaid' && $payment->refund_status && $payment->refund_status !== 'completed')
+                                        @php
+                                            $refundConfig = [
+                                                'none' => ['text' => 'Chưa hoàn tiền', 'color' => 'secondary'],
+                                                'pending' => ['text' => 'Đang hoàn tiền', 'color' => 'warning'],
+                                                'failed' => ['text' => 'Hoàn tiền lỗi', 'color' => 'danger'],
+                                            ];
+                                            $refund = $refundConfig[$payment->refund_status] ?? [
+                                                'text' => 'Không rõ',
+                                                'color' => 'dark',
+                                            ];
+                                        @endphp
+                                        <br>
+                                        <span class="badge bg-{{ $refund['color'] }}">
+                                            <i class="bx bx-undo me-1"></i>
+                                            {{ $refund['text'] }}
+                                        </span>
                                     @endif
                                 </td>
                                 <td data-label="Thao tác">
@@ -305,12 +359,12 @@
                                         @endif
 
                                         {{-- Hoàn tiền VNPay --}}
-                                        @if (
-                                            $appointment->status === 'cancelled' &&
-                                                optional($appointment->payment)->status === 'paid' &&
+                                        @if (in_array($appointment->status, ['cancelled', 'completed']) &&
+                                                in_array(optional($appointment->payment)->status, ['paid', 'overpaid']) &&
                                                 !optional($appointment->payment)->is_refunded)
                                             <form action="{{ route('admin.appointments.refund', $appointment->id) }}"
-                                                method="POST" class="d-inline">
+                                                method="POST" class="d-inline"
+                                                onsubmit="return confirm('Bạn chắc chắn muốn hoàn tiền? Hành động này không thể hoàn tác.')">
                                                 @csrf
                                                 <button class="btn btn-sm btn-outline-danger" title="Hoàn tiền VNPay">
                                                     <i class="bx bx-undo"></i> Hoàn tiền
@@ -320,92 +374,92 @@
                                     </div>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="text-center py-4">
-                                    <div class="text-muted">
-                                        <i class="bx bx-calendar-x" style="font-size: 3rem;"></i>
-                                        <div class="mt-2">Không tìm thấy lịch hẹn nào</div>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            @if ($appointments->hasPages())
-                <div class="card-footer">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="text-muted">
-                            Hiển thị {{ $appointments->firstItem() }} - {{ $appointments->lastItem() }} trong tổng số
-                            {{ $appointments->total() }} bản ghi
-                        </div>
-                        {{ $appointments->appends(request()->query())->links('pagination::bootstrap-5') }}
-                    </div>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="bx bx-calendar-x" style="font-size: 3rem;"></i>
+                                            <div class="mt-2">Không tìm thấy lịch hẹn nào</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
-            @endif
-        </div>
-    </div>
 
-    <!-- Modal cập nhật trạng thái -->
-    <div class="modal fade" id="statusModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Cập nhật trạng thái lịch hẹn</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="statusForm" method="POST">
-                    @csrf
-                    @method('PATCH')
-                    <div class="modal-body">
-                        <input type="hidden" name="current_status" id="currentStatusInput" value="">
-                        <div class="mb-3">
-                            <label class="form-label">Trạng thái mới</label>
-                            <select class="form-control" name="status" id="statusSelect" required>
-                                <option value="pending">Chờ xác nhận</option>
-                                <option value="confirmed">Đã xác nhận</option>
-                                <option value="completed">Hoàn thành</option>
-                                <option value="cancelled">Đã hủy</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Ghi chú (tùy chọn)</label>
-                            <textarea class="form-control" name="note" rows="3"
-                                placeholder="Nhập ghi chú về việc thay đổi trạng thái..."></textarea>
+                @if ($appointments->hasPages())
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted">
+                                Hiển thị {{ $appointments->firstItem() }} - {{ $appointments->lastItem() }} trong tổng số
+                                {{ $appointments->total() }} bản ghi
+                            </div>
+                            {{ $appointments->appends(request()->query())->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-primary">Cập nhật</button>
-                    </div>
-                </form>
+                @endif
             </div>
         </div>
-    </div>
 
-    {{-- Modal hủy lịch hẹn --}}
-    <div class="modal fade" id="cancelModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form id="cancelForm" method="POST">
-                    @csrf
-                    @method('PATCH')
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title">Xác nhận hủy lịch hẹn</h5>
+        <!-- Modal cập nhật trạng thái -->
+        <div class="modal fade" id="statusModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cập nhật trạng thái lịch hẹn</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
-                        <p>Bạn có chắc chắn muốn <strong>hủy lịch hẹn</strong> này không?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không</button>
-                        <button type="submit" class="btn btn-danger">Xác nhận hủy</button>
-                    </div>
-                </form>
+                    <form id="statusForm" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <div class="modal-body">
+                            <input type="hidden" name="current_status" id="currentStatusInput" value="">
+                            <div class="mb-3">
+                                <label class="form-label">Trạng thái mới</label>
+                                <select class="form-control" name="status" id="statusSelect" required>
+                                    <option value="pending">Chờ xác nhận</option>
+                                    <option value="confirmed">Đã xác nhận</option>
+                                    <option value="completed">Hoàn thành</option>
+                                    <option value="cancelled">Đã hủy</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Ghi chú (tùy chọn)</label>
+                                <textarea class="form-control" name="note" rows="3"
+                                    placeholder="Nhập ghi chú về việc thay đổi trạng thái..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-    <script src="{{ asset('js/Appointment/index.js') }}"></script>
-@endsection
+
+        {{-- Modal hủy lịch hẹn --}}
+        <div class="modal fade" id="cancelModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="cancelForm" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">Xác nhận hủy lịch hẹn</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Bạn có chắc chắn muốn <strong>hủy lịch hẹn</strong> này không?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không</button>
+                            <button type="submit" class="btn btn-danger">Xác nhận hủy</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <script src="{{ asset('js/Appointment/index.js') }}"></script>
+    @endsection

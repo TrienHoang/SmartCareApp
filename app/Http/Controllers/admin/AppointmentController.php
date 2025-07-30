@@ -656,20 +656,24 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
+        $oldPrice = optional($appointment->service)->price ?? 0;
+        $newPrice = $newService->price;
+        $priceChanged = $oldPrice != $newPrice;
+
         if ($payment) {
-            $newPrice = $newService->price;
             $alreadyPaid = PaymentHistory::where('payment_id', $payment->id)->sum('amount');
             $remaining = $newPrice - $alreadyPaid;
 
-            if ($remaining > 0) {
-                $payment->status = 'underpaid';
-                $payment->note = 'Cần thu thêm: ' . number_format($remaining) . '₫';
-            } elseif ($remaining < 0) {
-                $payment->status = 'overpaid';
-                $payment->note = 'Cần hoàn lại: ' . number_format(abs($remaining)) . '₫';
-            } else {
+            if (abs($remaining) < 1) {
                 $payment->status = 'paid';
                 $payment->note = null;
+                $remaining = 0;
+            } elseif ($remaining > 0) {
+                $payment->status = 'underpaid';
+                $payment->note = 'Cần thu thêm: ' . number_format($remaining) . '₫';
+            } else {
+                $payment->status = 'overpaid';
+                $payment->note = 'Cần hoàn lại: ' . number_format(abs($remaining)) . '₫';
             }
 
             $payment->amount = $newPrice;
@@ -703,7 +707,7 @@ class AppointmentController extends Controller
                 ));
             }
 
-            if ($payment) {
+            if ($payment && $priceChanged && $payment->status !== 'paid') {
                 if ($payment->status === 'underpaid') {
                     session()->flash('warning', 'Dịch vụ mới đắt hơn, cần thu thêm tiền từ bệnh nhân.');
                 } elseif ($payment->status === 'overpaid') {
@@ -1118,23 +1122,25 @@ class AppointmentController extends Controller
             return back()->withErrors(['error' => 'Không tìm thấy thời gian thanh toán.']);
         }
 
+        Log::info('🧾 Gọi refund thủ công', ['payment_id' => $payment->id]);
+
         // Load config
         $vnp_TmnCode = config('services.vnpay.tmn_code');
         $vnp_HashSecret = config('services.vnpay.hash_secret');
         $vnp_RefundUrl = config('services.vnpay.refund_url');
 
-        $vnp_RequestId = uniqid();
-        $vnp_Version = '2.1.0';
-        $vnp_Command = 'refund';
-        $vnp_TxnRef = $payment->vnp_txn_ref;
-        $vnp_Amount = $payment->amount * 100; // nhân 100 theo VNPay
-        $vnp_TransactionType = '02'; // 02 = hoàn toàn bộ
-        $vnp_TransactionNo = $payment->vnp_transaction_no;
-
+        // Chuẩn bị dữ liệu
+        $vnp_RequestId       = uniqid();
+        $vnp_Version         = '2.1.0';
+        $vnp_Command         = 'refund';
+        $vnp_TxnRef          = $payment->vnp_txn_ref;
+        $vnp_Amount          = (int) round($payment->amount * 100); // phải là số nguyên
+        $vnp_TransactionType = '02'; // Hoàn toàn bộ
+        $vnp_TransactionNo   = $payment->vnp_transaction_no;
         $vnp_TransactionDate = Carbon::parse($payment->paid_at)->format('YmdHis');
-        $vnp_CreateBy = auth()->user()->name ?? 'system';
-        $vnp_CreateDate = now()->format('YmdHis');
-        $vnp_IpAddr = request()->ip();
+        $vnp_CreateBy        = auth()->user()->name ?? 'system';
+        $vnp_CreateDate      = now()->format('YmdHis');
+        $vnp_IpAddr          = request()->ip();
 
         $inputData = [
             'vnp_RequestId'       => $vnp_RequestId,
@@ -1152,7 +1158,7 @@ class AppointmentController extends Controller
             'vnp_OrderInfo'       => 'Hoàn tiền lịch hẹn #' . $appointment->id,
         ];
 
-        // Bước 1: tạo secure hash
+        // Tạo secure hash
         ksort($inputData);
         $hashData = urldecode(http_build_query($inputData));
         $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
@@ -1168,6 +1174,25 @@ class AppointmentController extends Controller
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
+
+                // ✅ Giả lập trong môi trường local/sandbox
+                if (app()->environment(['local', 'sandbox'])) {
+                    Log::warning('🌐 VNPay sandbox lỗi 500 - GIẢ LẬP hoàn tiền');
+
+                    $payment->refund_status = 'completed';
+                    $payment->refunded_at = now();
+                    $payment->save();
+
+                    PaymentHistory::create([
+                        'payment_id' => $payment->id,
+                        'amount' => -1 * $payment->amount,
+                        'payment_method' => 'vnpay_refund_fake',
+                        'payment_date' => now(),
+                    ]);
+
+                    return back()->with('success', '✅ [Giả lập] Hoàn tiền thành công qua VNPay (sandbox).');
+                }
+
                 return back()->withErrors(['error' => 'VNPay không phản hồi đúng: HTTP ' . $response->status()]);
             }
 
@@ -1185,10 +1210,9 @@ class AppointmentController extends Controller
                 $payment->refunded_at = now();
                 $payment->save();
 
-                // Ghi log lịch sử hoàn tiền
                 PaymentHistory::create([
                     'payment_id' => $payment->id,
-                    'amount' => -1 * $payment->amount, // số âm để biểu thị hoàn lại
+                    'amount' => -1 * $payment->amount,
                     'payment_method' => 'vnpay_refund',
                     'payment_date' => now(),
                 ]);
@@ -1205,9 +1229,11 @@ class AppointmentController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return back()->withErrors(['error' => 'Có lỗi xảy ra khi hoàn tiền: ' . $e->getMessage()]);
         }
     }
+
 
     protected function performVnpayRefund($payment)
     {

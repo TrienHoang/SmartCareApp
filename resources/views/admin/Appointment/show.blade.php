@@ -253,54 +253,71 @@
                         <div class="mb-4">
                             <label class="form-label fw-semibold">Thanh toán</label>
                             <div>
-                                @switch(optional($appointment->payment)->status)
-                                    @case('paid')
-                                        <span class="badge bg-success badge-lg">
-                                            <i class="bx bx-check-circle me-1"></i>
-                                            Đã thanh toán
-                                        </span>
-                                    @break
+                                @php
+                                    $payment = optional($appointment->payment);
+                                @endphp
 
-                                    @case('overpaid')
-                                        <span class="badge bg-info text-dark badge-lg">
-                                            <i class="bx bx-money me-1"></i>
-                                            Đã thanh toán (dư)
-                                        </span>
-                                    @break
+                                {{-- Hiển thị trạng thái thanh toán/hoàn tiền --}}
+                                @if ($payment && $payment->refund_status === 'completed')
+                                    {{-- Ưu tiên: đã hoàn tiền toàn bộ --}}
+                                    <span class="badge bg-success badge-lg">
+                                        <i class="bx bx-check-circle me-1"></i>
+                                        Đã hoàn tiền
+                                    </span>
+                                @else
+                                    {{-- Nếu chưa hoàn tiền thì hiển thị theo status --}}
+                                    @switch($payment->status)
+                                        @case('paid')
+                                            <span class="badge bg-success badge-lg">
+                                                <i class="bx bx-check-circle me-1"></i>
+                                                Đã thanh toán
+                                            </span>
+                                        @break
 
-                                    @case('underpaid')
-                                        <span class="badge bg-warning text-dark badge-lg">
-                                            <i class="bx bx-error-circle me-1"></i>
-                                            Chưa thanh toán đủ
-                                        </span>
-                                    @break
+                                        @case('overpaid')
+                                            <span class="badge bg-info text-dark badge-lg">
+                                                <i class="bx bx-money me-1"></i>
+                                                Đã thanh toán (dư)
+                                            </span>
+                                        @break
 
-                                    @default
-                                        <span class="badge bg-danger badge-lg">
-                                            <i class="bx bx-x-circle me-1"></i>
-                                            Chưa thanh toán
-                                        </span>
-                                @endswitch
+                                        @case('underpaid')
+                                            <span class="badge bg-warning text-dark badge-lg">
+                                                <i class="bx bx-error-circle me-1"></i>
+                                                Chưa thanh toán đủ
+                                            </span>
+                                        @break
 
-                                @if ($appointment->payment && $appointment->payment->paid_at)
+                                        @default
+                                            <span class="badge bg-danger badge-lg">
+                                                <i class="bx bx-x-circle me-1"></i>
+                                                Chưa thanh toán
+                                            </span>
+                                    @endswitch
+                                @endif
+
+                                @if ($payment && $payment->paid_at)
                                     <div class="mt-2">
                                         <small class="text-muted">
                                             <i class="bx bx-time me-1"></i>
-                                            {{ $appointment->payment->paid_at->format('d/m/Y H:i') }}
+                                            {{ $payment->paid_at->format('d/m/Y H:i') }}
                                         </small>
                                         <br>
                                         <small class="text-muted">
                                             <i class="bx bx-credit-card me-1"></i>
                                             Hình thức:
-                                            @if ($appointment->payment->payment_method === 'cash')
+                                            @if ($payment->payment_method === 'cash')
                                                 Tiền mặt
-                                            @elseif ($appointment->payment->payment_method === 'bank')
+                                            @elseif ($payment->payment_method === 'bank')
                                                 Ngân hàng
+                                            @elseif ($payment->payment_method === 'vnpay')
+                                                Thanh toán vnpay
                                             @else
-                                                {{ ucfirst($appointment->payment->method ?? 'Không xác định') }}
+                                                {{ ucfirst($payment->method ?? 'Không xác định') }}
                                             @endif
                                         </small>
                                     </div>
+
                                     <div class="mt-3">
                                         <small class="text-muted d-block">
                                             <i class="bx bx-wallet me-1"></i>
@@ -320,7 +337,7 @@
                                             </small>
                                         @endif
 
-                                        @if ($overpaidAmount > 0)
+                                        {{-- @if ($overpaidAmount > 0)
                                             <small class="text-muted d-block">
                                                 <i class="bx bx-money me-1"></i>
                                                 Dư:
@@ -328,9 +345,10 @@
                                                     {{ number_format($overpaidAmount, 0, ',', '.') }}đ
                                                 </strong>
                                             </small>
-                                        @endif
+                                        @endif --}}
 
-                                        @if ($appointment->payment && $appointment->payment->refund_status)
+                                        {{-- Hiển thị badge hoàn tiền chi tiết --}}
+                                        @if ($payment->refund_status)
                                             <div class="mt-3">
                                                 <small class="text-muted d-block">
                                                     <i class="bx bx-undo me-1"></i>
@@ -358,9 +376,7 @@
                                                                 'icon' => 'bx-x-circle',
                                                             ],
                                                         ];
-                                                        $refund = $refundConfig[
-                                                            $appointment->payment->refund_status
-                                                        ] ?? [
+                                                        $refund = $refundConfig[$payment->refund_status] ?? [
                                                             'text' => 'Không xác định',
                                                             'color' => 'dark',
                                                             'icon' => 'bx-help-circle',
@@ -372,10 +388,10 @@
                                                     </span>
                                                 </small>
 
-                                                @if ($appointment->payment->note)
+                                                @if ($payment->note)
                                                     <small class="text-muted d-block mt-1">
                                                         <i class="bx bx-info-circle me-1"></i>
-                                                        Ghi chú: {{ $appointment->payment->note }}
+                                                        Ghi chú: {{ $payment->note }}
                                                     </small>
                                                 @endif
                                             </div>
