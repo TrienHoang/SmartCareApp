@@ -39,6 +39,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Notifications\LateNotification;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
@@ -69,6 +70,15 @@ Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFaceboo
 // đăng nhập bằng google
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
+
+// ✅ VNPAY Routes (không cần auth - webhook từ VNPAY)
+Route::post('/vnpay/callback', [PaymentHistoryController::class, 'vnpayCallback'])
+    ->name('vnpay.callback')
+    ->withoutMiddleware([VerifyCsrfToken::class]); // Loại bỏ CSRF cho webhook
+
+Route::get('/vnpay/return', [PaymentHistoryController::class, 'vnpayReturn'])
+    ->name('vnpay.return');
 
 
 Route::group([
@@ -339,6 +349,8 @@ Route::group([
 
         Route::get('/{doctor}', [DoctorController::class, 'show'])
             ->middleware('check_permission:view_doctors')->name('show');
+
+
     });
 
     // Nhóm quản lý phòng ban
@@ -748,6 +760,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
+        Route::post('/admin/doctors/{user}/toggle-status', [DoctorController::class, 'toggleStatus'])->name('admin.doctors.toggleStatus');
+
+
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -785,6 +800,9 @@ Route::middleware(['auth', 'checkAdmin'])->group(function () {
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::resource('shifts', ShiftsController::class);
 });
+
+
+
 
 require __DIR__ . '/client.php';
 

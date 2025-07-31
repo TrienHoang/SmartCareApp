@@ -15,7 +15,8 @@
                             </div>
                             <div>
                                 <h2 class="content-header-title mb-0 text-primary font-weight-bold">Lịch sử thanh toán</h2>
-                                <p class="text-muted mb-0">Quản lý và theo dõi tất cả giao dịch thanh toán trong hệ thống</p>
+                                <p class="text-muted mb-0">Quản lý và theo dõi tất cả giao dịch thanh toán trong hệ thống
+                                </p>
                             </div>
                         </div>
                         <div class="breadcrumb-wrapper col-12 mt-2">
@@ -73,14 +74,15 @@
                                     </h4>
                                     <small class="text-white d-block mb-1">Đã thanh toán</small>
                                     <small class="text-white opacity-75">
-                                        Tổng: <span class="fw-bold">{{ number_format($stat['paid_amount'] ?? 0, 0, ',', '.') }}₫</span>
+                                        Tổng: <span
+                                            class="fw-bold">{{ number_format($stat['paid_amount'] ?? 0, 0, ',', '.') }}₫</span>
                                     </small>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-3 col-md-6 col-12 mb-3">
                     <div class="card gradient-card bg-gradient-warning card-3d">
                         <div class="card-body text-white">
@@ -96,14 +98,15 @@
                                     </h4>
                                     <small class="text-white d-block mb-1">Chờ xử lý</small>
                                     <small class="text-white opacity-75">
-                                        Tổng: <span class="fw-bold">{{ number_format($stat['pending_amount'] ?? 0, 0, ',', '.') }}₫</span>
+                                        Tổng: <span
+                                            class="fw-bold">{{ number_format($stat['pending_amount'] ?? 0, 0, ',', '.') }}₫</span>
                                     </small>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-3 col-md-6 col-12 mb-3">
                     <div class="card gradient-card bg-gradient-danger card-3d">
                         <div class="card-body text-white">
@@ -119,14 +122,15 @@
                                     </h4>
                                     <small class="text-white d-block mb-1">Thất bại</small>
                                     <small class="text-white opacity-75">
-                                        Tổng: <span class="fw-bold">{{ number_format($stat['failed_amount'] ?? 0, 0, ',', '.') }}₫</span>
+                                        Tổng: <span
+                                            class="fw-bold">{{ number_format($stat['failed_amount'] ?? 0, 0, ',', '.') }}₫</span>
                                     </small>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-3 col-md-6 col-12 mb-3">
                     <div class="card gradient-card bg-gradient-info card-3d">
                         <div class="card-body text-white">
@@ -140,7 +144,8 @@
                                     <h4 class="text-white mb-1 counter-number">{{ $histories->total() }}</h4>
                                     <small class="text-white d-block mb-1">Tổng giao dịch</small>
                                     <small class="text-white opacity-75">
-                                        Tổng: <span class="fw-bold">{{ number_format($stat['total_amount'] ?? 0, 0, ',', '.') }}₫</span>
+                                        Tổng: <span
+                                            class="fw-bold">{{ number_format($stat['total_amount'] ?? 0, 0, ',', '.') }}₫</span>
                                     </small>
                                 </div>
                             </div>
@@ -149,7 +154,7 @@
                 </div>
             </div>
 
-            {{-- Form lọc --}}
+            {{-- Bộ lọc tìm kiếm --}}
             <div class="card border-0 shadow-3d mb-4 card-3d">
                 <div class="card-header bg-light border-0">
                     <h5 class="mb-0 d-flex align-items-center">
@@ -158,7 +163,8 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.payment_histories.index') }}" method="GET" class="row g-3 align-items-end">
+                    <form action="{{ route('admin.payment_histories.index') }}" method="GET"
+                        class="row g-3 align-items-end">
                         {{-- Tên bệnh nhân --}}
                         <div class="col-12 col-md-3">
                             <label for="patient_name" class="form-label fw-semibold">Tên bệnh nhân</label>
@@ -170,16 +176,16 @@
                         <div class="col-6 col-md-2">
                             <label for="date_from" class="form-label fw-semibold">Từ ngày</label>
                             <input type="date" name="date_from" id="date_from" class="form-control input-3d"
-                                   max="{{ now()->toDateString() }}" value="{{ request('date_from') }}">
+                                max="{{ now()->toDateString() }}" value="{{ request('date_from') }}">
                         </div>
 
                         {{-- Đến ngày --}}
                         <div class="col-6 col-md-2">
                             <label for="date_to" class="form-label fw-semibold">Đến ngày</label>
                             <input type="date" name="date_to" id="date_to" class="form-control input-3d"
-                                   max="{{ now()->toDateString() }}" value="{{ request('date_to') }}">
+                                max="{{ now()->toDateString() }}" value="{{ request('date_to') }}">
                         </div>
-                        
+
                         {{-- Dịch vụ --}}
                         <div class="col-6 col-md-2">
                             <label for="service_id" class="form-label fw-semibold">Dịch vụ</label>
@@ -206,6 +212,35 @@
                             </select>
                         </div>
 
+                        {{-- Phương thức thanh toán --}}
+                        <div class="col-6 col-md-2">
+                            <label for="payment_method" class="form-label fw-semibold">Phương thức</label>
+                            <select name="payment_method" id="payment_method" class="form-select input-3d">
+                                <option value="">Tất cả</option>
+                                @foreach($paymentMethods as $method)
+                                    <option value="{{ $method }}" {{ request('payment_method') == $method ? 'selected' : '' }}>
+                                        {{ ucfirst($method) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Trạng thái --}}
+                        <div class="col-6 col-md-2">
+                            <label for="payment_status" class="form-label fw-semibold">Trạng thái</label>
+                            <select name="payment_status" id="payment_status" class="form-select input-3d">
+                                <option value="">Tất cả</option>
+                                <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Đã thanh toán
+                                </option>
+                                <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Chờ xử
+                                    lý</option>
+                                <option value="failed" {{ request('payment_status') == 'failed' ? 'selected' : '' }}>Thất bại
+                                </option>
+                                <option value="refunded" {{ request('payment_status') == 'refunded' ? 'selected' : '' }}>Hoàn
+                                    tiền</option>
+                            </select>
+                        </div>
+
                         {{-- Nút lọc --}}
                         <div class="col-6 col-md-1">
                             <button type="submit" class="btn btn-primary w-100 btn-3d" title="Lọc">
@@ -215,7 +250,8 @@
 
                         {{-- Nút reset --}}
                         <div class="col-6 col-md-1">
-                            <a href="{{ route('admin.payment_histories.index') }}" class="btn btn-outline-secondary w-100 btn-3d" title="Xóa lọc">
+                            <a href="{{ route('admin.payment_histories.index') }}"
+                                class="btn btn-outline-secondary w-100 btn-3d" title="Xóa lọc">
                                 <i class="bx bx-x"></i>
                             </a>
                         </div>
@@ -248,6 +284,7 @@
                                     <th class="d-none d-md-table-cell th-3d">Bác sĩ</th>
                                     <th class="th-3d">Ngày</th>
                                     <th class="th-3d">Trạng thái</th>
+                                    <th class="th-3d">Hoàn tiền</th>
                                     <th class="th-3d">Số tiền</th>
                                     <th class="th-3d">Thao tác</th>
                                 </tr>
@@ -256,21 +293,38 @@
                                 @forelse($histories as $history)
                                     @php
                                         $status = $history->payment->status ?? null;
+                                        $refundStatus = $history->refund_status ?? 'none'; // Lấy từ chính $history
+
                                         $statusMap = [
                                             'paid' => ['label' => 'Đã thanh toán', 'class' => 'bg-success'],
                                             'pending' => ['label' => 'Chờ xử lý', 'class' => 'bg-warning text-dark'],
                                             'failed' => ['label' => 'Thất bại', 'class' => 'bg-danger'],
+                                            'refunded' => ['label' => 'Đã hoàn tiền', 'class' => 'bg-secondary'],
                                         ];
-                                        $statusLabel = $statusMap[$status] ?? ['label' => 'Không xác định', 'class' => 'bg-secondary'];
+
+                                        $refundMap = [
+                                            'none' => ['label' => 'Chưa hoàn', 'class' => 'bg-light text-dark'],
+                                            'pending' => ['label' => 'Chờ hoàn', 'class' => 'bg-warning text-dark'],
+                                            'completed' => ['label' => 'Đã hoàn', 'class' => 'bg-info text-white'],
+                                            'failed' => ['label' => 'Hoàn thất bại', 'class' => 'bg-danger'],
+                                        ];
+
+                                        $statusLabel = $statusMap[$status] ?? ['label' => 'Không xác định', 'class' => 'bg-dark'];
+                                        $refundLabel = $refundMap[$refundStatus] ?? ['label' => 'Không xác định', 'class' => 'bg-dark'];
                                     @endphp
                                     <tr class="row-3d">
-                                        <td>{{ $loop->iteration + ($histories->currentPage() - 1) * $histories->perPage() }}</td>
-                                        <td><span class="badge bg-label-primary badge-3d">#{{ $history->payment->id }}</span></td>
+                                        <td>{{ $loop->iteration + ($histories->currentPage() - 1) * $histories->perPage() }}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-label-primary badge-3d">
+                                                #{{ $history->payment->id ?? 'N/A' }}
+                                            </span>
+                                        </td>
                                         <td class="text-start">
-                                            <div class="patient-info">
-                                                <strong>{{ optional($history->payment->appointment->patient)->full_name ?? 'N/A' }}</strong>
-                                                <small class="text-muted d-block">{{ optional($history->payment->appointment->patient)->phone }}</small>
-                                            </div>
+                                            <strong>{{ optional($history->payment->appointment->patient)->full_name ?? 'N/A' }}</strong>
+                                            <small class="text-muted d-block">
+                                                {{ optional($history->payment->appointment->patient)->phone ?? 'N/A' }}
+                                            </small>
                                         </td>
                                         <td>{{ optional($history->payment->appointment->service)->name ?? 'N/A' }}</td>
                                         <td class="d-none d-md-table-cell">
@@ -278,10 +332,19 @@
                                         </td>
                                         <td>{{ optional($history->payment_date)->format('d/m/Y H:i') ?? 'Chưa TT' }}</td>
                                         <td>
-                                            <span class="badge {{ $statusLabel['class'] }} badge-3d">{{ $statusLabel['label'] }}</span>
+                                            <span class="badge {{ $statusLabel['class'] }} badge-3d">
+                                                {{ $statusLabel['label'] }}
+                                            </span>
                                         </td>
                                         <td>
-                                            <strong class="text-success amount-3d">{{ number_format($history->amount, 0, ',', '.') }}₫</strong>
+                                            <span class="badge {{ $refundLabel['class'] }} badge-3d">
+                                                {{ $refundLabel['label'] }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong class="text-success amount-3d">
+                                                {{ number_format($history->amount, 0, ',', '.') }}₫
+                                            </strong>
                                         </td>
                                         <td>
                                             <a href="{{ route('admin.payment_histories.show', $history->id) }}"
@@ -292,7 +355,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="text-muted py-5">
+                                        <td colspan="10" class="text-muted py-5">
                                             <div class="empty-state">
                                                 <i class="bx bx-search-alt-2 display-4 text-muted"></i>
                                                 <p class="mt-2">Không có dữ liệu phù hợp.</p>
@@ -301,9 +364,10 @@
                                     </tr>
                                 @endforelse
                             </tbody>
+
                         </table>
                     </div>
-                    
+
                     {{-- Phân trang --}}
                     @if($histories->hasPages())
                         <div class="pagination-wrapper bg-light p-3 border-top pagination-3d">
@@ -322,357 +386,365 @@
                     @endif
                 </div>
             </div>
-        </div>
-    </div>
 
-    <style>
-        /* 3D Effects Base */
-        .shadow-3d {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
-        }
 
-        .card-3d {
-            border-radius: 15px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateZ(0);
-            backface-visibility: hidden;
-        }
+            <style>
+                /* 3D Effects Base */
+                .shadow-3d {
+                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+                }
 
-        .card-3d:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+                .card-3d {
+                    border-radius: 15px;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    transform: translateZ(0);
+                    backface-visibility: hidden;
+                }
 
-        /* Icon Circle 3D */
-        .icon-circle {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
+                .card-3d:hover {
+                    transform: translateY(-5px) scale(1.02);
+                    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.1);
+                }
 
-        .icon-circle:hover {
-            transform: rotateY(15deg) scale(1.1);
-        }
+                /* Icon Circle 3D */
+                .icon-circle {
+                    width: 55px;
+                    height: 55px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                    transition: all 0.3s ease;
+                }
 
-        /* Avatar 3D */
-        .avatar-3d {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
+                .icon-circle:hover {
+                    transform: rotateY(15deg) scale(1.1);
+                }
 
-        .avatar-3d:hover {
-            transform: rotateY(20deg) scale(1.1);
-        }
+                /* Avatar 3D */
+                .avatar-3d {
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                    transition: all 0.3s ease;
+                }
 
-        /* Gradient Cards 3D */
-        .gradient-card {
-            border: none;
-            border-radius: 15px;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
+                .avatar-3d:hover {
+                    transform: rotateY(20deg) scale(1.1);
+                }
 
-        .gradient-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-            transition: opacity 0.3s ease;
-            opacity: 0;
-        }
+                /* Gradient Cards 3D */
+                .gradient-card {
+                    border: none;
+                    border-radius: 15px;
+                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: hidden;
+                }
 
-        .gradient-card:hover::before {
-            opacity: 1;
-        }
+                .gradient-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+                    transition: opacity 0.3s ease;
+                    opacity: 0;
+                }
 
-        .gradient-card:hover {
-            transform: translateY(-8px) rotateX(5deg);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-        }
+                .gradient-card:hover::before {
+                    opacity: 1;
+                }
 
-        /* Gradients giữ nguyên màu gốc */
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
+                .gradient-card:hover {
+                    transform: translateY(-8px) rotateX(5deg);
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+                }
 
-        .bg-gradient-success {
-            background: linear-gradient(135deg, #00cec9 0%, #55a3ff 100%);
-        }
+                /* Gradients giữ nguyên màu gốc */
+                .bg-gradient-primary {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                }
 
-        .bg-gradient-info {
-            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-        }
+                .bg-gradient-success {
+                    background: linear-gradient(135deg, #00cec9 0%, #55a3ff 100%);
+                }
 
-        .bg-gradient-warning {
-            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
-        }
+                .bg-gradient-info {
+                    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+                }
 
-        .bg-gradient-danger {
-            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
-        }
+                .bg-gradient-warning {
+                    background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+                }
 
-        /* Counter Animation */
-        .counter-number {
-            font-size: 2.2rem;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
+                .bg-gradient-danger {
+                    background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+                }
 
-        /* Input 3D */
-        .input-3d {
-            border-radius: 10px;
-            border: 2px solid #e9ecef;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
+                /* Counter Animation */
+                .counter-number {
+                    font-size: 2.2rem;
+                    font-weight: 700;
+                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                }
 
-        .input-3d:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.05);
-            transform: translateY(-2px);
-        }
+                /* Input 3D */
+                .input-3d {
+                    border-radius: 10px;
+                    border: 2px solid #e9ecef;
+                    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+                    transition: all 0.3s ease;
+                }
 
-        /* Button 3D */
-        .btn-3d {
-            border-radius: 10px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
+                .input-3d:focus {
+                    border-color: #667eea;
+                    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.05);
+                    transform: translateY(-2px);
+                }
 
-        .btn-3d:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        }
+                /* Button 3D */
+                .btn-3d {
+                    border-radius: 10px;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                }
 
-        .btn-3d:active {
-            transform: translateY(0);
-        }
+                .btn-3d:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+                }
 
-        /* Badge 3D */
-        .badge-3d {
-            border-radius: 8px;
-            padding: 0.4em 0.8em;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-        }
+                .btn-3d:active {
+                    transform: translateY(0);
+                }
 
-        .badge-3d:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
+                /* Badge 3D */
+                .badge-3d {
+                    border-radius: 8px;
+                    padding: 0.4em 0.8em;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                    transition: all 0.3s ease;
+                }
 
-        /* Table 3D */
-        .table-3d {
-            border-radius: 0;
-            overflow: hidden;
-        }
+                .badge-3d:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                }
 
-        .th-3d {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-bottom: 3px solid #dee2e6;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 0.5px;
-        }
+                /* Table 3D */
+                .table-3d {
+                    border-radius: 0;
+                    overflow: hidden;
+                }
 
-        .row-3d {
-            transition: all 0.3s ease;
-        }
+                .th-3d {
+                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    border-bottom: 3px solid #dee2e6;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    font-size: 0.8rem;
+                    letter-spacing: 0.5px;
+                }
 
-        .row-3d:hover {
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+                .row-3d {
+                    transition: all 0.3s ease;
+                }
 
-        /* Header 3D */
-        .header-3d {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px 15px 0 0;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
+                .row-3d:hover {
+                    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+                    transform: translateX(5px);
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                }
 
-        /* Alert 3D */
-        .alert-3d {
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
+                /* Header 3D */
+                .header-3d {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border-radius: 15px 15px 0 0;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                }
 
-        .alert-3d:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
+                /* Alert 3D */
+                .alert-3d {
+                    border-radius: 12px;
+                    border: none;
+                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+                    transition: all 0.3s ease;
+                }
 
-        /* Patient Info 3D */
-        .patient-info {
-            transition: all 0.3s ease;
-        }
+                .alert-3d:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+                }
 
-        .patient-info:hover {
-            transform: translateX(3px);
-        }
+                /* Patient Info 3D */
+                .patient-info {
+                    transition: all 0.3s ease;
+                }
 
-        /* Amount 3D */
-        .amount-3d {
-            font-size: 1.1rem;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
+                .patient-info:hover {
+                    transform: translateX(3px);
+                }
 
-        /* Pagination 3D */
-        .pagination-3d {
-            background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 0 0 15px 15px;
-        }
+                /* Amount 3D */
+                .amount-3d {
+                    font-size: 1.1rem;
+                    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                }
 
-        /* Empty State */
-        .empty-state {
-            padding: 3rem 0;
-            text-align: center;
-        }
+                /* Pagination 3D */
+                .pagination-3d {
+                    background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+                    border-radius: 0 0 15px 15px;
+                }
 
-        .empty-state i {
-            opacity: 0.3;
-        }
+                /* Empty State */
+                .empty-state {
+                    padding: 3rem 0;
+                    text-align: center;
+                }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .card-3d:hover {
-                transform: translateY(-3px) scale(1.01);
-            }
-            
-            .gradient-card:hover {
-                transform: translateY(-5px);
-            }
-            
-            .counter-number {
-                font-size: 1.8rem;
-            }
-            
-            .table th,
-            .table td {
-                font-size: 13px !important;
-                padding: 12px 8px;
-            }
-            
-            .d-none.d-md-table-cell {
-                display: none !important;
-            }
-        }
+                .empty-state i {
+                    opacity: 0.3;
+                }
 
-        /* Animation Keyframes */
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
+                /* Responsive */
+                @media (max-width: 768px) {
+                    .card-3d:hover {
+                        transform: translateY(-3px) scale(1.01);
+                    }
 
-        .gradient-card {
-            animation: float 6s ease-in-out infinite;
-        }
+                    .gradient-card:hover {
+                        transform: translateY(-5px);
+                    }
 
-        .gradient-card:nth-child(2) {
-            animation-delay: -1s;
-        }
+                    .counter-number {
+                        font-size: 1.8rem;
+                    }
 
-        .gradient-card:nth-child(3) {
-            animation-delay: -2s;
-        }
+                    .table th,
+                    .table td {
+                        font-size: 13px !important;
+                        padding: 12px 8px;
+                    }
 
-        .gradient-card:nth-child(4) {
-            animation-delay: -3s;
-        }
+                    .d-none.d-md-table-cell {
+                        display: none !important;
+                    }
+                }
 
-        /* Badge Colors */
-        .badge-success {
-            background-color: #39DA8A;
-            color: #fff;
-        }
+                /* Animation Keyframes */
+                @keyframes float {
+                    0% {
+                        transform: translateY(0px);
+                    }
 
-        .badge-info {
-            background-color: #00CFDD;
-            color: #fff;
-        }
+                    50% {
+                        transform: translateY(-10px);
+                    }
 
-        .badge-warning {
-            background-color: #FDAC41;
-            color: #212529;
-        }
+                    100% {
+                        transform: translateY(0px);
+                    }
+                }
 
-        .badge-danger {
-            background-color: #FF5B5C;
-            color: #fff;
-        }
+                .gradient-card {
+                    animation: float 6s ease-in-out infinite;
+                }
 
-        .badge-secondary {
-            background-color: #6c757d;
-            color: #fff;
-        }
+                .gradient-card:nth-child(2) {
+                    animation-delay: -1s;
+                }
 
-        .bg-rgba-white {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
+                .gradient-card:nth-child(3) {
+                    animation-delay: -2s;
+                }
 
-        /* Modern Table */
-        .table-modern {
-            font-size: 0.9rem;
-        }
+                .gradient-card:nth-child(4) {
+                    animation-delay: -3s;
+                }
 
-        .table-modern td {
-            vertical-align: middle;
-            padding: 1rem 0.75rem;
-        }
-    </style>
+                /* Badge Colors */
+                .badge-success {
+                    background-color: #39DA8A;
+                    color: #fff;
+                }
+
+                .badge-info {
+                    background-color: #00CFDD;
+                    color: #fff;
+                }
+
+                .badge-warning {
+                    background-color: #FDAC41;
+                    color: #212529;
+                }
+
+                .badge-danger {
+                    background-color: #FF5B5C;
+                    color: #fff;
+                }
+
+                .badge-secondary {
+                    background-color: #6c757d;
+                    color: #fff;
+                }
+
+                .bg-rgba-white {
+                    background-color: rgba(255, 255, 255, 0.2);
+                }
+
+                /* Modern Table */
+                .table-modern {
+                    font-size: 0.9rem;
+                }
+
+                .table-modern td {
+                    vertical-align: middle;
+                    padding: 1rem 0.75rem;
+                }
+            </style>
 @endsection
 
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const fromInput = document.getElementById('date_from');
-        const toInput = document.getElementById('date_to');
+        @push('scripts')
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const fromInput = document.getElementById('date_from');
+                    const toInput = document.getElementById('date_to');
 
-        // Khi chọn "Từ ngày" thì đặt min cho "Đến ngày"
-        fromInput.addEventListener('change', function () {
-            if (fromInput.value) {
-                toInput.min = fromInput.value;
-            } else {
-                toInput.removeAttribute('min');
-            }
-        });
+                    // Khi chọn "Từ ngày" thì đặt min cho "Đến ngày"
+                    fromInput.addEventListener('change', function () {
+                        if (fromInput.value) {
+                            toInput.min = fromInput.value;
+                        } else {
+                            toInput.removeAttribute('min');
+                        }
+                    });
 
-        // Khi chọn "Đến ngày" thì đặt max cho "Từ ngày"
-        toInput.addEventListener('change', function () {
-            if (toInput.value) {
-                fromInput.max = toInput.value;
-            } else {
-                fromInput.setAttribute('max', '{{ now()->toDateString() }}');
-            }
-        });
+                    // Khi chọn "Đến ngày" thì đặt max cho "Từ ngày"
+                    toInput.addEventListener('change', function () {
+                        if (toInput.value) {
+                            fromInput.max = toInput.value;
+                        } else {
+                            fromInput.setAttribute('max', '{{ now()->toDateString() }}');
+                        }
+                    });
 
-        // Khởi tạo giá trị ban đầu nếu có
-        if (fromInput.value) {
-            toInput.min = fromInput.value;
-        }
-        if (toInput.value) {
-            fromInput.max = toInput.value;
-        }
-    });
-</script>
-@endpush
+                    // Khởi tạo giá trị ban đầu nếu có
+                    if (fromInput.value) {
+                        toInput.min = fromInput.value;
+                    }
+                    if (toInput.value) {
+                        fromInput.max = toInput.value;
+                    }
+                });
+            </script>
+        @endpush
+

@@ -10,55 +10,71 @@
             <div class="container mx-auto px-4">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
                     {{-- thông tin bác sĩ chỉnh lần 1 --}}
-                    <div class="lg:col-span-2 fade-in">
-                        <div
-                            class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
-                            @if ($doctor->user && $doctor->user->avatar)
-                                <img src="{{ asset('storage/' . $doctor->user->avatar) }}"
-                                    alt="{{ $doctor->user->full_name }}"
-                                    class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
-                            @else
-                                <img src="{{ asset('images/default-doctor.png') }}" alt="{{ $doctor->user->full_name }}"
-                                    class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
-                            @endif
+{{-- Thông tin bác sĩ --}}
+<div class="lg:col-span-2 fade-in">
+    <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
+        {{-- Avatar --}}
+        <img
+            src="{{ $doctor->user && $doctor->user->avatar ? asset('storage/' . $doctor->user->avatar) : asset('images/default-doctor.png') }}"
+            alt="{{ $doctor->user->full_name ?? 'Bác sĩ' }}"
+            class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
 
-                            <div class="flex-1">
-                                <h1 class="text-4xl font-bold mb-2">BS. {{ $doctor->user->full_name }}</h1>
-                                <p class="text-xl text-blue-100 mb-4">{{ $doctor->department->name ?? 'Chuyên khoa' }}</p>
+        {{-- Thông tin chính --}}
+        <div class="flex-1">
+            {{-- Tên bác sĩ --}}
+            <h1 class="text-4xl font-bold mb-2">
+                BS. {{ $doctor->user->full_name ?? '[Không rõ tên]' }}
+            </h1>
 
-                                <div class="flex items-center space-x-4 mb-4">
-                                    <div class="flex items-center">
-                                        <div class="flex text-yellow-400 mr-2">
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                <i data-lucide="star"
-                                                    class="w-4 h-4 {{ $i <= round($doctor->average_rating ?? 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"></i>
-                                            @endfor
-                                        </div>
-                                        <span class="text-blue-100">
-                                            {{ number_format($doctor->average_rating ?? 5, 1) }}/5
-                                            ({{ $doctor->review_count ?? 0 }} đánh giá)
-                                        </span>
-                                    </div>
-                                    <span class="text-blue-200">•</span>
-                                    <span class="text-blue-100">
-                                        {{ $doctor->experience_years ?? 'Nhiều' }} năm kinh nghiệm
-                                    </span>
-                                </div>
+            {{-- Tên đăng nhập --}}
+            <p class="text-sm text-blue-200 mb-1">
+                <span class="font-semibold">Tên đăng nhập:</span>
+                {{ $doctor->user->username ?? '[Chưa có]' }}
+            </p>
 
+            {{-- Khoa/Phòng ban --}}
+            <p class="text-xl text-blue-100 mb-4">
+                {{ $doctor->department->name ?? 'Chuyên khoa không xác định' }}
+            </p>
 
-                                <div class="flex flex-wrap gap-2">
-                                    @if ($doctor->specialties && $doctor->specialties->count())
-                                        @foreach ($doctor->specialties as $specialty)
-                                            <span
-                                                class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $specialty->name }}</span>
-                                        @endforeach
-                                    @else
-                                        <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Đa khoa</span>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
+            {{-- Đánh giá & Kinh nghiệm --}}
+            <div class="flex items-center space-x-4 mb-4">
+                {{-- Rating --}}
+                <div class="flex items-center">
+                    <div class="flex text-yellow-400 mr-2">
+                        @for ($i = 1; $i <= 5; $i++)
+                            <i data-lucide="star"
+                               class="w-4 h-4 {{ $i <= round($doctor->average_rating ?? 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"></i>
+                        @endfor
                     </div>
+                    <span class="text-blue-100">
+                        {{ number_format($doctor->average_rating ?? 5, 1) }}/5
+                        ({{ $doctor->review_count ?? 0 }} đánh giá)
+                    </span>
+                </div>
+
+                <span class="text-blue-200">•</span>
+
+                {{-- Kinh nghiệm --}}
+                <span class="text-blue-100">
+                    {{ $doctor->experience_years ?? 'Nhiều' }} năm kinh nghiệm
+                </span>
+            </div>
+
+            {{-- Chuyên môn --}}
+            <div class="flex flex-wrap gap-2">
+                @if ($doctor->specialties && $doctor->specialties->count())
+                    @foreach ($doctor->specialties as $specialty)
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $specialty->name }}</span>
+                    @endforeach
+                @else
+                    <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Đa khoa</span>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
                     <div class="fade-in">

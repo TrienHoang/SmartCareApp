@@ -15,7 +15,7 @@
                             </div>
                             <div>
                                 <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý Bác sĩ</h2>
-                                <p class="text-muted mb-0">Quản lý thông tin bác sĩ và chuyên môn trong hệ thống</p>
+                                <p class="text-muted mb-0">Quản lý thông tin bác sĩ và chuyên Khoa trong hệ thống</p>
                             </div>
                         </div>
                         <div class="breadcrumb-wrapper col-12">
@@ -107,7 +107,7 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white mb-0">{{ $doctors->unique('specialization')->count() }}</h4>
-                                    <small class="text-white">Chuyên môn</small>
+                                    <small class="text-white">Chuyên Khoa </small>
                                 </div>
                             </div>
                         </div>
@@ -166,11 +166,11 @@
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
                                     <label class="form-label font-weight-semibold">
-                                        <i class="bx bx-search mr-1 text-info"></i>Chuyên môn
+                                        <i class="bx bx-search mr-1 text-info"></i>Chuyên Khoa
                                     </label>
                                     <div class="input-group">
                                         <input type="text" name="specialization" class="form-control"
-                                               placeholder="Nhập chuyên môn..." value="{{ request('specialization') }}">
+                                               placeholder="Nhập chuyên Khoa..." value="{{ request('specialization') }}">
                                     </div>
             
                                 </div>
@@ -213,7 +213,7 @@
                                         <i class="bx bx-user mr-1"></i>Thông tin bác sĩ
                                     </th>
                                     <th class="border-top-0">
-                                        <i class="bx bx-star mr-1"></i>Chuyên môn
+                                        <i class="bx bx-star mr-1"></i>Chuyên Khoa
                                     </th>
                                     <th class="border-top-0">
                                         <i class="bx bx-building mr-1"></i>Phòng ban
@@ -295,18 +295,16 @@
                                             </div>
                                         </td>
 
-                                        <td>
-                                            @if ($doctor->is_on_leave_today)
-                                                @php $leave = $doctor->currentLeave(); @endphp
-                                                <span class="badge badge-danger" data-toggle="tooltip" title="{{ $leave->reason ?? 'Đang nghỉ' }}">
-                                                    <i class="bx bx-block mr-1"></i> Nghỉ hôm nay
-                                                </span>
-                                            @else
-                                                <span class="badge badge-success">
-                                                    <i class="bx bx-check-circle mr-1"></i> Làm việc
-                                                </span>
-                                            @endif
-                                        </td>
+<td>
+    <button class="btn btn-sm toggle-status-btn {{ $doctor->user->status === 'online' ? 'btn-success' : 'btn-secondary' }}"
+        data-user-id="{{ $doctor->user->id }}"
+        data-status="{{ $doctor->user->status }}">
+        <i class="bx {{ $doctor->user->status === 'online' ? 'bx-check-circle' : 'bx-power-off' }}"></i>
+        {{ ucfirst($doctor->user->status) }}
+    </button>
+</td>
+
+
 
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
@@ -319,13 +317,7 @@
                                                    class="btn btn-outline-warning" data-toggle="tooltip" title="Chỉnh sửa">
                                                     <i class="bx bx-edit"></i>
                                                 </a>
-<form action="{{ route('admin.doctors.destroy', $doctor->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa bác sĩ {{ $doctor->user->full_name }}?')">
-    @csrf
-    @method('DELETE')
-    <button type="submit" class="btn btn-outline-danger" title="Xóa">
-        <i class="bx bx-trash"></i>
-    </button>
-</form>
+
                                             </div>
                                         </td>
 
@@ -372,3 +364,72 @@
 
 
                                     @endsection
+
+
+@section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const buttons = document.querySelectorAll('.toggle-status-btn');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const userId = this.dataset.userId;
+                    const btn = this;
+                    const currentStatus = btn.dataset.status;
+                    const newStatus = currentStatus === 'online' ? 'offline' : 'online';
+
+                    Swal.fire({
+                        title: 'Xác nhận thay đổi trạng thái',
+                        text: `Bạn có chắc muốn chuyển trạng thái bác sĩ sang "${newStatus.toUpperCase()}" không?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Có, thay đổi',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(`/admin/doctors/${userId}/toggle-status`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    btn.classList.toggle('btn-success', data.status === 'online');
+                                    btn.classList.toggle('btn-secondary', data.status === 'offline');
+                                    btn.innerHTML = `<i class="bx ${data.status === 'online' ? 'bx-check-circle' : 'bx-power-off'}"></i> ${data.status.charAt(0).toUpperCase() + data.status.slice(1)}`;
+                                    btn.dataset.status = data.status;
+
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Thành công',
+                                        text: data.message,
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Lỗi',
+                                        text: data.message || 'Không thể cập nhật trạng thái.'
+                                    });
+                                }
+                            })
+                            .catch(() => {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Lỗi kết nối',
+                                    text: 'Không thể gửi yêu cầu tới máy chủ.'
+                                });
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+@endsection
