@@ -1,6 +1,7 @@
 $(document).ready(function () {
     const $doctor = $('#doctor_id');
-    const $serviceSelect = $('#service_id');
+    const $serviceDisplay = $('#service_id_display'); // select readonly
+    const submittedServiceId = $('input[name="service_id"]').val(); // hidden input
     const $servicePrice = $('#service_price');
     const $dateInput = $('#appointment_date');
     const $slotSelect = $('#appointment_slot');
@@ -39,7 +40,6 @@ $(document).ready(function () {
 
             if (flatpickrDate) flatpickrDate.destroy();
 
-            // Chỉ cho phép chọn những ngày trong specificDates và không bị nghỉ phép
             flatpickrDate = flatpickr($dateInput[0], {
                 dateFormat: "Y-m-d",
                 minDate: "today",
@@ -68,7 +68,7 @@ $(document).ready(function () {
     function loadAvailableSlots() {
         const doctorId = $doctor.val();
         const date = $dateInput.val();
-        const serviceId = $serviceSelect.val();
+        const serviceId = submittedServiceId;
 
         if (!doctorId || !date || !serviceId) {
             $slotSelect.html('<option value="">Chọn giờ</option>').prop('disabled', true);
@@ -101,7 +101,6 @@ $(document).ready(function () {
                     $slotSelect.append(`<option value="${value}" ${selected}>${slot}</option>`);
                 });
 
-                // Nếu giờ cũ không còn trong danh sách, vẫn hiển thị để tránh mất dữ liệu khi edit
                 if (!hasOld && oldTimeOnly) {
                     $slotSelect.append(`<option value="${oldFull}" selected>${oldTimeOnly} (giờ đã bận)</option>`);
                 }
@@ -112,28 +111,6 @@ $(document).ready(function () {
             $slotSelect.html('<option value="">Chọn giờ</option>').prop('disabled', true);
         });
     }
-
-    $serviceSelect.on('change', function () {
-        const price = parseFloat($(this).find(':selected').data('price')) || 0;
-        $servicePrice.val(price.toLocaleString('vi-VN') + ' ₫');
-
-        const serviceId = $(this).val();
-        if (!serviceId) {
-            resetForm();
-            return;
-        }
-
-        loadDoctors(serviceId, () => {
-            const selectedDoctorId = $doctor.val();
-            if (selectedDoctorId) {
-                loadWorkingDays(selectedDoctorId, () => {
-                    if ($dateInput.val()) {
-                        loadAvailableSlots();
-                    }
-                });
-            }
-        });
-    });
 
     $doctor.on('change', function () {
         const doctorId = $(this).val();
@@ -151,8 +128,21 @@ $(document).ready(function () {
         });
     });
 
-    // Tự động load lại dữ liệu cũ nếu có
-    if ($serviceSelect.val()) {
-        $serviceSelect.trigger('change');
+    // 👉 Ép load dữ liệu dịch vụ ban đầu vì không có onchange nữa
+    if (submittedServiceId) {
+        const selectedOption = $serviceDisplay.find('option:selected');
+        const price = selectedOption.data('price') || 0;
+        $servicePrice.val(price.toLocaleString('vi-VN') + ' ₫');
+
+        loadDoctors(submittedServiceId, () => {
+            const selectedDoctorId = $doctor.data('old') || $doctor.val();
+            if (selectedDoctorId) {
+                loadWorkingDays(selectedDoctorId, () => {
+                    if ($dateInput.val()) {
+                        loadAvailableSlots();
+                    }
+                });
+            }
+        });
     }
 });
