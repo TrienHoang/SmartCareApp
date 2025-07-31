@@ -627,7 +627,7 @@ class BookingController extends Controller
 
 
     // New method to handle VNPay return URL
-     public function paymentReturn(Request $request)
+    public function paymentReturn(Request $request)
     {
         $vnp_HashSecret = env('VNPAY_HASH_SECRET', 'HSDJ58ZKRZ24ZSYULQGO0ISQ4205JON1');
         $vnp_SecureHash = $request->vnp_SecureHash;
