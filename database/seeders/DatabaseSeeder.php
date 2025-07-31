@@ -11,9 +11,6 @@ use Database\Seeders\ReviewSeeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         $this->call([
@@ -29,6 +26,8 @@ class DatabaseSeeder extends Seeder
             RoomSeeder::class,
 
             DoctorSeeder::class,
+            DoctorDetailSeeder::class,
+            DoctorServiceSeeder::class,
             WorkingScheduleSeeder::class,
             DoctorLeaveSeeder::class,
 

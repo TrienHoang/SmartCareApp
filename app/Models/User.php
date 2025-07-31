@@ -25,7 +25,11 @@ class User extends Authenticatable
         'address',
         'role_id',
         'avatar',
-        'status', // ⚠️ Cột này cần tồn tại trong DB
+        'status', 
+        'description',
+        'education',
+        'email_verified_at',
+        
     ];
 
     public $timestamps = true;

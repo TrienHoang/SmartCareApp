@@ -38,9 +38,11 @@ Route::get('/chi-tiet-dich-vu/{service_id}', [BookingController::class, 'show'])
 // Route::get('/dich-vu/chi-tiet/{id}', [ServiceController::class, 'detail'])->name('client.services.detail');
 
 // Tin tức
-Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news');
+// Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news');
 Route::get('/tin-tuc/danh-muc/{id}', [NewsController::class, 'category'])->name('client.news.category');
 Route::get('/tin-tuc/{slug}', [NewsController::class, 'show'])->name('client.news.show');
+Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news.index');
+
 
 
 
@@ -49,7 +51,7 @@ Route::get('/contact', [ContactController::class, 'showForm'])->name('contact.fo
 Route::post('/contact', [ContactController::class, 'submitForm'])->name('contact.submit');
 
 Route::get('/dat-lich', function () {
-    return view('client.booking');
+    return view('client.booking.');
 })->name('booking');
 
 Route::get('/lien-he', function () {

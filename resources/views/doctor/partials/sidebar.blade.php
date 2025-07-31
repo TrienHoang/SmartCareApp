@@ -35,6 +35,14 @@
 
             <li class="menu-header small text-uppercase"><span class="menu-header-text">Bác sĩ</span></li>
 
+<li class="menu-item">
+    <a href="{{ route('doctor.profile.show') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-user-circle"></i>
+        <div>Thông tin cá nhân</div>
+    </a>
+</li>
+
+
             <li class="menu-item">
                 <a href="{{ route('doctor.appointments.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-calendar"></i>

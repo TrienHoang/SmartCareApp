@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Doctor\DoctorReviewController;
 use App\Http\Controllers\Doctor\DoctorAppointmentController;
 use App\Http\Controllers\doctor\DoctorController;
+use App\Http\Controllers\Doctor\DoctorProfileController;
 use App\Http\Controllers\Doctor\ReviewController;
 use App\Http\Controllers\Doctor\TaskController;
 use App\Http\Controllers\doctor\TreatmentPlanController;
@@ -148,6 +149,24 @@ Route::prefix('doctor/working_schedules')->name('doctor.working_schedules.')->mi
     Route::delete('/{id}', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'destroy'])->name('destroy');
 });
 
+
+
+
+
+
+
+Route::prefix('doctor')
+    ->name('doctor.')
+    ->middleware(['auth', 'checkRole:doctor'])
+    ->group(function () {
+        Route::get('/profile', [DoctorProfileController::class, 'show'])->name('profile.show');
+        Route::get('/profile/edit', [DoctorProfileController::class, 'edit'])->name('profile.edit');
+        Route::post('/profile/update', [DoctorProfileController::class, 'update'])->name('profile.update');
+
+        // đổi mật khẩu
+        Route::get('/profile/change-password', [DoctorProfileController::class, 'changePasswordForm'])->name('profile.change-password');
+        Route::post('/profile/change-password', [DoctorProfileController::class, 'changePassword'])->name('profile.change-password.submit');
+    });
 
 
 
