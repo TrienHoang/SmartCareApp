@@ -54,11 +54,6 @@
                                 <i data-lucide="file-text" class="w-5 h-5"></i>
                                 <span>Hồ Sơ Y Tế</span>
                             </a>
-                            <a href="{{ route('client.uploads.index') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="upload" class="w-5 h-5"></i>
-                                <span>Upload File</span>
-                            </a>
                             <a href="{{ route('client.notifications.index') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="bell" class="w-5 h-5"></i>
