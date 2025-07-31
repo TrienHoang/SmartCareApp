@@ -332,13 +332,18 @@
                                                             class="bx bx-{{ $category->status == 'active' ? 'pause' : 'play' }}"></i>
                                                     </button>
                                                 </form>
-
                                                 <!-- Xóa -->
-                                                <button type="button" class="btn btn-outline-danger"
-                                                    data-toggle="tooltip" title="Xóa"
-                                                    onclick="deleteCategory({{ $category->id }})">
-                                                    <i class="bx bx-trash"></i>
-                                                </button>
+                                                <!-- Form xóa -->
+                                                <form action="{{ route('admin.categories.destroy', $category->id) }}"
+                                                    method="POST" class="d-inline"
+                                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-outline-danger"
+                                                        data-toggle="tooltip" title="Xóa">
+                                                        <i class="bx bx-trash"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
 

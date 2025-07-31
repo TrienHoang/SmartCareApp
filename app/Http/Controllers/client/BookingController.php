@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\OrderService;
 use App\Models\Promotion;
 use App\Models\PromotionUserUsage;
 use App\Models\Service;
@@ -11,7 +12,6 @@ use App\Models\WorkingSchedule;
 use App\Models\Appointment;
 use App\Models\DoctorLeave;
 use App\Models\Order;
-use App\Models\OrderService;
 use App\Models\Payment; // Assumed Payment model
 use App\Models\PaymentHistory;
 use Carbon\Carbon;
@@ -227,7 +227,7 @@ class BookingController extends Controller
         // Lấy danh sách bác sĩ và số lịch hẹn (nếu random)
         $doctor_appointments = [];
         if (!$doctor_id) {
-            $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(40)])
+            $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(value: 20)])
                 ->where('status', '!=', 'cancelled')
                 ->groupBy('doctor_id')
                 ->select('doctor_id', \DB::raw('count(*) as appointment_count'))
@@ -375,7 +375,7 @@ class BookingController extends Controller
         }
 
         $validated = $request->validate([
-            'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(40)->toDateString(),
+            'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(20)->toDateString(),
             'slot_start' => 'required|date_format:H:i',
             'reason' => 'nullable|string|max:255',
         ]);
@@ -498,6 +498,10 @@ class BookingController extends Controller
 
         // Tạo một mã QR duy nhất (UUID) cho cuộc hẹn
         $qrCodeData = (string) Str::uuid();
+        if ($booked) {
+            DB::rollBack();
+            return redirect()->route('booking.showService', $booking_confirm['service_id'])->with('error', 'Khung giờ này đã có người khác đặt hoặc không còn khả dụng.');
+        }
 
         $appointment = Appointment::create([
             'patient_id' => $user->id,
@@ -624,6 +628,7 @@ class BookingController extends Controller
     }
 
 
+    // New method to handle VNPay return URL
     public function paymentReturn(Request $request)
     {
         $vnp_HashSecret = env('VNPAY_HASH_SECRET');
@@ -832,8 +837,6 @@ class BookingController extends Controller
             return response()->json(['RspCode' => '97', 'Message' => 'Invalid checksum']);
         }
     }
-
-
     // New method for success page
     public function success()
     {
