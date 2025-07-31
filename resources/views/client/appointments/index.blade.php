@@ -174,13 +174,13 @@
                                                     Xem chi tiết
                                                 </a>
                                                 @if ($item->status === 'pending')
-                                                    <a href="{{ route('client.appointments.edit', $item) }}"
+                                                    {{-- <a href="{{ route('client.appointments.edit', $item) }}"
                                                         title="Chỉnh sửa" class="text-yellow-600 hover:underline text-sm">
                                                         Chỉnh sửa
-                                                    </a>
+                                                    </a> --}}
                                                     <button type="button" onclick="openCancelModal({{ $item->id }})"
                                                         class="action-btn-cancel">
-                                                        xóa
+                                                        Hủy
                                                     </button>
                                                 @endif
                                             </div>

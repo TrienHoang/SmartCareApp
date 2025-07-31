@@ -11,18 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('services', function (Blueprint $table) {
-            $table->integer('min_booking_hours')->after('duration'); 
+        Schema::table('patients', function (Blueprint $table) {
+            $table->string('address')->nullable()->after('date_of_birth');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('patients', function (Blueprint $table) {
+            $table->dropColumn('address');
         });
     }
 
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
-        Schema::table('services', function (Blueprint $table) {
-            $table->dropColumn('min_booking_hours');
-        });
-    }
 };

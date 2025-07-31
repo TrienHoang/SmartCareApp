@@ -1,0 +1,60 @@
+[33m5ef1f10[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev[m[33m, [m[1;31morigin/dev[m[33m)[m HEAD@{0}: commit (merge): Merge branch 'dev' of https://github.com/TrienHoang/SmartCareApp into dev
+[33m8199e29[m HEAD@{1}: commit: Lưu thay đổi tạm thời trước khi pull
+[33mc2913dd[m HEAD@{2}: pull origin dev: Fast-forward
+[33m445f34b[m HEAD@{3}: commit: Thanh toán VNPay
+[33m12d1e0d[m HEAD@{4}: pull origin dev: Fast-forward
+[33mb7f7eda[m HEAD@{5}: pull origin dev: Fast-forward
+[33md652428[m HEAD@{6}: pull origin dev: Fast-forward
+[33m5ef0eac[m HEAD@{7}: commit: Lọc cho admin
+[33m6ab90c2[m HEAD@{8}: pull origin dev: Fast-forward
+[33m479feae[m HEAD@{9}: commit: validate lại
+[33m65ad8ca[m HEAD@{10}: pull origin dev: Fast-forward
+[33mddc2761[m HEAD@{11}: checkout: moving from hieudev to dev
+[33m0d918ad[m[33m ([m[1;31morigin/hieudev[m[33m, [m[1;32mhieudev[m[33m)[m HEAD@{12}: pull origin hieudev: Fast-forward
+[33mbf34c57[m HEAD@{13}: commit: Quản lý ca làm việc và đăng ký ca làm bác sĩ đổi trạng thái đơn đăng ký ca làm
+[33m215cc25[m HEAD@{14}: commit (merge): Merge branch 'hieudev' of https://github.com/TrienHoang/SmartCareApp into hieudev
+[33m5b407e0[m HEAD@{15}: commit: Lịch làm việc bác sĩ và sửa trạng thái quản lý ca làm
+[33m7148232[m HEAD@{16}: pull origin hieudev: Fast-forward
+[33mc5039c4[m HEAD@{17}: pull origin hieudev: Fast-forward
+[33m94b4fe7[m HEAD@{18}: checkout: moving from dev to hieudev
+[33mddc2761[m HEAD@{19}: checkout: moving from hieudev to dev
+[33m94b4fe7[m HEAD@{20}: commit: fix bug phần validate cho nó hết auto validate
+[33m8d113ef[m HEAD@{21}: pull origin hieudev: Fast-forward
+[33m85b09b3[m HEAD@{22}: checkout: moving from dev to hieudev
+[33mddc2761[m HEAD@{23}: commit: Fix bug của show bình luận của mình
+[33m840c63c[m HEAD@{24}: commit: danh sách bình luận chỉnh sửa bình luận trong thời gian nhất định và show đang bug
+[33mf341f14[m HEAD@{25}: commit (merge): Merge branch 'dev' of https://github.com/TrienHoang/SmartCareApp into dev
+[33mf099416[m HEAD@{26}: commit (merge): Merge branch 'dev' of https://github.com/TrienHoang/SmartCareApp into dev
+[33mff79bf8[m HEAD@{27}: checkout: moving from hieudev to dev
+[33m85b09b3[m HEAD@{28}: commit (merge): Merge branch 'main' into hieudev
+[33m1e9bcb5[m HEAD@{29}: commit (merge): Merge branch 'hieudev' of https://github.com/TrienHoang/SmartCareApp into hieudev
+[33m9f99532[m HEAD@{30}: commit: Payments VNPay
+[33ma4ba8b5[m HEAD@{31}: commit: Sửa lại lịch sử thanh toán
+[33me94c585[m HEAD@{32}: checkout: moving from dev to hieudev
+[33mff79bf8[m HEAD@{33}: checkout: moving from hieudev to dev
+[33me94c585[m HEAD@{34}: commit: Update tb
+[33m3264832[m HEAD@{35}: commit: update logic nghỉ đột xuất của bác sĩ
+[33m8c5706c[m HEAD@{36}: commit (merge): Merge branch 'dev' of https://github.com/TrienHoang/SmartCareApp into dev
+[33m0b730ac[m HEAD@{37}: commit (merge): Mer gg
+[33mb63468f[m HEAD@{38}: commit (merge): Update khi lịch nghỉ đột xuất
+[33m19481ea[m HEAD@{39}: checkout: moving from dev to hieudev
+[33mff79bf8[m HEAD@{40}: commit (merge): Mer code
+[33m099d96a[m HEAD@{41}: commit: Thay đổi sidebar của bác sĩ
+[33m3d71274[m HEAD@{42}: checkout: moving from hieudev to dev
+[33m19481ea[m HEAD@{43}: commit (merge): Thêm lịch nghỉ du lịch cho bác sĩ
+[33m0fe4988[m HEAD@{44}: commit: Thêm đăng kí lịch nghỉ du lịch cho bác sĩ
+[33ma8ddafe[m HEAD@{45}: checkout: moving from dev to hieudev
+[33m3d71274[m HEAD@{46}: pull origin dev: Fast-forward
+[33mf06dc9c[m HEAD@{47}: checkout: moving from hieudev to dev
+[33ma8ddafe[m HEAD@{48}: commit (merge): Tạo trường dữ liệu status cho doctor để phân loại bác sĩ full hay part
+[33m0d9d596[m HEAD@{49}: commit: Update header.blade.php
+[33mbf94133[m HEAD@{50}: commit (merge): Xây router cho thanh toán và dựng api cho nó
+[33m3feeef3[m HEAD@{51}: commit: Dựng sẵn api và router cho thanh toán
+[33m489bc56[m HEAD@{52}: pull origin hieudev: Fast-forward
+[33mf7d8ed7[m HEAD@{53}: commit: Bug lịch sử thanh toán
+[33mcdea7ca[m HEAD@{54}: commit: Fix hiển thị bên xuất file excel
+[33m4758dd2[m HEAD@{55}: commit: Hiển thị khi xuất file cho bác sĩ
+[33me533f4e[m HEAD@{56}: pull origin hieudev: Fast-forward
+[33m8e121d5[m HEAD@{57}: commit: Xây lại doctor/dashboard và bổ sung thêm các thông tin của bác sĩ khi xuất file
+[33mdb33d5c[m HEAD@{58}: checkout: moving from main to hieudev
+[33mbafedd2[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{59}: clone: from https://github.com/TrienHoang/SmartCareApp.git

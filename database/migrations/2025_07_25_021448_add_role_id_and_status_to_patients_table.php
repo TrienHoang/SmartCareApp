@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('treatment_plan_items', function (Blueprint $table) {
-            $table->foreignId('service_id')->nullable()->constrained('services')->onDelete('set null');
+        Schema::table('patients', function (Blueprint $table) {
+            $table->unsignedBigInteger('role_id')->nullable();
+            $table->enum('status', ['online', 'offline'])->default('online');
         });
     }
 
@@ -21,9 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('treatment_plan_items', function (Blueprint $table) {
-            $table->dropForeign(['service_id']);
-            $table->dropColumn('service_id');
+        Schema::table('patients', function (Blueprint $table) {
+            $table->dropColumn('role_id');
+            $table->dropColumn('status');
         });
     }
 };

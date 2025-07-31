@@ -6,15 +6,24 @@ use App\Http\Controllers\Client\ServiceController;
 use App\Http\Controllers\client\PrescriptionClientController;
 use App\Http\Controllers\client\ClientFileController;
 use App\Http\Controllers\Client\PaymentHistoryClientController;
-
+use App\Http\Controllers\Client\BookingController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Client\PaymentController;
 use Illuminate\Support\Facades\Route;
+
+
 
 use App\Http\Controllers\Client\ReviewReplyController;
 use App\Http\Controllers\Client\AppointmentController;
 use App\Http\Controllers\Client\DoctorController;
 use App\Http\Controllers\Client\AppointmentClientController;
+use chillerlan\QRCode\{QRCode, QROptions};
+use Illuminate\Support\Facades\Response;
+
+use App\Http\Controllers\Client\AppointmentHistoryController;
+use App\Http\Controllers\Client\UserController;
+use App\Http\Controllers\Client\ProfileController;
+
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -55,10 +64,11 @@ Route::get('/chi-tiet-tin-tuc/{id}', function ($id) {
     return view('client.news_detail', ['id' => $id]);
 })->name('news_detail');
 
-Route::get('/thong-tin-ca-nhan', function () {
-    return view('client.profile');
-})->name('profile');
-
+// Thông tin cá nhân
+Route::middleware(['auth'])->prefix('client/profile')->name('client.profile.')->group(function () {
+    Route::get('/', [ProfileController::class, 'show'])->name('show');
+    Route::patch('/update', [ProfileController::class, 'update'])->name('update');
+});
 // Route::get('/thong-tin-bac-si', function () {
 //     return view('client.doctors_detail');
 // })->name('doctors_detail');
@@ -73,11 +83,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Gửi phản hồi đánh giá
     Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
+    Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
 
     // Đánh dấu đánh giá là hữu ích
     Route::post('/reviews/{review}/useful', [ReviewReplyController::class, 'markUseful'])->name('reviews.useful');
-
-    Route::put('/thong-tin-bac-si/{doctor}/reviews/{id}', [ReviewReplyController::class, 'update'])->name('reviews.update');
 });
 
 // Route hiển thị chi tiết bác sĩ (không yêu cầu đăng nhập)
@@ -135,6 +144,19 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/payment/return', [BookingController::class, 'paymentReturn'])->name('payment.return');
     // Route::match(['get', 'post'], '/payment/ipn', [BookingController::class, 'paymentIpn'])->name('payment.ipn');
     Route::get('/booking/success', [BookingController::class, 'success'])->name('booking.success');
+
+    Route::get('/qr-code/{data}', function ($data) {
+        $options = new QROptions([
+            'outputType' => QRCode::OUTPUT_IMAGE_PNG,
+            'eccLevel'   => QRCode::ECC_L,
+            'scale'      => 3,
+            'imageBase64'  => false,
+        ]);
+
+        $image = (new QRCode($options))->render($data);
+
+        return Response::make($image, 200, ['Content-Type' => 'image/png']);
+    })->name('qr.generate');
 });
 
 
@@ -155,14 +177,14 @@ Route::prefix('client/appointments')->name('client.appointments.')->middleware([
     Route::get('/{appointment}', [AppointmentClientController::class, 'show'])->name('show'); // Chi tiết lịch hẹn
     Route::get('/{appointment}/edit', [AppointmentClientController::class, 'edit'])->name('edit'); // Sửa lịch hẹn
     Route::put('/{appointment}', [AppointmentClientController::class, 'update'])->name('update'); // Cập nhật
-Route::delete('/{appointment}/cancel', [AppointmentClientController::class, 'cancel'])->name('cancel');
-// Hủy lịch hẹn
+    Route::delete('/{appointment}/cancel', [AppointmentClientController::class, 'cancel'])->name('cancel');
+    // Hủy lịch hẹn
 });
 // Sửa lại routes của bạn như sau:
 
 Route::prefix('client/notifications')->middleware('auth')->name('client.notifications.')->group(function () {
     Route::get('/', [ClientNotificationController::class, 'index'])->name('index');
-    
+
     // 👇 Các route tĩnh (string) phải để TRƯỚC
     Route::delete('/delete-all', [ClientNotificationController::class, 'deleteAll'])->name('deleteAll');
     Route::post('/mark-all-as-read', [ClientNotificationController::class, 'markAllAsRead'])->name('mark-all-as-read');
@@ -170,6 +192,16 @@ Route::prefix('client/notifications')->middleware('auth')->name('client.notifica
     Route::delete('/{id}', [ClientNotificationController::class, 'destroy'])->name('destroy');
     Route::get('/{notification}', [ClientNotificationController::class, 'show'])->name('show');
     Route::post('/{notification}/mark-as-read', [ClientNotificationController::class, 'markAsRead'])->name('mark-as-read');
+});
+
+// giảm kịch khung
+// Thêm vào file routes/web.php
+
+Route::middleware(['auth'])->group(function () {
+    // Routes cho promotion (phù hợp với view có sẵn)
+    Route::get('/promotions', [PromotionController::class, 'index'])->name('client.promotions.index');
+    Route::post('/promotions/apply/{promotion}', [PromotionController::class, 'apply'])->name('client.promotions.apply');
+    Route::post('/promotions/remove', [PromotionController::class, 'remove'])->name('client.promotions.remove');
 });
 
 

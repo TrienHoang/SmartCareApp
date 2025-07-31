@@ -78,4 +78,9 @@ class User extends Authenticatable
     {
         return $this->role && $this->role->name === '1';
     }
+    public function appointments()
+{
+    return $this->hasMany(Appointment::class, 'patient_id');
+}
+
 }
