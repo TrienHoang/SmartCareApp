@@ -497,10 +497,6 @@ class BookingController extends Controller
 
         // Tạo một mã QR duy nhất (UUID) cho cuộc hẹn
         $qrCodeData = (string) Str::uuid();
-        if ($booked) {
-            DB::rollBack();
-            return redirect()->route('booking.showService', $booking_confirm['service_id'])->with('error', 'Khung giờ này đã có người khác đặt hoặc không còn khả dụng.');
-        }
 
         $appointment = Appointment::create([
             'patient_id' => $user->id,

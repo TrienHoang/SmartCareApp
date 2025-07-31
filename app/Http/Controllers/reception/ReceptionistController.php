@@ -4,6 +4,7 @@ namespace App\Http\Controllers\reception;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\WorkingSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -44,9 +45,9 @@ class ReceptionistController extends Controller
             if ($appointment->status === 'cancelled') {
                 return response()->json(['success' => false, 'message' => 'Cuộc hẹn đã bị hủy.'], 400);
             }
-            if ($appointment->status === 'check_in') {
-                return response()->json(['success' => false, 'message' => 'Cuộc hẹn đã được check-in trước đó.'], 400);
-            }
+            // if ($appointment->status === 'checked_in') {
+            //     return response()->json(['success' => false, 'message' => 'Cuộc hẹn đã được check-in trước đó.'], 400);
+            // }
             if ($appointment->status === 'completed') {
                 return response()->json(['success' => false, 'message' => 'Cuộc hẹn đã hoàn tất.'], 400);
             }
@@ -56,14 +57,27 @@ class ReceptionistController extends Controller
             //     return response()->json(['success' => false, 'message' => 'Cuộc hẹn này không phải cho hôm nay.'], 400);
             // }
 
+            $doctor_id = $appointment->doctor_id;
+
+            $scheduledRoom = WorkingSchedule::where('doctor_id', $doctor_id)->with('room')
+                ->first();
+
+                if ($scheduledRoom && $scheduledRoom->room) {
+                    $room = $scheduledRoom->room->name;
+                } else {
+                    $room = 'Chưa xác định';
+                }
+
+            log::info("Scheduled room: " . $room);
+
             // Cập nhật trạng thái và thời gian check-in
             $appointment->status = 'checked_in';
             $appointment->check_in_time = Carbon::now();
             $appointment->save();
 
             // Lấy thông tin chi tiết để trả về
-            $patient = $appointment->patient; 
-            $doctor = $appointment->doctor->user; 
+            $patient = $appointment->patient;
+            $doctor = $appointment->doctor->user;
             $service = $appointment->service;
 
             return response()->json([
@@ -75,12 +89,13 @@ class ReceptionistController extends Controller
                     'patient_phone' => $patient->phone,
                     'doctor_name' => $doctor->full_name,
                     'service_name' => $service->name,
+                    'room' =>   $room,
+                    'department' => $service->department->name,
                     'appointment_time' => Carbon::parse($appointment->appointment_time)->format('H:i d/m/Y'),
                     'check_in_time' => Carbon::parse($appointment->check_in_time)->format('H:i d/m/Y'),
                     'status' => $appointment->status,
                 ]
             ]);
-
         } catch (\Exception $e) {
             Log::error("QR Check-in error: " . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Đã xảy ra lỗi trong quá trình check-in.'], 500);

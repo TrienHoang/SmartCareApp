@@ -583,12 +583,13 @@ class AppointmentController extends Controller
 
         // Kiểm tra bệnh nhân có lịch khác bị trùng không
         $overlappedAppointments = Appointment::where('patient_id', $patientId)
-            ->where('id', '!=', $appointment->id)
-            ->where(function ($q) use ($appointmentTime, $endTime) {
-                $q->where('appointment_time', '<', $endTime)
-                    ->where('end_time', '>', $appointmentTime);
-            })
-            ->get();
+        ->where('id', '!=', $appointment->id)
+        ->where('status', '!=', 'cancelled')
+        ->where(function ($q) use ($appointmentTime, $endTime) {
+            $q->where('appointment_time', '<', $endTime)
+                ->where('end_time', '>', $appointmentTime);
+        })
+        ->get();
 
         if ($overlappedAppointments->count() > 0) {
             return back()->withErrors([
@@ -676,6 +677,11 @@ class AppointmentController extends Controller
                 ->with('success', 'Cập nhật lịch hẹn thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error updating appointment', [
+                'appointment_id' => $appointment->id,
+                'error'          => $e->getMessage(),
+                'changes'        => $changes,
+            ]);
             return back()->withErrors(['error' => 'Đã xảy ra lỗi khi cập nhật lịch hẹn.']);
         }
     }
