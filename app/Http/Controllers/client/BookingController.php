@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Log;
+use Illuminate\Support\Str;
 
 class BookingController extends Controller
 {
@@ -549,6 +550,8 @@ class BookingController extends Controller
                 DB::rollBack();
                 return redirect()->route('booking.showService', $booking_confirm['service_id'])->with('error', 'Khung giờ này đã có người khác đặt hoặc không còn khả dụng.');
             }
+            // Tạo một mã QR duy nhất (UUID) cho cuộc hẹn
+            $qrCodeData = (string) Str::uuid();
 
             $appointment = Appointment::create([
                 'patient_id' => $user->id,
@@ -559,6 +562,7 @@ class BookingController extends Controller
                 'status' => 'pending', // Trạng thái mặc định sau khi đặt
                 'reason' => $validated['reason'] ?? null, // Sử dụng $validated['reason']
                 'created_by' => $user->id, // Người tạo là người dùng hiện tại
+                'qr_code' => $qrCodeData,
             ]);
 
             // 4. Xóa dữ liệu đặt lịch tạm thời khỏi session
