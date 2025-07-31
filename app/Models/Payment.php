@@ -18,7 +18,12 @@ class Payment extends Model
         'amount',
         'payment_method',
         'status',
+        'note',
+        'refund_status',
         'paid_at',
+        'vnp_txn_ref',
+        'vnp_transaction_no',
+        'vnp_response_code',
     ];
 
     protected $casts = [
