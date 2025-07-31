@@ -9,6 +9,7 @@ use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
 use App\Http\Requests\UpdateStatusAppointmentRequest;
 use App\Mail\AppointmentConfirmed;
+use App\Mail\RefundSuccessfulMail;
 use App\Models\Appointment;
 use App\Models\AppointmentLog;
 use App\Models\Department;
@@ -1126,6 +1127,33 @@ class AppointmentController extends Controller
                     'refunded_at'    => now(),
                 ]);
 
+                PaymentHistory::create([
+                    'payment_id'      => $payment->id,
+                    'amount'          => -1 * $payment->amount,
+                    'payment_method'  => 'vnpay',
+                    'payment_date'    => now(),
+                ]);
+
+                try {
+                    // Xác định lý do hoàn tiền
+                    $reason = match (true) {
+                        $appointment->status === 'cancelled' =>
+                        'Lịch hẹn đã bị huỷ. Chúng tôi xin lỗi nếu có sự bất tiện xảy ra.',
+                        $appointment->cancel_reason === 'doctor_unavailable' =>
+                        'Bác sĩ xin nghỉ đột xuất. Chúng tôi xin lỗi vì sự bất tiện này.',
+                        default =>
+                        'Hoàn tiền theo chính sách hoặc yêu cầu từ phía quý khách.',
+                    };
+
+                    Mail::to($appointment->patient->email)
+                        ->send(new RefundSuccessfulMail($appointment, $reason));
+                } catch (\Throwable $e) {
+                    \Log::error('Lỗi gửi mail hoàn tiền', [
+                        'appointment_id' => $appointment->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+
                 return back()->with('success', 'Hoàn tiền thành công.');
             } else {
                 $payment->update(['refund_status' => 'failed']);
@@ -1227,6 +1255,27 @@ class AppointmentController extends Controller
                     'payment_method' => 'vnpay_refund',
                     'payment_date' => now(),
                 ]);
+
+                try {
+                    $appointment = $payment->appointment;
+
+                    // Xác định lý do nếu có cột cancellation_reason
+                    if ($appointment->status === 'cancelled') {
+                        $reason = 'Lịch hẹn đã bị huỷ. Chúng tôi xin lỗi nếu có sự bất tiện xảy ra.';
+                    } elseif ($appointment->cancel_reason === 'doctor_unavailable') {
+                        $reason = 'Bác sĩ xin nghỉ đột xuất. Chúng tôi xin lỗi vì sự bất tiện này.';
+                    } else {
+                        $reason = 'Hoàn tiền theo chính sách hoặc yêu cầu từ phía quý khách.';
+                    }
+
+                    Mail::to($appointment->patient->email)
+                        ->send(new RefundSuccessfulMail($appointment, $reason));
+                } catch (\Throwable $e) {
+                    Log::error('Lỗi gửi mail hoàn tiền (performVnpayRefund)', [
+                        'appointment_id' => $payment->appointment_id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
 
                 return ['success' => true];
             }
