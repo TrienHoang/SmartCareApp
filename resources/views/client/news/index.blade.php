@@ -56,31 +56,36 @@
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
                             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                                 <div class="flex flex-wrap gap-2">
-                                    <button
-                                        class="px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition-colors">
+                                    {{-- Kiểm tra nếu không có category_id trong request thì highlight "Tất cả" --}}
+                                    <a href="{{ route('client.news.index') }}"
+                                        class="px-4 py-2 rounded-full text-sm font-medium transition-colors
+                                        {{ !request('category_id') && !request()->route('id') ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                                         Tất cả
-                                    </button>
+                                    </a>
 
                                     @foreach ($serviceCategories as $category)
-                                        <button
-                                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">
+                                        {{-- Kiểm tra nếu category hiện tại được chọn thì highlight --}}
+                                        <a href="{{ route('client.news.category', ['id' => $category->id]) }}"
+                                            class="px-4 py-2 rounded-full text-sm font-medium transition-colors
+                                            {{ (request('category_id') == $category->id) || (request()->route('id') == $category->id) ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                                             {{ $category->name }}
-                                        </button>
+                                        </a>
                                     @endforeach
                                 </div>
 
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm text-gray-600">Sắp xếp:</span>
-                                    <select
-                                        class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        <option>Mới nhất</option>
-                                        <option>Phổ biến nhất</option>
-                                        <option>Cũ nhất</option>
+                                <form method="GET" action="{{ route('client.news.index') }}">
+                                    {{-- Giữ lại category_id khi sort --}}
+                                    @if(request('category_id') || request()->route('id'))
+                                        <input type="hidden" name="category_id" value="{{ request('category_id') ?? request()->route('id') }}">
+                                    @endif
+                                    <select name="sort" onchange="this.form.submit()"
+                                        class="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="desc" {{ request('sort', 'desc') == 'desc' ? 'selected' : '' }}>Mới nhất</option>
+                                        <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Cũ nhất</option>
                                     </select>
-                                </div>
+                                </form>
                             </div>
                         </div>
-
 
                         {{-- News Grid with enhanced cards --}}
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -96,7 +101,7 @@
                                         <div class="absolute top-4 left-4">
                                             <span
                                                 class="bg-white/90 backdrop-blur-sm text-blue-700 px-3 py-1.5 rounded-full text-sm font-semibold shadow-sm">
-                                                {{ $post->category->name ?? 'Chuyên mục' }}
+                                                {{ $post->serviceCategory->name ?? 'Chuyên mục' }}
                                             </span>
                                         </div>
                                     </div>
@@ -108,7 +113,7 @@
                                             </div>
                                             <div class="flex items-center gap-1">
                                                 <i data-lucide="eye" class="w-4 h-4"></i>
-                                                <span>1.2k lượt xem</span>
+                                                <span>{{ number_format($post->view_count, 0, ',', '.') }} lượt xem</span>
                                             </div>
                                         </div>
                                         <h3
@@ -144,20 +149,23 @@
 
                     {{-- Enhanced Sidebar --}}
                     <div class="xl:col-span-1 order-1 xl:order-2 space-y-8">
-                        {{-- Search Box with better styling --}}
+                        {{-- Search Box with working form --}}
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                             <h3 class="text-xl font-bold mb-6 flex items-center">
                                 <i data-lucide="search" class="w-5 h-5 mr-2 text-blue-600"></i>
                                 Tìm Kiếm Tin Tức
                             </h3>
-                            <div class="relative">
-                                <input type="text" placeholder="Nhập từ khóa tìm kiếm..."
-                                    class="w-full p-4 border border-gray-200 rounded-xl pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                                <button
-                                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors">
-                                    <i data-lucide="search" class="w-5 h-5"></i>
-                                </button>
-                            </div>
+                            <form action="{{ route('client.news.index') }}" method="GET">
+                                <div class="relative">
+                                    <input type="text" name="keyword" value="{{ request('keyword') }}"
+                                        placeholder="Nhập từ khóa tìm kiếm..."
+                                        class="w-full p-4 border border-gray-200 rounded-xl pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                    <button type="submit"
+                                        class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors">
+                                        <i data-lucide="search" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                            </form>
                         </div>
 
                         {{-- Categories with modern design --}}
@@ -167,30 +175,33 @@
                                 Chuyên Mục
                             </h3>
                             <div class="space-y-2">
-                                @php
-                                    $categories = [
-                                        ['name' => 'Nội Khoa', 'count' => 15, 'icon' => 'stethoscope'],
-                                        ['name' => 'Ngoại Khoa', 'count' => 12, 'icon' => 'scissors'],
-                                        ['name' => 'Sản Phụ Khoa', 'count' => 8, 'icon' => 'baby'],
-                                        ['name' => 'Nhi Khoa', 'count' => 10, 'icon' => 'smile'],
-                                        ['name' => 'Tim Mạch', 'count' => 6, 'icon' => 'heart'],
-                                        ['name' => 'Da Liễu', 'count' => 5, 'icon' => 'shield'],
-                                    ];
-                                @endphp
-                                @foreach ($categories as $category)
-                                    <a href="#"
-                                        class="group flex items-center justify-between p-4 rounded-xl hover:bg-blue-50 transition-all duration-200 hover:shadow-sm">
+                                {{-- Tất cả --}}
+                                <a href="{{ route('client.news.index') }}"
+                                    class="group flex items-center justify-between p-4 rounded-xl transition-all duration-200 hover:shadow-sm
+                                    {{ !request('category_id') && !request()->route('id') ? 'bg-blue-50 border border-blue-200' : 'hover:bg-blue-50' }}">
+                                    <div class="flex items-center">
+                                        <div
+                                            class="w-10 h-10 rounded-lg flex items-center justify-center mr-3 transition-colors
+                                            {{ !request('category_id') && !request()->route('id') ? 'bg-blue-200' : 'bg-blue-100 group-hover:bg-blue-200' }}">
+                                            <i data-lucide="grid-3x3" class="w-5 h-5 text-blue-600"></i>
+                                        </div>
+                                        <span class="font-medium {{ !request('category_id') && !request()->route('id') ? 'text-blue-700' : 'text-gray-700' }}">Tất cả</span>
+                                    </div>
+                                </a>
+
+                                @foreach ($serviceCategories as $category)
+                                    <a href="{{ route('client.news.category', $category->id) }}"
+                                        class="group flex items-center justify-between p-4 rounded-xl transition-all duration-200 hover:shadow-sm
+                                        {{ (request('category_id') == $category->id) || (request()->route('id') == $category->id) ? 'bg-blue-50 border border-blue-200' : 'hover:bg-blue-50' }}">
                                         <div class="flex items-center">
                                             <div
-                                                class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">
-                                                <i data-lucide="{{ $category['icon'] }}" class="w-5 h-5 text-blue-600"></i>
+                                                class="w-10 h-10 rounded-lg flex items-center justify-center mr-3 transition-colors
+                                                {{ (request('category_id') == $category->id) || (request()->route('id') == $category->id) ? 'bg-blue-200' : 'bg-blue-100 group-hover:bg-blue-200' }}">
+                                                <i data-lucide="{{ $category->icon ?? 'folder' }}"
+                                                    class="w-5 h-5 text-blue-600"></i>
                                             </div>
-                                            <span class="text-gray-700 font-medium">{{ $category['name'] }}</span>
+                                            <span class="font-medium {{ (request('category_id') == $category->id) || (request()->route('id') == $category->id) ? 'text-blue-700' : 'text-gray-700' }}">{{ $category->name }}</span>
                                         </div>
-                                        <span
-                                            class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-semibold group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors">
-                                            {{ $category['count'] }}
-                                        </span>
                                     </a>
                                 @endforeach
                             </div>
@@ -203,26 +214,6 @@
                                 Bài Viết Phổ Biến
                             </h3>
                             <div class="space-y-4">
-                                @php
-                                    $popularArticles = [
-                                        [
-                                            'title' => '10 Thói Quen Tốt Cho Sức Khỏe',
-                                            'date' => '01/07/2025',
-                                            'views' => '2.1k',
-                                        ],
-                                        [
-                                            'title' => 'Cách Tăng Cường Hệ Miễn Dịch',
-                                            'date' => '28/06/2025',
-                                            'views' => '1.8k',
-                                        ],
-                                        [
-                                            'title' => 'Chế Độ Ăn Uống Lành Mạnh',
-                                            'date' => '25/06/2025',
-                                            'views' => '1.5k',
-                                        ],
-                                        ['title' => 'Tập Thể Dục Đúng Cách', 'date' => '22/06/2025', 'views' => '1.2k'],
-                                    ];
-                                @endphp
                                 @foreach ($popularArticles as $index => $article)
                                     <div
                                         class="group flex items-start space-x-4 p-3 rounded-xl hover:bg-gray-50 transition-colors">
@@ -231,68 +222,23 @@
                                             {{ $index + 1 }}
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <a href="#"
+                                            <a href="{{ route('client.news.show', $article->slug) }}"
                                                 class="text-gray-800 hover:text-blue-600 transition-colors block font-medium leading-tight mb-2 line-clamp-2">
-                                                {{ $article['title'] }}
+                                                {{ $article->title }}
                                             </a>
                                             <div class="flex items-center gap-4 text-xs text-gray-500">
                                                 <span class="flex items-center gap-1">
                                                     <i data-lucide="calendar" class="w-3 h-3"></i>
-                                                    {{ $article['date'] }}
+                                                    {{ $article->created_at->format('d/m/Y') }}
                                                 </span>
                                                 <span class="flex items-center gap-1">
                                                     <i data-lucide="eye" class="w-3 h-3"></i>
-                                                    {{ $article['views'] }}
+                                                    {{ number_format($article->view_count) }} lượt xem
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
                                 @endforeach
-                            </div>
-                        </div>
-
-                        {{-- Enhanced Quick Booking --}}
-                        <div
-                            class="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 text-white rounded-2xl shadow-lg">
-                            <div class="absolute inset-0 bg-black/10"></div>
-                            <div
-                                class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl transform translate-x-8 -translate-y-8">
-                            </div>
-                            <div class="relative z-10 p-6">
-                                <div class="flex items-center mb-4">
-                                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-3">
-                                        <i data-lucide="calendar-plus" class="w-6 h-6"></i>
-                                    </div>
-                                    <h3 class="text-xl font-bold">Đặt Lịch Khám</h3>
-                                </div>
-                                <p class="text-blue-50 mb-6 leading-relaxed">
-                                    Cần tư vấn sức khỏe? Đặt lịch khám ngay với các chuyên gia của chúng tôi.
-                                </p>
-                                <a href="{{ url('/dat-lich') }}"
-                                    class="group inline-flex items-center justify-center w-full bg-white text-blue-700 px-6 py-4 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-200 hover:shadow-lg">
-                                    <span>Đặt Lịch Ngay</span>
-                                    <i data-lucide="arrow-right"
-                                        class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-                                </a>
-                            </div>
-                        </div>
-
-                        {{-- Newsletter Signup Widget --}}
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                            <h3 class="text-xl font-bold mb-4 flex items-center">
-                                <i data-lucide="mail" class="w-5 h-5 mr-2 text-blue-600"></i>
-                                Nhận Tin Mới
-                            </h3>
-                            <p class="text-gray-600 mb-4 text-sm">
-                                Đăng ký để nhận thông tin y tế mới nhất qua email
-                            </p>
-                            <div class="space-y-3">
-                                <input type="email" placeholder="Email của bạn"
-                                    class="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                                <button
-                                    class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm">
-                                    Đăng Ký
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -376,12 +322,9 @@
 
         /* Enhanced hover animations */
         @keyframes float {
-
-            0%,
-            100% {
+            0%, 100% {
                 transform: translateY(0px);
             }
-
             50% {
                 transform: translateY(-10px);
             }
