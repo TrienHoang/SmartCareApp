@@ -32,7 +32,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\RefundSuccessfulMail;
 
 class AppointmentController extends Controller
 {
@@ -1060,7 +1059,7 @@ class AppointmentController extends Controller
 
     public function refund($appointmentId)
     {
-        $appointment = Appointment::with(['payment', 'patient'])->findOrFail($appointmentId);
+        $appointment = Appointment::with('payment')->findOrFail($appointmentId);
         $payment = $appointment->payment;
 
         if (!$payment || $payment->status !== 'paid') {
@@ -1068,100 +1067,82 @@ class AppointmentController extends Controller
         }
 
         if ($payment->refund_status === 'completed') {
-            return back()->withErrors(['error' => 'Đã hoàn tiền trước đó.']);
+            return back()->withErrors(['error' => 'Giao dịch đã được hoàn tiền trước đó.']);
         }
 
-        if (empty($payment->vnp_txn_ref) || empty($payment->vnp_transaction_no) || empty($payment->paid_at)) {
-            return back()->withErrors(['error' => 'Thiếu thông tin giao dịch VNPay.']);
-        }
-
+        // VNPay config
         $tmnCode     = config('services.vnpay.tmn_code');
         $hashSecret  = config('services.vnpay.hash_secret');
         $refundUrl   = config('services.vnpay.refund_url');
 
-        $txnRef = trim((string) $payment->vnp_txn_ref);
-        $amount = (int) round((float) $payment->amount * 100);
-        $transactionNo  = $payment->vnp_transaction_no;
-        $transactionDate = \Carbon\Carbon::parse($payment->paid_at)->format('YmdHis');
-        $requestId      = uniqid();
-        $createDate     = now()->format('YmdHis');
-        $ipAddr         = request()->ip();
-        $createBy       = auth()->user()->name ?? 'system';
+        // Lấy dữ liệu giao dịch gốc
+        $amount            = intval($payment->amount * 100); // VNPay dùng đơn vị xu
+        $txnRef            = $payment->vnp_txn_ref;
+        $transactionNo     = $payment->vnp_transaction_no;
+        $transactionDate   = \Carbon\Carbon::parse($payment->paid_at)->format('YmdHis');
+        $requestId         = Str::random(13);
+        $createDate        = now()->format('YmdHis');
+        $ipAddr            = request()->ip();
 
         $data = [
             'vnp_Version'          => '2.1.0',
             'vnp_Command'          => 'refund',
             'vnp_TmnCode'          => $tmnCode,
-            'vnp_TransactionType'  => '02',
+            'vnp_TransactionType'  => '02', // Hoàn tiền toàn phần
             'vnp_TxnRef'           => $txnRef,
             'vnp_TransactionNo'    => $transactionNo,
             'vnp_Amount'           => $amount,
+            'vnp_OrderInfo'        => "Hoàn tiền lịch hẹn #$appointment->id",
             'vnp_TransactionDate'  => $transactionDate,
-            'vnp_CreateBy'         => $createBy,
+            'vnp_CreateBy'         => 'system',
             'vnp_CreateDate'       => $createDate,
             'vnp_IpAddr'           => $ipAddr,
             'vnp_RequestId'        => $requestId,
-            'vnp_OrderInfo'        => 'Refund appointment ' . $appointment->id,
         ];
 
-        // ✅ Hash chính xác
+        // Tạo secure hash
         ksort($data);
         $hashData = urldecode(http_build_query($data));
-        $data['vnp_SecureHash'] = hash_hmac('sha512', $hashData, $hashSecret);
-
+        $secureHash = hash_hmac('sha512', $hashData, $hashSecret);
+        $data['vnp_SecureHash'] = $secureHash;
 
         \Log::info('🧾 Gọi refund thực tế', ['payment_id' => $payment->id]);
         \Log::debug('🔐 Hash string', ['hash_string' => $hashData]);
         \Log::debug('VNPay Refund input data', $data);
 
         try {
-            $response = Http::asForm()->post($refundUrl, $data);
+            // Gửi POST JSON
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post($refundUrl, $data);
 
             \Log::info('📥 VNPay Refund HTTP Status: ' . $response->status());
             \Log::info('📥 VNPay Refund Body: ' . $response->body());
 
-            $result = $response->json();
-
-            if ($response->successful() && ($result['vnp_ResponseCode'] ?? null) === '00') {
+            if ($response->successful()) {
                 $payment->update([
-                    'status'        => 'refunded',
-                    'refund_status' => 'completed',
-                    'refunded_at'   => now(),
+                    'status'         => 'refunded',
+                    'refund_status'  => 'completed',
+                    'refunded_at'    => now(),
                 ]);
-
-                PaymentHistory::create([
-                    'payment_id' => $payment->id,
-                    'amount'     => -1 * $payment->amount,
-                    'payment_method' => 'vnpay_refund',
-                    'payment_date'   => now(),
-                ]);
-
-                try {
-                    $reason = $appointment->status === 'cancelled'
-                        ? 'Lịch hẹn đã bị huỷ.'
-                        : 'Hoàn tiền theo chính sách hoặc yêu cầu từ phía quý khách.';
-
-                    Mail::to($appointment->patient->email)
-                        ->send(new RefundSuccessfulMail($appointment, $reason));
-                } catch (\Throwable $e) {
-                    \Log::error('Lỗi gửi mail hoàn tiền', [
-                        'appointment_id' => $appointment->id,
-                        'error' => $e->getMessage()
-                    ]);
-                }
 
                 return back()->with('success', 'Hoàn tiền thành công.');
             } else {
                 $payment->update(['refund_status' => 'failed']);
-                \Log::error('❌ VNPay Refund Failed', ['response' => $result]);
-                return back()->withErrors(['error' => 'Hoàn tiền thất bại: ' . ($result['vnp_Message'] ?? 'Không rõ lỗi')]);
+
+                \Log::error('❌ VNPay HTTP ERROR', [
+                    'status' => $response->status(),
+                    'body'   => $response->body(),
+                ]);
+
+                return back()->withErrors(['error' => 'Hoàn tiền thất bại: ' . $response->body()]);
             }
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             $payment->update(['refund_status' => 'failed']);
 
             \Log::error('❌ Exception refund', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'trace'   => $e->getTraceAsString(),
             ]);
 
             return back()->withErrors(['error' => 'Có lỗi xảy ra khi gửi yêu cầu hoàn tiền.']);
