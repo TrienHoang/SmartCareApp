@@ -11,6 +11,7 @@ use App\Models\WorkingSchedule;
 use App\Models\Appointment;
 use App\Models\DoctorLeave;
 use App\Models\Order;
+use App\Models\OrderService;
 use App\Models\Payment; // Assumed Payment model
 use App\Models\PaymentHistory;
 use Carbon\Carbon;
@@ -642,64 +643,98 @@ class BookingController extends Controller
         $appointment = Appointment::find($appointmentId);
 
         if (!$payment || !$appointment) {
-            return redirect()->route('client.services')->with('error', 'Giao dịch không hợp lệ hoặc không tìm thấy.');
+            return redirect()->route('client.services')
+                ->with('error', 'Giao dịch không hợp lệ hoặc không tìm thấy.');
         }
 
-        // Kiểm tra checksum và mã thành công
-        if ($secureHash === $vnp_SecureHash && $responseCode === '00') {
-            if ($payment->status !== 'paid') {
+        // Kiểm tra checksum trước
+        if ($secureHash === $vnp_SecureHash) {
+
+            if ($responseCode === '00') {
+                // Thanh toán thành công
+                if ($payment->status !== 'paid') {
+                    DB::beginTransaction();
+                    try {
+                        $payDate = Carbon::createFromFormat('YmdHis', $request->vnp_PayDate);
+
+                        $payment->update([
+                            'status'              => 'paid',
+                            'paid_at'             => $payDate,
+                            'vnp_txn_ref'         => $request->vnp_TxnRef,
+                            'vnp_transaction_no'  => $request->vnp_TransactionNo,
+                            'vnp_response_code'   => $request->vnp_ResponseCode,
+                        ]);
+
+                        PaymentHistory::create([
+                            'payment_id'     => $payment->id,
+                            'amount'         => $request->vnp_Amount / 100,
+                            'payment_method' => 'vnpay',
+                            'payment_date'   => $payDate,
+                        ]);
+
+                        // Ở bước return vẫn để pending, admin/lễ tân sẽ xác nhận sau
+                        $appointment->update([
+                            'status' => 'pending',
+                        ]);
+
+                        $order = Order::create([
+                            'user_id'        => $appointment->patient_id,
+                            'appointment_id' => $appointment->id,
+                            'payment_id'     => $payment->id,
+                            'total_amount'   => $request->vnp_Amount / 100,
+                            'status'         => 'paid',
+                            'ordered_at'     => now(),
+                        ]);
+
+                        // Lưu vào bảng order_service
+                        OrderService::create([
+                            'order_id'   => $order->id,
+                            'service_id' => $appointment->service_id,
+                            'quantity'   => 1,
+                            'price'      => $appointment->service->price ?? 0,
+                        ]);
+
+                        DB::commit();
+                        return redirect()->route('booking.success')
+                            ->with('success', 'Thanh toán thành công! Lịch hẹn của bạn đã được ghi nhận.');
+                    } catch (\Exception $e) {
+                        DB::rollBack();
+                        \Log::error("Payment confirmation failed: " . $e->getMessage());
+                        return redirect()->route('client.services')
+                            ->with('error', 'Có lỗi xảy ra khi xác nhận thanh toán.');
+                    }
+                } else {
+                    // Đã thanh toán rồi thì chuyển về trang thành công
+                    return redirect()->route('booking.success')
+                        ->with('success', 'Giao dịch đã được xác nhận trước đó.');
+                }
+            } elseif ($responseCode === '24') {
+                // Người dùng hủy thanh toán
                 DB::beginTransaction();
                 try {
-                    $payDate = Carbon::createFromFormat('YmdHis', $request->vnp_PayDate);
-
-                    // Cập nhật Payment với các trường VNPay
-                    $payment->update([
-                        'status'              => 'paid',
-                        'paid_at'             => $payDate,
-                        'vnp_txn_ref'         => $request->vnp_TxnRef,
-                        'vnp_transaction_no'  => $request->vnp_TransactionNo,
-                        'vnp_response_code'   => $request->vnp_ResponseCode,
-                    ]);
-
-                    // Ghi vào PaymentHistory
-                    PaymentHistory::create([
-                        'payment_id'     => $payment->id,
-                        'amount'         => $request->vnp_Amount / 100,
-                        'payment_method' => 'vnpay',
-                        'payment_date'   => $payDate,
-                    ]);
-
-                    // Cập nhật trạng thái lịch hẹn
-                    $appointment->update([
-                        'status' => 'pending',
-                    ]);
-
-                    Order::create([
-                        'user_id'        => $appointment->patient_id,
-                        'appointment_id' => $appointment->id,
-                        'payment_id'     => $payment->id,
-                        'total_amount'   => $request->vnp_Amount / 100,
-                        'status'         => 'paid',
-                        'ordered_at'     => now(),
-                    ]);
-
+                    $payment->delete();
+                    $appointment->delete();
                     DB::commit();
-                    return redirect()->route('booking.success')
-                        ->with('success', 'Thanh toán thành công! Lịch hẹn của bạn đã được xác nhận.');
+                    return redirect()->route('client.services')
+                        ->with('error', 'Bạn đã hủy giao dịch. Lịch hẹn đã bị xóa.');
                 } catch (\Exception $e) {
                     DB::rollBack();
-                    \Log::error("Payment confirmation failed: " . $e->getMessage());
+                    \Log::error("Payment cancellation failed: " . $e->getMessage());
                     return redirect()->route('client.services')
-                        ->with('error', 'Có lỗi xảy ra khi xác nhận thanh toán.');
+                        ->with('error', 'Có lỗi xảy ra khi xóa dữ liệu.');
                 }
+            } else {
+                // Các mã lỗi khác
+                $payment->update(['status' => 'unpaid']);
+                $appointment->update(['status' => 'cancelled']);
+
+                return redirect()->route('booking.showService', $appointment->service_id)
+                    ->with('error', 'Thanh toán không thành công. Vui lòng thử lại.');
             }
         } else {
-            // Nếu không thành công
-            $payment->update(['status' => 'unpaid']);
-            $appointment->update(['status' => 'cancelled']);
-
-            return redirect()->route('booking.showService', $appointment->service_id)
-                ->with('error', 'Thanh toán không thành công. Vui lòng thử lại.');
+            // Checksum không đúng
+            return redirect()->route('client.services')
+                ->with('error', 'Dữ liệu không hợp lệ (checksum sai).');
         }
     }
 
@@ -729,50 +764,72 @@ class BookingController extends Controller
             return response()->json(['RspCode' => '01', 'Message' => 'Transaction not found']);
         }
 
-        if ($secureHash === $vnp_SecureHash && $responseCode === '00') {
-            if ($payment->status !== 'paid') {
+        // Kiểm tra checksum trước
+        if ($secureHash === $vnp_SecureHash) {
+
+            if ($responseCode === '00') {
+                // Giao dịch thành công
+                if ($payment->status !== 'paid') {
+                    DB::beginTransaction();
+                    try {
+                        $payDate = Carbon::createFromFormat('YmdHis', $request->vnp_PayDate);
+
+                        // Cập nhật Payment
+                        $payment->update([
+                            'status'              => 'paid',
+                            'paid_at'             => $payDate,
+                            'vnp_txn_ref'         => $request->vnp_TxnRef,
+                            'vnp_transaction_no'  => $request->vnp_TransactionNo,
+                            'vnp_response_code'   => $request->vnp_ResponseCode,
+                        ]);
+
+                        // Ghi lại PaymentHistory
+                        PaymentHistory::create([
+                            'payment_id'     => $payment->id,
+                            'amount'         => $request->vnp_Amount / 100,
+                            'payment_method' => 'vnpay',
+                            'payment_date'   => $payDate,
+                        ]);
+
+                        // Cập nhật trạng thái lịch hẹn
+                        $appointment->update([
+                            'status' => 'pending', // admin/lễ tân duyệt sau
+                        ]);
+
+                        DB::commit();
+                        return response()->json(['RspCode' => '00', 'Message' => 'Confirm Success']);
+                    } catch (\Exception $e) {
+                        DB::rollBack();
+                        \Log::error("IPN processing failed: " . $e->getMessage());
+                        return response()->json(['RspCode' => '99', 'Message' => 'Unknown error']);
+                    }
+                } else {
+                    return response()->json(['RspCode' => '02', 'Message' => 'Transaction already confirmed']);
+                }
+            } elseif ($responseCode === '24') {
+                // Người dùng hủy giao dịch
                 DB::beginTransaction();
                 try {
-                    $payDate = Carbon::createFromFormat('YmdHis', $request->vnp_PayDate);
-
-                    // Cập nhật Payment
-                    $payment->update([
-                        'status'              => 'paid',
-                        'paid_at'             => $payDate,
-                        'vnp_txn_ref'         => $request->vnp_TxnRef,
-                        'vnp_transaction_no'  => $request->vnp_TransactionNo,
-                        'vnp_response_code'   => $request->vnp_ResponseCode,
-                    ]);
-
-                    // Ghi lại PaymentHistory
-                    PaymentHistory::create([
-                        'payment_id'     => $payment->id,
-                        'amount'         => $request->vnp_Amount / 100,
-                        'payment_method' => 'vnpay',
-                        'payment_date'   => $payDate,
-                    ]);
-
-                    $appointment->update([
-                        'status' => 'pending',
-                    ]);
-
+                    $payment->delete();
+                    $appointment->delete();
                     DB::commit();
-                    return response()->json(['RspCode' => '00', 'Message' => 'Confirm Success']);
+                    return response()->json(['RspCode' => '00', 'Message' => 'Cancellation processed']);
                 } catch (\Exception $e) {
                     DB::rollBack();
-                    \Log::error("IPN processing failed: " . $e->getMessage());
+                    \Log::error("IPN cancellation failed: " . $e->getMessage());
                     return response()->json(['RspCode' => '99', 'Message' => 'Unknown error']);
                 }
             } else {
-                return response()->json(['RspCode' => '02', 'Message' => 'Transaction already confirmed']);
+                // Các mã lỗi khác: thất bại
+                if ($payment->status !== 'unpaid') {
+                    $payment->update(['status' => 'unpaid']);
+                    $appointment->update(['status' => 'cancelled']);
+                }
+                return response()->json(['RspCode' => '01', 'Message' => 'Transaction failed']);
             }
         } else {
-            // Thất bại
-            if ($payment->status !== 'unpaid') {
-                $payment->update(['status' => 'unpaid']);
-                $appointment->update(['status' => 'cancelled']);
-            }
-            return response()->json(['RspCode' => '01', 'Message' => 'Transaction failed']);
+            // Sai checksum
+            return response()->json(['RspCode' => '97', 'Message' => 'Invalid checksum']);
         }
     }
 
