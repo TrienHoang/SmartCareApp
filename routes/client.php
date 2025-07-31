@@ -11,12 +11,19 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Client\PaymentController;
 use Illuminate\Support\Facades\Route;
 
+
+
 use App\Http\Controllers\Client\ReviewReplyController;
 use App\Http\Controllers\Client\AppointmentController;
 use App\Http\Controllers\Client\DoctorController;
 use App\Http\Controllers\Client\AppointmentClientController;
 use chillerlan\QRCode\{QRCode, QROptions};
 use Illuminate\Support\Facades\Response;
+
+use App\Http\Controllers\Client\AppointmentHistoryController;
+use App\Http\Controllers\Client\UserController;
+use App\Http\Controllers\Client\ProfileController;
+
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -59,10 +66,11 @@ Route::get('/chi-tiet-tin-tuc/{id}', function ($id) {
     return view('client.news_detail', ['id' => $id]);
 })->name('news_detail');
 
-Route::get('/thong-tin-ca-nhan', function () {
-    return view('client.profile');
-})->name('profile');
-
+// Thông tin cá nhân
+Route::middleware(['auth'])->prefix('client/profile')->name('client.profile.')->group(function () {
+    Route::get('/', [ProfileController::class, 'show'])->name('show');
+    Route::patch('/update', [ProfileController::class, 'update'])->name('update');
+});
 // Route::get('/thong-tin-bac-si', function () {
 //     return view('client.doctors_detail');
 // })->name('doctors_detail');
@@ -77,11 +85,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Gửi phản hồi đánh giá
     Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
+    Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
 
     // Đánh dấu đánh giá là hữu ích
     Route::post('/reviews/{review}/useful', [ReviewReplyController::class, 'markUseful'])->name('reviews.useful');
-
-    Route::put('/thong-tin-bac-si/{doctor}/reviews/{id}', [ReviewReplyController::class, 'update'])->name('reviews.update');
 });
 
 // Route hiển thị chi tiết bác sĩ (không yêu cầu đăng nhập)
@@ -147,12 +154,11 @@ Route::middleware(['auth'])->group(function () {
             'scale'      => 3,
             'imageBase64'  => false,
         ]);
-    
+
         $image = (new QRCode($options))->render($data);
-    
+
         return Response::make($image, 200, ['Content-Type' => 'image/png']);
     })->name('qr.generate');
-    
 });
 
 
@@ -189,3 +195,19 @@ Route::prefix('client/notifications')->middleware('auth')->name('client.notifica
     Route::get('/{notification}', [ClientNotificationController::class, 'show'])->name('show');
     Route::post('/{notification}/mark-as-read', [ClientNotificationController::class, 'markAsRead'])->name('mark-as-read');
 });
+
+// giảm kịch khung
+// Thêm vào file routes/web.php
+
+Route::middleware(['auth'])->group(function () {
+    // Routes cho promotion (phù hợp với view có sẵn)
+    Route::get('/promotions', [PromotionController::class, 'index'])->name('client.promotions.index');
+    Route::post('/promotions/apply/{promotion}', [PromotionController::class, 'apply'])->name('client.promotions.apply');
+    Route::post('/promotions/remove', [PromotionController::class, 'remove'])->name('client.promotions.remove');
+});
+
+
+
+
+
+

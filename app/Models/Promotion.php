@@ -12,6 +12,11 @@ class Promotion extends Model
         'code', 'description', 'discount_percentage',
         'valid_from', 'valid_until'
     ];
+    protected $casts = [
+    'valid_from' => 'date',
+    'valid_until' => 'date',
+];
+
     public $timestamps = false;
 }
 

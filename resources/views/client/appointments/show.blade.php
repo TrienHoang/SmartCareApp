@@ -56,7 +56,7 @@
                                 <i data-lucide="upload" class="w-5 h-5"></i>
                                 <span>Upload File</span>
                             </a>
-                                 <a href="{{ route('client.notifications.index') }}"
+                            <a href="{{ route('client.notifications.index') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="bell" class="w-5 h-5"></i>
                                 <span>Thông Báo</span>
@@ -264,7 +264,7 @@
                                     <h2 class="text-xl font-semibold text-gray-800">Thông tin dịch vụ khám</h2>
                                 </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div class="flex items-start">
                                         <i class="fas fa-tag text-gray-400 mr-3 mt-1"></i>
                                         <div>
@@ -280,6 +280,15 @@
                                             <div class="text-sm text-gray-500">Giá dịch vụ</div>
                                             <div class="font-semibold text-green-600 text-lg">
                                                 {{ number_format($appointment->service->price ?? 500000, 0, ',', '.') }}₫
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <i class="fas fa-user-md mr-3 mt-1"></i>
+                                        <div>
+                                            <div class="text-sm text-gray-500">Chuyên Khoa</div>
+                                            <div class="font-medium text-gray-800">
+                                                {{ $appointment->doctor->specialization ?? 'Nội tổng quát' }}
                                             </div>
                                         </div>
                                     </div>
