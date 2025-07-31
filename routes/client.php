@@ -38,9 +38,11 @@ Route::get('/chi-tiet-dich-vu/{service_id}', [BookingController::class, 'show'])
 // Route::get('/dich-vu/chi-tiet/{id}', [ServiceController::class, 'detail'])->name('client.services.detail');
 
 // Tin tức
-Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news');
+// Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news');
 Route::get('/tin-tuc/danh-muc/{id}', [NewsController::class, 'category'])->name('client.news.category');
 Route::get('/tin-tuc/{slug}', [NewsController::class, 'show'])->name('client.news.show');
+Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news.index');
+
 
 
 
@@ -49,7 +51,7 @@ Route::get('/contact', [ContactController::class, 'showForm'])->name('contact.fo
 Route::post('/contact', [ContactController::class, 'submitForm'])->name('contact.submit');
 
 Route::get('/dat-lich', function () {
-    return view('client.booking');
+    return view('client.booking.');
 })->name('booking');
 
 Route::get('/lien-he', function () {
@@ -193,3 +195,19 @@ Route::prefix('client/notifications')->middleware('auth')->name('client.notifica
     Route::get('/{notification}', [ClientNotificationController::class, 'show'])->name('show');
     Route::post('/{notification}/mark-as-read', [ClientNotificationController::class, 'markAsRead'])->name('mark-as-read');
 });
+
+// giảm kịch khung
+// Thêm vào file routes/web.php
+
+Route::middleware(['auth'])->group(function () {
+    // Routes cho promotion (phù hợp với view có sẵn)
+    Route::get('/promotions', [PromotionController::class, 'index'])->name('client.promotions.index');
+    Route::post('/promotions/apply/{promotion}', [PromotionController::class, 'apply'])->name('client.promotions.apply');
+    Route::post('/promotions/remove', [PromotionController::class, 'remove'])->name('client.promotions.remove');
+});
+
+
+
+
+
+

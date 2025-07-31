@@ -89,18 +89,24 @@
 @endpush
 
 @section('content')
-    <div class="container mx-auto my-10 m-5 p-4 py-8 max-w-6xl rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
         <div class="page-header">
             <div class="flex items-center justify-center mb-4">
-                <h1 class="text-4xl m-4 font-bold">Xác nhận đặt lịch khám bệnh</h1>
+                {{-- <svg class="w-12 h-12 mr-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                </svg> --}}
+                <h1 class="text-4xl font-bold">Xác nhận đặt lịch khám bệnh</h1>
             </div>
-            <p class="text-blue-500 m-3 text-lg">Vui lòng kiểm tra thông tin và xác nhận lịch hẹn của bạn</p>
+            <p class="text-blue-500 text-lg">Vui lòng kiểm tra thông tin và xác nhận lịch hẹn của bạn</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
                 <div class="info-card floating-element">
                     <div class="section-header text-2xl font-bold m-2">
+                        {{-- <svg class="w-6 h-6 mr-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg> --}}
                         Dịch vụ đã chọn
                     </div>
                     <div class="space-y-3">
@@ -376,11 +382,75 @@
                                 <span class="text-gray-600">Thời lượng:</span>
                                 <span class="font-semibold text-gray-800">{{ $service->duration }} phút</span>
                             </div>
-                            <div class="flex justify-between items-center pt-3 border-t border-gray-100">
-                                <span class="text-gray-800 font-bold text-base">Tổng chi phí:</span>
-                                <span
-                                    class="font-extrabold text-green-600 text-xl">{{ number_format($service->price, 0, ',', '.') }}
-                                    VNĐ</span>
+                            <div class="mb-6 border rounded-lg p-4 bg-gray-50">
+                                <p><strong>Giá gốc:</strong> {{ number_format($originalPrice, 0, ',', '.') }} đ</p>
+
+                                @if (session('selected_promotion_code'))
+                                    <div class="bg-green-50 border border-green-200 rounded-lg p-3 my-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="text-green-800 font-semibold">
+                                                    <svg class="w-4 h-4 inline mr-1" fill="currentColor"
+                                                        viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd"
+                                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+                                                    Mã: {{ session('selected_promotion_code') }}
+                                                </p>
+                                                <p class="text-green-700 text-sm">Giảm
+                                                    {{ session('selected_promotion_discount') }}%</p>
+                                            </div>
+                                            <form method="POST" action="{{ route('client.promotions.remove') }}"
+                                                class="inline">
+                                                @csrf
+                                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
+                                                    <svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd"
+                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+                                                    Xóa
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <p><strong>Giảm giá:</strong> <span
+                                            class="text-red-600">-{{ number_format($discountAmount, 0, ',', '.') }}
+                                            đ</span></p>
+                                @endif
+
+                                <hr class="my-2">
+                                <p class="text-lg font-semibold text-green-600">
+                                    Tổng thanh toán: {{ number_format($finalPrice, 0, ',', '.') }} đ
+                                    @if ($discountAmount > 0)
+                                        <span
+                                            class="text-sm text-gray-500 line-through ml-2">{{ number_format($originalPrice, 0, ',', '.') }}
+                                            đ</span>
+                                    @endif
+                                </p>
+                            </div>
+
+                            {{-- Nút chọn mã giảm giá (cập nhật) --}}
+                            <div class="mb-6">
+                                @if (session('selected_promotion_code'))
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-green-600 font-medium">✅ Đã áp dụng mã giảm giá</span>
+                                        <a href="{{ route('client.promotions.index') }}"
+                                            class="text-blue-600 hover:text-blue-800 text-sm underline">
+                                            Đổi mã khác
+                                        </a>
+                                    </div>
+                                @else
+                                    <a href="{{ route('client.promotions.index') }}"
+                                        class="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
+                                        <svg class="w-4 h-4 inline mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path
+                                                d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                                        </svg>
+                                        Chọn mã giảm giá
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     </div>

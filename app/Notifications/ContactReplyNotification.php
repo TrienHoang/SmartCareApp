@@ -28,14 +28,17 @@ class ContactReplyNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Phản hồi từ phòng khám')
-            ->greeting('Xin chào ' . $this->contact->name . '!')
-            ->line('Chúng tôi đã nhận được yêu cầu liên hệ của bạn.')
-            ->line('Dưới đây là phản hồi từ chúng tôi:')
-            ->line('---')
+            ->subject('Phản hồi từ Phòng khám SmartCare')
+            ->greeting('Kính chào ' . $this->contact->name . ',')
+            ->line('Cảm ơn bạn đã liên hệ với Phòng khám SmartCare.')
+            ->line('Chúng tôi đã tiếp nhận yêu cầu của bạn và xin phản hồi như sau:')
+            ->line('――――――――――――――――――――')
             ->line($this->replyContent)
-            ->line('---')
-            ->line('Nếu bạn cần thêm hỗ trợ, đừng ngần ngại liên hệ lại với chúng tôi.')
-            ->salutation('Trân trọng, Phòng khám');
+            ->line('――――――――――――――――――――')
+            ->line('Nếu bạn còn bất kỳ thắc mắc nào, xin vui lòng phản hồi lại email này hoặc liên hệ trực tiếp với chúng tôi qua thông tin bên dưới.')
+            ->line('📞 Hotline: 0123 456 789')
+            ->line('📧 Email: smartcare@gmail.com.vn')
+            ->salutation('Trân trọng,')
+            ->salutation('Đội ngũ Phòng khám SmartCare');
     }
 }

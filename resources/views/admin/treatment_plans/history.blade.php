@@ -58,7 +58,7 @@
                                         {{ \Carbon\Carbon::parse($history->changed_at)->format('H:i') }}
                                     </span>
                                     <h3 class="timeline-header font-weight-normal">
-                                        <strong>{{ $history->changedBy->name ?? 'Hệ thống' }}</strong>
+                                        <strong>{{ $history->changedBy->full_name ?? 'Hệ thống' }}</strong>
                                         <span class="text-secondary ml-2 font-weight-light">đã thực hiện thay đổi</span>
                                     </h3>
                                     <div class="timeline-body pt-3 pb-3">
@@ -68,8 +68,13 @@
 
                                         @if ($history->old_data && $history->new_data)
                                             @php
-                                                $oldData = json_decode($history->old_data, true);
-                                                $newData = json_decode($history->new_data, true);
+                                                $oldData = is_array($history->old_data)
+                                                    ? $history->old_data
+                                                    : json_decode($history->old_data, true);
+                                                $newData = is_array($history->new_data)
+                                                    ? $history->new_data
+                                                    : json_decode($history->new_data, true);
+
                                                 $changes = [];
                                                 $ignoreFields = ['updated_at'];
 
