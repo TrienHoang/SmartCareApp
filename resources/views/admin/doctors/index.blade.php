@@ -15,7 +15,7 @@
                             </div>
                             <div>
                                 <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý Bác sĩ</h2>
-                                <p class="text-muted mb-0">Quản lý thông tin bác sĩ và chuyên môn trong hệ thống</p>
+                                <p class="text-muted mb-0">Quản lý thông tin bác sĩ và chuyên Khoa trong hệ thống</p>
                             </div>
                         </div>
                         <div class="breadcrumb-wrapper col-12">
@@ -107,7 +107,7 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white mb-0">{{ $doctors->unique('specialization')->count() }}</h4>
-                                    <small class="text-white">Chuyên môn</small>
+                                    <small class="text-white">Chuyên Khoa </small>
                                 </div>
                             </div>
                         </div>
@@ -166,11 +166,11 @@
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
                                     <label class="form-label font-weight-semibold">
-                                        <i class="bx bx-search mr-1 text-info"></i>Chuyên môn
+                                        <i class="bx bx-search mr-1 text-info"></i>Chuyên Khoa
                                     </label>
                                     <div class="input-group">
                                         <input type="text" name="specialization" class="form-control"
-                                               placeholder="Nhập chuyên môn..." value="{{ request('specialization') }}">
+                                               placeholder="Nhập chuyên Khoa..." value="{{ request('specialization') }}">
                                     </div>
             
                                 </div>
@@ -213,7 +213,7 @@
                                         <i class="bx bx-user mr-1"></i>Thông tin bác sĩ
                                     </th>
                                     <th class="border-top-0">
-                                        <i class="bx bx-star mr-1"></i>Chuyên môn
+                                        <i class="bx bx-star mr-1"></i>Chuyên Khoa
                                     </th>
                                     <th class="border-top-0">
                                         <i class="bx bx-building mr-1"></i>Phòng ban
