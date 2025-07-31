@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('treatment_plan_items', function (Blueprint $table) {
-            $table->foreignId('service_id')->nullable()->constrained('services')->onDelete('set null');
+        Schema::table('payments', function (Blueprint $table) {
+            $table->datetime('refunded_at')->nullable()->after('refund_status')->comment('Thời gian hoàn tiền thành công');
         });
     }
 
@@ -21,9 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('treatment_plan_items', function (Blueprint $table) {
-            $table->dropForeign(['service_id']);
-            $table->dropColumn('service_id');
+        Schema::table('payments', function (Blueprint $table) {
+            $table->dropColumn('refunded_at');
         });
     }
 };

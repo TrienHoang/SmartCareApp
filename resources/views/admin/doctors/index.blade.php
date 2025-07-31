@@ -295,18 +295,16 @@
                                             </div>
                                         </td>
 
-                                        <td>
-                                            @if ($doctor->is_on_leave_today)
-                                                @php $leave = $doctor->currentLeave(); @endphp
-                                                <span class="badge badge-danger" data-toggle="tooltip" title="{{ $leave->reason ?? 'Đang nghỉ' }}">
-                                                    <i class="bx bx-block mr-1"></i> Nghỉ hôm nay
-                                                </span>
-                                            @else
-                                                <span class="badge badge-success">
-                                                    <i class="bx bx-check-circle mr-1"></i> Làm việc
-                                                </span>
-                                            @endif
-                                        </td>
+<td>
+    <button class="btn btn-sm toggle-status-btn {{ $doctor->user->status === 'online' ? 'btn-success' : 'btn-secondary' }}"
+        data-user-id="{{ $doctor->user->id }}"
+        data-status="{{ $doctor->user->status }}">
+        <i class="bx {{ $doctor->user->status === 'online' ? 'bx-check-circle' : 'bx-power-off' }}"></i>
+        {{ ucfirst($doctor->user->status) }}
+    </button>
+</td>
+
+
 
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
@@ -319,13 +317,7 @@
                                                    class="btn btn-outline-warning" data-toggle="tooltip" title="Chỉnh sửa">
                                                     <i class="bx bx-edit"></i>
                                                 </a>
-<form action="{{ route('admin.doctors.destroy', $doctor->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa bác sĩ {{ $doctor->user->full_name }}?')">
-    @csrf
-    @method('DELETE')
-    <button type="submit" class="btn btn-outline-danger" title="Xóa">
-        <i class="bx bx-trash"></i>
-    </button>
-</form>
+
                                             </div>
                                         </td>
 
@@ -372,3 +364,72 @@
 
 
                                     @endsection
+
+
+@section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const buttons = document.querySelectorAll('.toggle-status-btn');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const userId = this.dataset.userId;
+                    const btn = this;
+                    const currentStatus = btn.dataset.status;
+                    const newStatus = currentStatus === 'online' ? 'offline' : 'online';
+
+                    Swal.fire({
+                        title: 'Xác nhận thay đổi trạng thái',
+                        text: `Bạn có chắc muốn chuyển trạng thái bác sĩ sang "${newStatus.toUpperCase()}" không?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Có, thay đổi',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(`/admin/doctors/${userId}/toggle-status`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    btn.classList.toggle('btn-success', data.status === 'online');
+                                    btn.classList.toggle('btn-secondary', data.status === 'offline');
+                                    btn.innerHTML = `<i class="bx ${data.status === 'online' ? 'bx-check-circle' : 'bx-power-off'}"></i> ${data.status.charAt(0).toUpperCase() + data.status.slice(1)}`;
+                                    btn.dataset.status = data.status;
+
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Thành công',
+                                        text: data.message,
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Lỗi',
+                                        text: data.message || 'Không thể cập nhật trạng thái.'
+                                    });
+                                }
+                            })
+                            .catch(() => {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Lỗi kết nối',
+                                    text: 'Không thể gửi yêu cầu tới máy chủ.'
+                                });
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+@endsection

@@ -24,6 +24,8 @@ class Payment extends Model
         'vnp_txn_ref',
         'vnp_transaction_no',
         'vnp_response_code',
+        'refunded_at',
+        'refund_status',
     ];
 
     protected $casts = [

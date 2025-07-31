@@ -349,6 +349,8 @@ Route::group([
 
         Route::get('/{doctor}', [DoctorController::class, 'show'])
             ->middleware('check_permission:view_doctors')->name('show');
+
+
     });
 
     // Nhóm quản lý phòng ban
@@ -757,6 +759,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     });
 });
+
+        Route::post('/admin/doctors/{user}/toggle-status', [DoctorController::class, 'toggleStatus'])->name('admin.doctors.toggleStatus');
+
 
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;

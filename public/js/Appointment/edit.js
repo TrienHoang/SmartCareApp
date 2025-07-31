@@ -1,19 +1,22 @@
 $(document).ready(function () {
     const $doctor = $('#doctor_id');
-    const $serviceSelect = $('#service_id');
     const $servicePrice = $('#service_price');
     const $treatmentPlan = $('#treatment_plan_id');
     const $dateInput = $('#appointment_date');
     const $slotSelect = $('#appointment_slot');
     const patientId = $('#patient_id').val();
     const selectedPlanId = window.selectedPlanId;
+    const selectedDoctorId = window.selectedDoctorId;
 
     const treatmentPlanDetailsUrl = $('#treatmentPlanDetailsUrl').val();
     const doctorWorkingDaysUrl = $('#doctorWorkingDaysUrl').val();
     const serviceDoctorsUrl = '/admin/appointments/services/:id/doctors';
     const availableTimesUrl = '/admin/appointments/doctor/__DOCTOR__/available-times';
 
-    $('#doctor_id, #service_id, #status, #treatment_plan_id').select2({ width: '100%' });
+    const readonlyServiceId = $('#service_id_display').data('selected');
+    const submittedServiceId = $('input[name="service_id"]').val(); // service_id từ input hidden
+
+    $('#doctor_id, #status, #treatment_plan_id').select2({ width: '100%' });
 
     let flatpickrInstance;
     let vacationDates = [];
@@ -53,7 +56,7 @@ $(document).ready(function () {
 
         const url = availableTimesUrl.replace('__DOCTOR__', doctorId)
             + '?date=' + encodeURIComponent(dateStr)
-            + '&service_id=' + encodeURIComponent($serviceSelect.val() || '')
+            + '&service_id=' + encodeURIComponent(submittedServiceId || '')
             + '&treatment_plan_id=' + encodeURIComponent($treatmentPlan.val() || '');
 
         $.get(url, function (slots) {
@@ -86,8 +89,6 @@ $(document).ready(function () {
                 disable: [
                     function (date) {
                         const str = flatpickr.formatDate(date, 'Y-m-d');
-
-                        // Chỉ bật chọn nếu ngày nằm trong workingSpecific và không nằm trong vacationDates
                         return !workingSpecific.includes(str) || vacationDates.includes(str);
                     }
                 ],
@@ -163,11 +164,6 @@ $(document).ready(function () {
             $('<input type="hidden" name="doctor_id">').val(selectedDoctorId).appendTo('form');
             $doctor.prop('disabled', true);
 
-            if (selectedServiceId) {
-                $serviceSelect.val(selectedServiceId).trigger('change.select2');
-                $serviceSelect.data('old', selectedServiceId);
-            }
-
             loadDoctorsByService(selectedServiceId, selectedDoctorId);
 
             if (response.expected_start_date) {
@@ -192,17 +188,6 @@ $(document).ready(function () {
         }
     });
 
-    $serviceSelect.on('change', function () {
-        const selectedService = $(this).val();
-        const selectedOption = $(this).find(':selected');
-        const price = selectedOption.data('price') || '';
-        $servicePrice.val(price ? price.toLocaleString() + ' ₫' : '');
-
-        if (!$treatmentPlan.val()) {
-            loadDoctorsByService(selectedService);
-        }
-    });
-
     const fullOldTime = $('#appointment_slot option[selected]').val();
     if (fullOldTime) {
         $slotSelect.data('selected', fullOldTime);
@@ -210,30 +195,27 @@ $(document).ready(function () {
         $dateInput.val(dateStr);
     }
 
-    if ($serviceSelect.val()) $serviceSelect.data('old', $serviceSelect.val());
-
     loadTreatmentPlans(patientId, selectedPlanId);
 
     setTimeout(() => {
         const selectedPlan = $treatmentPlan.val();
-        const selectedDoctorId = window.selectedDoctorId || $doctor.val(); // 👈 đảm bảo có giá trị ban đầu
 
         if (selectedPlan) {
             $treatmentPlan.trigger('change');
             $doctor.prop('disabled', true);
-        } else if ($serviceSelect.val()) {
-            loadDoctorsByService($serviceSelect.val(), selectedDoctorId);
+        } else if (submittedServiceId) {
+            loadDoctorsByService(submittedServiceId, selectedDoctorId);
             $doctor.prop('disabled', false);
         } else {
-            // Nếu không có cả kế hoạch lẫn dịch vụ → reset luôn bác sĩ
             $doctor.html('<option value="">Chọn bác sĩ</option>').trigger('change.select2');
             $doctor.prop('disabled', false);
         }
-    }, 300); // 👈 có thể giảm delay nếu dữ liệu DOM đã sẵn sàng
 
-
-
-
+        // 👇 Thêm đoạn này nếu không dùng select2 onchange cho dịch vụ
+        if (readonlyServiceId && !selectedPlanId) {
+            loadDoctorsByService(readonlyServiceId, selectedDoctorId);
+        }
+    }, 300);
 
     $('form').on('submit', function (e) {
         const selectedDate = $dateInput.val();

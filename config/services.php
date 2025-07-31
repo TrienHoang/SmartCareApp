@@ -61,6 +61,6 @@ return [
         'url' => env('VNPAY_URL'),
         'return_url' => env('VNPAY_RETURN_URL'),
         'ipn_url' => env('VNPAY_IPN_URL'),
-        'refund_url' => env('PAYMENT_REFUND_URL', 'https://example.com/api/refund'),
+        'refund_url'   => env('PAYMENT_REFUND_URL'),
     ],
 ];

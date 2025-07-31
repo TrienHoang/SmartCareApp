@@ -39,7 +39,7 @@ class Doctor extends Model
 
     public function room()
     {
-        return $this->belongsTo(Room::class);
+        return $this->belongsTo(Room::class, 'room_id');
     }
 
     public function appointments()
@@ -74,8 +74,8 @@ class Doctor extends Model
     public function leaves()
     {
         return $this->hasMany(DoctorLeave::class)
-            ->where('approved', true)
-            ->whereNull('deleted_at');
+            ->where('approved', true);
+            // ->whereNull('deleted_at');
     }
 
     public function isOnLeaveToday()

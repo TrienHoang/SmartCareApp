@@ -37,6 +37,6 @@ class TreatmentPlanHistory extends Model
     // Quan hệ với User (người thay đổi)
     public function changedBy()
     {
-        return $this->belongsTo(Doctor::class, 'changed_by_id'); // Giả sử người thay đổi là User
+        return $this->belongsTo(User::class, 'changed_by_id'); // Giả sử người thay đổi là User
     }
 }

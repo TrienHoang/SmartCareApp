@@ -161,16 +161,15 @@
                                     <label class="form-label font-weight-semibold">
                                         <i class="bx bx-category mr-1 text-info"></i>Danh mục
                                     </label>
-                                    <select name="category" class="form-control custom-select">
-                                        <option value="">-- Tất cả danh mục --</option>
-                                        @if(isset($categories))
-                                            @foreach($categories as $category)
-                                                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                                                    {{ $category->name }}
-                                                </option>
-                                            @endforeach
-                                        @endif
-                                    </select>
+                                    <select name="category" class="form-control">
+    <option value="">-- Tất cả danh mục --</option>
+    @foreach($categories as $category)
+        <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+            {{ $category->name }}
+        </option>
+    @endforeach
+</select>
+
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
                                     <label class="form-label font-weight-semibold">
@@ -219,6 +218,9 @@
                                     </th>
                                     <th class="border-top-0">
                                         <i class="bx bx-calendar mr-1"></i>Ngày tạo
+                                    </th>
+                                    <th class="border-top-0 text-center">
+                                        <i class="bx bx-show mr-1"></i>Lượt xem
                                     </th>
                                     <th class="border-top-0 text-center">
                                         <i class="bx bx-cog mr-1"></i>Thao tác
@@ -278,16 +280,42 @@
                                             </div>
                                         </td>
                                         <td class="text-center">
-                                            <div class="btn-group-sm" role="group">
+                                            <div class="view-count-wrapper">
+                                                <span class="view-count-badge">
+                                                    <i class="bx bx-show text-primary mr-1"></i>
+                                                    <span class="view-number">{{ number_format($post->view_count) }}</span>
+                                                </span>
+                                                @if($post->view_count > 1000)
+                                                    <small class="text-success d-block mt-1">
+                                                        <i class="bx bx-trending-up"></i> Phổ biến
+                                                    </small>
+                                                @elseif($post->view_count > 100)
+                                                    <small class="text-info d-block mt-1">
+                                                        <i class="bx bx-bar-chart-alt-2"></i> Tốt
+                                                    </small>
+                                                @elseif($post->view_count > 0)
+                                                    <small class="text-muted d-block mt-1">
+                                                        <i class="bx bx-trending-up"></i> Mới
+                                                    </small>
+                                                @else
+                                                    <small class="text-secondary d-block mt-1">
+                                                        <i class="bx bx-minus"></i> Chưa xem
+                                                    </small>
+                                                @endif
+                                            </div>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <div class="action-buttons d-flex justify-content-center align-items-center">
                                                 <a href="{{ route('admin.posts.show', $post->id) }}"
-                                                    class="btn btn-outline-info btn-sm" data-toggle="tooltip" title="Xem chi tiết">
+                                                    class="btn btn-outline-info btn-sm action-btn" data-toggle="tooltip" title="Xem chi tiết">
                                                     <i class="bx bx-show-alt"></i>
                                                 </a>
                                                 <a href="{{ route('admin.posts.edit', $post->id) }}"
-                                                    class="btn btn-outline-warning btn-sm" data-toggle="tooltip" title="Chỉnh sửa">
+                                                    class="btn btn-outline-warning btn-sm action-btn" data-toggle="tooltip" title="Chỉnh sửa">
                                                     <i class="bx bx-edit"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                                <button type="button" class="btn btn-outline-danger btn-sm action-btn"
                                                     data-toggle="tooltip" title="Xóa" onclick="deletePost({{ $post->id }})">
                                                     <i class="bx bx-trash"></i>
                                                 </button>
@@ -304,7 +332,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center py-5">
+                                        <td colspan="7" class="text-center py-5">
                                             <div class="empty-state">
                                                 <i class="bx bx-edit text-muted" style="font-size: 48px;"></i>
                                                 <h5 class="mt-3 text-muted">Không có bài viết nào</h5>
@@ -464,13 +492,48 @@
             background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
         }
 
-        .btn-group-sm .btn {
-            border-radius: 4px;
-            margin-right: 2px;
+        /* Action Buttons Styling */
+        .action-buttons {
+            gap: 8px;
         }
 
-        .btn-group-sm .btn:last-child {
-            margin-right: 0;
+        .action-btn {
+            border-radius: 6px;
+            padding: 0.375rem 0.75rem;
+            transition: all 0.3s ease;
+            border: 1.5px solid;
+            min-width: 38px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-btn.btn-outline-info:hover {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+            color: white;
+        }
+
+        .action-btn.btn-outline-warning:hover {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .action-btn.btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .action-btn i {
+            font-size: 1rem;
         }
 
         .avatar {
@@ -484,19 +547,95 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
 
+        /* Enhanced View Count Styles */
+        .view-count-wrapper {
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+            min-width: 80px;
+        }
+
+        .view-count-wrapper:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            background: linear-gradient(135deg, #e6f3ff 0%, #cce7ff 100%);
+        }
+
+        .view-count-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        .view-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .view-count-wrapper small {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .view-count-wrapper .bx-trending-up,
+        .view-count-wrapper .bx-bar-chart-alt-2 {
+            font-size: 0.8rem;
+        }
+
+        /* Responsive adjustments for view count and action buttons */
         @media (max-width: 768px) {
+            .view-count-wrapper {
+                min-width: 60px;
+                padding: 0.3rem;
+            }
+            
+            .view-count-badge {
+                font-size: 0.8rem;
+            }
+            
+            .view-count-wrapper small {
+                font-size: 0.7rem;
+            }
+            
             .filter-form .row>div {
                 margin-bottom: 1rem;
             }
 
-            .btn-group-sm {
+            .action-buttons {
                 flex-direction: column;
+                gap: 4px;
             }
 
-            .btn-group-sm .btn {
-                margin-bottom: 2px;
-                margin-right: 0;
+            .action-btn {
+                margin-bottom: 4px;
+                width: 100%;
+                min-width: auto;
             }
+
+            .table-modern {
+                font-size: 0.8rem;
+            }
+
+            .table-modern td {
+                padding: 0.5rem 0.25rem;
+            }
+        }
+
+        /* Animation for view count hover */
+        .view-count-wrapper .bx-show {
+            transition: transform 0.2s ease;
+        }
+
+        .view-count-wrapper:hover .bx-show {
+            transform: scale(1.1);
         }
     </style>
 @endpush

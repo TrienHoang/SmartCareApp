@@ -2,8 +2,7 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <!-- Back Button -->
-
+   
 
     <!-- Header Section -->
     <div class="row mb-4">
@@ -133,7 +132,7 @@
                         </div>
                         <div class="list-group-item d-flex justify-content-between align-items-center py-3">
                             <div class="d-flex align-items-center">
-                                <i class="fas fa-eye text-muted me-2"></i>
+                                <i class="fas fa-activity text-muted me-2"></i>
                                 <span class="text-muted">Trạng thái</span>
                             </div>
                             @switch($post->status)
@@ -147,6 +146,32 @@
                                     <span class="badge bg-secondary">Lưu trữ</span> 
                                 @break
                             @endswitch
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-eye text-muted me-2"></i>
+                                <span class="text-muted">Lượt xem</span>
+                            </div>
+                            <div class="view-count-display">
+                                <span class="view-count-number fw-bold text-primary">{{ number_format($post->view_count) }}</span>
+                                @if($post->view_count > 1000)
+                                    <small class="text-success d-block">
+                                        <i class="fas fa-trending-up"></i> Phổ biến
+                                    </small>
+                                @elseif($post->view_count > 100)
+                                    <small class="text-info d-block">
+                                        <i class="fas fa-chart-bar"></i> Tốt
+                                    </small>
+                                @elseif($post->view_count > 0)
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-eye"></i> Mới
+                                    </small>
+                                @else
+                                    <small class="text-secondary d-block">
+                                        <i class="fas fa-minus"></i> Chưa xem
+                                    </small>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -162,27 +187,31 @@
                 </div>
                 <div class="card-body p-3">
                     <div class="d-grid gap-2">
-                        <a href="#" class="btn btn-outline-primary btn-sm">
+                        <a href="{{ route('admin.posts.edit', $post->id) }}" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-edit me-2"></i>Chỉnh sửa
                         </a>
-                        <a href="#" class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-copy me-2"></i>Sao chép
-                        </a>
-                        <a href="#" class="btn btn-outline-danger btn-sm">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="copyPostUrl()">
+                            <i class="fas fa-copy me-2"></i>Sao chép liên kết
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="deletePost({{ $post->id }})">
                             <i class="fas fa-trash me-2"></i>Xóa
+                        </button>
+                        <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
                         </a>
-                            <div class="row mb-3">
-            <a href="{{ url()->previous() }}" class="btn btn-outline-secondary btn-sm ">
-                <i class="fas fa-arrow-left me-2"></i>
-                Quay lại
-            </a>
-        </div>
-    </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Hidden form for delete -->
+    <form id="delete-form-{{ $post->id }}" 
+          action="{{ route('admin.posts.destroy', $post->id) }}" 
+          method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
 </div>
 
 <style>
@@ -234,5 +263,92 @@
 .list-group-item:last-child {
     border-bottom: none;
 }
+
+/* Enhanced View Count Styling */
+.view-count-display {
+    text-align: right;
+    min-width: 80px;
+}
+
+.view-count-number {
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+}
+
+.view-count-display small {
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.view-count-display small i {
+    font-size: 0.7rem;
+}
+
+/* Back Button Styling */
+.btn-outline-secondary {
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    transform: translateX(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .view-count-display {
+        min-width: 60px;
+    }
+    
+    .view-count-number {
+        font-size: 1rem;
+    }
+    
+    .view-count-display small {
+        font-size: 0.7rem;
+    }
+}
 </style>
+
+<script>
+// Copy post URL function
+function copyPostUrl() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(function() {
+        // Show success message (you can customize this)
+        alert('Đã sao chép liên kết vào clipboard!');
+    }, function(err) {
+        console.error('Không thể sao chép: ', err);
+    });
+}
+
+// Delete post function
+function deletePost(id) {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Xóa bài viết',
+            text: 'Bạn chắc chắn muốn xóa bài viết này?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        });
+    } else {
+        if (confirm('Bạn chắc chắn muốn xóa bài viết này?')) {
+            document.getElementById('delete-form-' + id).submit();
+        }
+    }
+}
+</script>
 @endsection

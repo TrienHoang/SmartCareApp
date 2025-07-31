@@ -33,5 +33,8 @@ class Admin_notification extends Model
         return $this->belongsTo(User::class, 'sender_id');
     }
 
-    
+    public function userStatuses()
+    {
+        return $this->hasMany(NotificationUserStatus::class, 'notification_id');
+    }
 }

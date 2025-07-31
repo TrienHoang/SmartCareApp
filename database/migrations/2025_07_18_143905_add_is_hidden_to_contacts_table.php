@@ -9,21 +9,17 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up(): void
-{
-    Schema::table('contacts', function (Blueprint $table) {
-        $table->softDeletes(); // tạo cột deleted_at
-        $table->boolean('is_hidden')->default(0)->after('status');
-    });
-}
-
-public function down(): void
-{
-    Schema::table('contacts', function (Blueprint $table) {
-        $table->dropSoftDeletes();
-        $table->dropColumn('is_hidden');
-    });
-}
-
-
+    public function up(): void
+    {
+        Schema::table('contacts', function (Blueprint $table) {
+            // tạo cột deleted_at
+            $table->boolean('is_hidden')->default(0);
+        });
+    }
+    public function down(): void
+    {
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->dropColumn('is_hidden');
+        });
+    }
 };
