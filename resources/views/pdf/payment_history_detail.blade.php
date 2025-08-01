@@ -68,6 +68,20 @@
   <table>
     <tr><th>Mã hóa đơn</th><td>{{ $history->payment_id }}</td></tr>
     <tr><th>Trạng thái</th><td><span class="badge">{{ ucfirst($history->payment->status ?? 'Không rõ') }}</span></td></tr>
+    <tr><th>Trạng thái hoàn tiền</th>
+      <td>
+        @php
+          $refund = $history->refund_status ?? 'none';
+          $refundText = match($refund) {
+            'pending' => 'Đang hoàn tiền',
+            'completed' => 'Đã hoàn tiền',
+            'failed' => 'Hoàn tiền thất bại',
+            default => 'Không hoàn tiền'
+          };
+        @endphp
+        <span class="badge">{{ $refundText }}</span>
+      </td>
+    </tr>
     <tr><th>Ngày thanh toán</th><td>{{ optional($history->payment_date)->format('d/m/Y H:i') ?? '---' }}</td></tr>
     <tr><th>Phương thức</th><td>{{ $history->payment_method ?? '---' }}</td></tr>
     <tr><th>Số tiền</th><td><strong>{{ number_format($history->amount, 0, ',', '.') }} ₫</strong></td></tr>

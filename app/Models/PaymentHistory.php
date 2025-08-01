@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Payment;
 
 class PaymentHistory extends Model
 {
@@ -15,14 +14,10 @@ class PaymentHistory extends Model
         'amount',
         'payment_method',
         'payment_date',
-        'note',  // Phải có dòng này để lưu mass assign
     ];
 
     public $timestamps = false;
 
-
-
-    // 👉 Thêm dòng này để fix lỗi format()
     protected $casts = [
         'payment_date' => 'datetime',
     ];
@@ -34,20 +29,15 @@ class PaymentHistory extends Model
     {
         return $this->belongsTo(Payment::class);
     }
+
+    // Relationships thông qua Payment
     public function appointment()
     {
-        return $this->belongsTo(Appointment::class, 'appointment_id');
+        return $this->hasOneThrough(Appointment::class, Payment::class, 'id', 'id', 'payment_id', 'appointment_id');
     }
-    public function user()
+
+    public function order()
     {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-    public function doctor()
-    {
-        return $this->belongsTo(Doctor::class, 'doctor_id');
-    }
-    public function room()
-    {
-        return $this->belongsTo(Room::class, 'room_id');
+        return $this->payment->appointment->order ?? null;
     }
 }
