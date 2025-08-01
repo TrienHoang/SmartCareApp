@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
+use App\Models\OrderService;
 use App\Models\Promotion;
 use App\Models\PromotionUserUsage;
 use App\Models\Service;
@@ -10,8 +12,6 @@ use App\Models\Doctor;
 use App\Models\WorkingSchedule;
 use App\Models\Appointment;
 use App\Models\DoctorLeave;
-use App\Models\Order;
-use App\Models\OrderService;
 use App\Models\Payment; // Assumed Payment model
 use App\Models\PaymentHistory;
 use Carbon\Carbon;
@@ -227,7 +227,7 @@ class BookingController extends Controller
         // Lấy danh sách bác sĩ và số lịch hẹn (nếu random)
         $doctor_appointments = [];
         if (!$doctor_id) {
-            $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(40)])
+            $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(7)])
                 ->where('status', '!=', 'cancelled')
                 ->groupBy('doctor_id')
                 ->select('doctor_id', \DB::raw('count(*) as appointment_count'))
@@ -375,7 +375,7 @@ class BookingController extends Controller
         }
 
         $validated = $request->validate([
-            'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(40)->toDateString(),
+            'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(7)->toDateString(),
             'slot_start' => 'required|date_format:H:i',
             'reason' => 'nullable|string|max:255',
         ]);
@@ -498,6 +498,10 @@ class BookingController extends Controller
 
         // Tạo một mã QR duy nhất (UUID) cho cuộc hẹn
         $qrCodeData = (string) Str::uuid();
+        if ($booked) {
+            DB::rollBack();
+            return redirect()->route('booking.showService', $booking_confirm['service_id'])->with('error', 'Khung giờ này đã có người khác đặt hoặc không còn khả dụng.');
+        }
 
         $appointment = Appointment::create([
             'patient_id' => $user->id,
@@ -521,34 +525,27 @@ class BookingController extends Controller
         $discountAmount = 0;
         $promotion = null;
 
-        // Lấy mã giảm từ session nếu có, nếu không thì lấy từ request
         $promotionCode = session('selected_promotion_code') ?? $validated['promotion_code'] ?? null;
 
         if (!empty($promotionCode)) {
             $promotion = Promotion::where('code', $promotionCode)
                 ->where('valid_from', '<=', now())
                 ->where('valid_until', '>=', now())
+                ->whereDoesntHave('usages', function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                })
                 ->first();
 
 
             if ($promotion) {
-                $used = PromotionUserUsage::where('promotion_id', $promotion->id)
-                    ->where('user_id', $user->id)
-                    ->exists();
+                $discountAmount = round($service->price * ($promotion->discount_percentage / 100));
+                $discountAmount = min($discountAmount, $service->price);
 
-                if (!$used) {
-                    $discountAmount = round($service->price * ($promotion->discount_percentage / 100));
-                    $discountAmount = min($discountAmount, $service->price);
-
-                    PromotionUserUsage::create([
-                        'promotion_id' => $promotion->id,
-                        'user_id' => $user->id,
-                        'used_at' => now(),
-                        'appointment_id' => $appointment->id,
-                    ]);
-                }
+                // ❗ CHỈ lưu promotionCode vào session, KHÔNG ghi vào DB
+                $request->session()->put('applied_promotion_code', $promotionCode);
             }
         }
+
 
         $finalPrice = max(0, $service->price - $discountAmount);
 
@@ -556,9 +553,6 @@ class BookingController extends Controller
         $request->session()->forget([
             'booking_data',
             'booking_confirm',
-            'selected_promotion_code',
-            'selected_promotion_id',
-            'selected_promotion_discount'
         ]);
 
         // Redirect với flash session data
@@ -624,6 +618,7 @@ class BookingController extends Controller
     }
 
 
+    // New method to handle VNPay return URL
     public function paymentReturn(Request $request)
     {
         $vnp_HashSecret = env('VNPAY_HASH_SECRET');
@@ -693,7 +688,22 @@ class BookingController extends Controller
                             'quantity'   => 1,
                             'price'      => $appointment->service->price ?? 0,
                         ]);
+                        $promoCode = session('selected_promotion_code');
+                        if ($promoCode) {
+                            $promotion = Promotion::where('code', $promoCode)->first();
+                            if ($promotion) {
+                                // Ghi nhận người dùng đã dùng mã này
+                                PromotionUserUsage::create([
+                                    'user_id'       => $appointment->patient_id,
+                                    'promotion_id'  => $promotion->id,
+                                    'used_at'       => now(),
+                                    'appointment_id' => $appointment->id,
+                                ]);
+                            }
 
+                            // Xóa khỏi session sau khi dùng
+                            session()->forget('selected_promotion_code');
+                        }
                         DB::commit();
                         return redirect()->route('booking.success')
                             ->with('success', 'Thanh toán thành công! Lịch hẹn của bạn đã được ghi nhận.');
@@ -832,6 +842,7 @@ class BookingController extends Controller
             return response()->json(['RspCode' => '97', 'Message' => 'Invalid checksum']);
         }
     }
+
 
 
     // New method for success page
