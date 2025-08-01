@@ -18,18 +18,18 @@ class PromotionController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        
+
         // Lấy tất cả mã giảm giá còn hiệu lực
         $promotions = Promotion::where('valid_from', '<=', Carbon::now())
             ->where('valid_until', '>=', Carbon::now())
             ->get();
-        
+
         $availablePromotions = [];
         $unavailablePromotions = [];
-        
+
         foreach ($promotions as $promotion) {
             $canUse = $this->canUserUsePromotion($user, $promotion);
-            
+
             if ($canUse) {
                 $availablePromotions[] = [
                     'promotion' => $promotion,
@@ -43,10 +43,10 @@ class PromotionController extends Controller
                 ];
             }
         }
-        
+
         return view('client.promotions.index', compact('availablePromotions', 'unavailablePromotions'));
     }
-    
+
     /**
      * Áp dụng mã giảm giá
      */
@@ -54,21 +54,20 @@ class PromotionController extends Controller
     {
         $user = Auth::user();
         $promotion = Promotion::findOrFail($promotionId);
-        
+
         // Kiểm tra user có thể dùng mã này không
         if (!$this->canUserUsePromotion($user, $promotion)) {
             return redirect()->back()->with('error', 'Bạn không thể sử dụng mã giảm giá này!');
         }
-        
+
         // Lưu thông tin mã giảm giá vào session
         $request->session()->put('selected_promotion_code', $promotion->code);
         $request->session()->put('selected_promotion_id', $promotion->id);
         $request->session()->put('selected_promotion_discount', $promotion->discount_percentage);
-        
-        return redirect()->route('booking.confirm')->with('success', 'Áp dụng mã giảm giá thành công!');
 
+        return redirect()->route('booking.confirm')->with('success', 'Áp dụng mã giảm giá thành công!');
     }
-    
+
     /**
      * Xóa mã giảm giá khỏi session
      */
@@ -77,7 +76,7 @@ class PromotionController extends Controller
         $request->session()->forget(['selected_promotion_code', 'selected_promotion_id', 'selected_promotion_discount']);
         return redirect()->back()->with('success', 'Đã xóa mã giảm giá!');
     }
-    
+
     /**
      * Xác nhận sử dụng mã giảm giá (gọi từ BookingController khi lưu thành công)
      */
@@ -91,7 +90,7 @@ class PromotionController extends Controller
             ]);
         }
     }
-    
+
     /**
      * Kiểm tra user có thể sử dụng mã giảm giá không
      */
@@ -101,21 +100,20 @@ class PromotionController extends Controller
         $hasUsed = PromotionUserUsage::where('user_id', $user->id)
             ->where('promotion_id', $promotion->id)
             ->exists();
-            
+
         if ($hasUsed) {
             return false;
         }
-        
+
         // Kiểm tra nếu là mã cho người mới (discount = 20% hoặc chứa "NEW")
-        if ($promotion->discount_percentage == 20 || stripos($promotion->code, 'NEW') !== false) {
-            // Kiểm tra user có phải là người mới không (chưa có appointment nào)
+        if (strcasecmp(trim($promotion->code), 'FIRST20') === 0) {
             $appointmentCount = $user->appointments()->count();
             return $appointmentCount == 0;
         }
-        
+
         return true;
     }
-    
+
     /**
      * Lấy lý do không thể sử dụng mã
      */
@@ -125,19 +123,21 @@ class PromotionController extends Controller
         $hasUsed = PromotionUserUsage::where('user_id', $user->id)
             ->where('promotion_id', $promotion->id)
             ->exists();
-            
+
         if ($hasUsed) {
             return 'Bạn đã sử dụng mã này rồi';
         }
-        
+
         // Kiểm tra mã cho người mới
-        if ($promotion->discount_percentage == 20 || stripos($promotion->code, 'NEW') !== false) {
+        if (strcasecmp(trim($promotion->code), 'FIRST20') === 0) {
             $appointmentCount = $user->appointments()->count();
             if ($appointmentCount > 0) {
                 return 'Mã chỉ dành cho khách hàng mới';
             }
         }
-        
+
+
+
         return 'Không đủ điều kiện sử dụng';
     }
 }

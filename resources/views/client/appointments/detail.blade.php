@@ -27,7 +27,7 @@
 
                     <!-- Menu -->
                     <nav class="space-y-2">
-                        <a href="#thong-tin-ca-nhan"
+                        <a href="{{ route('client.profile.show') }}"
                             class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 text-blue-600 border-l-4 border-blue-600">
                             <i class="bx bx-user text-lg"></i>
                             <span class="font-medium">Thông Tin Cá Nhân</span>
@@ -37,7 +37,7 @@
                             <i class="bx bx-calendar text-lg"></i>
                             <span>Lịch Sử Khám</span>
                         </a>
-                        <a href="#lich-hen"
+                        <a href="{{ route('client.appointments.index') }}"
                             class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-blue-600">
                             <i class="bx bx-time text-lg"></i>
                             <span>Lịch Hẹn</span>
@@ -52,11 +52,22 @@
                             <i class="bx bx-upload text-lg"></i>
                             <span>Upload File</span>
                         </a>
-                        <a href="#thong-bao"
-                            class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-blue-600">
-                            <i class="bx bx-bell text-lg"></i>
-                            <span>Thông Báo</span>
-                        </a>
+                      <a href="{{ route('client.notifications.index') }}"
+                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
+                                <i data-lucide="bell" class="w-5 h-5"></i>
+                                <span>Thông Báo</span>
+                                @php
+                                    $currentUnreadCount = $notifications
+                                        ->where('userStatuses.0.is_read', false)
+                                        ->count();
+                                @endphp
+                                @if ($currentUnreadCount > 0)
+                                    <span id="unreadCount"
+                                        class="ml-2 px-2 py-0.5 bg-red-500 text-white rounded-full text-xs font-semibold">
+                                        {{ $currentUnreadCount }}
+                                    </span>
+                                @endif
+                            </a>
                         <a href="#cai-dat"
                             class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-blue-600">
                             <i class="bx bx-cog text-lg"></i>
