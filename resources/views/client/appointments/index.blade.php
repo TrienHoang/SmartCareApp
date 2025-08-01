@@ -26,12 +26,12 @@
 
                         {{-- Menu --}}
                         <nav class="space-y-2">
-                            <a href="{{ url('/thong-tin-ca-nhan') }}"
+                            <a href="{{ route('client.profile.show') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="user" class="w-5 h-5"></i>
                                 <span>Thông Tin Cá Nhân</span>
                             </a>
-                            <a href="#lich-su-kham"
+                            <a href="{{ route('client.appointments.history') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="calendar" class="w-5 h-5"></i>
                                 <span>Lịch Sử Khám</span>
@@ -117,72 +117,195 @@
                         {{-- Danh sách lịch hẹn --}}
                         <div class="appointment-list-wrapper">
                             @if ($appointments->isEmpty())
-                                <div class="empty-state-appointments text-center py-12">
-                                    <div class="flex justify-center mb-4">
-                                        <i data-lucide="calendar-x" class="w-16 h-16 text-gray-400"></i>
+                                <div class="empty-state-appointments text-center py-16 px-6">
+                                    <div class="max-w-md mx-auto">
+                                        <div class="flex justify-center mb-6">
+                                            <div class="relative">
+                                                <div
+                                                    class="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center shadow-lg">
+                                                    <i data-lucide="calendar-x" class="w-12 h-12 text-blue-500"></i>
+                                                </div>
+                                                <div
+                                                    class="absolute -top-1 -right-1 w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                                                    <div class="w-2 h-2 bg-red-400 rounded-full"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h3 class="text-2xl font-bold text-gray-800 mb-3">Chưa có lịch hẹn nào</h3>
+                                        <p class="text-gray-600 mb-8 leading-relaxed">Bạn chưa có lịch hẹn nào được lên kế
+                                            hoạch. Hãy đặt lịch khám để được chăm sóc sức khỏe tốt nhất.</p>
+                                        <a href="#"
+                                            class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                                            Đặt lịch hẹn mới
+                                        </a>
                                     </div>
-                                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Chưa có lịch hẹn nào</h3>
-                                    <p class="text-gray-600 mb-4">Bạn chưa có lịch hẹn nào được lên kế hoạch.</p>
-                                    <a href="#" class="btn-primary-lg inline-flex items-center gap-2">
-                                        <i data-lucide="plus-circle" class="w-5 h-5"></i> Đặt lịch hẹn mới
-                                    </a>
                                 </div>
                             @else
-                                <div class="grid gap-6">
+                                <div class="space-y-6">
                                     @foreach ($appointments as $item)
                                         @php
-                                            $statusClass = match ($item->status) {
-                                                'pending' => 'text-yellow-600 bg-yellow-100',
-                                                'confirmed' => 'text-blue-600 bg-blue-100',
-                                                'completed' => 'text-green-600 bg-green-100',
-                                                'cancelled' => 'text-red-600 bg-red-100',
-                                                default => 'text-gray-600 bg-gray-100',
+                                            $statusConfig = match ($item->status) {
+                                                'pending' => [
+                                                    'class' => 'text-amber-700 bg-amber-50 border-amber-200',
+                                                    'icon' => 'clock',
+                                                    'color' => 'amber',
+                                                ],
+                                                'confirmed' => [
+                                                    'class' => 'text-blue-700 bg-blue-50 border-blue-200',
+                                                    'icon' => 'check-circle',
+                                                    'color' => 'blue',
+                                                ],
+                                                'completed' => [
+                                                    'class' => 'text-emerald-700 bg-emerald-50 border-emerald-200',
+                                                    'icon' => 'check-circle-2',
+                                                    'color' => 'emerald',
+                                                ],
+                                                'cancelled' => [
+                                                    'class' => 'text-red-700 bg-red-50 border-red-200',
+                                                    'icon' => 'x-circle',
+                                                    'color' => 'red',
+                                                ],
+                                                default => [
+                                                    'class' => 'text-gray-700 bg-gray-50 border-gray-200',
+                                                    'icon' => 'help-circle',
+                                                    'color' => 'gray',
+                                                ],
                                             };
                                         @endphp
 
-                                        <div class="border border-gray-200 rounded-lg p-5 shadow-sm bg-white">
-                                            {{-- Z --}}
-                                            <div class="text-lg font-semibold text-blue-600 mb-2 uppercase">
-                                                {{ $item->patient->full_name ?? auth()->user()->name }}
+                                        <div
+                                            class="group relative bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                                            <!-- Header với gradient -->
+                                            <div class="flex items-start justify-between mb-6">
+                                                <div class="flex items-center gap-4">
+                                                    <div
+                                                        class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                                                        <i data-lucide="user" class="w-6 h-6 text-white"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h3 class="text-xl font-bold text-gray-900 mb-1">
+                                                            {{ $item->patient->full_name ?? auth()->user()->name }}
+                                                        </h3>
+                                                        <div class="flex items-center gap-2">
+                                                            <i data-lucide="{{ $statusConfig['icon'] }}"
+                                                                class="w-4 h-4 text-{{ $statusConfig['color'] }}-500"></i>
+                                                            <span
+                                                                class="px-3 py-1 rounded-full text-xs font-semibold border {{ $statusConfig['class'] }}">
+                                                                {{ $item->status_text ?? ucfirst($item->status) }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Quick actions -->
+                                                <div
+                                                    class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                    @if ($item->status === 'pending')
+                                                        <button type="button"
+                                                            onclick="openCancelModal({{ $item->id }})"
+                                                            class="w-10 h-10 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors duration-200"
+                                                            title="Hủy lịch hẹn">
+                                                            <i data-lucide="x" class="w-4 h-4 text-red-600"></i>
+                                                        </button>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            <div class="mb-2 text-sm">
-                                                <span class="font-medium text-gray-700">Chuyên khoa:</span>
-                                                {{ $item->doctor->specialization ?? '---' }}
+
+                                            <!-- Thông tin chi tiết -->
+                                            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                                <div class="space-y-4">
+                                                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                        <div
+                                                            class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                            <i data-lucide="stethoscope"
+                                                                class="w-4 h-4 text-blue-600"></i>
+                                                        </div>
+                                                        <div>
+                                                            <p
+                                                                class="text-xs text-gray-500 uppercase tracking-wide font-medium">
+                                                                Chuyên khoa</p>
+                                                            <p class="text-sm font-semibold text-gray-900">
+                                                                {{ $item->doctor->specialization ?? '---' }}</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                        <div
+                                                            class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                                            <i data-lucide="activity" class="w-4 h-4 text-green-600"></i>
+                                                        </div>
+                                                        <div>
+                                                            <p
+                                                                class="text-xs text-gray-500 uppercase tracking-wide font-medium">
+                                                                Dịch vụ</p>
+                                                            <p class="text-sm font-semibold text-gray-900">
+                                                                {{ $item->service->name ?? '---' }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="space-y-4">
+                                                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                        <div
+                                                            class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                                            <i data-lucide="calendar-days"
+                                                                class="w-4 h-4 text-purple-600"></i>
+                                                        </div>
+                                                        <div>
+                                                            <p
+                                                                class="text-xs text-gray-500 uppercase tracking-wide font-medium">
+                                                                Ngày khám</p>
+                                                            <p class="text-sm font-semibold text-gray-900">
+                                                                {{ \Carbon\Carbon::parse($item->appointment_time)->format('d/m/Y') }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                        <div
+                                                            class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                                                            <i data-lucide="clock" class="w-4 h-4 text-orange-600"></i>
+                                                        </div>
+                                                        <div>
+                                                            <p
+                                                                class="text-xs text-gray-500 uppercase tracking-wide font-medium">
+                                                                Giờ khám</p>
+                                                            <p class="text-sm font-semibold text-gray-900">
+                                                                {{ \Carbon\Carbon::parse($item->appointment_time)->format('H:i') }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="mb-2 text-sm">
-                                                <span class="font-medium text-gray-700">Dịch vụ:</span>
-                                                {{ $item->service->name ?? '---' }}
+
+                                            <!-- Footer actions -->
+                                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                                <div class="flex items-center gap-2 text-xs text-gray-500">
+                                                    <i data-lucide="calendar" class="w-3 h-3"></i>
+                                                    <span>Lịch hẹn #{{ $item->id }}</span>
+                                                </div>
+
+                                                <div class="flex items-center gap-3">
+                                                    <a href="{{ route('client.appointments.show', $item) }}"
+                                                        class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200">
+                                                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                                        Xem chi tiết
+                                                    </a>
+                                                    @if ($item->status === 'pending')
+                                                        <button type="button"
+                                                            onclick="openCancelModal({{ $item->id }})"
+                                                            class="inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-medium text-sm transition-colors duration-200">
+                                                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                                            Hủy lịch
+                                                        </button>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            <div class="mb-2 text-sm">
-                                                <span class="font-medium text-gray-700">Ngày khám:</span>
-                                                {{ \Carbon\Carbon::parse($item->appointment_time)->format('d/m/Y') }}
-                                            </div>
-                                            <div class="mb-2 text-sm">
-                                                <span class="font-medium text-gray-700">Giờ khám dự kiến:</span>
-                                                {{ \Carbon\Carbon::parse($item->appointment_time)->format('H:i') }}
-                                            </div>
-                                            <div class="mb-4 text-sm">
-                                                <span class="font-medium text-gray-700">Trạng thái:</span>
-                                                <span
-                                                    class="px-2 py-1 rounded-full text-xs font-semibold {{ $statusClass }}">
-                                                    {{ $item->status_text ?? ucfirst($item->status) }}
-                                                </span>
-                                            </div>
-                                            <div class="flex gap-3 items-center">
-                                                <a href="{{ route('client.appointments.show', $item) }}"
-                                                    title="Xem chi tiết" class="text-blue-600 hover:underline text-sm">
-                                                    Xem chi tiết
-                                                </a>
-                                                @if ($item->status === 'pending')
-                                                    {{-- <a href="{{ route('client.appointments.edit', $item) }}"
-                                                        title="Chỉnh sửa" class="text-yellow-600 hover:underline text-sm">
-                                                        Chỉnh sửa
-                                                    </a> --}}
-                                                    <button type="button" onclick="openCancelModal({{ $item->id }})"
-                                                        class="action-btn-cancel">
-                                                        Hủy
-                                                    </button>
-                                                @endif
+
+                                            <!-- Decorative element -->
+                                            <div
+                                                class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 rounded-bl-full">
                                             </div>
                                         </div>
                                     @endforeach
@@ -251,6 +374,55 @@
                 /* Remove padding as outer container handles it */
                 background: none;
                 /* Remove background as outer container handles it */
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            }
+
+            .group:hover .absolute.top-0.right-0 {
+                background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
+            }
+
+            /* Enhanced hover effects */
+            .group:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            }
+
+            /* Icon animations */
+            .group:hover i[data-lucide] {
+                transform: scale(1.1);
+                transition: transform 0.2s ease;
+            }
+
+            /* Status badge animations */
+            .group:hover span.px-3.py-1 {
+                transform: scale(1.05);
+                transition: transform 0.2s ease;
+            }
+
+            /* Gradient background for info cards */
+            .bg-gray-50 {
+                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            }
+
+            /* Enhanced button styles */
+            .inline-flex.items-center.gap-3 {
+                position: relative;
+                overflow: hidden;
+            }
+
+            .inline-flex.items-center.gap-3::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.5s;
+            }
+
+            .inline-flex.items-center.gap-3:hover::before {
+                left: 100%;
             }
 
             /* Page Header */
@@ -513,52 +685,52 @@
             }
         </script>
     @endpush
-   <script>
-    function openCancelModal(appointmentId) {
-        // Hiển thị modal
-        const modal = document.getElementById('cancelModal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+    <script>
+        function openCancelModal(appointmentId) {
+            // Hiển thị modal
+            const modal = document.getElementById('cancelModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
 
-            // Gán appointment_id cho form
-            const form = document.getElementById('cancelForm');
-            form.action = `/client/appointments/${appointmentId}/cancel`; // Cập nhật URL
+                // Gán appointment_id cho form
+                const form = document.getElementById('cancelForm');
+                form.action = `/client/appointments/${appointmentId}/cancel`; // Cập nhật URL
 
-            // Reset các lựa chọn
-            document.getElementById('customReasonContainer').classList.add('hidden');
-            document.getElementById('customReason').value = '';
-            document.getElementById('cancel_reason_final').value = '';
+                // Reset các lựa chọn
+                document.getElementById('customReasonContainer').classList.add('hidden');
+                document.getElementById('customReason').value = '';
+                document.getElementById('cancel_reason_final').value = '';
+            }
         }
-    }
 
-    function closeCancelModal() {
-        const modal = document.getElementById('cancelModal');
-        if (modal) {
-            modal.classList.add('hidden');
+        function closeCancelModal() {
+            const modal = document.getElementById('cancelModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
         }
-    }
 
-    function toggleCustomReason(radio) {
-        const customContainer = document.getElementById('customReasonContainer');
-        const finalReasonInput = document.getElementById('cancel_reason_final');
-
-        if (radio.value === 'Lý do khác') {
-            customContainer.classList.remove('hidden');
-            finalReasonInput.value = '';
-        } else {
-            customContainer.classList.add('hidden');
-            finalReasonInput.value = radio.value;
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const customReasonTextarea = document.getElementById('customReason');
-        customReasonTextarea?.addEventListener('input', function () {
+        function toggleCustomReason(radio) {
+            const customContainer = document.getElementById('customReasonContainer');
             const finalReasonInput = document.getElementById('cancel_reason_final');
-            finalReasonInput.value = this.value;
+
+            if (radio.value === 'Lý do khác') {
+                customContainer.classList.remove('hidden');
+                finalReasonInput.value = '';
+            } else {
+                customContainer.classList.add('hidden');
+                finalReasonInput.value = radio.value;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const customReasonTextarea = document.getElementById('customReason');
+            customReasonTextarea?.addEventListener('input', function() {
+                const finalReasonInput = document.getElementById('cancel_reason_final');
+                finalReasonInput.value = this.value;
+            });
         });
-    });
-</script>
+    </script>
 
 @endsection

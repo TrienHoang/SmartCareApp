@@ -44,7 +44,7 @@
                                 <span>Đơn Thuốc</span>
                             </a>
 
-                            <a href="#lich-hen"
+                            <a href="{{ route('client.appointments.index') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="clock" class="w-5 h-5"></i>
                                 <span>Lịch Hẹn</span>
