@@ -78,27 +78,46 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        lucide.createIcons();
         document.addEventListener('DOMContentLoaded', function() {
+            // Cấu hình Toastr
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000"
+            };
+    
+            // Hiển thị thông báo session
+            @if (session('success'))
+                toastr.success("{{ session('success') }}");
+            @endif
+            @if (session('error'))
+                toastr.error("{!! session('error') !!}");
+            @endif
+            @if (session('warning'))
+                toastr.warning("{{ session('warning') }}", "Cảnh báo");
+            @endif
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    toastr.error("{!! $error !!}");
+                @endforeach
+            @endif
+    
+            // Các mã khác như Splide, counter animation...
             new Splide('#testimonial-slider', {
                 type: 'loop',
                 perPage: 3,
                 autoplay: true,
-                interval: 3000, // 3 giây
+                interval: 3000,
                 pauseOnHover: true,
                 pauseOnFocus: true,
                 gap: '1rem',
                 breakpoints: {
-                    1024: {
-                        perPage: 2
-                    },
-                    640: {
-                        perPage: 1
-                    },
+                    1024: { perPage: 2 },
+                    640: { perPage: 1 }
                 }
             }).mount();
-
-            // doctor slider
+    
             new Splide('#doctor-slider', {
                 type: 'loop',
                 perPage: 4,
@@ -108,50 +127,21 @@
                 pauseOnFocus: true,
                 gap: '1rem',
                 breakpoints: {
-                    1024: {
-                        perPage: 2
-                    },
-                    640: {
-                        perPage: 1
-                    },
+                    1024: { perPage: 2 },
+                    640: { perPage: 1 }
                 }
             }).mount();
-
-            $(document).ready(function() {
-                @if (session('success'))
-                    toastr.success("{{ session('success') }}");
-                @endif
-                @if (session('error'))
-                    toastr.error("{{ session('error') }}");
-                @endif
-                @if (session('warning'))
-                    toastr.warning("{{ session('warning') }}", "Cảnh báo");
-                @endif
-                @if ($errors->any())
-                    @foreach ($errors->all() as $error)
-                        toastr.error("{{ $error }}");
-                    @endforeach
-                @endif
-                @if (session('date_swapped'))
-                    toastr.warning(
-                        "Ngày bắt đầu lớn hơn ngày kết thúc. Hệ thống đã tự động hoán đổi giúp bạn.",
-                        "Cảnh báo");
-                @endif
-            });
-
-
-            // animation Count Numb
+    
+            // Animation Count Number
             const counters = document.querySelectorAll(".counter");
-
             function animateCounter(counter) {
                 const target = +counter.getAttribute("data-number");
                 const step = +counter.getAttribute("data-step") || 1;
-                const duration = 1500; // thời gian tổng cộng
+                const duration = 1500;
                 const incrementTime = Math.max(duration / (target / step), 10);
                 let current = 0;
-
+    
                 counter.textContent = "0";
-
                 const run = () => {
                     current += step;
                     if (current >= target) {
@@ -161,24 +151,20 @@
                         setTimeout(run, incrementTime);
                     }
                 };
-
                 run();
             }
-
+    
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
                         animateCounter(entry.target);
                     }
                 });
-            }, {
-                threshold: 0.6
-            });
-
+            }, { threshold: 0.6 });
+    
             counters.forEach(counter => {
                 observer.observe(counter);
             });
-
         });
     </script>
     @stack('scripts')
