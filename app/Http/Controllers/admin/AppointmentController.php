@@ -664,21 +664,21 @@ class AppointmentController extends Controller
             }
 
             // Đồng bộ trạng thái Order (luôn thực hiện)
-            $order = Order::where('appointment_id', $appointment->id)->first();
-            if ($order) {
-                if ($request->status === 'completed') {
-                    $order->update([
-                        'status'       => 'completed',
-                        'completed_at' => now(),
-                    ]);
-                } elseif ($request->status === 'confirmed') {
-                    $order->update(['status' => 'confirmed']);
-                } elseif ($request->status === 'checked_in') {
-                    $order->update(['status' => 'in_progress']);
-                } elseif ($request->status === 'cancelled') {
-                    $order->update(['status' => 'cancelled']);
-                }
-            }
+            // $order = Order::where('appointment_id', $appointment->id)->first();
+            // if ($order) {
+            //     if ($request->status === 'completed') {
+            //         $order->update([
+            //             'status'       => 'completed',
+            //             'completed_at' => now(),
+            //         ]);
+            //     } elseif ($request->status === 'confirmed') {
+            //         $order->update(['status' => 'confirmed']);
+            //     } elseif ($request->status === 'checked_in') {
+            //         $order->update(['status' => 'in_progress']);
+            //     } elseif ($request->status === 'cancelled') {
+            //         $order->update(['status' => 'cancelled']);
+            //     }
+            // }
 
             // Cập nhật trạng thái kế hoạch điều trị
             TreatmentPlanHelper::updatePlanStatus($appointment->treatment_plan_id);

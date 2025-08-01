@@ -8,7 +8,7 @@
             <i class="fas fa-user-edit mr-2"></i> Cập nhật hồ sơ bệnh nhân
         </h1>
 
-        {{-- Thông báo thành công hoặc lỗi --}}
+        {{-- Thông báo flash --}}
         @if (session('success'))
             <div class="bg-green-100 text-green-800 px-4 py-3 rounded mb-4">
                 {{ session('success') }}
@@ -64,8 +64,8 @@
                 <select name="gender"
                     class="w-full mt-1 px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400">
                     <option value="">-- Chọn giới tính --</option>
-                    <option value="Nam" {{ old('gender', $patient->gender) == 'Nam' ? 'selected' : '' }}>Nam</option>
-                    <option value="Nữ" {{ old('gender', $patient->gender) == 'Nữ' ? 'selected' : '' }}>Nữ</option>
+                    <option value="Nam" {{ old('gender', $patient->gender) === 'Nam' ? 'selected' : '' }}>Nam</option>
+                    <option value="Nữ" {{ old('gender', $patient->gender) === 'Nữ' ? 'selected' : '' }}>Nữ</option>
                 </select>
             </div>
 
@@ -84,7 +84,7 @@
                     class="w-full mt-1 px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400">
             </div>
 
-            {{-- Buttons --}}
+            {{-- Nút hành động --}}
             <div class="pt-4 flex justify-end">
                 <a href="{{ route('receptionist.patients.index') }}"
                     class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2">
