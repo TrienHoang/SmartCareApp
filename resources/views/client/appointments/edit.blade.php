@@ -31,7 +31,7 @@
                                 <i data-lucide="user" class="w-5 h-5"></i>
                                 <span>Thông Tin Cá Nhân</span>
                             </a>
-                            <a href="#lich-su-kham"
+                            <a href="{{ route('client.appointments.history') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="calendar" class="w-5 h-5"></i>
                                 <span>Lịch Sử Khám</span>
