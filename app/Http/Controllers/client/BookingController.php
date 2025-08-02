@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderService;
-use App\Models\Order;
-use App\Models\OrderService;
 use App\Models\Promotion;
 use App\Models\PromotionUserUsage;
 use App\Models\Service;
@@ -230,7 +228,6 @@ class BookingController extends Controller
         $doctor_appointments = [];
         if (!$doctor_id) {
             $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(7)])
-            $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(7)])
                 ->where('status', '!=', 'cancelled')
                 ->groupBy('doctor_id')
                 ->select('doctor_id', \DB::raw('count(*) as appointment_count'))
@@ -378,7 +375,6 @@ class BookingController extends Controller
         }
 
         $validated = $request->validate([
-            'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(7)->toDateString(),
             'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(7)->toDateString(),
             'slot_start' => 'required|date_format:H:i',
             'reason' => 'nullable|string|max:255',
@@ -633,8 +629,6 @@ class BookingController extends Controller
         if (!$payment || !$appointment) {
             return redirect()->route('client.services')
                 ->with('error', 'Giao dịch không hợp lệ hoặc không tìm thấy.');
-            return redirect()->route('client.services')
-                ->with('error', 'Giao dịch không hợp lệ hoặc không tìm thấy.');
         }
 
         // Kiểm tra checksum trước
@@ -653,13 +647,6 @@ class BookingController extends Controller
                             'vnp_transaction_no'  => $request->vnp_TransactionNo,
                             'vnp_response_code'   => $request->vnp_ResponseCode,
                         ]);
-                        $payment->update([
-                            'status'              => 'paid',
-                            'paid_at'             => $payDate,
-                            'vnp_txn_ref'         => $request->vnp_TxnRef,
-                            'vnp_transaction_no'  => $request->vnp_TransactionNo,
-                            'vnp_response_code'   => $request->vnp_ResponseCode,
-                        ]);
 
                         PaymentHistory::create([
                             'payment_id'     => $payment->id,
@@ -667,17 +654,7 @@ class BookingController extends Controller
                             'payment_method' => 'vnpay',
                             'payment_date'   => $payDate,
                         ]);
-                        PaymentHistory::create([
-                            'payment_id'     => $payment->id,
-                            'amount'         => $request->vnp_Amount / 100,
-                            'payment_method' => 'vnpay',
-                            'payment_date'   => $payDate,
-                        ]);
 
-                        // Ở bước return vẫn để pending, admin/lễ tân sẽ xác nhận sau
-                        $appointment->update([
-                            'status' => 'pending',
-                        ]);
                         // Ở bước return vẫn để pending, admin/lễ tân sẽ xác nhận sau
                         $appointment->update([
                             'status' => 'pending',
@@ -691,49 +668,7 @@ class BookingController extends Controller
                             'status'         => 'paid',
                             'ordered_at'     => now(),
                         ]);
-                        $order = Order::create([
-                            'user_id'        => $appointment->patient_id,
-                            'appointment_id' => $appointment->id,
-                            'payment_id'     => $payment->id,
-                            'total_amount'   => $request->vnp_Amount / 100,
-                            'status'         => 'paid',
-                            'ordered_at'     => now(),
-                        ]);
 
-                        // Lưu vào bảng order_service
-                        OrderService::create([
-                            'order_id'   => $order->id,
-                            'service_id' => $appointment->service_id,
-                            'quantity'   => 1,
-                            'price'      => $appointment->service->price ?? 0,
-                        ]);
-                        $promoCode = session('selected_promotion_code');
-                        if ($promoCode) {
-                            $promotion = Promotion::where('code', $promoCode)->first();
-                            if ($promotion) {
-                                // Ghi nhận người dùng đã dùng mã này
-                                PromotionUserUsage::create([
-                                    'user_id'       => $appointment->patient_id,
-                                    'promotion_id'  => $promotion->id,
-                                    'used_at'       => now(),
-                                    'appointment_id' => $appointment->id,
-                                ]);
-                            }
-
-                            // Xóa khỏi session sau khi dùng
-                            session()->forget('selected_promotion_code');
-                        }
-                        DB::commit();
-                        return redirect()->route('booking.success')
-                            ->with('success', 'Thanh toán thành công! Lịch hẹn của bạn đã được ghi nhận.');
-                    } catch (\Exception $e) {
-                        DB::rollBack();
-                        \Log::error("Payment confirmation failed: " . $e->getMessage());
-                        return redirect()->route('client.services')
-                            ->with('error', 'Có lỗi xảy ra khi xác nhận thanh toán.');
-                    }
-                } else {
-                    // Đã thanh toán rồi thì chuyển về trang thành công
                         // Lưu vào bảng order_service
                         OrderService::create([
                             'order_id'   => $order->id,
@@ -780,28 +715,10 @@ class BookingController extends Controller
                     DB::commit();
                     return redirect()->route('client.services')
                         ->with('error', 'Bạn đã hủy giao dịch. Lịch hẹn đã bị xóa.');
-                        ->with('success', 'Giao dịch đã được xác nhận trước đó.');
-                }
-            } elseif ($responseCode === '24') {
-                // Người dùng hủy thanh toán
-                DB::beginTransaction();
-                try {
-                    $payment->delete();
-                    $appointment->delete();
-                    DB::commit();
-                    return redirect()->route('client.services')
-                        ->with('error', 'Bạn đã hủy giao dịch. Lịch hẹn đã bị xóa.');
                 } catch (\Exception $e) {
                     DB::rollBack();
                     \Log::error("Payment cancellation failed: " . $e->getMessage());
-                    \Log::error("Payment cancellation failed: " . $e->getMessage());
                     return redirect()->route('client.services')
-                        ->with('error', 'Có lỗi xảy ra khi xóa dữ liệu.');
-                }
-            } else {
-                // Các mã lỗi khác
-                $payment->update(['status' => 'unpaid']);
-                $appointment->update(['status' => 'cancelled']);
                         ->with('error', 'Có lỗi xảy ra khi xóa dữ liệu.');
                 }
             } else {
@@ -809,13 +726,6 @@ class BookingController extends Controller
                 $payment->update(['status' => 'unpaid']);
                 $appointment->update(['status' => 'cancelled']);
 
-                return redirect()->route('booking.showService', $appointment->service_id)
-                    ->with('error', 'Thanh toán không thành công. Vui lòng thử lại.');
-            }
-        } else {
-            // Checksum không đúng
-            return redirect()->route('client.services')
-                ->with('error', 'Dữ liệu không hợp lệ (checksum sai).');
                 return redirect()->route('booking.showService', $appointment->service_id)
                     ->with('error', 'Thanh toán không thành công. Vui lòng thử lại.');
             }
@@ -870,22 +780,7 @@ class BookingController extends Controller
                             'vnp_transaction_no'  => $request->vnp_TransactionNo,
                             'vnp_response_code'   => $request->vnp_ResponseCode,
                         ]);
-                        // Cập nhật Payment
-                        $payment->update([
-                            'status'              => 'paid',
-                            'paid_at'             => $payDate,
-                            'vnp_txn_ref'         => $request->vnp_TxnRef,
-                            'vnp_transaction_no'  => $request->vnp_TransactionNo,
-                            'vnp_response_code'   => $request->vnp_ResponseCode,
-                        ]);
 
-                        // Ghi lại PaymentHistory
-                        PaymentHistory::create([
-                            'payment_id'     => $payment->id,
-                            'amount'         => $request->vnp_Amount / 100,
-                            'payment_method' => 'vnpay',
-                            'payment_date'   => $payDate,
-                        ]);
                         // Ghi lại PaymentHistory
                         PaymentHistory::create([
                             'payment_id'     => $payment->id,
@@ -898,45 +793,7 @@ class BookingController extends Controller
                         $appointment->update([
                             'status' => 'pending', // admin/lễ tân duyệt sau
                         ]);
-                        // Cập nhật trạng thái lịch hẹn
-                        $appointment->update([
-                            'status' => 'pending', // admin/lễ tân duyệt sau
-                        ]);
 
-                        DB::commit();
-                        return response()->json(['RspCode' => '00', 'Message' => 'Confirm Success']);
-                    } catch (\Exception $e) {
-                        DB::rollBack();
-                        \Log::error("IPN processing failed: " . $e->getMessage());
-                        return response()->json(['RspCode' => '99', 'Message' => 'Unknown error']);
-                    }
-                } else {
-                    return response()->json(['RspCode' => '02', 'Message' => 'Transaction already confirmed']);
-                }
-            } elseif ($responseCode === '24') {
-                // Người dùng hủy giao dịch
-                DB::beginTransaction();
-                try {
-                    $payment->delete();
-                    $appointment->delete();
-                    DB::commit();
-                    return response()->json(['RspCode' => '00', 'Message' => 'Cancellation processed']);
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    \Log::error("IPN cancellation failed: " . $e->getMessage());
-                    return response()->json(['RspCode' => '99', 'Message' => 'Unknown error']);
-                }
-            } else {
-                // Các mã lỗi khác: thất bại
-                if ($payment->status !== 'unpaid') {
-                    $payment->update(['status' => 'unpaid']);
-                    $appointment->update(['status' => 'cancelled']);
-                }
-                return response()->json(['RspCode' => '01', 'Message' => 'Transaction failed']);
-            }
-        } else {
-            // Sai checksum
-            return response()->json(['RspCode' => '97', 'Message' => 'Invalid checksum']);
                         DB::commit();
                         return response()->json(['RspCode' => '00', 'Message' => 'Confirm Success']);
                     } catch (\Exception $e) {
