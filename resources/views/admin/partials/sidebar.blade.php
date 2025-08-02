@@ -62,6 +62,9 @@
                 <li class="menu-item"><a href="{{ route('admin.schedules.index') }}" class="menu-link">
                         <div>Lịch làm việc bác sĩ</div>
                     </a></li>
+                <li class="menu-item"><a href="{{ route('admin.shifts.index') }}" class="menu-link">
+                        <div>Ca làm việc </div>
+                    </a></li>
             </ul>
         </li>
 

@@ -167,6 +167,3 @@ Route::prefix('doctor')
         Route::get('/profile/change-password', [DoctorProfileController::class, 'changePasswordForm'])->name('profile.change-password');
         Route::post('/profile/change-password', [DoctorProfileController::class, 'changePassword'])->name('profile.change-password.submit');
     });
-
-
-
