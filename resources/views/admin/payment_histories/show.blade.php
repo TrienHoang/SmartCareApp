@@ -43,16 +43,38 @@
           <p><strong>Phương thức:</strong> {{ $history->payment_method ?? '---' }}</p>
           @php
             $status = $history->payment->status ?? null;
+            $refund = $history->refund_status ?? 'none';
+
             $badgeColor = match($status) {
               'paid' => 'bg-success',
               'pending' => 'bg-warning text-dark',
               'failed' => 'bg-danger',
+              'refunded' => 'bg-info text-dark',
               default => 'bg-secondary'
             };
+
+            $refundColor = match($refund) {
+              'pending' => 'bg-warning text-dark',
+              'completed' => 'bg-success',
+              'failed' => 'bg-danger',
+              default => 'bg-secondary'
+            };
+
+            $refundText = match($refund) {
+              'pending' => 'Đang hoàn tiền',
+              'completed' => 'Đã hoàn tiền',
+              'failed' => 'Hoàn tiền thất bại',
+              default => 'Không hoàn tiền'
+            };
           @endphp
-          <p><strong>Trạng thái:</strong> 
+          <p><strong>Trạng thái thanh toán:</strong> 
             <span class="badge {{ $badgeColor }} badge-status">
               {{ ucfirst($status) ?? 'Không rõ' }}
+            </span>
+          </p>
+          <p><strong>Trạng thái hoàn tiền:</strong> 
+            <span class="badge {{ $refundColor }} badge-status">
+              {{ $refundText }}
             </span>
           </p>
         </div>

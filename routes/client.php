@@ -67,10 +67,12 @@ Route::get('/chi-tiet-tin-tuc/{id}', function ($id) {
 })->name('news_detail');
 
 // Thông tin cá nhân
-Route::middleware(['auth'])->prefix('client/profile')->name('client.profile.')->group(function () {
-    Route::get('/', [ProfileController::class, 'show'])->name('show');
-    Route::patch('/update', [ProfileController::class, 'update'])->name('update');
+Route::prefix('client/profile')->name('client.profile.')->group(function () {
+    Route::get('/', [ProfileController::class, 'show'])->name('show'); // tên đầy đủ: client.profile.show
+    Route::patch('/update', [ProfileController::class, 'update'])->name('update'); // client.profile.update
 });
+
+
 // Route::get('/thong-tin-bac-si', function () {
 //     return view('client.doctors_detail');
 // })->name('doctors_detail');

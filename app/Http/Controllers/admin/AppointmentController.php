@@ -569,12 +569,13 @@ class AppointmentController extends Controller
         $endTime         = $appointmentTime->copy()->addMinutes($duration);
 
         // Không cho đặt lịch rơi vào hoặc kéo dài sang giờ nghỉ trưa
-        $lunchStart = Carbon::parse($appointmentDate->format('Y-m-d') . ' 12:00');
-        $lunchEnd   = Carbon::parse($appointmentDate->format('Y-m-d') . ' 13:00');
+        $lunchStart = $appointmentDate->copy()->setTime(12, 0);
+        $lunchEnd   = $appointmentDate->copy()->setTime(13, 0);
+
         if (
-            ($appointmentDate->lt($lunchStart) && $endTime->gt($lunchStart)) ||
-            ($appointmentDate->between($lunchStart, $lunchEnd)) ||
-            ($endTime->between($lunchStart, $lunchEnd))
+            // Bắt đầu trước 13:00 và kết thúc sau 12:00 -> có giao nhau
+            $appointmentDate->lt($lunchEnd) &&
+            $endTime->gt($lunchStart)
         ) {
             return back()->withErrors([
                 'appointment_time' => 'Thời gian khám rơi vào hoặc kéo dài sang giờ nghỉ trưa (12:00 - 13:00).'
@@ -584,6 +585,7 @@ class AppointmentController extends Controller
         // Kiểm tra bệnh nhân có lịch khác bị trùng không
         $overlappedAppointments = Appointment::where('patient_id', $patientId)
             ->where('id', '!=', $appointment->id)
+            ->where('status', '!=', 'cancelled')
             ->where(function ($q) use ($appointmentTime, $endTime) {
                 $q->where('appointment_time', '<', $endTime)
                     ->where('end_time', '>', $appointmentTime);
@@ -602,7 +604,7 @@ class AppointmentController extends Controller
             'service_id'        => $request->service_id,
             'appointment_time'  => $request->appointment_time,
             'end_time'          => $endTime,
-            'status'            => $request->status, // bao gồm cả checked_in
+            'status'            => $request->status,
             'reason'            => $request->reason,
             'treatment_plan_id' => $request->treatment_plan_id,
         ];
@@ -625,7 +627,7 @@ class AppointmentController extends Controller
                 ' → ' . Carbon::parse($request->appointment_time)->format('d/m/Y H:i');
         }
         if ($oldDoctorId != $request->doctor_id) {
-            $oldDoctor    = optional($appointment->doctor->user)->full_name ?? 'Không xác định';
+            $oldDoctor     = optional($appointment->doctor->user)->full_name ?? 'Không xác định';
             $newDoctorName = optional($newDoctor->user)->full_name ?? 'Không xác định';
             $changes[] = 'Bác sĩ: ' . $oldDoctor . ' → ' . $newDoctorName;
         }
@@ -649,6 +651,7 @@ class AppointmentController extends Controller
         try {
             $appointment->update($updateData);
 
+            // Ghi log nếu có thay đổi
             if (!empty($changes)) {
                 AppointmentLog::create([
                     'appointment_id' => $appointment->id,
@@ -658,6 +661,23 @@ class AppointmentController extends Controller
                     'change_time'    => now(),
                     'note'           => implode("\n", $changes),
                 ]);
+            }
+
+            // Đồng bộ trạng thái Order (luôn thực hiện)
+            $order = Order::where('appointment_id', $appointment->id)->first();
+            if ($order) {
+                if ($request->status === 'completed') {
+                    $order->update([
+                        'status'       => 'completed',
+                        'completed_at' => now(),
+                    ]);
+                } elseif ($request->status === 'confirmed') {
+                    $order->update(['status' => 'confirmed']);
+                } elseif ($request->status === 'checked_in') {
+                    $order->update(['status' => 'in_progress']);
+                } elseif ($request->status === 'cancelled') {
+                    $order->update(['status' => 'cancelled']);
+                }
             }
 
             // Cập nhật trạng thái kế hoạch điều trị
@@ -676,6 +696,11 @@ class AppointmentController extends Controller
                 ->with('success', 'Cập nhật lịch hẹn thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error updating appointment', [
+                'appointment_id' => $appointment->id,
+                'error'          => $e->getMessage(),
+                'changes'        => $changes,
+            ]);
             return back()->withErrors(['error' => 'Đã xảy ra lỗi khi cập nhật lịch hẹn.']);
         }
     }
