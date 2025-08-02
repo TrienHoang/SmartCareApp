@@ -134,6 +134,7 @@ Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->gr
 
 Route::get('/payment/return', [BookingController::class, 'paymentReturn'])->name('payment.return');
 Route::match(['get', 'post'], '/payment/ipn', [BookingController::class, 'paymentIpn'])->name('payment.ipn');
+Route::get('/booking/clean-expired', [BookingController::class, 'cleanExpiredPaymentsRoute'])->name('booking.clean-expired');
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/booking/prepare', [BookingController::class, 'prepare'])->name('booking.prepare');
@@ -205,9 +206,3 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/promotions/apply/{promotion}', [PromotionController::class, 'apply'])->name('client.promotions.apply');
     Route::post('/promotions/remove', [PromotionController::class, 'remove'])->name('client.promotions.remove');
 });
-
-
-
-
-
-
