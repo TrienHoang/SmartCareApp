@@ -1249,7 +1249,9 @@ class AppointmentController extends Controller
         $inputData['vnp_SecureHash'] = hash_hmac('sha512', $hashData, $vnp_HashSecret);
 
         try {
-            $response = \Illuminate\Support\Facades\Http::asForm()->post($vnp_RefundUrl, $inputData);
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post($vnp_RefundUrl, $inputData);
 
             if (!$response->ok()) {
                 Log::error('VNPay Refund HTTP error', [
