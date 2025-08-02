@@ -26,12 +26,12 @@
 
                         {{-- Menu --}}
                         <nav class="space-y-2">
-                            <a href="{{ url('/thong-tin-ca-nhan') }}"
+                            <a href="{{ route('client.profile.show') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="user" class="w-5 h-5"></i>
                                 <span>Thông Tin Cá Nhân</span>
                             </a>
-                            <a href="#lich-su-kham"
+                            <a href="{{ route('client.appointments.history') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="calendar" class="w-5 h-5"></i>
                                 <span>Lịch Sử Khám</span>
@@ -56,10 +56,10 @@
                                 <i data-lucide="upload" class="w-5 h-5"></i>
                                 <span>Upload File</span>
                             </a>
-                                 <a href="{{ route('client.notifications.index') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 text-blue-600 border-l-4 border-blue-600">
+                            <a href="{{ route('client.notifications.index') }}"
+                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="bell" class="w-5 h-5"></i>
-                                <span class="font-semibold">Thông Báo</span>
+                                <span>Thông Báo</span>
                                 @php
                                     $currentUnreadCount = $notifications
                                         ->where('userStatuses.0.is_read', false)
