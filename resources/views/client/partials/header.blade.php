@@ -71,8 +71,8 @@
                     {{-- Nếu đã đăng nhập --}}
                     <div class="relative group">
                         <button class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors">
-                            <img src="{{ Auth::user()->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
-                                alt="Avatar" class="w-8 h-8 rounded-full border">
+                            <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
+                                alt="Avatar" class="w-8 h-8 rounded-full border object-cover">
                             <span class="text-sm">{{ Auth::user()->name }}</span>
                             <i data-lucide="chevron-down" class="w-4 h-4"></i>
                         </button>

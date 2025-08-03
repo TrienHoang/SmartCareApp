@@ -349,8 +349,6 @@ Route::group([
 
         Route::get('/{doctor}', [DoctorController::class, 'show'])
             ->middleware('check_permission:view_doctors')->name('show');
-
-
     });
 
     // Nhóm quản lý phòng ban
@@ -750,17 +748,16 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 // quản lý liên hệ
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('contacts')->name('contacts.')->group(function () {
-        Route::get('/', [ContactController::class, 'index'])->name('index');    
-        Route::get('/{id}', [ContactController::class, 'show'])->name('show');     
-        Route::delete('/{id}', [ContactController::class, 'destroy'])->name('destroy'); 
+        Route::get('/', [ContactController::class, 'index'])->name('index');
+        Route::get('/{id}', [ContactController::class, 'show'])->name('show');
+        Route::delete('/{id}', [ContactController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/reply', [ContactController::class, 'reply'])->name('reply');
         Route::patch('/{id}/status', [ContactController::class, 'updateStatus'])->name('updateStatus');
-        Route::get('/search', [ContactController::class, 'search'])->name('search'); 
-
+        Route::get('/search', [ContactController::class, 'search'])->name('search');
     });
 });
 
-        Route::post('/admin/doctors/{user}/toggle-status', [DoctorController::class, 'toggleStatus'])->name('admin.doctors.toggleStatus');
+Route::post('/admin/doctors/{user}/toggle-status', [DoctorController::class, 'toggleStatus'])->name('admin.doctors.toggleStatus');
 
 
 use Illuminate\Support\Facades\Mail;
@@ -770,7 +767,7 @@ Route::get('/test-email', function () {
     try {
         Mail::raw('Đây là email test từ hệ thống Laravel.', function ($message) {
             $message->to('lehieu19042005@gmail.com')
-                    ->subject('Thử gửi email');
+                ->subject('Thử gửi email');
         });
 
         return 'Gửi email thành công';
@@ -806,17 +803,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
 require __DIR__ . '/client.php';
 
-
-
-
-
-
-
-
 // Trong routes/web.php hoặc routes/doctor.php
 require __DIR__ . '/doctor.php';
-
-
 
 // Route phần lễ tân
 require __DIR__ . '/reception.php';

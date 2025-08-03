@@ -332,13 +332,9 @@
                                                             class="bx bx-{{ $category->status == 'active' ? 'pause' : 'play' }}"></i>
                                                     </button>
                                                 </form>
-
                                                 <!-- Xóa -->
-                                                <button type="button" class="btn btn-outline-danger"
-                                                    data-toggle="tooltip" title="Xóa"
-                                                    onclick="deleteCategory({{ $category->id }})">
-                                                    <i class="bx bx-trash"></i>
-                                                </button>
+                                                <!-- Form xóa -->
+
                                             </div>
                                         </td>
 

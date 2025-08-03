@@ -303,11 +303,16 @@
                                                 </form>
 
                                                 <!-- Xóa -->
-                                                <button type="button" class="btn btn-outline-danger"
-                                                    data-toggle="tooltip" title="Xóa"
-                                                    onclick="deleteFaq({{ $faq->id }})">
-                                                    <i class="bx bx-trash"></i>
-                                                </button>
+                                                <form action="{{ route('admin.faqs.destroy', $faq->id) }}" method="POST"
+                                                    class="d-inline"
+                                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-outline-danger"
+                                                        data-toggle="tooltip" title="Xóa">
+                                                        <i class="bx bx-trash"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
