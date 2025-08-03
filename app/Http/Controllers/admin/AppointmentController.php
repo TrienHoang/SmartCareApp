@@ -763,8 +763,7 @@ class AppointmentController extends Controller
                 $appointment->status = 'cancelled';
                 $appointment->save();
 
-                $result = $this->performVnpayRefund($payment);
-                $this->logRefundResult($payment, $result, 'Hủy do chưa xác nhận');
+                return $this->refund($appointment->id);
 
                 if ($result['success']) {
                     return redirect()->route('admin.appointments.index')
@@ -812,7 +811,7 @@ class AppointmentController extends Controller
     protected function logRefundResult($payment, $result, $reason)
     {
         if ($result['success']) {
-            $payment->refund_status = 'success';
+            $payment->refund_status = 'completed';
             $payment->note = $reason . ' - Hoàn tiền thành công';
         } else {
             $payment->refund_status = 'failed';
@@ -1161,17 +1160,9 @@ class AppointmentController extends Controller
 
                 try {
                     // Xác định lý do hoàn tiền
-                    $reason = match (true) {
-                        $appointment->status === 'cancelled' =>
-                        'Lịch hẹn đã bị huỷ. Chúng tôi xin lỗi nếu có sự bất tiện xảy ra.',
-                        $appointment->cancel_reason === 'doctor_unavailable' =>
-                        'Bác sĩ xin nghỉ đột xuất. Chúng tôi xin lỗi vì sự bất tiện này.',
-                        default =>
-                        'Hoàn tiền theo chính sách hoặc yêu cầu từ phía quý khách.',
-                    };
+                    $reason = 'Hoàn tiền theo yêu cầu. Lịch hẹn đã bị hủy.';
 
-                    Mail::to($appointment->patient->email)
-                        ->send(new RefundSuccessfulMail($appointment, $reason));
+                    $this->sendRefundMail($appointment, $reason);
                 } catch (\Throwable $e) {
                     \Log::error('Lỗi gửi mail hoàn tiền', [
                         'appointment_id' => $appointment->id,
@@ -1202,14 +1193,60 @@ class AppointmentController extends Controller
         }
     }
 
-    protected function performVnpayRefund($payment)
+    public function performVnpayRefund($payment)
     {
+        // MOCK refund khi chạy local/testing để demo
+        if (app()->environment(['local', 'testing'])) {
+            \Log::info('MOCK VNPay Refund (local/testing)', ['payment_id' => $payment->id]);
+
+            // Cập nhật trạng thái thanh toán
+            $payment->refund_status = 'completed';
+            $payment->status = 'refunded';
+            $payment->refunded_at = now();
+            $payment->save();
+
+            // Ghi lịch sử hoàn tiền
+            PaymentHistory::create([
+                'payment_id' => $payment->id,
+                'amount' => -1 * $payment->amount,
+                'payment_method' => 'vnpay_refund',
+                'payment_date' => now(),
+            ]);
+
+            // Gửi mail hoàn tiền
+            try {
+                $appointment = $payment->appointment()
+                    ->with(['patient', 'service', 'doctor.user', 'doctor.room'])
+                    ->first();
+
+                $cancel_reason = 'Bác sĩ có lịch nghỉ đột xuất. Chúng tôi xin lỗi vì sự bất tiện này.';
+                $this->sendRefundMail($appointment, $cancel_reason);
+            } catch (\Throwable $e) {
+                \Log::error('Lỗi gửi mail hoàn tiền (MOCK performVnpayRefund)', [
+                    'appointment_id' => $payment->appointment_id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            return ['success' => true];
+        }
+
         if (empty($payment->vnp_txn_ref) || empty($payment->vnp_transaction_no)) {
             return ['success' => false, 'message' => 'Không tìm thấy mã giao dịch VNPay.'];
         }
 
-        if (empty($payment->paid_at)) {
-            return ['success' => false, 'message' => 'Không tìm thấy thời gian thanh toán.'];
+        $transactionDate = null;
+        if (!empty($payment->note)) {
+            $note = json_decode($payment->note, true);
+            if (isset($note['transaction_date']) && $note['transaction_date']) {
+                $transactionDate = $note['transaction_date'];
+            }
+        }
+        if (!$transactionDate && !empty($payment->paid_at)) {
+            $transactionDate = \Carbon\Carbon::parse($payment->paid_at)->format('YmdHis');
+        }
+        if (!$transactionDate) {
+            return ['success' => false, 'message' => 'Không có thời gian giao dịch để hoàn tiền.'];
         }
 
         $vnp_TmnCode     = config('services.vnpay.tmn_code');
@@ -1220,10 +1257,10 @@ class AppointmentController extends Controller
         $vnp_Version         = '2.1.0';
         $vnp_Command         = 'refund';
         $vnp_TxnRef          = $payment->vnp_txn_ref;
-        $vnp_Amount          = $payment->amount * 100; // nhân 100 theo yêu cầu của VNPay
-        $vnp_TransactionType = '02'; // 02 = Hoàn toàn bộ
+        $vnp_Amount          = $payment->amount * 100;
+        $vnp_TransactionType = '02';
         $vnp_TransactionNo   = $payment->vnp_transaction_no;
-        $vnp_TransactionDate = Carbon::parse($payment->paid_at)->format('YmdHis');
+        $vnp_TransactionDate = $transactionDate;
         $vnp_CreateBy        = auth()->user()->name ?? 'system';
         $vnp_CreateDate      = now()->format('YmdHis');
         $vnp_IpAddr          = request()->ip();
@@ -1248,57 +1285,51 @@ class AppointmentController extends Controller
         $hashData = urldecode(http_build_query($inputData));
         $inputData['vnp_SecureHash'] = hash_hmac('sha512', $hashData, $vnp_HashSecret);
 
+        \Log::info('VNPay Refund request', $inputData);
+
         try {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post($vnp_RefundUrl, $inputData);
+            $response = \Illuminate\Support\Facades\Http::asForm()->post($vnp_RefundUrl, $inputData);
 
             if (!$response->ok()) {
-                Log::error('VNPay Refund HTTP error', [
+                \Log::error('VNPay Refund HTTP error', [
                     'status' => $response->status(),
                     'body'   => $response->body(),
+                    'url'    => $vnp_RefundUrl,
+                    'input'  => $inputData
                 ]);
                 return ['success' => false, 'message' => 'VNPay không phản hồi đúng: HTTP ' . $response->status()];
             }
 
             $result = $response->json();
-
             if (!is_array($result)) {
-                Log::error('VNPay Refund invalid JSON', ['body' => $response->body()]);
+                \Log::error('VNPay Refund invalid JSON', ['body' => $response->body()]);
                 return ['success' => false, 'message' => 'Phản hồi VNPay không hợp lệ.'];
             }
 
-            Log::info('VNPay Refund response', $result);
+            \Log::info('VNPay Refund response', $result);
 
             if (($result['vnp_ResponseCode'] ?? null) === '00') {
                 $payment->refund_status = 'completed';
+                $payment->status = 'refunded';
                 $payment->refunded_at = now();
                 $payment->save();
 
-                // Ghi log lịch sử hoàn tiền
-                PaymentHistory::create([
-                    'payment_id' => $payment->id,
-                    'amount' => -1 * $payment->amount,
-                    'payment_method' => 'vnpay_refund',
-                    'payment_date' => now(),
-                ]);
+                // \App\Models\PaymentHistory::create([
+                //     'payment_id' => $payment->id,
+                //     'amount' => -1 * $payment->amount,
+                //     'payment_method' => 'vnpay_refund',
+                //     'payment_date' => now(),
+                // ]);
 
                 try {
-                    $appointment = $payment->appointment;
+                    $appointment = $payment->appointment()
+                        ->with(['patient', 'service', 'doctor.user', 'doctor.room'])
+                        ->first();
 
-                    // Xác định lý do nếu có cột cancellation_reason
-                    if ($appointment->status === 'cancelled') {
-                        $reason = 'Lịch hẹn đã bị huỷ. Chúng tôi xin lỗi nếu có sự bất tiện xảy ra.';
-                    } elseif ($appointment->cancel_reason === 'doctor_unavailable') {
-                        $reason = 'Bác sĩ xin nghỉ đột xuất. Chúng tôi xin lỗi vì sự bất tiện này.';
-                    } else {
-                        $reason = 'Hoàn tiền theo chính sách hoặc yêu cầu từ phía quý khách.';
-                    }
-
-                    Mail::to($appointment->patient->email)
-                        ->send(new RefundSuccessfulMail($appointment, $reason));
+                    $cancel_reason = 'Bác sĩ có lịch nghỉ đột xuất. Chúng tôi xin lỗi vì sự bất tiện này.';
+                    $this->sendRefundMail($appointment, $cancel_reason);
                 } catch (\Throwable $e) {
-                    Log::error('Lỗi gửi mail hoàn tiền (performVnpayRefund)', [
+                    \Log::error('Lỗi gửi mail hoàn tiền (performVnpayRefund)', [
                         'appointment_id' => $payment->appointment_id,
                         'error' => $e->getMessage(),
                     ]);
@@ -1308,13 +1339,36 @@ class AppointmentController extends Controller
             }
 
             $message = $result['vnp_Message'] ?? 'Không rõ lỗi';
+            \Log::error('VNPay Refund thất bại', $result);
+
             return ['success' => false, 'message' => 'Hoàn tiền thất bại: ' . $message];
         } catch (\Throwable $e) {
-            Log::error('VNPay Refund exception', [
+            \Log::error('VNPay Refund exception', [
                 'message' => $e->getMessage(),
                 'trace'   => $e->getTraceAsString(),
             ]);
             return ['success' => false, 'message' => 'Có lỗi khi hoàn tiền: ' . $e->getMessage()];
+        }
+    }
+
+
+    protected function sendRefundMail(Appointment $appointment, string $reason)
+    {
+        $appointment->loadMissing([
+            'patient',
+            'service',
+            'doctor.user',
+            'doctor.room'
+        ]);
+
+        try {
+            Mail::to($appointment->patient->email)
+                ->send(new RefundSuccessfulMail($appointment, $reason));
+        } catch (\Throwable $e) {
+            \Log::error('Lỗi gửi mail hoàn tiền (sendRefundMail)', [
+                'appointment_id' => $appointment->id,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 
