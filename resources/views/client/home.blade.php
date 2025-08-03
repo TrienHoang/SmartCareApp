@@ -33,36 +33,38 @@
                             </a>
                         </div>
                     </div>
-                    <div class="fade-in">
-                        <div class="bg-white/40 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-white/20">
-                            <h3 class="text-2xl font-bold mb-6 text-blue-700">Đặt Lịch Nhanh</h3>
-                            <form method="GET" action="{{ url('/dat-lich') }}" class="space-y-6">
-                                <div>
-                                    <label class="block text-sm font-medium mb-2 text-blue-900">Chọn Chuyên Khoa</label>
-                                    <select name="department_id"
-                                        class="w-full p-3 rounded-lg bg-white/80 border border-blue-200 text-blue-900 focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all"
-                                        required>
-                                        <option value="" disabled selected>-- Chọn chuyên khoa --</option>
-                                        @foreach ($departments as $dept)
-                                            <option value="{{ $dept->id }}">
-                                                {{ $dept->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                    {{-- <div class="relative w-full max-w-3xl mx-auto">
+                        <!-- Container -->
+                        <div class="overflow-hidden relative rounded-2xl shadow-xl h-96">
+                            <!-- Slides -->
+                            <div class="slides flex transition-transform duration-700 ease-in-out h-full"
+                                style="width:120%;">
+                                <div class="w-full flex-shrink-0 h-full">
+                                    <img src="{{ asset('storage/avatars/anh2.webp') }}" alt="Slide 1"
+                                        class="w-full h-full object-cover">
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-2 text-blue-900">Chọn Ngày</label>
-                                    <input type="date" name="appointment_date"
-                                        class="w-full p-3 rounded-lg bg-white/80 border border-blue-200 text-blue-900 focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all"
-                                        required />
+                                <div class="w-full flex-shrink-0 h-full">
+                                    <img src="{{ asset('storage/avatars/anh3.webp') }}" alt="Slide 2"
+                                        class="w-full h-full object-cover">
                                 </div>
-                                <button type="submit"
-                                    class="w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:from-blue-600 hover:to-blue-800 transition-all scale-100 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                                    Tìm Lịch Trống
-                                </button>
-                            </form>
+                                <div class="w-full flex-shrink-0 h-full">
+                                    <img src="{{ asset('storage/avatars/anh4.webp') }}" alt="Slide 3"
+                                        class="w-full h-full object-cover">
+                                </div>
+                            </div>
+
+
+                            <!-- Nút điều hướng -->
+                            <button id="prev"
+                                class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/70 rounded-full p-2 hover:bg-white shadow">
+                                ◀
+                            </button>
+                            <button id="next"
+                                class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/70 rounded-full p-2 hover:bg-white shadow">
+                                ▶
+                            </button>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
         </section>
@@ -288,4 +290,20 @@
                 </div>
             </section>
     </div>
+
+    <script>
+        const slides = document.querySelector('.slides');
+        const totalSlides = slides.children.length;
+        let index = 0;
+
+        document.getElementById('next').addEventListener('click', () => {
+            index = (index + 1) % totalSlides;
+            slides.style.transform = `translateX(-${index * 100}%)`;
+        });
+
+        document.getElementById('prev').addEventListener('click', () => {
+            index = (index - 1 + totalSlides) % totalSlides;
+            slides.style.transform = `translateX(-${index * 100}%)`;
+        });
+    </script>
 @endsection

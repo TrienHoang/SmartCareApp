@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Doctor;
 
+use App\Http\Controllers\Admin\AppointmentController;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Doctor;
@@ -159,7 +160,7 @@ class DoctorLeaveController extends Controller
             'end_date'             => $end,
             'reason'               => $request->reason,
             'urgent'               => $leaveType === 'emergency' ? 1 : 0,
-            'approved'             => 0,
+            'approved' => ($leaveType === 'emergency' && !$request->filled('replacement_doctor_id')) ? 1 : 0,
             'replacement_doctor_id' => $leaveType === 'emergency' ? $request->replacement_doctor_id : null,
         ]);
 
@@ -386,7 +387,8 @@ class DoctorLeaveController extends Controller
 
     protected function handleUrgentReplacementOrCancel($doctor, Carbon $leaveDay, $replacementDoctorId = null)
     {
-        $appointments = Appointment::where('doctor_id', $doctor->id)
+        $appointments = Appointment::with('user', 'payment') // load user và payment
+            ->where('doctor_id', $doctor->id)
             ->whereDate('appointment_time', $leaveDay->toDateString())
             ->where('status', '!=', 'cancelled')
             ->get();
@@ -407,41 +409,82 @@ class DoctorLeaveController extends Controller
                     ->whereDate('end_date', '>=', $leaveDay)
                     ->exists()
             ) {
-                // Valid replacement doctor
+                // valid replacement
             } else {
-                $replacement = null; // Invalid or unavailable
+                $replacement = null;
             }
         }
 
         foreach ($appointments as $appointment) {
             if ($replacement) {
+                // Nếu có bác sĩ thay thế, chuyển lịch hẹn
                 $appointment->doctor_id = $replacement->id;
                 $appointment->save();
 
-                // Gửi thông báo cho bệnh nhân
                 $message = "Cuộc hẹn được chuyển sang bác sĩ {$replacement->name} do bác sĩ {$doctor->name} nghỉ đột xuất.";
-                $appointment->user->notify(new \App\Notifications\AppointmentReassigned($appointment, $message));
+
+                if ($appointment->user) {
+                    $appointment->user->notify(
+                        new \App\Notifications\AppointmentReassigned($appointment, $message)
+                    );
+                }
             } else {
+                // Không có bác sĩ thay thế -> hủy lịch
                 $appointment->status = 'cancelled';
                 $appointment->save();
 
+                // Hoàn tiền tự động nếu đã thanh toán
                 if ($appointment->payment && $appointment->payment->status === 'paid') {
                     $payment = $appointment->payment;
 
-                    $payment->refund_status = 'completed';
-                    $payment->status = 'refunded';
-                    $payment->save();
+                    if ($payment->payment_method === 'vnpay') {
 
-                    PaymentHistory::create([
-                        'payment_id' => $payment->id,
-                        'amount' => $payment->amount,
-                        'payment_method' => $payment->payment_method,
-                        'payment_date' => now(),
-                    ]);
+                        \Log::info('DEBUG REFUND PAYMENT', [
+                            'payment_id' => $payment->id,
+                            'vnp_txn_ref' => $payment->vnp_txn_ref,
+                            'vnp_transaction_no' => $payment->vnp_transaction_no,
+                            'paid_at' => $payment->paid_at,
+                            'status' => $payment->status,
+                            'method' => $payment->payment_method,
+                        ]);
+                        // Gọi hàm refund tự động
+                        $refundResult = app(AppointmentController::class)
+                            ->performVnpayRefund($payment);
+
+                        if (!$refundResult['success']) {
+                            \Log::error('Không hoàn tiền được khi hủy lịch đột xuất', [
+                                'appointment_id' => $appointment->id,
+                                'error' => $refundResult['message'],
+                            ]);
+                        } else {
+                            \Log::info('Đã hoàn tiền VNPay khi hủy lịch đột xuất', [
+                                'appointment_id' => $appointment->id,
+                                'payment_id' => $payment->id,
+                            ]);
+                        }
+                    } else {
+                        // Các phương thức thanh toán khác (offline, tiền mặt, ...)
+                        $payment->refund_status = 'completed';
+                        $payment->status = 'refunded';
+                        $payment->refunded_at = now();
+                        $payment->save();
+
+                        PaymentHistory::create([
+                            'payment_id' => $payment->id,
+                            'amount' => -1 * $payment->amount,
+                            'payment_method' => $payment->payment_method,
+                            'payment_date' => now(),
+                        ]);
+                    }
                 }
 
                 $message = "Cuộc hẹn bị hủy do bác sĩ {$doctor->name} nghỉ đột xuất và không có bác sĩ thay thế. Bạn có thể đặt lịch lại hoặc hủy lịch tại: ...";
-                $appointment->user->notify(new \App\Notifications\AppointmentCancelledWithSuggestion($appointment, $message));
+
+                if ($appointment->user) {
+                    $appointment->user->notify(
+                        new \App\Notifications\AppointmentCancelledWithSuggestion($appointment, $message)
+                    );
+                }
             }
         }
     }
