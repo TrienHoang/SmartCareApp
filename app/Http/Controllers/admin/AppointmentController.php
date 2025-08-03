@@ -1145,10 +1145,12 @@ class AppointmentController extends Controller
             \Log::info('📥 VNPay Refund Body: ' . $response->body());
 
             if ($response->successful()) {
+                $reason = 'Hoàn tiền theo yêu cầu. Lịch hẹn đã bị hủy.';
                 $payment->update([
                     'status'         => 'refunded',
                     'refund_status'  => 'completed',
                     'refunded_at'    => now(),
+                    'note'           => $reason . ' - Hoàn tiền thành công', // Ghi chú rõ ràng
                 ]);
 
                 PaymentHistory::create([
@@ -1159,9 +1161,6 @@ class AppointmentController extends Controller
                 ]);
 
                 try {
-                    // Xác định lý do hoàn tiền
-                    $reason = 'Hoàn tiền theo yêu cầu. Lịch hẹn đã bị hủy.';
-
                     $this->sendRefundMail($appointment, $reason);
                 } catch (\Throwable $e) {
                     \Log::error('Lỗi gửi mail hoàn tiền', [
