@@ -48,6 +48,9 @@ Route::post('/login', [AuthController::class, 'login'])->name('postLogin');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('postRegister');
+Route::get('/verify-otp', [AuthController::class, 'showVerifyOtpForm'])->name('verify.otp.form');
+Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('verify.otp');
+Route::post('/resend-otp', [AuthController::class, 'resendOtp'])->name('resend.otp');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Trang nhập email để gửi link

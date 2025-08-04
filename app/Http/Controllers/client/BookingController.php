@@ -648,6 +648,11 @@ class BookingController extends Controller
                             'vnp_response_code'   => $request->vnp_ResponseCode,
                         ]);
 
+                        $payment->note = json_encode([
+                            'transaction_date' => $request->vnp_PayDate,
+                        ]);
+                        $payment->save();
+
                         PaymentHistory::create([
                             'payment_id'     => $payment->id,
                             'amount'         => $request->vnp_Amount / 100,
