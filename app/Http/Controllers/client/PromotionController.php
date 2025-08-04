@@ -102,7 +102,7 @@ class PromotionController extends Controller
             ->exists();
 
         if ($hasUsed) {
-            return false;
+            return false; // ❌ KHÔNG được return redirect
         }
 
         // Kiểm tra nếu là mã cho người mới (discount = 20% hoặc chứa "NEW")

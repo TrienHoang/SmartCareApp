@@ -62,6 +62,9 @@
                 <li class="menu-item"><a href="{{ route('admin.schedules.index') }}" class="menu-link">
                         <div>Lịch làm việc bác sĩ</div>
                     </a></li>
+                <li class="menu-item"><a href="{{ route('admin.shifts.index') }}" class="menu-link">
+                        <div>Ca làm việc </div>
+                    </a></li>
             </ul>
         </li>
 
@@ -146,6 +149,20 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item"><a href="{{ route('admin.prescriptions.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
+                <li class="menu-item"><a href="{{ route('admin.prescriptions.create') }}" class="menu-link">
+                        <div>Thêm mới</div>
+                    </a></li>
+            </ul>
+        </li>
+        <li class="menu-item">
+            <a href="{{ route('admin.medicines.index') }}" class="menu-link menu-toggle">
+                <i class="menu-icon fas fa-file-prescription"></i>
+                <div>Quản lý thuốc</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item"><a href="{{ route('admin.medicines.index') }}" class="menu-link">
                         <div>Danh sách</div>
                     </a></li>
                 <li class="menu-item"><a href="{{ route('admin.prescriptions.create') }}" class="menu-link">

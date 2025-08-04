@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+
 class CheckAdminMiddleware
 {
 
@@ -18,8 +19,8 @@ class CheckAdminMiddleware
             } else {
                 return redirect()->route('home')->with('message', 'Bạn không có quyền truy cập trang này!');
             }
-        }else{
-            return redirect()->route('auth')->with('message', 'Bạn cần đăng nhập để truy cập trang này!');
+        } else {
+            return redirect()->route('login')->with('message', 'Bạn cần đăng nhập để truy cập trang này!');
         }
     }
 }

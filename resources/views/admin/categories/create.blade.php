@@ -84,7 +84,7 @@
                             </label>
                             <input type="text" name="name"
                                 class="form-control form-control-lg @error('name') is-invalid @enderror" id="name"
-                                value="{{ old('name') }}" placeholder="Nhập tên danh mục..." required>
+                                value="{{ old('name') }}" placeholder="Nhập tên danh mục...">
                             @error('name')
                                 <div class="invalid-feedback">
                                     {{ $message }}
@@ -94,7 +94,6 @@
                                 <i class="feather icon-info me-1"></i>Tên danh mục phải là duy nhất và dễ hiểu.
                             </small>
                         </div>
-
                         <div class="form-group mb-4">
                             <label for="description" class="form-label font-weight-semibold d-flex align-items-center">
                                 <i class="bx bx-notepad me-2 text-info"></i>

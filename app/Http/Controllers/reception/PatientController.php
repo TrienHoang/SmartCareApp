@@ -84,7 +84,6 @@ class PatientController extends Controller
     public function edit($id)
     {
         $patient = User::where('role_id', 5)->findOrFail($id);
-
         return view('reception.patients.edit', compact('patient'));
     }
 
@@ -92,17 +91,16 @@ class PatientController extends Controller
     {
         $patient = User::where('role_id', 5)->findOrFail($id);
 
-
         $validated = $request->validate(
             [
                 'full_name'      => ['required', 'string', 'max:255'],
                 'phone'          => [
                     'required',
                     'regex:/^(03|05|07|08|09)[0-9]{8}$/',
-                    'unique:patients,phone,' . $patient->id,
+                    'unique:users,phone,' . $patient->id,
                 ],
-                'email'          => ['nullable', 'email', 'unique:patients,email,' . $patient->id],
-                'gender'         => ['nullable', 'in:male,female'],
+                'email'          => ['nullable', 'email', 'unique:users,email,' . $patient->id],
+                'gender'         => ['nullable', 'in:Nam,Nữ'],
                 'date_of_birth'  => ['nullable', 'date', 'before:today'],
                 'address'        => ['nullable', 'string', 'max:255'],
             ],
@@ -113,7 +111,7 @@ class PatientController extends Controller
                 'phone.unique'            => 'Số điện thoại đã tồn tại.',
                 'email.email'             => 'Email không đúng định dạng.',
                 'email.unique'            => 'Email đã tồn tại.',
-                'gender.in'               => 'Giới tính không hợp lệ.',
+                'gender.in'               => 'Giới tính không hợp lệ. Chỉ được chọn Nam hoặc Nữ.',
                 'date_of_birth.before'    => 'Ngày sinh phải trước ngày hôm nay.',
             ]
         );

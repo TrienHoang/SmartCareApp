@@ -29,6 +29,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\admin\FaqController;
+use App\Http\Controllers\Admin\MedicineController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\TreatmentPlanController;
@@ -344,8 +345,6 @@ Route::group([
 
         Route::get('/{doctor}', [DoctorController::class, 'show'])
             ->middleware('check_permission:view_doctors')->name('show');
-
-
     });
 
     // Nhóm quản lý phòng ban
@@ -435,14 +434,6 @@ Route::group([
 });
 
 
-
-// Route::get('admin/users', [UserController::class, 'index'])->name('admin.users.index');
-// Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admin.users.show');
-// Route::get('admin/users/edit/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
-// Route::put('admin/users/edit/{id}', [UserController::class, 'update'])->name('admin.users.update');
-// Route::get('admin/users/search', [UserController::class, 'search'])->name('admin.users.search');
-// Route::patch('admin/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('admin.users.toggleStatus');
-
 // quản lý danh mục dịch vụ
 Route::get('admin/categories', [ServiceCategoryController::class, 'index'])->name('admin.categories.index');
 Route::get('admin/categories/create', [ServiceCategoryController::class, 'create'])->name('admin.categories.create');
@@ -509,17 +500,6 @@ Route::group([
     Route::put('/update/{id}', [DoctorLeaveController::class, 'update'])
         ->middleware('check_permission:view_reviews')->name('update');
 });
-
-// Quản lý danh mục dịch vụ
-// Route::prefix('admin/categories')->name('admin.categories.')->group(function () {
-//     Route::get('/', [ServiceCategoryController::class, 'index'])->name('index');
-//     Route::get('/create', [ServiceCategoryController::class, 'create'])->name('create');
-//     Route::post('/store', [ServiceCategoryController::class, 'store'])->name('store');
-//     Route::get('/edit/{id}', [ServiceCategoryController::class, 'edit'])->name('edit');
-//     Route::put('/update/{id}', [ServiceCategoryController::class, 'update'])->name('update');
-//     Route::delete('/destroy/{id}', [ServiceCategoryController::class, 'destroy'])->name('destroy');
-//     Route::get('/show/{id}', [ServiceCategoryController::class, 'show'])->name('show');
-// });
 
 
 Route::group([
@@ -644,6 +624,32 @@ Route::group([
         Route::put('/{id}/update-category', [AdminFileController::class, 'updateCategory'])
             ->middleware('check_permission:upload_files')->name('updateCategory');
     });
+
+    Route::group([
+        'prefix' => 'medicines',
+        'as' => 'medicines.',
+        'middleware' => 'check_permission:view_payment_history',
+    ], function () {
+        // Trang hiển thị thuốc đã xoá mềm
+        Route::get('/trash', [MedicineController::class, 'trash'])->name('trash');
+        // Khôi phục thuốc
+        Route::post('/{id}/restore', [MedicineController::class, 'restore'])->name('restore');
+
+        // Danh sách thuốc
+        Route::get('/', [MedicineController::class, 'index'])->name('index');
+        // Form thêm thuốc mới
+        Route::get('/create', [MedicineController::class, 'create'])->name('create');
+        // Lưu thuốc mới
+        Route::post('/', [MedicineController::class, 'store'])->name('store');
+        // Form sửa thuốc
+        Route::get('/{id}/edit', [MedicineController::class, 'edit'])->name('edit');
+        // Cập nhật thuốc
+        Route::put('/{id}', [MedicineController::class, 'update'])->name('update');
+        // Hiển thị chi tiết thuốc
+        Route::get('/{id}', [MedicineController::class, 'show'])->name('show');
+        // Xoá thuốc
+        Route::delete('/{id}', [MedicineController::class, 'destroy'])->name('destroy');
+    });
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
@@ -713,17 +719,16 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 // quản lý liên hệ
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('contacts')->name('contacts.')->group(function () {
-        Route::get('/', [ContactController::class, 'index'])->name('index');    
-        Route::get('/{id}', [ContactController::class, 'show'])->name('show');     
-        Route::delete('/{id}', [ContactController::class, 'destroy'])->name('destroy'); 
+        Route::get('/', [ContactController::class, 'index'])->name('index');
+        Route::get('/{id}', [ContactController::class, 'show'])->name('show');
+        Route::delete('/{id}', [ContactController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/reply', [ContactController::class, 'reply'])->name('reply');
         Route::patch('/{id}/status', [ContactController::class, 'updateStatus'])->name('updateStatus');
-        Route::get('/search', [ContactController::class, 'search'])->name('search'); 
-
+        Route::get('/search', [ContactController::class, 'search'])->name('search');
     });
 });
 
-        Route::post('/admin/doctors/{user}/toggle-status', [DoctorController::class, 'toggleStatus'])->name('admin.doctors.toggleStatus');
+Route::post('/admin/doctors/{user}/toggle-status', [DoctorController::class, 'toggleStatus'])->name('admin.doctors.toggleStatus');
 
 
 
@@ -740,17 +745,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
 require __DIR__ . '/client.php';
 
-
-
-
-
-
-
-
 // Trong routes/web.php hoặc routes/doctor.php
 require __DIR__ . '/doctor.php';
-
-
 
 // Route phần lễ tân
 require __DIR__ . '/reception.php';
