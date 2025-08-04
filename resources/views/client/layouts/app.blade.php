@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'SmartCare - Hệ thống Y tế')</title>
 
     <!-- Google Fonts -->
@@ -18,7 +19,7 @@
     <!-- SplideJS CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/css/splide.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 
     <!-- App Vite Assets -->
@@ -72,6 +73,7 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <!-- SweetAlert2 -->
@@ -85,7 +87,7 @@
                 "positionClass": "toast-top-right",
                 "timeOut": "5000"
             };
-    
+
             // Hiển thị thông báo session
             @if (session('success'))
                 toastr.success("{{ session('success') }}");
@@ -101,7 +103,7 @@
                     toastr.error("{!! $error !!}");
                 @endforeach
             @endif
-    
+
             // Các mã khác như Splide, counter animation...
             new Splide('#testimonial-slider', {
                 type: 'loop',
@@ -112,11 +114,15 @@
                 pauseOnFocus: true,
                 gap: '1rem',
                 breakpoints: {
-                    1024: { perPage: 2 },
-                    640: { perPage: 1 }
+                    1024: {
+                        perPage: 2
+                    },
+                    640: {
+                        perPage: 1
+                    }
                 }
             }).mount();
-    
+
             new Splide('#doctor-slider', {
                 type: 'loop',
                 perPage: 4,
@@ -126,20 +132,25 @@
                 pauseOnFocus: true,
                 gap: '1rem',
                 breakpoints: {
-                    1024: { perPage: 2 },
-                    640: { perPage: 1 }
+                    1024: {
+                        perPage: 2
+                    },
+                    640: {
+                        perPage: 1
+                    }
                 }
             }).mount();
-    
+
             // Animation Count Number
             const counters = document.querySelectorAll(".counter");
+
             function animateCounter(counter) {
                 const target = +counter.getAttribute("data-number");
                 const step = +counter.getAttribute("data-step") || 1;
                 const duration = 1500;
                 const incrementTime = Math.max(duration / (target / step), 10);
                 let current = 0;
-    
+
                 counter.textContent = "0";
                 const run = () => {
                     current += step;
@@ -152,15 +163,17 @@
                 };
                 run();
             }
-    
+
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
                         animateCounter(entry.target);
                     }
                 });
-            }, { threshold: 0.6 });
-    
+            }, {
+                threshold: 0.6
+            });
+
             counters.forEach(counter => {
                 observer.observe(counter);
             });
