@@ -29,6 +29,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\admin\FaqController;
+use App\Http\Controllers\Admin\MedicineController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\TreatmentPlanController;
@@ -41,11 +42,6 @@ use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Notifications\LateNotification;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Auth;
-
-Route::get('/', function () {
-    return view('client.home');
-})->name('home');
-
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('postLogin');
@@ -75,7 +71,7 @@ Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name(
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 
 
-// ✅ VNPAY Routes (không cần auth - webhook từ VNPAY)
+// VNPAY Routes 
 Route::post('/vnpay/callback', [PaymentHistoryController::class, 'vnpayCallback'])
     ->name('vnpay.callback')
     ->withoutMiddleware([VerifyCsrfToken::class]); // Loại bỏ CSRF cho webhook
@@ -84,18 +80,18 @@ Route::get('/vnpay/return', [PaymentHistoryController::class, 'vnpayReturn'])
     ->name('vnpay.return');
 
 
-Route::group([
-    'prefix' => 'admin',
-    'as' => 'admin.',
-    'middleware' => 'checkAdmin'
-], function () {
-    // Dashboard
-    Route::get('/dashboard', function () {
-        return view(view: 'admin.dashboard');
-    })->name('dashboard');
-    Route::get('dashboard/export-excel', [DashboardController::class, 'exportExcel']);
-    Route::get('dashboard/export-pdf', [DashboardController::class, 'exportPdf']);
-});
+// Route::group([
+//     'prefix' => 'admin',
+//     'as' => 'admin.',
+//     'middleware' => 'checkAdmin'
+// ], function () {
+//     // Dashboard
+//     Route::get('/dashboard', function () {
+//         return view(view: 'admin.dashboard');
+//     })->name('dashboard');
+//     Route::get('dashboard/export-excel', [DashboardController::class, 'exportExcel']);
+//     Route::get('dashboard/export-pdf', [DashboardController::class, 'exportPdf']);
+// });
 
 
 // Nhóm users
@@ -441,14 +437,6 @@ Route::group([
 });
 
 
-
-Route::get('admin/users', [UserController::class, 'index'])->name('admin.users.index');
-Route::get('admin/users/show/{id}', [UserController::class, 'show'])->name('admin.users.show');
-Route::get('admin/users/edit/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
-Route::put('admin/users/edit/{id}', [UserController::class, 'update'])->name('admin.users.update');
-Route::get('admin/users/search', [UserController::class, 'search'])->name('admin.users.search');
-Route::patch('admin/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('admin.users.toggleStatus');
-
 // quản lý danh mục dịch vụ
 Route::get('admin/categories', [ServiceCategoryController::class, 'index'])->name('admin.categories.index');
 Route::get('admin/categories/create', [ServiceCategoryController::class, 'create'])->name('admin.categories.create');
@@ -516,26 +504,6 @@ Route::group([
         ->middleware('check_permission:view_reviews')->name('update');
 });
 
-// Quản lý danh mục dịch vụ
-Route::prefix('admin/categories')->name('admin.categories.')->group(function () {
-    Route::get('/', [ServiceCategoryController::class, 'index'])->name('index');
-    Route::get('/create', [ServiceCategoryController::class, 'create'])->name('create');
-    Route::post('/store', [ServiceCategoryController::class, 'store'])->name('store');
-    Route::get('/edit/{id}', [ServiceCategoryController::class, 'edit'])->name('edit');
-    Route::put('/update/{id}', [ServiceCategoryController::class, 'update'])->name('update');
-    Route::delete('/destroy/{id}', [ServiceCategoryController::class, 'destroy'])->name('destroy');
-    Route::get('/show/{id}', [ServiceCategoryController::class, 'show'])->name('show');
-});
-// Quản lý dịch vụ
-// Route::prefix('admin/services')->name('admin.services.')->group(function () {
-//     Route::get('/', [ServiceController::class, 'index'])->name('index');
-//     Route::get('/create', [ServiceController::class, 'create'])->name('create');
-//     Route::post('/store', [ServiceController::class, 'store'])->name('store');
-//     Route::get('/edit/{id}', [ServiceController::class, 'edit'])->name('edit');
-//     Route::put('/update/{id}', [ServiceController::class, 'update'])->name('update');
-//     Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])->name('destroy');
-//     Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
-// });
 
 Route::group([
     'prefix' => 'admin',
@@ -593,26 +561,6 @@ Route::group([
     });
 
 
-    // Nhóm quản lý dịch vụ
-    // Route::group([
-    //     'prefix' => 'services',
-    //     'as' => 'services.',
-    //     'middleware' => ['auth', 'checkAdmin', 'check_permission:view_services']
-    // ], function () {
-    //     Route::get('/', [ServiceController::class, 'index'])->name('index');
-    //     Route::get('/create', [ServiceController::class, 'create'])
-    //         ->middleware('check_permission:create_services')->name('create');
-    //     Route::post('/store', [ServiceController::class, 'store'])
-    //         ->middleware('check_permission:create_services')->name('store');
-    //     Route::get('/edit/{id}', [ServiceController::class, 'edit'])
-    //         ->middleware('check_permission:edit_services')->name('edit');
-    //     Route::put('/edit/{id}', [ServiceController::class, 'update'])
-    //         ->middleware('check_permission:edit_services')->name('update');
-    //     Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])
-    //         ->middleware('check_permission:delete_services')->name('destroy');
-    //     Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
-    // });
-
     // Quản lý câu hỏi thường gặp
     Route::group([
         'prefix' => 'faqs',
@@ -652,9 +600,6 @@ Route::group([
     // Route để lấy danh sách vai trò
     Route::get('notifications/ajax/get-roles', [AdminNotificationController::class, 'getRoles'])->name('notifications.getRoles');
 
-    // Route::get('admin/payment_histories', [AppointmentController::class, 'index'])->name('payment_histories.index');
-    // Route::get('admin/payment_histories/{id}', [AppointmentController::class, 'show'])->name('payment_histories.show');
-
     // Quản lý file tải lên
     Route::group([
         'prefix' => 'files',
@@ -681,6 +626,32 @@ Route::group([
 
         Route::put('/{id}/update-category', [AdminFileController::class, 'updateCategory'])
             ->middleware('check_permission:upload_files')->name('updateCategory');
+    });
+
+    Route::group([
+        'prefix' => 'medicines',
+        'as' => 'medicines.',
+        'middleware' => 'check_permission:view_payment_history',
+    ], function () {
+        // Trang hiển thị thuốc đã xoá mềm
+        Route::get('/trash', [MedicineController::class, 'trash'])->name('trash');
+        // Khôi phục thuốc
+        Route::post('/{id}/restore', [MedicineController::class, 'restore'])->name('restore');
+
+        // Danh sách thuốc
+        Route::get('/', [MedicineController::class, 'index'])->name('index');
+        // Form thêm thuốc mới
+        Route::get('/create', [MedicineController::class, 'create'])->name('create');
+        // Lưu thuốc mới
+        Route::post('/', [MedicineController::class, 'store'])->name('store');
+        // Form sửa thuốc
+        Route::get('/{id}/edit', [MedicineController::class, 'edit'])->name('edit');
+        // Cập nhật thuốc
+        Route::put('/{id}', [MedicineController::class, 'update'])->name('update');
+        // Hiển thị chi tiết thuốc
+        Route::get('/{id}', [MedicineController::class, 'show'])->name('show');
+        // Xoá thuốc
+        Route::delete('/{id}', [MedicineController::class, 'destroy'])->name('destroy');
     });
 });
 
@@ -763,35 +734,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::post('/admin/doctors/{user}/toggle-status', [DoctorController::class, 'toggleStatus'])->name('admin.doctors.toggleStatus');
 
 
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
-
-Route::get('/test-email', function () {
-    try {
-        Mail::raw('Đây là email test từ hệ thống Laravel.', function ($message) {
-            $message->to('lehieu19042005@gmail.com')
-                ->subject('Thử gửi email');
-        });
-
-        return 'Gửi email thành công';
-    } catch (\Exception $e) {
-        Log::error('Lỗi gửi mail: ' . $e->getMessage());
-        return 'Lỗi: ' . $e->getMessage();
-    }
-});
-
-
-
-
-// phân quyền bác sĩ
-// Route::get('/doctor/dashboard', function () {
-//     return view('doctor.dashboard');
-// })->name('doctor.dashboard');
-
-// Route::prefix('doctor')->name('doctor.')->middleware('auth')->group(function () {
-//     Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
-//     Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
-// });
 
 Route::middleware(['auth', 'checkAdmin'])->group(function () {
     Route::get('/admin/system-notifications', [AdminNotificationController::class, 'index'])

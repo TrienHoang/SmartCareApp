@@ -164,13 +164,6 @@ Route::middleware(['auth'])->group(function () {
     })->name('qr.generate');
 });
 
-
-
-Route::get('/abc', function () {
-    return view('client.note');
-});
-
-
 Route::prefix('client/prescriptions')->name('client.prescriptions.')->middleware(['auth'])->group(function () {
     Route::get('/', [PrescriptionClientController::class, 'index'])->name('index');
     Route::get('/{id}', [PrescriptionClientController::class, 'show'])->name('show');
