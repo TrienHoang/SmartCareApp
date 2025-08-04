@@ -326,7 +326,7 @@
                                         @endif
 
                                         {{-- Hoàn thành --}}
-                                        @if ($appointment->status === 'confirmed')
+                                        @if (in_array($appointment->status, ['confirmed', 'checked_in']))
                                             <button class="btn btn-sm btn-outline-success"
                                                 onclick="updateStatus({{ $appointment->id }}, 'completed')"
                                                 title="Hoàn thành">
