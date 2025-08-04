@@ -1,6 +1,6 @@
 <header class="bg-white shadow-md sticky top-0 z-50" x-data="{ menuOpen: false }">
     <div class="container mx-auto px-4 py-4">
-        <div class="flex justify-between items-center">
+        <div class="flex justify-around items-center">
             <div class="flex items-center space-x-2">
                 <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
                     <i data-lucide="stethoscope" class="w-6 h-6 text-white"></i>
@@ -29,7 +29,7 @@
                 @endforeach
             </nav>
             <!-- Chuông thông báo -->
-            <div class="relative group cursor-pointer" onclick="toggleNotifications()">
+            <div class="relative group cursor-pointer" style="justify-content: end" onclick="toggleNotifications()">
                 <i class="fas fa-bell text-xl text-gray-700"></i>
 
                 <!-- Số lượng chưa đọc -->
@@ -89,8 +89,7 @@
                                 Lịch hẹn của tôi
                             </a>
                             <a href="{{ route('client.uploads.index') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="upload" class="w-5 h-5"></i>
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 <span>Upload File</span>
                             </a>
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">

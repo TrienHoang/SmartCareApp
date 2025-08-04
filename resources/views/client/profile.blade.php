@@ -50,11 +50,11 @@
                                 <i data-lucide="clock" class="w-5 h-5"></i>
                                 <span>Lịch Hẹn</span>
                             </a>
-                            <a href="#ho-so-y-te"
+                            {{-- <a href="#ho-so-y-te"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="file-text" class="w-5 h-5"></i>
                                 <span>Hồ Sơ Y Tế</span>
-                            </a>
+                            </a> --}}
                             <a href="{{ route('client.notifications.index') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="bell" class="w-5 h-5"></i>
@@ -71,11 +71,11 @@
                                     </span>
                                 @endif
                             </a>
-                            <a href="#cai-dat"
+                            {{-- <a href="#cai-dat"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="settings" class="w-5 h-5"></i>
                                 <span>Cài Đặt</span>
-                            </a>
+                            </a> --}}
                             <a href="{{ route('client.payment_history.index') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="credit-card" class="w-5 h-5"></i>
