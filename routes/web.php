@@ -492,12 +492,13 @@ Route::get('admin/vouchers/edit/{id}', [VoucherController::class, 'edit'])->name
 Route::put('admin/vouchers/edit/{id}', [VoucherController::class, 'update'])->name('admin.vouchers.update');
 Route::delete('admin/vouchers/destroy/{id}', [VoucherController::class, 'destroy'])->name('admin.vouchers.destroy');
 Route::get('admin/vouchers/show/{id}', [VoucherController::class, 'show'])->name('admin.vouchers.show');
-// quản lý lịch làm việc
-Route::get('admin/schedules', [SchedulesController::class, 'index'])->name('admin.schedules.index');
-Route::get('admin/schedules/show/{id}', [SchedulesController::class, 'show'])->name('admin.schedules.show');
-Route::post('/admin/schedules/{id}/status', [SchedulesController::class, 'status'])->name('admin.schedules.status');
-
-
+// Quản lý lịch làm việc
+Route::prefix('admin')->group(function () {
+    Route::get('/schedules', [SchedulesController::class, 'index'])->name('admin.schedules.index');
+    Route::get('/schedules/{id}', [SchedulesController::class, 'show'])->name('admin.schedules.show');
+    Route::post('/schedules/{id}/status', [SchedulesController::class, 'status'])->name('admin.schedules.status');
+    Route::post('/schedules/bulk-approve', [SchedulesController::class, 'bulkApprove'])->name('admin.schedules.bulk-approve');
+});
 // Quản lý đánh giá bác sĩ
 Route::group([
     'prefix' => 'admin/doctor_leaves',
