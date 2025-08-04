@@ -47,14 +47,29 @@ Route::get('/', function () {
 })->name('home');
 
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('postLogin');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('postLogin');
 
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('postRegister');
-Route::get('/verify-otp', [AuthController::class, 'showVerifyOtpForm'])->name('verify.otp.form');
-Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('verify.otp');
-Route::post('/resend-otp', [AuthController::class, 'resendOtp'])->name('resend.otp');
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('postRegister');
+
+    Route::get('/verify-otp', [AuthController::class, 'showVerifyOtpForm'])->name('verify.otp.form');
+    Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('verify.otp');
+    Route::post('/resend-otp', [AuthController::class, 'resendOtp'])->name('resend.otp');
+
+    // Đăng nhập mạng xã hội cũng chỉ cho guest
+    Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
+    Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+
+    // đăng nhập bằng facebook
+    Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
+    Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('facebook.callback');
+
+    // đăng nhập bằng google
+    Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+    Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+});
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Trang nhập email để gửi link
@@ -65,14 +80,6 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 // Gửi mật khẩu mới về server để cập nhật
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
-
-// đăng nhập bằng facebook
-Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
-Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('facebook.callback');
-
-// đăng nhập bằng google
-Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
-Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 
 
 // ✅ VNPAY Routes (không cần auth - webhook từ VNPAY)

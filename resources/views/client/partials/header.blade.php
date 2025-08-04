@@ -1,3 +1,6 @@
+@php
+    $avatar = Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : null;
+@endphp
 <header class="bg-white shadow-md sticky top-0 z-50" x-data="{ menuOpen: false }">
     <div class="container mx-auto px-4 py-4">
         <div class="flex justify-between items-center">
@@ -71,8 +74,16 @@
                     {{-- Nếu đã đăng nhập --}}
                     <div class="relative group">
                         <button class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors">
-                            <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
-                                alt="Avatar" class="w-8 h-8 rounded-full border object-cover">
+                            @if ($avatar)
+                                <img src="{{ $avatar }}" alt="Avatar"
+                                    class="w-8 h-8 rounded-full border object-cover shadow">
+                            @else
+                                <div
+                                    class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-bold shadow">
+                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                </div>
+                            @endif
+
                             <span class="text-sm">{{ Auth::user()->name }}</span>
                             <i data-lucide="chevron-down" class="w-4 h-4"></i>
                         </button>
