@@ -7,8 +7,9 @@ use App\Models\Appointment;
 
 class AppointmentController extends Controller
 {
-    public function show(Appointment $appointment)
-    {
-        return view('doctor.appointments.show', compact('appointment'));
-    }
+public function show(Appointment $appointment)
+{
+    $schedule = $appointment;
+    return view('doctor.appointments.show', compact('schedule'));
+}
 }

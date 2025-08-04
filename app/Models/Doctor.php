@@ -105,4 +105,9 @@ class Doctor extends Model
     {
         return $this->belongsToMany(Specialty::class, 'doctor_specialty');
     }
+
+public function doctors()
+{
+    return $this->belongsToMany(Doctor::class, 'doctor_service', 'service_id', 'doctor_id');
+}
 }

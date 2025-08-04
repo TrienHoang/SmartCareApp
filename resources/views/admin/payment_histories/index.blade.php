@@ -284,7 +284,6 @@
                                     <th class="d-none d-md-table-cell th-3d">Bác sĩ</th>
                                     <th class="th-3d">Ngày</th>
                                     <th class="th-3d">Trạng thái</th>
-                                    <th class="th-3d">Hoàn tiền</th>
                                     <th class="th-3d">Số tiền</th>
                                     <th class="th-3d">Thao tác</th>
                                 </tr>
@@ -331,16 +330,13 @@
                                             {{ optional($history->payment->appointment->doctor->user)->full_name ?? 'N/A' }}
                                         </td>
                                         <td>{{ optional($history->payment_date)->format('d/m/Y H:i') ?? 'Chưa TT' }}</td>
-                                        <td>
-                                            <span class="badge {{ $statusLabel['class'] }} badge-3d">
-                                                {{ $statusLabel['label'] }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge {{ $refundLabel['class'] }} badge-3d">
-                                                {{ $refundLabel['label'] }}
-                                            </span>
-                                        </td>
+
+<td>
+    <span class="badge {{ $statusLabel['class'] }} badge-3d me-1">
+        {{ $statusLabel['label'] }}
+    </span>
+
+</td>
                                         <td>
                                             <strong class="text-success amount-3d">
                                                 {{ number_format($history->amount, 0, ',', '.') }}₫
