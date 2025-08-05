@@ -88,7 +88,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-                    <input type="email" 
+                    <input type="text" 
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('email') border-red-500 ring-2 ring-red-200 @enderror" 
                            id="email" 
                            name="email" 
@@ -113,7 +113,7 @@
                 </div>
             </div>
 
-            <div class="mt-6">
+            {{-- <div class="mt-6">
                 <label for="address" class="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ</label>
                 <input type="text" 
                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('address') border-red-500 ring-2 ring-red-200 @enderror" 
@@ -124,7 +124,36 @@
                 @error('address')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
-            </div>
+            </div> --}}
+
+            <!-- Thay thế đoạn địa chỉ trong phần "Thông tin liên hệ" -->
+<div class="mt-6">
+    <label for="province" class="block text-sm font-semibold text-gray-700 mb-2">Tỉnh / Thành phố</label>
+    <select id="province" class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+        <option value="">-- Chọn tỉnh --</option>
+    </select>
+</div>
+
+<div class="mt-6">
+    <label for="district" class="block text-sm font-semibold text-gray-700 mb-2">Quận / Huyện</label>
+    <select id="district" class="w-full px-4 py-3 border border-gray-300 rounded-lg" disabled>
+        <option value="">-- Chọn quận --</option>
+    </select>
+</div>
+
+<div class="mt-6">
+    <label for="ward" class="block text-sm font-semibold text-gray-700 mb-2">Phường / Xã</label>
+    <select id="ward" class="w-full px-4 py-3 border border-gray-300 rounded-lg" disabled>
+        <option value="">-- Chọn phường --</option>
+    </select>
+</div>
+
+<!-- Trường address ẩn, vẫn dùng để submit -->
+<input type="hidden" name="address" id="address" value="{{ old('address', $user->address) }}">
+@error('address')
+    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+@enderror
+
         </div>
 
         <!-- Thông tin chuyên môn -->
@@ -221,3 +250,80 @@
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    const provinceSelect = document.getElementById('province');
+    const districtSelect = document.getElementById('district');
+    const wardSelect = document.getElementById('ward');
+    const addressInput = document.getElementById('address');
+
+    let selectedProvince = '';
+    let selectedDistrict = '';
+    let selectedWard = '';
+
+    // Load provinces
+    fetch('https://provinces.open-api.vn/api/?depth=1')
+        .then(res => res.json())
+        .then(data => {
+            data.forEach(province => {
+                let opt = document.createElement('option');
+                opt.value = province.code;
+                opt.textContent = province.name;
+                provinceSelect.appendChild(opt);
+            });
+        });
+
+    // When province changes
+    provinceSelect.addEventListener('change', function () {
+        const provinceCode = this.value;
+        selectedProvince = this.options[this.selectedIndex].text;
+        districtSelect.innerHTML = '<option value="">-- Chọn quận --</option>';
+        wardSelect.innerHTML = '<option value="">-- Chọn phường --</option>';
+        districtSelect.disabled = true;
+        wardSelect.disabled = true;
+
+        if (!provinceCode) return;
+
+        fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`)
+            .then(res => res.json())
+            .then(data => {
+                data.districts.forEach(district => {
+                    let opt = document.createElement('option');
+                    opt.value = district.code;
+                    opt.textContent = district.name;
+                    districtSelect.appendChild(opt);
+                });
+                districtSelect.disabled = false;
+            });
+    });
+
+    // When district changes
+    districtSelect.addEventListener('change', function () {
+        const districtCode = this.value;
+        selectedDistrict = this.options[this.selectedIndex].text;
+        wardSelect.innerHTML = '<option value="">-- Chọn phường --</option>';
+        wardSelect.disabled = true;
+
+        if (!districtCode) return;
+
+        fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`)
+            .then(res => res.json())
+            .then(data => {
+                data.wards.forEach(ward => {
+                    let opt = document.createElement('option');
+                    opt.value = ward.code;
+                    opt.textContent = ward.name;
+                    wardSelect.appendChild(opt);
+                });
+                wardSelect.disabled = false;
+            });
+    });
+
+    // When ward changes → update address
+    wardSelect.addEventListener('change', function () {
+        selectedWard = this.options[this.selectedIndex].text;
+        addressInput.value = `${selectedWard}, ${selectedDistrict}, ${selectedProvince}`;
+    });
+</script>
+@endpush
