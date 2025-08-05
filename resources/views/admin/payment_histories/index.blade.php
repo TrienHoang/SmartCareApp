@@ -568,17 +568,8 @@
                 }
 
                 /* Alert 3D */
-                .alert-3d {
-                    border-radius: 12px;
-                    border: none;
-                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-                    transition: all 0.3s ease;
-                }
 
-                .alert-3d:hover {
-                    transform: translateY(-3px);
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-                }
+
 
                 /* Patient Info 3D */
                 .patient-info {
