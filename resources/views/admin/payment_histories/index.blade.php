@@ -47,7 +47,7 @@
             {{-- Thông báo --}}
             @foreach (['success', 'error'] as $msg)
                 @if(session($msg))
-                    <div class="alert alert-{{ $msg == 'error' ? 'danger' : $msg }} alert-dismissible fade show border-0 shadow-3d alert-3d"
+                    <div class="alert alert-{{ $msg == 'error' ? 'danger' : $msg }} alert-dismissible fade show border-0 "
                         role="alert">
                         <div class="d-flex align-items-center">
                             <i class="bx {{ $msg == 'success' ? 'bx-check-circle' : 'bx-x-circle' }} mr-2"></i>
@@ -132,10 +132,10 @@
                 </div>
 
                 <div class="col-lg-3 col-md-6 col-12 mb-3">
-                    <div class="card gradient-card bg-gradient-info card-3d">
+                    <div class="card gradient-card bg-gradient-info ">
                         <div class="card-body text-white">
                             <div class="d-flex align-items-center">
-                                <div class="avatar bg-rgba-white mr-3 avatar-3d">
+                                <div class="avatar bg-rgba-white mr-3 ">
                                     <div class="avatar-content">
                                         <i class="bx bx-receipt font-medium-5"></i>
                                     </div>
@@ -155,7 +155,7 @@
             </div>
 
             {{-- Bộ lọc tìm kiếm --}}
-            <div class="card border-0 shadow-3d mb-4 card-3d">
+            <div class="card border-0  mb-4 ">
                 <div class="card-header bg-light border-0">
                     <h5 class="mb-0 d-flex align-items-center">
                         <i class="bx bx-filter-alt mr-2 text-primary"></i>
@@ -260,8 +260,8 @@
             </div>
 
             {{-- Bảng dữ liệu --}}
-            <div class="card shadow-3d border-0 card-3d">
-                <div class="card-header bg-gradient-primary text-white border-0 header-3d">
+            <div class="card  border-0 ">
+                <div class="card-header bg-gradient-primary text-white border-0 ">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
                             <i class="bx bx-list mr-2"></i>
@@ -274,7 +274,7 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover table-bordered align-middle text-center mb-0 table-modern table-3d">
+                        <table class="table table-hover table-bordered align-middle text-center mb-0 table-modern ">
                             <thead class="table-light text-dark">
                                 <tr>
                                     <th class="th-3d">#</th>
@@ -284,7 +284,6 @@
                                     <th class="d-none d-md-table-cell th-3d">Bác sĩ</th>
                                     <th class="th-3d">Ngày</th>
                                     <th class="th-3d">Trạng thái</th>
-                                    <th class="th-3d">Hoàn tiền</th>
                                     <th class="th-3d">Số tiền</th>
                                     <th class="th-3d">Thao tác</th>
                                 </tr>
@@ -331,16 +330,13 @@
                                             {{ optional($history->payment->appointment->doctor->user)->full_name ?? 'N/A' }}
                                         </td>
                                         <td>{{ optional($history->payment_date)->format('d/m/Y H:i') ?? 'Chưa TT' }}</td>
-                                        <td>
-                                            <span class="badge {{ $statusLabel['class'] }} badge-3d">
-                                                {{ $statusLabel['label'] }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge {{ $refundLabel['class'] }} badge-3d">
-                                                {{ $refundLabel['label'] }}
-                                            </span>
-                                        </td>
+
+<td>
+    <span class="badge {{ $statusLabel['class'] }} badge-3d me-1">
+        {{ $statusLabel['label'] }}
+    </span>
+
+</td>
                                         <td>
                                             <strong class="text-success amount-3d">
                                                 {{ number_format($history->amount, 0, ',', '.') }}₫
@@ -572,17 +568,8 @@
                 }
 
                 /* Alert 3D */
-                .alert-3d {
-                    border-radius: 12px;
-                    border: none;
-                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-                    transition: all 0.3s ease;
-                }
 
-                .alert-3d:hover {
-                    transform: translateY(-3px);
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-                }
+
 
                 /* Patient Info 3D */
                 .patient-info {
@@ -600,10 +587,7 @@
                 }
 
                 /* Pagination 3D */
-                .pagination-3d {
-                    background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
-                    border-radius: 0 0 15px 15px;
-                }
+
 
                 /* Empty State */
                 .empty-state {
@@ -616,44 +600,10 @@
                 }
 
                 /* Responsive */
-                @media (max-width: 768px) {
-                    .card-3d:hover {
-                        transform: translateY(-3px) scale(1.01);
-                    }
 
-                    .gradient-card:hover {
-                        transform: translateY(-5px);
-                    }
-
-                    .counter-number {
-                        font-size: 1.8rem;
-                    }
-
-                    .table th,
-                    .table td {
-                        font-size: 13px !important;
-                        padding: 12px 8px;
-                    }
-
-                    .d-none.d-md-table-cell {
-                        display: none !important;
-                    }
-                }
 
                 /* Animation Keyframes */
-                @keyframes float {
-                    0% {
-                        transform: translateY(0px);
-                    }
 
-                    50% {
-                        transform: translateY(-10px);
-                    }
-
-                    100% {
-                        transform: translateY(0px);
-                    }
-                }
 
                 .gradient-card {
                     animation: float 6s ease-in-out infinite;
