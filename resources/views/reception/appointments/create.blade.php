@@ -94,11 +94,11 @@
                             <label for="payment_method">Phương thức thanh toán</label>
                             <select name="payment_method" id="payment_method" class="form-control" required>
                                 <option value="cash">Tiền mặt</option>
-                                <option value="card">Thẻ</option>
+                                {{-- <option value="card">Thẻ</option> --}}
                                 <option value="bank">Chuyển khoản</option>
                             </select>
                             <div id="payment_note" class="text-muted small mt-1">
-                                Thanh toán sẽ được xử lý ngay nếu là tiền mặt. Đối với thẻ/chuyển khoản, cần xác nhận thanh
+                                Thanh toán sẽ được xử lý ngay nếu là tiền mặt. Đối với chuyển khoản, cần xác nhận thanh
                                 toán sau.
                             </div>
                         </div>
