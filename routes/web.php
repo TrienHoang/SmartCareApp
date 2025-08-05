@@ -43,14 +43,34 @@ use App\Notifications\LateNotification;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Auth;
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('postLogin');
+Route::get('/', function () {
+    return view('client.home');
+})->name('home');
 
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('postRegister');
-Route::get('/verify-otp', [AuthController::class, 'showVerifyOtpForm'])->name('verify.otp.form');
-Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('verify.otp');
-Route::post('/resend-otp', [AuthController::class, 'resendOtp'])->name('resend.otp');
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('postLogin');
+
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('postRegister');
+
+    Route::get('/verify-otp', [AuthController::class, 'showVerifyOtpForm'])->name('verify.otp.form');
+    Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('verify.otp');
+    Route::post('/resend-otp', [AuthController::class, 'resendOtp'])->name('resend.otp');
+
+    // Đăng nhập mạng xã hội cũng chỉ cho guest
+    Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
+    Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+
+    // đăng nhập bằng facebook
+    Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
+    Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('facebook.callback');
+
+    // đăng nhập bằng google
+    Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+    Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+});
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Trang nhập email để gửi link
@@ -62,16 +82,8 @@ Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showRese
 // Gửi mật khẩu mới về server để cập nhật
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
-// đăng nhập bằng facebook
-Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
-Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('facebook.callback');
 
-// đăng nhập bằng google
-Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
-Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
-
-
-// VNPAY Routes 
+// ✅ VNPAY Routes (không cần auth - webhook từ VNPAY)
 Route::post('/vnpay/callback', [PaymentHistoryController::class, 'vnpayCallback'])
     ->name('vnpay.callback')
     ->withoutMiddleware([VerifyCsrfToken::class]); // Loại bỏ CSRF cho webhook
@@ -483,12 +495,13 @@ Route::get('admin/vouchers/edit/{id}', [VoucherController::class, 'edit'])->name
 Route::put('admin/vouchers/edit/{id}', [VoucherController::class, 'update'])->name('admin.vouchers.update');
 Route::delete('admin/vouchers/destroy/{id}', [VoucherController::class, 'destroy'])->name('admin.vouchers.destroy');
 Route::get('admin/vouchers/show/{id}', [VoucherController::class, 'show'])->name('admin.vouchers.show');
-// quản lý lịch làm việc
-Route::get('admin/schedules', [SchedulesController::class, 'index'])->name('admin.schedules.index');
-Route::get('admin/schedules/show/{id}', [SchedulesController::class, 'show'])->name('admin.schedules.show');
-Route::post('/admin/schedules/{id}/status', [SchedulesController::class, 'status'])->name('admin.schedules.status');
-
-
+// Quản lý lịch làm việc
+Route::prefix('admin')->group(function () {
+    Route::get('/schedules', [SchedulesController::class, 'index'])->name('admin.schedules.index');
+    Route::get('/schedules/{id}', [SchedulesController::class, 'show'])->name('admin.schedules.show');
+    Route::post('/schedules/{id}/status', [SchedulesController::class, 'status'])->name('admin.schedules.status');
+    Route::post('/schedules/bulk-approve', [SchedulesController::class, 'bulkApprove'])->name('admin.schedules.bulk-approve');
+});
 // Quản lý đánh giá bác sĩ
 Route::group([
     'prefix' => 'admin/doctor_leaves',

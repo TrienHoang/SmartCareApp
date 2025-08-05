@@ -146,6 +146,7 @@ class ReceptionAppointmentController extends Controller
         $specificDates = $doctor->workingSchedules()
             ->whereNotNull('day')
             ->where('day', '>=', now()->toDateString())
+            ->where('status', 'Đã xét duyệt')
             ->pluck('day')
             ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
             ->unique()
