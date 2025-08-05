@@ -219,6 +219,7 @@ class ReceptionAppointmentController extends Controller
         $lunchEnd   = Carbon::parse("$date 13:00");
 
         $availableSlots = [];
+        $now = now();
 
         foreach ($workings as $working) {
             $shiftStart = Carbon::parse("$date {$working->shift->start_time}");
@@ -228,6 +229,12 @@ class ReceptionAppointmentController extends Controller
             while ($start->copy()->addMinutes($slotDuration) <= $shiftEnd) {
                 $slotStart = $start->copy();
                 $slotEnd = $slotStart->copy()->addMinutes($slotDuration);
+
+                // Nếu ngày được chọn là ngày hôm nay, loại bỏ các giờ đã qua
+                if ($date === $now->toDateString() && $slotEnd <= $now) {
+                    $start->addMinutes(5);
+                    continue;
+                }
 
                 // Bỏ qua khung giờ rơi vào giờ nghỉ trưa
                 if (
@@ -282,6 +289,7 @@ class ReceptionAppointmentController extends Controller
             'doctor_id.required' => 'Vui lòng chọn bác sĩ.',
             'service_id.required' => 'Vui lòng chọn dịch vụ khám.',
             'appointment_time.required' => 'Vui lòng chọn thời gian hẹn.',
+            'appointment_time.after' => 'Thời gian hẹn phải lớn hơn hôm nay.',
             'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
         ]);
 
