@@ -67,10 +67,12 @@ Route::get('/chi-tiet-tin-tuc/{id}', function ($id) {
 })->name('news_detail');
 
 // Thông tin cá nhân
-Route::middleware(['auth'])->prefix('client/profile')->name('client.profile.')->group(function () {
-    Route::get('/', [ProfileController::class, 'show'])->name('show');
-    Route::patch('/update', [ProfileController::class, 'update'])->name('update');
+Route::prefix('client/profile')->name('client.profile.')->group(function () {
+    Route::get('/', [ProfileController::class, 'show'])->name('show'); // tên đầy đủ: client.profile.show
+    Route::patch('/update', [ProfileController::class, 'update'])->name('update'); // client.profile.update
 });
+
+
 // Route::get('/thong-tin-bac-si', function () {
 //     return view('client.doctors_detail');
 // })->name('doctors_detail');
@@ -134,6 +136,7 @@ Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->gr
 
 Route::get('/payment/return', [BookingController::class, 'paymentReturn'])->name('payment.return');
 Route::match(['get', 'post'], '/payment/ipn', [BookingController::class, 'paymentIpn'])->name('payment.ipn');
+Route::get('/booking/clean-expired', [BookingController::class, 'cleanExpiredPaymentsRoute'])->name('booking.clean-expired');
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/booking/prepare', [BookingController::class, 'prepare'])->name('booking.prepare');
@@ -160,13 +163,6 @@ Route::middleware(['auth'])->group(function () {
         return Response::make($image, 200, ['Content-Type' => 'image/png']);
     })->name('qr.generate');
 });
-
-
-
-Route::get('/abc', function () {
-    return view('client.note');
-});
-
 
 Route::prefix('client/prescriptions')->name('client.prescriptions.')->middleware(['auth'])->group(function () {
     Route::get('/', [PrescriptionClientController::class, 'index'])->name('index');
@@ -205,9 +201,3 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/promotions/apply/{promotion}', [PromotionController::class, 'apply'])->name('client.promotions.apply');
     Route::post('/promotions/remove', [PromotionController::class, 'remove'])->name('client.promotions.remove');
 });
-
-
-
-
-
-

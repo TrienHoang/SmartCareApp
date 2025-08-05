@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
+use App\Models\OrderService;
 use App\Models\Promotion;
 use App\Models\PromotionUserUsage;
 use App\Models\Service;
@@ -10,8 +12,6 @@ use App\Models\Doctor;
 use App\Models\WorkingSchedule;
 use App\Models\Appointment;
 use App\Models\DoctorLeave;
-use App\Models\Order;
-use App\Models\OrderService;
 use App\Models\Payment; // Assumed Payment model
 use App\Models\PaymentHistory;
 use Carbon\Carbon;
@@ -227,7 +227,7 @@ class BookingController extends Controller
         // Lấy danh sách bác sĩ và số lịch hẹn (nếu random)
         $doctor_appointments = [];
         if (!$doctor_id) {
-            $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(40)])
+            $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(7)])
                 ->where('status', '!=', 'cancelled')
                 ->groupBy('doctor_id')
                 ->select('doctor_id', \DB::raw('count(*) as appointment_count'))
@@ -375,7 +375,7 @@ class BookingController extends Controller
         }
 
         $validated = $request->validate([
-            'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(40)->toDateString(),
+            'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(7)->toDateString(),
             'slot_start' => 'required|date_format:H:i',
             'reason' => 'nullable|string|max:255',
         ]);
@@ -441,9 +441,10 @@ class BookingController extends Controller
         ));
     }
 
-
     public function save(Request $request)
     {
+        $this->cleanExpiredPayments(); // Dọn dẹp trước khi lưu
+
         $booking_data = $request->session()->get('booking_data');
         $booking_confirm = $request->session()->get('booking_confirm');
 
@@ -473,104 +474,85 @@ class BookingController extends Controller
 
         DB::beginTransaction();
 
-        if ($user) {
-            $user->update([
-                'full_name' => $validated['full_name'],
-                'phone' => $validated['phone'],
-                'gender' => $validated['gender'],
-                'date_of_birth' => $validated['date_of_birth'],
-                'address' => $validated['address'],
+        try {
+            if ($user) {
+                $user->update([
+                    'full_name' => $validated['full_name'],
+                    'phone' => $validated['phone'],
+                    'gender' => $validated['gender'],
+                    'date_of_birth' => $validated['date_of_birth'],
+                    'address' => $validated['address'],
+                ]);
+            } else {
+                throw new \Exception('Người dùng chưa đăng nhập hoặc không tìm thấy.');
+            }
+
+            $booked = Appointment::where('doctor_id', $validated['doctor_id'])
+                ->where('appointment_time', $appointment_time)
+                ->where('status', '!=', 'cancelled')
+                ->exists();
+
+            if ($booked) {
+                throw new \Exception('Khung giờ này đã có người khác đặt hoặc không còn khả dụng.');
+            }
+
+            // Tạo một mã QR duy nhất (UUID) cho cuộc hẹn
+            $qrCodeData = (string) Str::uuid();
+
+            $appointment = Appointment::create([
+                'patient_id' => $user->id,
+                'doctor_id' => $validated['doctor_id'],
+                'service_id' => $validated['service_id'],
+                'appointment_time' => $appointment_time,
+                'end_time' => $appointment_time->copy()->addMinutes($service->duration),
+                'status' => 'pending',
+                'reason' => $validated['reason'] ?? null,
+                'created_by' => $user->id,
+                'qr_code' => $qrCodeData,
             ]);
-        } else {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Người dùng chưa đăng nhập hoặc không tìm thấy.');
-        }
 
-        $booked = Appointment::where('doctor_id', $validated['doctor_id'])
-            ->where('appointment_time', $appointment_time)
-            ->where('status', '!=', 'cancelled')
-            ->exists();
+            // === Xử lý mã giảm giá nếu có ===
+            $discountAmount = 0;
+            $promotion = null;
 
-        if ($booked) {
-            DB::rollBack();
-            return redirect()->route('booking.showService', $booking_confirm['service_id'])->with('error', 'Khung giờ này đã có người khác đặt hoặc không còn khả dụng.');
-        }
+            $promotionCode = session('selected_promotion_code') ?? $validated['promotion_code'] ?? null;
 
-        // Tạo một mã QR duy nhất (UUID) cho cuộc hẹn
-        $qrCodeData = (string) Str::uuid();
+            if (!empty($promotionCode)) {
+                $promotion = Promotion::where('code', $promotionCode)
+                    ->where('valid_from', '<=', now())
+                    ->where('valid_until', '>=', now())
+                    ->whereDoesntHave('usages', function ($query) use ($user) {
+                        $query->where('user_id', $user->id);
+                    })
+                    ->first();
 
-        $appointment = Appointment::create([
-            'patient_id' => $user->id,
-            'doctor_id' => $validated['doctor_id'],
-            'service_id' => $validated['service_id'],
-            'appointment_time' => $appointment_time,
-            'end_time' => $appointment_time->copy()->addMinutes($service->duration),
-            'status' => 'pending',
-            'reason' => $validated['reason'] ?? null,
-            'created_by' => $user->id,
-            'qr_code' => $qrCodeData,
-        ]);
-
-        DB::commit();
-
-        // QUAN TRỌNG: Xóa session sau khi commit thành công
-        $request->session()->forget(['booking_data', 'booking_confirm']);
-
-
-        // === Xử lý mã giảm giá nếu có ===
-        $discountAmount = 0;
-        $promotion = null;
-
-        // Lấy mã giảm từ session nếu có, nếu không thì lấy từ request
-        $promotionCode = session('selected_promotion_code') ?? $validated['promotion_code'] ?? null;
-
-        if (!empty($promotionCode)) {
-            $promotion = Promotion::where('code', $promotionCode)
-                ->where('valid_from', '<=', now())
-                ->where('valid_until', '>=', now())
-                ->first();
-
-
-            if ($promotion) {
-                $used = PromotionUserUsage::where('promotion_id', $promotion->id)
-                    ->where('user_id', $user->id)
-                    ->exists();
-
-                if (!$used) {
+                if ($promotion) {
                     $discountAmount = round($service->price * ($promotion->discount_percentage / 100));
                     $discountAmount = min($discountAmount, $service->price);
 
-                    PromotionUserUsage::create([
-                        'promotion_id' => $promotion->id,
-                        'user_id' => $user->id,
-                        'used_at' => now(),
-                        'appointment_id' => $appointment->id,
-                    ]);
+                    // ❗ CHỈ lưu promotionCode vào session, KHÔNG ghi vào DB
+                    $request->session()->put('applied_promotion_code', $promotionCode);
                 }
             }
+
+            $finalPrice = max(0, $service->price - $discountAmount);
+
+            DB::commit();
+
+            // QUAN TRỌNG: Xóa session sau khi commit thành công
+            $request->session()->forget(['booking_data', 'booking_confirm']);
+
+            // Gọi VNPay kèm giá đã giảm
+            $vnpayUrl = $this->initiateVNPayPayment($appointment, $service, $finalPrice, $promotion);
+
+            return redirect($vnpayUrl);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error("Booking save failed: " . $e->getMessage());
+            return redirect()->route('booking.showService', $booking_confirm['service_id'])
+                ->with('error', $e->getMessage());
         }
-
-        $finalPrice = max(0, $service->price - $discountAmount);
-
-        // Xoá session
-        $request->session()->forget([
-            'booking_data',
-            'booking_confirm',
-            'selected_promotion_code',
-            'selected_promotion_id',
-            'selected_promotion_discount'
-        ]);
-
-        // Redirect với flash session data
-
-
-        // Gọi VNPay kèm giá đã giảm
-        $vnpayUrl = $this->initiateVNPayPayment($appointment, $service, $finalPrice, $promotion);
-
-        return redirect($vnpayUrl);
     }
-
-
 
     // New method to initiate VNPay payment
     protected function initiateVNPayPayment($appointment, $service, $finalPrice, $promotion = null)
@@ -587,7 +569,7 @@ class BookingController extends Controller
         $vnp_OrderInfo = "Thanh toán lịch hẹn #{$appointment->id} cho dịch vụ {$service->name}";
         $vnp_OrderType = 'billpayment';
         $vnp_CreateDate = now()->format('YmdHis');
-        $vnp_ExpireDate = now()->addMinutes(15)->format('YmdHis');
+        $vnp_ExpireDate = now()->addMinutes(5)->format('YmdHis');
 
         $inputData = [
             "vnp_Version" => "2.1.0",
@@ -623,9 +605,11 @@ class BookingController extends Controller
         return $vnp_Url;
     }
 
-
+    // New method to handle VNPay return URL
     public function paymentReturn(Request $request)
     {
+        $this->cleanExpiredPayments(); // Dọn dẹp trước khi xử lý
+
         $vnp_HashSecret = env('VNPAY_HASH_SECRET');
         $vnp_SecureHash = $request->vnp_SecureHash;
         $inputData = $request->all();
@@ -649,7 +633,6 @@ class BookingController extends Controller
 
         // Kiểm tra checksum trước
         if ($secureHash === $vnp_SecureHash) {
-
             if ($responseCode === '00') {
                 // Thanh toán thành công
                 if ($payment->status !== 'paid') {
@@ -664,6 +647,11 @@ class BookingController extends Controller
                             'vnp_transaction_no'  => $request->vnp_TransactionNo,
                             'vnp_response_code'   => $request->vnp_ResponseCode,
                         ]);
+
+                        $payment->note = json_encode([
+                            'transaction_date' => $request->vnp_PayDate,
+                        ]);
+                        $payment->save();
 
                         PaymentHistory::create([
                             'payment_id'     => $payment->id,
@@ -693,7 +681,22 @@ class BookingController extends Controller
                             'quantity'   => 1,
                             'price'      => $appointment->service->price ?? 0,
                         ]);
+                        $promoCode = session('selected_promotion_code');
+                        if ($promoCode) {
+                            $promotion = Promotion::where('code', $promoCode)->first();
+                            if ($promotion) {
+                                // Ghi nhận người dùng đã dùng mã này
+                                PromotionUserUsage::create([
+                                    'user_id'       => $appointment->patient_id,
+                                    'promotion_id'  => $promotion->id,
+                                    'used_at'       => now(),
+                                    'appointment_id' => $appointment->id,
+                                ]);
+                            }
 
+                            // Xóa khỏi session sau khi dùng
+                            session()->forget('selected_promotion_code');
+                        }
                         DB::commit();
                         return redirect()->route('booking.success')
                             ->with('success', 'Thanh toán thành công! Lịch hẹn của bạn đã được ghi nhận.');
@@ -738,12 +741,13 @@ class BookingController extends Controller
         }
     }
 
-
     /**
      * Xử lý VNPay IPN (server-to-server)
      */
     public function paymentIpn(Request $request)
     {
+        $this->cleanExpiredPayments(); // Dọn dẹp trước khi xử lý
+
         $vnp_HashSecret = env('VNPAY_HASH_SECRET');
         $vnp_SecureHash = $request->vnp_SecureHash;
         $inputData = $request->all();
@@ -766,7 +770,6 @@ class BookingController extends Controller
 
         // Kiểm tra checksum trước
         if ($secureHash === $vnp_SecureHash) {
-
             if ($responseCode === '00') {
                 // Giao dịch thành công
                 if ($payment->status !== 'paid') {
@@ -833,10 +836,51 @@ class BookingController extends Controller
         }
     }
 
-
     // New method for success page
     public function success()
     {
         return view('client.booking.success');
+    }
+
+    /**
+     * Dọn dẹp các Payment và Appointment hết hạn
+     */
+    protected function cleanExpiredPayments()
+    {
+        DB::beginTransaction();
+        try {
+            $expiredPayments = Payment::where('status', 'pending')
+                ->whereNotNull('vnp_txn_ref') // Đảm bảo là giao dịch VNPay
+                ->whereNotExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('appointments')
+                        ->whereColumn('appointments.id', 'payments.appointment_id')
+                        ->where('status', 'cancelled');
+                })
+                ->where('created_at', '<', now()->subMinutes(5)) // Xóa sau 5 phút (theo vnp_ExpireDate)
+                ->with('appointment')
+                ->get();
+
+            $countPayments = 0;
+            $countAppointments = 0;
+            foreach ($expiredPayments as $payment) {
+                $appointment = $payment->appointment;
+                if ($payment->delete()) {
+                    $countPayments++;
+                    if ($appointment && !$appointment->trashed()) {
+                        $appointment->delete();
+                        $countAppointments++;
+                    }
+                }
+            }
+
+            DB::commit();
+            if ($countPayments > 0) {
+                \Log::info("Cleaned up {$countPayments} expired payments and {$countAppointments} appointments due to timeout.");
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error("Failed to clean expired payments: " . $e->getMessage());
+        }
     }
 }
