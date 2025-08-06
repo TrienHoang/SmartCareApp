@@ -60,6 +60,12 @@ Route::prefix('receptionist')
             Route::get('/doctor/{doctor}/working-days', [ReceptionAppointmentController::class, 'getDoctorWorkingDays'])->name('doctor.working-days');
 
             Route::get('/services/{service}/doctors', [ReceptionAppointmentController::class, 'getDoctorsByService'])->name('services.doctors');
+
+            // xuất phiếu in
+            Route::get('/{id}/payment-receipt', [ReceptionAppointmentController::class, 'printPaymentReceipt'])->name('payment-receipt');
+            Route::get('/{id}/payment-receipt/print', [ReceptionAppointmentController::class, 'printPaymentReceiptPDF'])->name('payment-receipt.print');
+
+            Route::patch('/{id}/check-in', [ReceptionAppointmentController::class, 'checkIn'])->name('check-in');
         });
 
 
