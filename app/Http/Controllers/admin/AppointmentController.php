@@ -70,6 +70,20 @@ class AppointmentController extends Controller
             $query->where('service_id', $request->service_id);
         }
 
+        if ($request->filled('payment_status')) {
+            $status = $request->payment_status;
+            $query->whereHas('payment', function ($query) use ($status) {
+                if ($status === 'paid') {
+                    $query->where('status', 'paid')->where(function ($q) {
+                        $q->whereNull('refund_status')->orWhere('refund_status', '!=', 'completed');
+                    });
+                } elseif ($status === 'unpaid') {
+                    $query->where('status', '!=', 'paid');
+                } elseif ($status === 'refunded') {
+                    $query->where('refund_status', 'completed');
+                }
+            });
+        }
 
 
         // Lọc theo ngày
@@ -1460,6 +1474,7 @@ class AppointmentController extends Controller
             });
 
         $availableSlots = [];
+        $now = now();
 
         foreach ($workingPeriods as $block) {
             $start = Carbon::parse("$date {$block['start']}");
@@ -1468,6 +1483,12 @@ class AppointmentController extends Controller
             while ($start->copy()->addMinutes($slotDuration) <= $end) {
                 $slotStart = $start->copy();
                 $slotEnd = $start->copy()->addMinutes($slotDuration);
+
+                // Nếu ngày được chọn là ngày hôm nay, loại bỏ các giờ đã qua
+                if ($date === $now->toDateString() && $slotStart <= $now) {
+                    $start->addMinutes(5);
+                    continue;
+                }
 
                 $conflict = false;
                 foreach ($appointments as $appt) {
