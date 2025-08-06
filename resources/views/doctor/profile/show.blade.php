@@ -2,9 +2,7 @@
 @section('title', 'Thông tin cá nhân')
 
 @section('content')
-    {{-- <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-10 px-4 sm:px-6 lg:px-8"> --}}
     <div class="max-w-6xl mx-auto space-y-8">
-
         <div
             class="bg-white rounded-xl shadow-lg border border-gray-200 p-8 transform transition-all duration-300 hover:scale-[1.005]">
             <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
@@ -16,13 +14,11 @@
                 </div>
                 <div class="text-center md:text-left flex-1">
                     <h2 class="text-3xl font-bold text-gray-900 mb-2">{{ Auth::user()->full_name }}</h2>
-
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
             <div
                 class="bg-white rounded-xl shadow-lg border border-gray-200 p-8 transform transition-all duration-300 hover:scale-[1.005]">
                 <div class="flex items-center mb-6">
@@ -51,6 +47,7 @@
                                 $genderText = match ($gender) {
                                     'male' => 'Nam',
                                     'female' => 'Nữ',
+                                    'other' => 'Khác',
                                     default => 'Chưa cập nhật',
                                 };
                             @endphp
@@ -81,7 +78,6 @@
                     <div class="flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0">
                         <span class="text-gray-700 font-medium">Email:</span>
                         <span class="text-blue-600 break-all font-semibold">{{ Auth::user()->email }}</span>
-
                     </div>
                     <div class="flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0">
                         <span class="text-gray-700 font-medium">Số điện thoại:</span>
@@ -89,10 +85,11 @@
                     </div>
                     <div class="py-3 last:border-b-0 flex items-start gap-2">
                         <span class="text-gray-700 font-medium w-24">Địa chỉ:</span>
-
                         @if (Auth::user()->address)
                             <p class="text-gray-900 font-semibold flex items-center gap-1 leading-relaxed">
                                 <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"></path>
                                 </svg>
                                 {{ Auth::user()->address }}
                             </p>
@@ -100,7 +97,6 @@
                             <p class="text-gray-500 italic">Chưa cập nhật</p>
                         @endif
                     </div>
-
                 </div>
             </div>
 
@@ -118,9 +114,50 @@
                 </div>
                 <div class="space-y-5">
                     <div class="py-3 border-b border-gray-100 last:border-b-0">
+                        <span class="text-gray-700 font-medium block mb-2">Chuyên môn:</span>
+                        <p class="text-gray-900 font-semibold leading-relaxed">
+                            {{ Auth::user()->specialization ?? 'Chưa cập nhật' }}</p>
+                    </div>
+                    <div class="py-3 border-b border-gray-100 last:border-b-0">
                         <span class="text-gray-700 font-medium block mb-2">Học vấn:</span>
                         <p class="text-gray-900 font-semibold leading-relaxed">
                             {{ Auth::user()->education ?? 'Chưa cập nhật' }}</p>
+                    </div>
+                    <div class="py-3 border-b border-gray-100 last:border-b-0">
+                        <span class="text-gray-700 font-medium block mb-2">Thành tựu:</span>
+                        @if ($achievements->isNotEmpty())
+                            <ul class="list-disc pl-5 text-gray-900 font-semibold leading-relaxed">
+                                @foreach ($achievements as $achievement)
+                                    <li>{{ $achievement->title }} - {{ $achievement->organization }} ({{ $achievement->year }})</li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="text-gray-500 italic">Chưa cập nhật</p>
+                        @endif
+                    </div>
+                    <div class="py-3 border-b border-gray-100 last:border-b-0">
+                        <span class="text-gray-700 font-medium block mb-2">Học vấn chi tiết:</span>
+                        @if ($educations->isNotEmpty())
+                            <ul class="list-disc pl-5 text-gray-900 font-semibold leading-relaxed">
+                                @foreach ($educations as $education)
+                                    <li>{{ $education->degree }} - {{ $education->school }} ({{ $education->start_year }} - {{ $education->end_year ?? 'Hiện tại' }})</li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="text-gray-500 italic">Chưa cập nhật</p>
+                        @endif
+                    </div>
+                    <div class="py-3 border-b border-gray-100 last:border-b-0">
+                        <span class="text-gray-700 font-medium block mb-2">Kinh nghiệm:</span>
+                        @if ($experiences->isNotEmpty())
+                            <ul class="list-disc pl-5 text-gray-900 font-semibold leading-relaxed">
+                                @foreach ($experiences as $experience)
+                                    <li>{{ $experience->degree }} - {{ $experience->school }} ({{ $experience->start_year }} - {{ $experience->end_year ?? 'Hiện tại' }})</li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="text-gray-500 italic">Chưa cập nhật</p>
+                        @endif
                     </div>
                     <div class="py-3 last:border-b-0">
                         <span class="text-gray-700 font-medium block mb-2">Mô tả chuyên môn:</span>
@@ -147,7 +184,6 @@
                         <span class="text-gray-700 font-medium">Mật khẩu:</span>
                         <span class="text-gray-900 font-semibold">••••••••••</span>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -165,7 +201,6 @@
                 </a>
                 <a href="{{ route('doctor.profile.change-password') }}"
                     class="inline-flex items-center px-8 py-3 bg-amber-500 hover:bg-amber-600 text-gray-900 font-semibold rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                    {{-- Changed text-white to text-gray-900 --}}
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z">
@@ -175,6 +210,5 @@
                 </a>
             </div>
         </div>
-    </div>
     </div>
 @endsection
