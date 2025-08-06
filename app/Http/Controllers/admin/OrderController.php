@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -12,8 +13,8 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         if ($request->start_date && $request->end_date && $request->end_date < $request->start_date) {
-        return back()->withInput()->with('error', 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.');
-    }
+            return back()->withInput()->with('error', 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.');
+        }
         $orders = Order::with('user')
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->start_date, fn($q) => $q->whereDate('ordered_at', '>=', $request->start_date))
@@ -48,10 +49,31 @@ class OrderController extends Controller
             return back()->with('error', 'Chuyển trạng thái không hợp lệ!');
         }
 
+
+
         $order->update([
             'status' => $target,
             'updated_at' => now(),
         ]);
+
+
+        // Nếu trạng thái chuyển sang "paid" mà chưa có payment_id
+        if ($target === 'paid' && !$order->payment_id) {
+            $payment = Payment::create([
+                'appointment_id' => $order->appointment_id,
+                'amount' => $order->total_amount,
+                'payment_method' => 'manual', // hoặc vnpay, momo, bank_transfer
+                'status' => 'success',
+                'paid_at' => now(),
+                'refund_status' => 'none',
+            ]);
+
+            // Cập nhật lại order để gán payment_id
+            $order->update([
+                'payment_id' => $payment->id,
+            ]);
+        }
+
 
         return back()->with('success', 'Cập nhật trạng thái thành công.');
     }
@@ -66,5 +88,4 @@ class OrderController extends Controller
         $pdf = Pdf::loadView('admin.orders.pdf', compact('order'));
         return $pdf->download('order-' . $order->id . '.pdf');
     }
-
 }

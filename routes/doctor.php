@@ -147,6 +147,8 @@ Route::prefix('doctor/working_schedules')->name('doctor.working_schedules.')->mi
     Route::get('/{id}/edit', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'edit'])->name('edit');
     Route::put('/{id}', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'update'])->name('update');
     Route::delete('/{id}', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'destroy'])->name('destroy');
+    Route::get('/{id}', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'show'])->name('show');           // Chi tiết
+
 });
 
 
