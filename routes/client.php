@@ -35,15 +35,12 @@ Route::get('/gioi-thieu', function () {
 Route::get('/dich-vu', [ServiceController::class, 'index'])->name('client.services');
 Route::get('/dich-vu/{id}', [ServiceController::class, 'show'])->name('client.services.show');
 Route::get('/chi-tiet-dich-vu/{service_id}', [BookingController::class, 'show'])->name('booking.showService');
-// Route::get('/dich-vu/chi-tiet/{id}', [ServiceController::class, 'detail'])->name('client.services.detail');
 
 // Tin tức
 // Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news');
 Route::get('/tin-tuc/danh-muc/{id}', [NewsController::class, 'category'])->name('client.news.category');
 Route::get('/tin-tuc/{slug}', [NewsController::class, 'show'])->name('client.news.show');
 Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news.index');
-
-
 
 
 // liên hệ
@@ -58,9 +55,8 @@ Route::get('/lien-he', function () {
     return view('client.contact');
 })->name('contact');
 
-// Route::get('/tin-tuc', function () {
-//     return view('client.news');
-// })->name('news');
+Route::get('/home/search', [HomeController::class, 'searchAvailableSlots'])->name('home.search');
+Route::get('/home/search-services', [HomeController::class, 'searchServices'])->name('home.searchServices');
 
 Route::get('/chi-tiet-tin-tuc/{id}', function ($id) {
     return view('client.news_detail', ['id' => $id]);
@@ -72,10 +68,6 @@ Route::prefix('client/profile')->name('client.profile.')->group(function () {
     Route::patch('/update', [ProfileController::class, 'update'])->name('update'); // client.profile.update
 });
 
-
-// Route::get('/thong-tin-bac-si', function () {
-//     return view('client.doctors_detail');
-// })->name('doctors_detail');
 
 Route::get('/thong-tin-bac-si/{id}', [DoctorController::class, 'show'])->name('doctor.show');
 
@@ -163,13 +155,6 @@ Route::middleware(['auth'])->group(function () {
         return Response::make($image, 200, ['Content-Type' => 'image/png']);
     })->name('qr.generate');
 });
-
-
-
-Route::get('/abc', function () {
-    return view('client.note');
-});
-
 
 Route::prefix('client/prescriptions')->name('client.prescriptions.')->middleware(['auth'])->group(function () {
     Route::get('/', [PrescriptionClientController::class, 'index'])->name('index');
