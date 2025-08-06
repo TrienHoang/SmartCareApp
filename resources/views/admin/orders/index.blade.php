@@ -1,6 +1,6 @@
 @extends('admin.dashboard')
 
-@section('title', 'Quản lý Đơn hàng')
+@section('title', 'Quản lý giao dịch')
 
 @section('content')
     <div class="content-wrapper">
@@ -14,8 +14,8 @@
                                 <i class="bx bx-receipt text-white"></i>
                             </div>
                             <div>
-                                <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý Đơn hàng</h2>
-                                <p class="text-muted mb-0">Quản lý và theo dõi tất cả đơn hàng trong hệ thống</p>
+                                <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý giao dịch</h2>
+                                <p class="text-muted mb-0">Quản lý và theo dõi tất cả giao dịch trong hệ thống</p>
                             </div>
                         </div>
                         <div class="breadcrumb-wrapper col-12">
@@ -27,7 +27,7 @@
                                         </a>
                                     </li>
                                     <li class="breadcrumb-item active text-primary font-weight-semibold">
-                                        Đơn hàng
+                                        giao dịch
                                     </li>
                                 </ol>
                             </nav>
@@ -136,10 +136,10 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
                             <i class="bx bx-list mr-2"></i>
-                            <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách Đơn hàng</h4>
+                            <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách giao dịch</h4>
                         </div>
                         <div class="card-tools">
-                            <span class="badge badge-light">{{ $orders->total() }} đơn hàng</span>
+                            <span class="badge badge-light">{{ $orders->total() }} giao dịch</span>
                         </div>
                     </div>
                 </div>
@@ -274,7 +274,7 @@
                                                 <div class="d-flex align-items-center text-muted">
                                                     <i class="bx bx-time mr-1"></i>
                                                     <div>
-                                                        <small class="font-weight-semibold">Đặt hàng</small><br>
+                                                        <small class="font-weight-semibold">Giao dịch</small><br>
                                                         <small class="text-muted">{{ $order->created_at->format('d/m/Y H:i') }}</small>
                                                     </div>
                                                 </div>
@@ -292,8 +292,8 @@
                                         <td colspan="7" class="text-center py-5">
                                             <div class="empty-state">
                                                 <i class="bx bx-receipt text-muted" style="font-size: 48px;"></i>
-                                                <h5 class="mt-3 text-muted">Không có đơn hàng nào</h5>
-                                                <p class="text-muted">Chưa có đơn hàng nào được tạo hoặc không tìm thấy kết quả phù hợp.</p>
+                                                <h5 class="mt-3 text-muted">Không có giao dịch nào</h5>
+                                                <p class="text-muted">Chưa có giao dịch nào được tạo hoặc không tìm thấy kết quả phù hợp.</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -500,8 +500,8 @@
         // Confirm order function
         function confirmOrder(id) {
             Swal.fire({
-                title: 'Xác nhận đơn hàng',
-                text: 'Bạn có chắc chắn muốn xác nhận đơn hàng này?',
+                title: 'Xác nhận giao dịch',
+                text: 'Bạn có chắc chắn muốn xác nhận giao dịch này?',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
@@ -530,8 +530,8 @@
         // Cancel order function
         function cancelOrder(id) {
             Swal.fire({
-                title: 'Hủy đơn hàng',
-                text: 'Bạn có chắc chắn muốn hủy đơn hàng này?',
+                title: 'Hủy giao dịch',
+                text: 'Bạn có chắc chắn muốn hủy giao dịch này?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Doctor;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
@@ -13,7 +14,7 @@ class AppointmentController extends Controller
      */
     public function index(Request $request)
     {
-        $doctorId = auth()->id();
+        $doctorId = Auth::user()->doctor->id;
 
         $query = Appointment::with(['patient', 'service'])
             ->where('doctor_id', $doctorId);
@@ -35,7 +36,6 @@ class AppointmentController extends Controller
         // 📄 Phân trang
         $appointments = $query->latest()->paginate(10);
 
-        // 📊 Thống kê số lượng theo trạng thái (loại trừ cancelled)
         $counts = Appointment::where('doctor_id', $doctorId)
             ->whereIn('status', ['pending', 'confirmed', 'completed'])
             ->selectRaw("
@@ -55,12 +55,15 @@ class AppointmentController extends Controller
     /**
      * Hiển thị chi tiết một lịch hẹn.
      */
-    public function show(Appointment $appointment)
+    public function show( $id)
     {
-        // 🛡 Đảm bảo chỉ bác sĩ chủ lịch hẹn mới được xem
-        if ($appointment->doctor_id !== auth()->id()) {
-            abort(403, 'Bạn không có quyền xem lịch hẹn này.');
-        }
+
+        $doctorId = Auth::user()->doctor->id;
+
+        $appointment = Appointment::with(['patient', 'doctor', 'service'])
+            ->where('id', $id)
+            ->where('doctor_id', $doctorId)
+            ->firstOrFail();
 
         return view('doctor.appointments.show', compact('appointment'));
     }

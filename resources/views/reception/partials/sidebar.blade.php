@@ -19,7 +19,7 @@
             <li class="menu-item">
                 <a href="{{ route('receptionist.dashboard') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-bar-chart-alt"></i>
-                    <div>Thống kê</div>
+                    <div>Check in</div>
                 </a>
             </li>
 

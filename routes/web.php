@@ -410,6 +410,8 @@ Route::group([
         Route::post('/create', [RoomController::class, 'store'])
             ->middleware('check_permission:create_rooms')->name('store');
 
+        Route::get('trash', [RoomController::class, 'trash'])->name('trash');
+        
         Route::get('/edit/{id}', [RoomController::class, 'edit'])
             ->middleware('check_permission:edit_rooms')->name('edit');
 
@@ -420,6 +422,10 @@ Route::group([
             ->middleware('check_permission:delete_rooms')->name('destroy');
 
         Route::get('/show/{id}', [RoomController::class, 'show'])->name('show');
+
+        Route::patch('rooms/{id}/toggle-status', [RoomController::class, 'toggleStatus'])->name('toggleStatus');
+
+        Route::put('restore/{id}', [RoomController::class, 'restore'])->name('restore');
     });
 
 

@@ -7,14 +7,14 @@ use App\Models\Appointment;
 use App\Models\WorkingSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class ReceptionistController extends Controller
 {
     public function index()
     {
-        $title = 'Bảng điều khiển lễ tân';
-        return view('reception.scan_qr', compact('title'));
+        return view('reception.scan_qr', ['title' => 'Bảng điều khiển lễ tân']);
     }
 
     public function checkinView()
@@ -22,83 +22,99 @@ class ReceptionistController extends Controller
         return view('reception.checkin');
     }
 
-    // Xử lý dữ liệu từ máy quét QR
-    public function processCheckin(Request $request)
+    public function getAppointmentByQR(Request $request)
     {
-        $validated = $request->validate([
+        $qrCodeData = $request->validate([
             'qr_code_data' => 'required|string|max:255',
-        ]);
-
-        $qrCodeData = $validated['qr_code_data'];
+        ])['qr_code_data'];
 
         try {
-            // Tìm cuộc hẹn bằng mã QR
-            $appointment = Appointment::where('qr_code', $qrCodeData)->first();
-
-            Log::info("QR Check-in data: " . $appointment);
+            $appointment = Cache::remember("appointment_qr_{$qrCodeData}", 600, function () use ($qrCodeData) {
+                return Appointment::query()
+                    ->where('qr_code', $qrCodeData)
+                    ->with(['patient', 'doctor.user', 'service.department'])
+                    ->first();
+            });
 
             if (!$appointment) {
-                return response()->json(['success' => false, 'message' => 'Mã QR không hợp lệ hoặc không tìm thấy cuộc hẹn.'], 404);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mã QR không hợp lệ hoặc không tìm thấy cuộc hẹn.'
+                ], 404);
             }
 
-            // Kiểm tra trạng thái cuộc hẹn
-            if ($appointment->status === 'cancelled') {
-                return response()->json(['success' => false, 'message' => 'Cuộc hẹn đã bị hủy.'], 400);
-            }
-            // if ($appointment->status === 'checked_in') {
-            //     return response()->json(['success' => false, 'message' => 'Cuộc hẹn đã được check-in trước đó.'], 400);
-            // }
-            if ($appointment->status === 'completed') {
-                return response()->json(['success' => false, 'message' => 'Cuộc hẹn đã hoàn tất.'], 400);
-            }
-
-            // Kiểm tra ngày hẹn có phải là hôm nay không (tùy chọn)
-            // if (Carbon::parse($appointment->appointment_time)->toDateString() !== Carbon::today()->toDateString()) {
-            //     return response()->json(['success' => false, 'message' => 'Cuộc hẹn này không phải cho hôm nay.'], 400);
-            // }
-
-            $doctor_id = $appointment->doctor_id;
-
-            $scheduledRoom = WorkingSchedule::where('doctor_id', $doctor_id)->with('room')
-                ->first();
-
-                if ($scheduledRoom && $scheduledRoom->room) {
-                    $room = $scheduledRoom->room->name;
-                } else {
-                    $room = 'Chưa xác định';
-                }
-
-            log::info("Scheduled room: " . $room);
-
-            // Cập nhật trạng thái và thời gian check-in
-            $appointment->status = 'checked_in';
-            $appointment->check_in_time = Carbon::now();
-            $appointment->save();
-
-            // Lấy thông tin chi tiết để trả về
-            $patient = $appointment->patient;
-            $doctor = $appointment->doctor->user;
-            $service = $appointment->service;
+            $room = Cache::remember("doctor_room_{$appointment->doctor_id}", 600, function () use ($appointment) {
+                $schedule = WorkingSchedule::where('doctor_id', $appointment->doctor_id)->first();
+                return $schedule && $schedule->room ? $schedule->room->name : 'Chưa xác định';
+            });
 
             return response()->json([
                 'success' => true,
-                'message' => 'Check-in thành công!',
                 'appointment' => [
                     'id' => $appointment->id,
-                    'patient_name' => $patient->full_name,
-                    'patient_phone' => $patient->phone,
-                    'doctor_name' => $doctor->full_name,
-                    'service_name' => $service->name,
-                    'room' =>   $room,
-                    'department' => $service->department->name,
-                    'appointment_time' => Carbon::parse($appointment->appointment_time)->format('H:i d/m/Y'),
-                    'check_in_time' => Carbon::parse($appointment->check_in_time)->format('H:i d/m/Y'),
+                    'patient_name' => $appointment->patient ? $appointment->patient->full_name : 'N/A',
+                    'patient_phone' => $appointment->patient ? $appointment->patient->phone : 'N/A',
+                    'doctor_name' => $appointment->doctor && $appointment->doctor->user ? $appointment->doctor->user->full_name : 'N/A',
+                    'service_name' => $appointment->service ? $appointment->service->name : 'N/A',
+                    'room' => $room,
+                    'department' => $appointment->service && $appointment->service->department ? $appointment->service->department->name : 'N/A',
+                    'appointment_time' => $appointment->appointment_time ? $appointment->appointment_time->format('H:i d/m/Y') : 'N/A',
                     'status' => $appointment->status,
                 ]
             ]);
         } catch (\Exception $e) {
-            Log::error("QR Check-in error: " . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Đã xảy ra lỗi trong quá trình check-in.'], 500);
+            Log::error("QR get error: {$e->getMessage()}", [
+                'qr_code' => $qrCodeData,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi khi lấy thông tin cuộc hẹn.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
+        }
+    }
+
+    public function confirmCheckin(Request $request)
+    {
+        $appointmentId = $request->validate([
+            'appointment_id' => 'required|exists:appointments,id',
+        ])['appointment_id'];
+
+        try {
+            $appointment = Appointment::findOrFail($appointmentId);
+
+            if (in_array($appointment->status, ['cancelled', 'checked_in', 'completed'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Trạng thái không cho phép check-in.'
+                ], 400);
+            }
+
+            if ($appointment->appointment_time->toDateString() !== now()->toDateString()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cuộc hẹn này không phải cho hôm nay.'
+                ], 400);
+            }
+
+            $appointment->update([
+                'status' => 'checked_in',
+                'check_in_time' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Check-in thành công.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Confirm check-in error: {$e->getMessage()}", ['appointment_id' => $appointmentId]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi check-in.'
+            ], 500);
         }
     }
 }
