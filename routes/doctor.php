@@ -92,6 +92,8 @@ Route::prefix('doctor')
 
         // 🟪 Appointments
         Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
+        Route::get('/appointments/show', [DoctorAppointmentController::class, 'show'])->name('appointments.show');
+
 
         // Treatment Plans (Kế hoạch điều trị)
         Route::prefix('treatment-plans')

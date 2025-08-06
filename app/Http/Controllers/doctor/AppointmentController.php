@@ -18,30 +18,31 @@ class AppointmentController extends Controller
         $query = Appointment::with(['patient', 'service'])
             ->where('doctor_id', $doctorId);
 
-        // 🔎 Lọc theo trạng thái (nếu có), mặc định loại bỏ 'cancelled'
+        // Lọc theo trạng thái (nếu có), nếu không thì lấy tất cả trừ 'cancelled'
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         } else {
             $query->where('status', '!=', 'cancelled');
         }
 
-        // 🔎 Lọc theo tên bệnh nhân
+        // Lọc theo tên bệnh nhân (nếu có)
         if ($request->filled('patient_name')) {
             $query->whereHas('patient', function ($q) use ($request) {
                 $q->where('full_name', 'like', '%' . $request->patient_name . '%');
             });
         }
 
-        // 📄 Phân trang
-        $appointments = $query->latest()->paginate(10);
+        // Phân trang kết quả
+        $appointments = $query->orderByDesc('created_at')->paginate(10);
 
-        // 📊 Thống kê số lượng theo trạng thái (loại trừ cancelled)
+        // Thống kê số lượng theo trạng thái (loại trừ cancelled)
+        $statuses = ['pending', 'confirmed', 'completed'];
         $counts = Appointment::where('doctor_id', $doctorId)
-            ->whereIn('status', ['pending', 'confirmed', 'completed'])
+            ->whereIn('status', $statuses)
             ->selectRaw("
-                COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
-                COUNT(CASE WHEN status = 'confirmed' THEN 1 END) as confirmed,
-                COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed
+                SUM(status = 'pending') as pending,
+                SUM(status = 'confirmed') as confirmed,
+                SUM(status = 'completed') as completed
             ")->first();
 
         return view('doctor.appointments.index', [
@@ -57,7 +58,7 @@ class AppointmentController extends Controller
      */
     public function show(Appointment $appointment)
     {
-        // 🛡 Đảm bảo chỉ bác sĩ chủ lịch hẹn mới được xem
+        // Chỉ bác sĩ chủ lịch hẹn mới được xem
         if ($appointment->doctor_id !== auth()->id()) {
             abort(403, 'Bạn không có quyền xem lịch hẹn này.');
         }
