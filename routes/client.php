@@ -205,9 +205,3 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/promotions/apply/{promotion}', [PromotionController::class, 'apply'])->name('client.promotions.apply');
     Route::post('/promotions/remove', [PromotionController::class, 'remove'])->name('client.promotions.remove');
 });
-
-
-
-
-
-

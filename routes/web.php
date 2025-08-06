@@ -525,16 +525,6 @@ Route::prefix('admin/categories')->name('admin.categories.')->group(function () 
     Route::delete('/destroy/{id}', [ServiceCategoryController::class, 'destroy'])->name('destroy');
     Route::get('/show/{id}', [ServiceCategoryController::class, 'show'])->name('show');
 });
-// Quản lý dịch vụ
-// Route::prefix('admin/services')->name('admin.services.')->group(function () {
-//     Route::get('/', [ServiceController::class, 'index'])->name('index');
-//     Route::get('/create', [ServiceController::class, 'create'])->name('create');
-//     Route::post('/store', [ServiceController::class, 'store'])->name('store');
-//     Route::get('/edit/{id}', [ServiceController::class, 'edit'])->name('edit');
-//     Route::put('/update/{id}', [ServiceController::class, 'update'])->name('update');
-//     Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])->name('destroy');
-//     Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
-// });
 
 Route::group([
     'prefix' => 'admin',
@@ -591,26 +581,6 @@ Route::group([
         Route::get('/show/{id}', [ServiceCategoryController::class, 'show'])->name('show');
     });
 
-
-    // Nhóm quản lý dịch vụ
-    // Route::group([
-    //     'prefix' => 'services',
-    //     'as' => 'services.',
-    //     'middleware' => ['auth', 'checkAdmin', 'check_permission:view_services']
-    // ], function () {
-    //     Route::get('/', [ServiceController::class, 'index'])->name('index');
-    //     Route::get('/create', [ServiceController::class, 'create'])
-    //         ->middleware('check_permission:create_services')->name('create');
-    //     Route::post('/store', [ServiceController::class, 'store'])
-    //         ->middleware('check_permission:create_services')->name('store');
-    //     Route::get('/edit/{id}', [ServiceController::class, 'edit'])
-    //         ->middleware('check_permission:edit_services')->name('edit');
-    //     Route::put('/edit/{id}', [ServiceController::class, 'update'])
-    //         ->middleware('check_permission:edit_services')->name('update');
-    //     Route::delete('/destroy/{id}', [ServiceController::class, 'destroy'])
-    //         ->middleware('check_permission:delete_services')->name('destroy');
-    //     Route::get('/show/{id}', [ServiceController::class, 'show'])->name('show');
-    // });
 
     // Quản lý câu hỏi thường gặp
     Route::group([
@@ -779,19 +749,6 @@ Route::get('/test-email', function () {
         return 'Lỗi: ' . $e->getMessage();
     }
 });
-
-
-
-
-// phân quyền bác sĩ
-// Route::get('/doctor/dashboard', function () {
-//     return view('doctor.dashboard');
-// })->name('doctor.dashboard');
-
-// Route::prefix('doctor')->name('doctor.')->middleware('auth')->group(function () {
-//     Route::get('/dashboard', fn() => view('doctor.dashboard'))->name('dashboard');
-//     Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
-// });
 
 Route::middleware(['auth', 'checkAdmin'])->group(function () {
     Route::get('/admin/system-notifications', [AdminNotificationController::class, 'index'])

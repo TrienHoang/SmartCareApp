@@ -145,7 +145,7 @@
                         </div>
 
                         <!-- QR Code Section -->
-                        @if ($appointment->status !== 'cancelled')
+                      @if ($appointment->status !== 'cancelled' && $appointment->status !== 'pending')
                             <div class="mb-8">
                                 <div class="bg-white rounded-2xl card-shadow p-6 text-center">
                                     <h2 class="text-xl font-semibold text-gray-800 mb-4">
