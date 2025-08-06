@@ -36,7 +36,7 @@
             {{-- Main Service Categories --}}
             <div class="mb-16">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold mb-4 gradient-text">Chuyên Khoa Chính</h2>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4 gradient-text">Các Danh Mục Dịch Vụ Chính</h2>
                     <div class="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 mx-auto rounded-full mb-6"></div>
                     <p class="text-gray-600 max-w-2xl mx-auto">
                         Khám phá các chuyên khoa y tế hàng đầu với đội ngũ bác sĩ chuyên môn cao

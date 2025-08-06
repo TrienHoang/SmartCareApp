@@ -10,70 +10,64 @@
             <div class="container mx-auto px-4">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
                     {{-- thông tin bác sĩ chỉnh lần 1 --}}
-{{-- Thông tin bác sĩ --}}
-<div class="lg:col-span-2 fade-in">
-    <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
-        {{-- Avatar --}}
-        <img
-            src="{{ $doctor->user && $doctor->user->avatar ? asset('storage/' . $doctor->user->avatar) : asset('images/default-doctor.png') }}"
-            alt="{{ $doctor->user->full_name ?? 'Bác sĩ' }}"
-            class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
+                    {{-- Thông tin bác sĩ --}}
+                    <div class="lg:col-span-2 fade-in">
+                        <div
+                            class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
+                            {{-- Avatar --}}
+                            <img src="{{ $doctor->user && $doctor->user->avatar ? asset('storage/' . $doctor->user->avatar) : asset('images/default-doctor.png') }}"
+                                alt="{{ $doctor->user->full_name ?? 'Bác sĩ' }}"
+                                class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
 
-        {{-- Thông tin chính --}}
-        <div class="flex-1">
-            {{-- Tên bác sĩ --}}
-            <h1 class="text-4xl font-bold mb-2">
-                BS. {{ $doctor->user->full_name ?? '[Không rõ tên]' }}
-            </h1>
+                            {{-- Thông tin chính --}}
+                            <div class="flex-1">
+                                {{-- Tên bác sĩ --}}
+                                <h1 class="text-4xl font-bold mb-2">
+                                    BS. {{ $doctor->user->full_name ?? '[Không rõ tên]' }}
+                                </h1>
 
-            {{-- Tên đăng nhập --}}
-            <p class="text-sm text-blue-200 mb-1">
-                <span class="font-semibold">Tên đăng nhập:</span>
-                {{ $doctor->user->username ?? '[Chưa có]' }}
-            </p>
 
-            {{-- Khoa/Phòng ban --}}
-            <p class="text-xl text-blue-100 mb-4">
-                {{ $doctor->department->name ?? 'Chuyên khoa không xác định' }}
-            </p>
+                                {{-- Khoa/Phòng ban --}}
+                                <p class="text-xl text-blue-100 mb-4">
+                                    {{ $doctor->department->name ?? 'Chuyên khoa không xác định' }}
+                                </p>
 
-            {{-- Đánh giá & Kinh nghiệm --}}
-            <div class="flex items-center space-x-4 mb-4">
-                {{-- Rating --}}
-                <div class="flex items-center">
-                    <div class="flex text-yellow-400 mr-2">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <i data-lucide="star"
-                               class="w-4 h-4 {{ $i <= round($doctor->average_rating ?? 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"></i>
-                        @endfor
+                                {{-- Đánh giá & Kinh nghiệm --}}
+                                <div class="flex items-center space-x-4 mb-4">
+                                    {{-- Rating --}}
+                                    <div class="flex items-center">
+                                        <div class="flex text-yellow-400 mr-2">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <i data-lucide="star"
+                                                    class="w-4 h-4 {{ $i <= round($doctor->average_rating ?? 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"></i>
+                                            @endfor
+                                        </div>
+                                        <span class="text-blue-100">
+                                            {{ number_format($doctor->average_rating ?? 5, 1) }}/5
+                                            ({{ $doctor->review_count ?? 0 }} đánh giá)
+                                        </span>
+                                    </div>
+
+                                    <span class="text-blue-200">•</span>
+
+                                    {{-- Kinh nghiệm --}}
+                                    <span class="text-blue-100">
+                                        {{ $doctor->experience_years ?? 'Nhiều' }} năm kinh nghiệm
+                                    </span>
+                                </div>
+
+                                {{-- Chuyên môn --}}
+                                <div class="flex flex-wrap gap-2">
+                                    @if ($doctor->specialties && $doctor->specialties->count())
+                                        @foreach ($doctor->specialties as $specialty)
+                                            <span
+                                                class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $specialty->name }}</span>
+                                        @endforeach
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <span class="text-blue-100">
-                        {{ number_format($doctor->average_rating ?? 5, 1) }}/5
-                        ({{ $doctor->review_count ?? 0 }} đánh giá)
-                    </span>
-                </div>
-
-                <span class="text-blue-200">•</span>
-
-                {{-- Kinh nghiệm --}}
-                <span class="text-blue-100">
-                    {{ $doctor->experience_years ?? 'Nhiều' }} năm kinh nghiệm
-                </span>
-            </div>
-
-            {{-- Chuyên môn --}}
-            <div class="flex flex-wrap gap-2">
-                @if ($doctor->specialties && $doctor->specialties->count())
-                    @foreach ($doctor->specialties as $specialty)
-                        <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $specialty->name }}</span>
-                    @endforeach
-                @else
-                    <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Đa khoa</span>
-                @endif
-            </div>
-        </div>
-    </div>
-</div>
 
 
 
@@ -120,10 +114,10 @@
                         class="tab-btn py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 whitespace-nowrap">
                         Đánh giá
                     </button>
-                    <button onclick="showTab('location')" id="tab-location"
+                    {{-- <button onclick="showTab('location')" id="tab-location"
                         class="tab-btn py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 whitespace-nowrap">
                         Địa điểm
-                    </button>
+                    </button> --}}
                 </nav>
             </div>
         </section>
@@ -136,17 +130,17 @@
                 <!-- Doctor Info Tab -->
                 <div id="content-info" class="tab-content">
                     <!-- About Section -->
-                <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 card-hover">
-                    <h2 class="text-2xl font-bold mb-6 gradient-text">Về Bác Sĩ</h2>
+                    <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 card-hover">
+                        <h2 class="text-2xl font-bold mb-6 gradient-text">Về Bác Sĩ</h2>
 
-                    <p class="text-gray-700 leading-relaxed mb-6">
-                        {{ $doctor->biography ?? 'Thông tin về bác sĩ đang được cập nhật.' }}
-                    </p>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            {{ $doctor->biography ?? 'Thông tin về bác sĩ đang được cập nhật.' }}
+                        </p>
 
-                    <p class="text-gray-700 leading-relaxed">
-                        {{ $doctor->user->full_name ?? 'Bác sĩ tận tâm với nhiều năm kinh nghiệm trong nghề.' }}
-                    </p>
-                </div>
+                        <p class="text-gray-700 leading-relaxed">
+                            {{ $doctor->user->full_name ?? 'Bác sĩ tận tâm với nhiều năm kinh nghiệm trong nghề.' }}
+                        </p>
+                    </div>
 
 
                     <!-- Education & Experience  học vấn cc-->
@@ -220,13 +214,6 @@
                     </div>
 
                 </div>
-
-
-
-
-
-
-
 
                 <!-- Schedule Tab -->
                 <div id="content-schedule" class="tab-content hidden">
@@ -366,7 +353,10 @@
                         <div class="space-y-6">
                             @forelse ($doctor->reviews->sortByDesc('created_at') as $review)
                                 @php
-                                    $editable = Auth::check() && $review->patient_id == Auth::id() && \Carbon\Carbon::parse($review->created_at)->diffInMinutes(now()) <= 60;
+                                    $editable =
+                                        Auth::check() &&
+                                        $review->patient_id == Auth::id() &&
+                                        \Carbon\Carbon::parse($review->created_at)->diffInMinutes(now()) <= 60;
                                 @endphp
                                 <div class="border-b pb-6">
                                     <div class="flex items-start space-x-4">
@@ -383,17 +373,18 @@
                                                         {{-- Đặt form bên dưới, chỉ hiển thị số sao ở đây --}}
                                                         @for ($i = 1; $i <= 5; $i++)
                                                             <label class="cursor-pointer flex items-center group">
-                                                                <input type="radio" name="rating_{{ $review->id }}" value="{{ $i }}" class="hidden"
+                                                                <input type="radio" name="rating_{{ $review->id }}"
+                                                                    value="{{ $i }}" class="hidden"
                                                                     {{ old('rating', $review->rating) == $i ? 'checked' : '' }}>
                                                                 <i data-lucide="star"
-                                                                   class="w-5 h-5 {{ $i <= old('rating', $review->rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"
-                                                                   data-value="{{ $i }}"></i>
+                                                                    class="w-5 h-5 {{ $i <= old('rating', $review->rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"
+                                                                    data-value="{{ $i }}"></i>
                                                             </label>
                                                         @endfor
                                                     @else
                                                         @for ($i = 1; $i <= 5; $i++)
                                                             <i data-lucide="star"
-                                                               class="w-4 h-4 {{ $i <= $review->rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"></i>
+                                                                class="w-4 h-4 {{ $i <= $review->rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"></i>
                                                         @endfor
                                                     @endif
                                                 </div>
@@ -403,18 +394,20 @@
                                             </div>
                                             <!-- Nội dung + form chỉnh sửa -->
                                             @if ($editable && request('edit_review_id') == $review->id)
-                                                <form method="POST" action="{{ url('/thong-tin-bac-si/' . $doctor->id . '/reviews/' . $review->id) }}">
+                                                <form method="POST"
+                                                    action="{{ url('/thong-tin-bac-si/' . $doctor->id . '/reviews/' . $review->id) }}">
                                                     @csrf
                                                     @method('PUT')
                                                     <div class="mb-2 flex items-center">
                                                         <label class="mr-2 text-sm">Đánh giá:</label>
                                                         @for ($i = 1; $i <= 5; $i++)
                                                             <label class="cursor-pointer flex items-center group">
-                                                                <input type="radio" name="rating" value="{{ $i }}" class="hidden"
+                                                                <input type="radio" name="rating"
+                                                                    value="{{ $i }}" class="hidden"
                                                                     {{ old('rating', $review->rating) == $i ? 'checked' : '' }}>
                                                                 <i data-lucide="star"
-                                                                   class="w-5 h-5 {{ $i <= old('rating', $review->rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"
-                                                                   data-value="{{ $i }}"></i>
+                                                                    class="w-5 h-5 {{ $i <= old('rating', $review->rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-none' }}"
+                                                                    data-value="{{ $i }}"></i>
                                                             </label>
                                                         @endfor
                                                     </div>
@@ -422,8 +415,10 @@
                                                         <textarea name="comment" rows="2" class="w-full border rounded p-2 text-sm" required>{{ old('comment', $review->comment) }}</textarea>
                                                     </div>
                                                     <div class="flex space-x-2">
-                                                        <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm font-medium">Lưu</button>
-                                                        <a href="{{ url()->current() }}" class="px-3 py-1 bg-gray-300 text-gray-700 rounded text-sm font-medium">Hủy</a>
+                                                        <button type="submit"
+                                                            class="px-3 py-1 bg-blue-600 text-white rounded text-sm font-medium">Lưu</button>
+                                                        <a href="{{ url()->current() }}"
+                                                            class="px-3 py-1 bg-gray-300 text-gray-700 rounded text-sm font-medium">Hủy</a>
                                                     </div>
                                                 </form>
                                             @else
@@ -500,7 +495,8 @@
                                 @elseif ($alreadyReviewed && $userReview)
                                     <div class="mb-4 p-4 border rounded bg-gray-100">
                                         <p class="text-sm mb-1 text-gray-700">Bạn đã đánh giá:
-                                            <strong>{{ $userReview->rating }} sao</strong></p>
+                                            <strong>{{ $userReview->rating }} sao</strong>
+                                        </p>
                                         <p class="text-sm text-gray-800 italic">"{{ $userReview->comment }}"</p>
                                         @if ($userReviewEditable)
                                             <div class="mt-2">
@@ -587,7 +583,7 @@
 
 
                 <!-- Location Tab -->
-                <div id="content-location" class="tab-content hidden">
+                {{-- <div id="content-location" class="tab-content hidden">
                     <div class="bg-white rounded-2xl shadow-lg p-8 card-hover">
                         <h2 class="text-2xl font-bold mb-6 gradient-text">Địa Điểm Khám</h2>
 
@@ -654,7 +650,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </main>
 
@@ -780,8 +776,6 @@
                     background: rgba(255, 255, 255, 0.9);
                 }
             </style>
-
-
         @endpush
 
 
@@ -863,19 +857,21 @@
                 window.addEventListener('load', animateOnScroll);
 
                 // Hiệu ứng click vào sao khi chỉnh sửa bình luận
-                document.addEventListener('DOMContentLoaded', function () {
+                document.addEventListener('DOMContentLoaded', function() {
                     // Hiệu ứng cho radio star trong form chỉnh sửa review
                     document.querySelectorAll('form[action*="/reviews/"]').forEach(function(form) {
                         const stars = form.querySelectorAll('label .w-5.h-5');
                         const radios = form.querySelectorAll('input[type="radio"][name="rating"]');
                         radios.forEach(function(radio, idx) {
-                            radio.addEventListener('change', function () {
+                            radio.addEventListener('change', function() {
                                 stars.forEach(function(star, i) {
                                     if (i < idx + 1) {
-                                        star.classList.add('text-yellow-400', 'fill-yellow-400');
+                                        star.classList.add('text-yellow-400',
+                                            'fill-yellow-400');
                                         star.classList.remove('text-gray-300', 'fill-none');
                                     } else {
-                                        star.classList.remove('text-yellow-400', 'fill-yellow-400');
+                                        star.classList.remove('text-yellow-400',
+                                            'fill-yellow-400');
                                         star.classList.add('text-gray-300', 'fill-none');
                                     }
                                 });

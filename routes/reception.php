@@ -64,7 +64,8 @@ Route::prefix('receptionist')
 
 
         Route::get('/checkin', [ReceptionistController::class, 'checkinView'])->name('checkin');
-        Route::post('/process-checkin', [ReceptionistController::class, 'processCheckin'])->name('process.checkin');
+        Route::post('/reception/checkin-info', [ReceptionistController::class, 'getAppointmentByQR'])->name('process.checkin');
+        Route::post('/reception/confirm-checkin', [ReceptionistController::class, 'confirmCheckin'])->name('confirm.checkin');
 
         // Lịch làm việc của bác sĩ
         Route::prefix('doctors')->name('doctors.')->group(function () {

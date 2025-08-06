@@ -672,11 +672,12 @@ class AppointmentController extends Controller
                         'completed_at' => now(),
                     ]);
                 } elseif ($request->status === 'confirmed') {
-                    $order->update(['status' => 'confirmed']);
-                } elseif ($request->status === 'checked_in') {
-                    $order->update(['status' => 'in_progress']);
+                    $order->update(['status' => 'paid']);
                 } elseif ($request->status === 'cancelled') {
                     $order->update(['status' => 'cancelled']);
+                } else {
+                    // fallback hoặc giữ nguyên nếu không match
+                    $order->update(['status' => 'pending']);
                 }
             }
 

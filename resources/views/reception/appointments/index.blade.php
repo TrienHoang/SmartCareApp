@@ -299,7 +299,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($appointments as $appointment)
+                                @forelse($appointments as $appointment) 
                                     <tr class="appointment-row" data-id="{{ $appointment->id }}">
                                         <td>
                                             <div class="custom-control custom-checkbox">
