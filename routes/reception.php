@@ -64,6 +64,8 @@ Route::prefix('receptionist')
             // xuất phiếu in
             Route::get('/{id}/payment-receipt', [ReceptionAppointmentController::class, 'printPaymentReceipt'])->name('payment-receipt');
             Route::get('/{id}/payment-receipt/print', [ReceptionAppointmentController::class, 'printPaymentReceiptPDF'])->name('payment-receipt.print');
+
+            Route::patch('/{id}/check-in', [ReceptionAppointmentController::class, 'checkIn'])->name('check-in');
         });
 
 

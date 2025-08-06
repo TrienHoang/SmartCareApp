@@ -793,8 +793,13 @@ class ReceptionAppointmentController extends Controller
         }
 
         DB::transaction(function () use ($appointment) {
+            $today = Carbon::now()->startOfDay();
+            $appointmentDate = Carbon::parse($appointment->appointment_time)->startOfDay();
+
+            $newStatus = $appointmentDate->equalTo($today) ? 'checked_in' : 'confirmed';
+
             $appointment->update([
-                'status' => 'confirmed',
+                'status' => $newStatus,
                 'updated_by' => auth()->id(),
             ]);
 
@@ -918,5 +923,23 @@ class ReceptionAppointmentController extends Controller
         $filename = 'phieu-thanh-toan-' . $appointment->id . '-' . date('Y-m-d') . '.pdf';
 
         return $pdf->download($filename);
+    }
+
+    public function checkIn($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+
+        if ($appointment->status !== 'confirmed') {
+            return back()->with('error', 'Lịch hẹn chưa được xác nhận.');
+        }
+
+        if (\Carbon\Carbon::parse($appointment->appointment_time)->toDateString() !== now()->toDateString()) {
+            return back()->with('error', 'Chỉ được checked-in vào đúng ngày hẹn.');
+        }
+
+        $appointment->status = 'checked_in';
+        $appointment->save();
+
+        return back()->with('success', 'Bệnh nhân đã được check-in lịch hẹn.');
     }
 }

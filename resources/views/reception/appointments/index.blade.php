@@ -431,6 +431,22 @@
                                                     </button>
                                                 @endif
 
+                                                @if (
+                                                    $appointment->status === 'confirmed' &&
+                                                        \Illuminate\Support\Carbon::parse($appointment->appointment_time)->isToday())
+                                                    <form
+                                                        action="{{ route('receptionist.appointments.check-in', $appointment->id) }}"
+                                                        method="post">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="btn btn-outline-success"
+                                                            data-toggle="tooltip" title="Check-in lịch hẹn">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+
+
                                                 @if ($appointment->payment && $appointment->payment->status !== 'paid')
                                                     <form method="POST"
                                                         action="{{ route('receptionist.appointments.confirm-payment', $appointment->id) }}">
