@@ -17,6 +17,7 @@ use App\Models\PaymentHistory;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\WorkingSchedule;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
@@ -865,5 +866,57 @@ class ReceptionAppointmentController extends Controller
         $doctors = $service->doctors()->with('user')->get();
 
         return response()->json($doctors);
+    }
+
+    public function printPaymentReceipt($id)
+    {
+        $appointment = Appointment::with([
+            'patient',
+            'doctor.user',
+            'service',
+            'payment' => function ($query) {
+                $query->with('promotion');
+            }
+        ])->findOrFail($id);
+
+        // Kiểm tra xem appointment đã có payment chưa
+        if (!$appointment->payment) {
+            return redirect()->back()->with('error', 'Lịch hẹn này chưa có thông tin thanh toán.');
+        }
+
+        // Kiểm tra trạng thái thanh toán
+        if ($appointment->payment->status !== 'paid') {
+            return redirect()->back()->with('error', 'Chỉ có thể in phiếu thanh toán cho các lịch hẹn đã thanh toán.');
+        }
+
+        return view('reception.appointments.payment-receipt', compact('appointment'));
+    }
+
+    public function printPaymentReceiptPDF($id)
+    {
+        $appointment = Appointment::with([
+            'patient',
+            'doctor.user',
+            'service',
+            'payment' => function ($query) {
+                $query->with('promotion');
+            }
+        ])->findOrFail($id);
+
+        // Kiểm tra xem appointment đã có payment chưa
+        if (!$appointment->payment) {
+            abort(404, 'Không tìm thấy thông tin thanh toán.');
+        }
+
+        // Kiểm tra trạng thái thanh toán
+        if ($appointment->payment->status !== 'paid') {
+            abort(403, 'Chỉ có thể in phiếu thanh toán cho các lịch hẹn đã thanh toán.');
+        }
+
+        $pdf = Pdf::loadView('reception.appointments.payment-receipt-pdf', compact('appointment'));
+
+        $filename = 'phieu-thanh-toan-' . $appointment->id . '-' . date('Y-m-d') . '.pdf';
+
+        return $pdf->download($filename);
     }
 }

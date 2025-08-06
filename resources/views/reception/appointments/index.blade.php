@@ -398,6 +398,15 @@
                                                     <i class="fas fa-eye"></i>
                                                 </a>
 
+                                                {{-- In phiếu thanh toán - chỉ hiển thị khi đã thanh toán --}}
+                                                @if ($appointment->payment && $appointment->payment->status === 'paid')
+                                                    <a href="{{ route('receptionist.appointments.payment-receipt.print', $appointment->id) }}"
+                                                        target="_blank" class="btn btn-success btn-sm"
+                                                        title="In phiếu thanh toán">
+                                                        <i class="fas fa-receipt"></i>
+                                                    </a>
+                                                @endif
+
                                                 @if ($appointment->status === 'pending')
                                                     <a href="{{ route('receptionist.appointments.edit', $appointment) }}"
                                                         class="btn btn-outline-warning" data-toggle="tooltip"
