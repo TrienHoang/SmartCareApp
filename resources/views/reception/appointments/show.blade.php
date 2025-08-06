@@ -224,6 +224,8 @@
                                                 Tiền mặt
                                             @elseif ($appointment->payment->payment_method === 'bank')
                                                 Ngân hàng
+                                            @elseif ($appointment->payment->payment_method === 'vnpay')
+                                                Ngân hàng VNPay
                                             @else
                                                 {{ ucfirst($appointment->payment->method ?? 'Không xác định') }}
                                             @endif
