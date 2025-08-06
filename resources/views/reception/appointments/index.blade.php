@@ -210,6 +210,10 @@
                                             {{ request('status') == 'confirmed' ? 'selected' : '' }}>
                                             Đã xác nhận
                                         </option>
+                                        <option value="checked_in"
+                                            {{ request('status') == 'checked_in' ? 'selected' : '' }}>
+                                            Đã check in
+                                        </option>
                                         <option value="completed"
                                             {{ request('status') == 'completed' ? 'selected' : '' }}>
                                             Hoàn thành
@@ -299,7 +303,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($appointments as $appointment)
+                                @forelse($appointments as $appointment) 
                                     <tr class="appointment-row" data-id="{{ $appointment->id }}">
                                         <td>
                                             <div class="custom-control custom-checkbox">
@@ -394,6 +398,15 @@
                                                     <i class="fas fa-eye"></i>
                                                 </a>
 
+                                                {{-- In phiếu thanh toán - chỉ hiển thị khi đã thanh toán --}}
+                                                @if ($appointment->payment && $appointment->payment->status === 'paid')
+                                                    <a href="{{ route('receptionist.appointments.payment-receipt.print', $appointment->id) }}"
+                                                        target="_blank" class="btn btn-success btn-sm"
+                                                        title="In phiếu thanh toán">
+                                                        <i class="fas fa-receipt"></i>
+                                                    </a>
+                                                @endif
+
                                                 @if ($appointment->status === 'pending')
                                                     <a href="{{ route('receptionist.appointments.edit', $appointment) }}"
                                                         class="btn btn-outline-warning" data-toggle="tooltip"
@@ -417,6 +430,22 @@
                                                         <i class="fas fa-times"></i>
                                                     </button>
                                                 @endif
+
+                                                @if (
+                                                    $appointment->status === 'confirmed' &&
+                                                        \Illuminate\Support\Carbon::parse($appointment->appointment_time)->isToday())
+                                                    <form
+                                                        action="{{ route('receptionist.appointments.check-in', $appointment->id) }}"
+                                                        method="post">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="btn btn-outline-success"
+                                                            data-toggle="tooltip" title="Check-in lịch hẹn">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+
 
                                                 @if ($appointment->payment && $appointment->payment->status !== 'paid')
                                                     <form method="POST"

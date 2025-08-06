@@ -21,6 +21,7 @@ class Payment extends Model
         'note',
         'refund_status',
         'paid_at',
+        'expires_at',
         'vnp_txn_ref',
         'vnp_transaction_no',
         'vnp_response_code',
@@ -30,6 +31,7 @@ class Payment extends Model
 
     protected $casts = [
         'paid_at' => 'datetime',
+        'expires_at' => 'datetime', // Cast expires_at to datetime
     ];
 
     public $timestamps = false;

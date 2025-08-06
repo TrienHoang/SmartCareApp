@@ -75,7 +75,7 @@ class Doctor extends Model
     {
         return $this->hasMany(DoctorLeave::class)
             ->where('approved', true);
-            // ->whereNull('deleted_at');
+        // ->whereNull('deleted_at');
     }
 
     public function isOnLeaveToday()
@@ -104,5 +104,10 @@ class Doctor extends Model
     public function specialties()
     {
         return $this->belongsToMany(Specialty::class, 'doctor_specialty');
+    }
+
+    public function doctors()
+    {
+        return $this->belongsToMany(Doctor::class, 'doctor_service', 'service_id', 'doctor_id');
     }
 }

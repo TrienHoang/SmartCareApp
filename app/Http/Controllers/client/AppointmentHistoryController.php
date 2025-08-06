@@ -18,17 +18,16 @@ class AppointmentHistoryController extends Controller
         $user = Auth::user();
 
         // Lấy danh sách các cuộc hẹn đã hoàn thành
-        $appointments = Appointment::with([
-            'doctor.user',                       // Bác sĩ và thông tin người dùng
-            'service',                           // Dịch vụ khám
-            'medicalRecord.prescription.items',  // Đơn thuốc qua medicalRecord
-            'payment',                           // Thanh toán
-            'review',                            // Đánh giá
-        ])
-        ->where('patient_id', $user->id)
-        ->where('status', 'completed')
-        ->orderByDesc('appointment_time')
-        ->get();
+ $appointments = Appointment::with([
+    'doctor.user',
+    'service',
+    'medicalRecord.prescription.items',
+    'payment',
+    'review',
+])
+->where('patient_id', $user->id)
+->orderByDesc('appointment_time')
+->get();
 
         return view('client.appointments.history', compact('appointments'));
     }

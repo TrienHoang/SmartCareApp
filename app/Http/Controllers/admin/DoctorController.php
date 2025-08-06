@@ -12,8 +12,11 @@ use App\Models\User;
 use App\Models\Department;
 use App\Models\Room;
 use App\Models\Appointment;
+use App\Models\Service;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+
+
 
 class DoctorController extends Controller
 {
@@ -37,18 +40,21 @@ class DoctorController extends Controller
         return view('admin.doctors.index', compact('doctors', 'departments'));
     }
 
-    public function create()
-    {
-        $existingDoctorUserIds = Doctor::pluck('user_id')->toArray();
+public function create()
+{
+    $existingDoctorUserIds = Doctor::pluck('user_id')->toArray();
 
-        $availableUsers = User::where('role_id', 2)
-            ->whereNotIn('id', $existingDoctorUserIds)
-            ->get();
+    $availableUsers = User::where('role_id', 2)
+        ->whereNotIn('id', $existingDoctorUserIds)
+        ->get();
 
-        $departments = Department::all();
+    $departments = Department::all();
+    $services = Service::where('status', 'active')->orderBy('name')->get(); // 👈 sửa ở đây
 
-        return view('admin.doctors.create', compact('availableUsers', 'departments'));
-    }
+    return view('admin.doctors.create', compact('availableUsers', 'departments', 'services'));
+}
+
+
 
     public function toggleStatus(Request $request, User $user)
     {
@@ -74,24 +80,9 @@ public function store(Request $request)
         'email'           => 'required|email|unique:users,email',
         'password'        => 'required|string|min:6',
         'avatar'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'specialization'  => 'required|string|max:255',
         'department_id'   => 'required|exists:departments,id',
-    ], [
-        'full_name.required'      => 'Vui lòng nhập họ và tên đầy đủ.',
-        'username.required'       => 'Vui lòng nhập tên đăng nhập.',
-        'username.unique'         => 'Tên đăng nhập đã tồn tại.',
-        'email.required'          => 'Vui lòng nhập email.',
-        'email.email'             => 'Email không đúng định dạng.',
-        'email.unique'            => 'Email này đã được sử dụng.',
-        'password.required'       => 'Vui lòng nhập mật khẩu.',
-        'password.min'            => 'Mật khẩu phải có ít nhất :min ký tự.',
-        'avatar.image'            => 'Ảnh đại diện phải là file hình ảnh.',
-        'avatar.mimes'            => 'Ảnh đại diện phải có định dạng jpeg, png, jpg hoặc gif.',
-        'avatar.max'              => 'Ảnh đại diện không được vượt quá 2MB.',
-        'specialization.required' => 'Vui lòng nhập chuyên môn.',
-        'specialization.max'      => 'Chuyên môn không được vượt quá 255 ký tự.',
-        'department_id.required'  => 'Vui lòng chọn phòng ban.',
-        'department_id.exists'    => 'Phòng ban đã chọn không hợp lệ.',
+        'service_ids'     => 'required|array',
+        'service_ids.*'   => 'exists:services,id',
     ]);
 
     $avatarPath = null;
@@ -106,18 +97,24 @@ public function store(Request $request)
         'password'  => Hash::make($request->password),
         'role_id'   => 2,
         'avatar'    => $avatarPath,
-        'status'    => 'online', // Trạng thái mặc định là online
+        'status'    => 'online',
     ]);
 
-    Doctor::create([
-        'user_id'        => $user->id,
-        'specialization' => $request->specialization,
-        'department_id'  => $request->department_id,
-        'biography'      => $request->biography,
+    $doctor = Doctor::create([
+        'user_id'       => $user->id,
+        'department_id' => $request->department_id,
+        'biography'     => $request->biography,
     ]);
+
+    // Gán dịch vụ cho bác sĩ qua bảng trung gian doctor_service
+    $doctor->services()->attach($request->service_ids);
 
     return redirect()->route('admin.doctors.index')->with('success', 'Đã thêm bác sĩ mới thành công.');
 }
+
+
+
+
 
 
 

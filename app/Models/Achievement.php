@@ -12,7 +12,7 @@ class Achievement extends Model
 protected $fillable = [
     'doctor_id',
     'title',
-    'organization', // ✅ Thêm dòng này
+    'organization', 
     'description',
     'year',
 ];

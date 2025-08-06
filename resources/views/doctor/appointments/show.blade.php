@@ -124,17 +124,31 @@
                 <p class="appointment-detail"><strong>Dịch vụ:</strong> {{ $appointment->service->name ?? 'Không xác định' }}
                 </p>
                 <p class="appointment-detail"><strong>Lý do:</strong> {{ $appointment->reason ?? 'Không có' }}</p>
-                <p class="appointment-detail"><strong>Trạng thái:</strong>
-                    @if ($appointment->status == 'pending')
-                        <span class="text-warning">Đang chờ</span>
-                    @elseif ($appointment->status == 'confirmed')
-                        <span class="text-success">Đã xác nhận</span>
-                    @elseif ($appointment->status == 'cancelled')
-                        <span class="text-danger">Đã hủy</span>
-                    @else
-                        <span class="text-secondary">Không xác định</span>
-                    @endif
-                </p>
+                @if (!in_array($appointment->status, ['completed', 'cancelled']))
+                    <form action="{{ route('doctor.appointments.updateStatus', $appointment->id) }}" method="POST"
+                        class="mt-4">
+                        @csrf
+                        @method('PUT')
+                        <div class="mb-3">
+                            <label for="status" class="form-label"><strong>Cập nhật trạng thái lịch hẹn:</strong></label>
+                            <select name="status" id="status" class="form-select w-auto d-inline-block">
+                                <option value="pending" {{ $appointment->status == 'pending' ? 'selected' : '' }}>Đang chờ
+                                </option>
+                                <option value="confirmed" {{ $appointment->status == 'confirmed' ? 'selected' : '' }}>Đã xác
+                                    nhận</option>
+                                <option value="check_in" {{ $appointment->status == 'check_in' ? 'selected' : '' }}>Đã đến
+                                </option>
+                                <option value="completed" {{ $appointment->status == 'completed' ? 'selected' : '' }}>Hoàn
+                                    tất</option>
+                                <option value="cancelled" {{ $appointment->status == 'cancelled' ? 'selected' : '' }}>Đã
+                                    hủy</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary ms-2">Cập nhật</button>
+                        </div>
+                    </form>
+                @endif
+
+
                 <p class="appointment-detail"><strong>Ghi chú:</strong> {{ $appointment->notes ?? 'Không có' }}</p>
                 <a href="{{ route('doctor.appointments.index') }}" class="btn btn-back">← Quay lại lịch</a>
             </div>

@@ -48,7 +48,7 @@
         </li>
 
         <!-- Bác sĩ & phòng ban -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Bác sĩ & phòng ban</span></li>
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">Bác sĩ & Khoa</span></li>
 
         <li class="menu-item">
             <a href="{{ route('admin.doctors.index') }}" class="menu-link menu-toggle">
@@ -85,7 +85,7 @@
         <li class="menu-item">
             <a href="{{ route('admin.departments.index') }}" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-building-house"></i>
-                <div>Quản lý phòng ban</div>
+                <div>Quản lý khoa</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item"><a href="{{ route('admin.departments.index') }}" class="menu-link">
@@ -112,18 +112,12 @@
             </ul>
         </li>
 
-
-
-
-
         <li class="menu-item">
             <a href="{{ route('admin.treatment-plans.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-notepad"></i> <!-- Icon phù hợp với "kế hoạch điều trị" -->
                 <div>Quản lý kế hoạch điều trị</div>
             </a>
         </li>
-
-
 
         <!-- Dịch vụ & đơn thuốc -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Dịch vụ & đơn thuốc</span></li>
@@ -156,18 +150,32 @@
                     </a></li>
             </ul>
         </li>
+        <li class="menu-item">
+            <a href="{{ route('admin.medicines.index') }}" class="menu-link menu-toggle">
+                <i class="menu-icon fas fa-file-prescription"></i>
+                <div>Quản lý thuốc</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item"><a href="{{ route('admin.medicines.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
+                <li class="menu-item"><a href="{{ route('admin.prescriptions.create') }}" class="menu-link">
+                        <div>Thêm mới</div>
+                    </a></li>
+            </ul>
+        </li>
 
         <!-- Quản lý đơn hàng -->
         <li class="menu-item">
-            <a href="{{ route('orders.index') }}" class="menu-link menu-toggle">
+            <a href="{{ route('orders.index') }}" class="menu-link ">
                 <i class="menu-icon tf-icons bx bx-receipt"></i>
-                <div>Quản lý đơn hàng</div>
+                <div>Danh sách giao dịch</div>
             </a>
-            <ul class="menu-sub">
+            {{-- <ul class="menu-sub">
                 <li class="menu-item"><a href="{{ route('orders.index') }}" class="menu-link">
                         <div>Danh sách</div>
                     </a></li>
-            </ul>
+            </ul> --}}
         </li>
 
         <!-- Tiện ích -->

@@ -14,7 +14,8 @@
                                 <i class="bx bx-calendar text-white"></i>
                             </div>
                             <div>
-                                <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý Lịch làm việc</h2>
+                                <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý Lịch làm việc
+                                </h2>
                                 <p class="text-muted mb-0">Quản lý và theo dõi tất cả lịch làm việc trong hệ thống</p>
                             </div>
                         </div>
@@ -22,7 +23,8 @@
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb bg-transparent p-0">
                                     <li class="breadcrumb-item">
-                                        <a href="{{ route('admin.dashboard.index') }}" class="text-decoration-none">Trang chủ</a>
+                                        <a href="{{ route('admin.dashboard.index') }}" class="text-decoration-none">Trang
+                                            chủ</a>
                                     </li>
                                     <li class="breadcrumb-item active text-primary font-weight-semibold">Lịch làm việc</li>
                                 </ol>
@@ -80,7 +82,7 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white mb-0">
-                                        {{ $workingSchedules->where('status', 'Đã duyệt')->count() }}
+                                        {{ $approvedCount }}
                                     </h4>
                                     <small class="text-white">Đã duyệt</small>
                                 </div>
@@ -99,7 +101,7 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white mb-0">
-                                        {{ $workingSchedules->where('status', 'Chờ xét duyệt')->count() }}
+                                        {{ $pendingCount }}
                                     </h4>
                                     <small class="text-white">Chờ xét duyệt</small>
                                 </div>
@@ -118,7 +120,7 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white mb-0">
-                                        {{ $workingSchedules->where('day', '>=', now()->startOfWeek())->where('day', '<=', now()->endOfWeek())->count() }}
+                                        {{ $thisWeekCount }}
                                     </h4>
                                     <small class="text-white">Tuần này</small>
                                 </div>
@@ -137,7 +139,7 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white mb-0">
-                                        {{ $workingSchedules->where('day', '<', now())->where('status', 'Chờ xét duyệt')->count() }}
+                                        {{ $overdueCount }}
                                     </h4>
                                     <small class="text-white">Quá hạn</small>
                                 </div>
@@ -155,8 +157,12 @@
                             <i class="bx bx-list mr-2"></i>
                             <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách Lịch làm việc</h4>
                         </div>
-                        <div class="card-tools">
-                            <span class="badge badge-light">{{ $workingSchedules->total() }} lịch làm việc</span>
+                        <div class="card-tools d-flex align-items-center">
+                            <span class="badge badge-light mr-2">{{ $workingSchedules->total() }} lịch làm việc</span>
+                            <button type="button" class="btn btn-sm btn-success" id="bulk-approve-btn"
+                                data-toggle="tooltip" title="Duyệt tất cả lịch được chọn">
+                                <i class="bx bx-check-double"></i> Duyệt tất cả
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -199,8 +205,7 @@
                                             {{ request('status') == 'Chờ xét duyệt' ? 'selected' : '' }}>
                                             Chờ xét duyệt
                                         </option>
-                                        <option value="Đã duyệt"
-                                            {{ request('status') == 'Đã duyệt' ? 'selected' : '' }}>
+                                        <option value="Đã duyệt" {{ request('status') == 'Đã duyệt' ? 'selected' : '' }}>
                                             Đã duyệt
                                         </option>
                                     </select>
@@ -256,7 +261,8 @@
                                         <td>
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" class="custom-control-input schedule-checkbox"
-                                                    id="schedule-{{ $schedule->id }}" value="{{ $schedule->id }}">
+                                                    id="schedule-{{ $schedule->id }}" value="{{ $schedule->id }}"
+                                                    {{ $schedule->status !== 'Chờ xét duyệt' ? 'disabled' : '' }}>
                                                 <label class="custom-control-label"
                                                     for="schedule-{{ $schedule->id }}"></label>
                                             </div>
@@ -266,7 +272,8 @@
                                         </td>
                                         <td>
                                             <div class="text-blue">
-                                                <span class="font-weight-bold">{{ $schedule->doctor->user->full_name ?? 'N/A' }}</span>
+                                                <span
+                                                    class="font-weight-bold">{{ $schedule->doctor->user->full_name ?? 'N/A' }}</span>
                                             </div>
                                         </td>
                                         <td>
@@ -310,7 +317,7 @@
                                             </div>
                                         </td>
                                         <td>
-                                           @if ($schedule->status === 'Đã xét duyệt')
+                                            @if ($schedule->status === 'Đã xét duyệt')
                                                 <span class="badge badge-success badge-pill">
                                                     <i class="bx bx-check-circle mr-1"></i>
                                                     Đã duyệt
@@ -350,7 +357,8 @@
                                             <div class="empty-state">
                                                 <i class="bx bx-calendar-x text-muted" style="font-size: 48px;"></i>
                                                 <h5 class="mt-3 text-muted">Không có lịch làm việc nào</h5>
-                                                <p class="text-muted">Chưa có lịch làm việc nào được tạo hoặc không tìm thấy
+                                                <p class="text-muted">Chưa có lịch làm việc nào được tạo hoặc không tìm
+                                                    thấy
                                                     kết quả phù hợp.</p>
                                                 <a href="{{ route('admin.schedules.create') }}" class="btn btn-primary">
                                                     <i class="bx bx-plus mr-1"></i>Tạo lịch làm việc đầu tiên
@@ -565,15 +573,15 @@
 
 @push('scripts')
     <script>
-        // Select all checkboxes functionality
+        // Select all checkboxes for pending schedules only
         document.getElementById('select-all').addEventListener('change', function() {
-            const checkboxes = document.querySelectorAll('.schedule-checkbox');
+            const checkboxes = document.querySelectorAll('.schedule-checkbox:not(:disabled)');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = this.checked;
             });
         });
 
-        // Approve schedule function
+        // Approve single schedule
         function approveSchedule(id) {
             Swal.fire({
                 title: 'Xác nhận duyệt lịch',
@@ -586,7 +594,6 @@
                 cancelButtonText: 'Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Create and submit form
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = `/admin/schedules/${id}/status`;
@@ -603,11 +610,61 @@
             });
         }
 
-        // Initialize tooltips
+        // Bulk approve selected schedules
+        document.getElementById('bulk-approve-btn').addEventListener('click', function() {
+            const selectedCheckboxes = document.querySelectorAll('.schedule-checkbox:checked');
+            const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+            if (selectedIds.length === 0) {
+                Swal.fire({
+                    title: 'Chưa chọn lịch',
+                    text: 'Vui lòng chọn ít nhất một lịch làm việc để duyệt.',
+                    icon: 'warning',
+                    confirmButtonColor: '#6c757d',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Xác nhận duyệt hàng loạt',
+                text: `Bạn có chắc chắn muốn duyệt ${selectedIds.length} lịch làm việc đã chọn?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Duyệt tất cả',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '{{ route('admin.schedules.bulk-approve') }}';
+
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '_token';
+                    csrfToken.value = '{{ csrf_token() }}';
+                    form.appendChild(csrfToken);
+
+                    selectedIds.forEach(id => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'schedule_ids[]';
+                        input.value = id;
+                        form.appendChild(input);
+                    });
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        });
+
+        // Initialize tooltips and auto-hide alerts
         $(document).ready(function() {
             $('[data-toggle="tooltip"]').tooltip();
 
-            // Auto-hide alerts after 5 seconds
             setTimeout(function() {
                 $('.alert').fadeOut('slow');
             }, 5000);

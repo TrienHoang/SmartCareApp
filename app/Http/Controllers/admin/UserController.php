@@ -50,33 +50,40 @@ class UserController extends Controller
 
     public function edit($id)
     {
+        // Kiểm tra nếu người dùng đang đăng nhập cố gắng sửa chính mình
         if (Auth::check() && Auth::id() == $id) {
-            return redirect()->route('admin.users.index')->with('error', 'Bạn không thể sửa quyền của chính mình.');
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Bạn không thể sửa quyền của chính mình.');
         }
 
+        // Tìm người dùng và vai trò
         $user = User::findOrFail($id);
-        $roles = Role::all();
+        $roles = Role::where('id', '!=', 1)->get(); // Loại bỏ role_id = 1 (admin)
 
         return view('admin.users.edit', compact('user', 'roles'));
     }
 
     public function update(Request $request, $id)
     {
+        // Kiểm tra nếu người dùng đang đăng nhập cố gắng sửa chính mình
         if (Auth::check() && Auth::id() == $id) {
-            return redirect()->route('admin.users.index')->with('error', 'Bạn không thể sửa quyền của chính mình.');
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Bạn không thể sửa quyền của chính mình.');
         }
 
+        // Xác thực dữ liệu đầu vào
         $request->validate([
-            'role_id' => 'required|exists:roles,id',
+            'role_id' => 'required|exists:roles,id|not_in:1', // Không cho phép gán role_id = 1 (admin)
         ]);
 
+        // Tìm và cập nhật người dùng
         $user = User::findOrFail($id);
         $user->role_id = $request->role_id;
         $user->save();
 
-        return redirect()->route('admin.users.index')->with('success', 'Cập nhật quyền thành công.');
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Cập nhật quyền thành công.');
     }
-
     public function search()
     {
         $search = request()->input('search');
