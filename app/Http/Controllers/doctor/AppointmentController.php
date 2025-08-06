@@ -4,11 +4,67 @@ namespace App\Http\Controllers\Doctor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
-    public function show(Appointment $appointment)
+    /**
+     * Hiển thị danh sách lịch hẹn của bác sĩ hiện tại.
+     */
+    public function index(Request $request)
     {
+        $doctorId = Auth::user()->doctor->id;
+
+        $query = Appointment::with(['patient', 'service'])
+            ->where('doctor_id', $doctorId);
+
+        // 🔎 Lọc theo trạng thái (nếu có), mặc định loại bỏ 'cancelled'
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        } else {
+            $query->where('status', '!=', 'cancelled');
+        }
+
+        // 🔎 Lọc theo tên bệnh nhân
+        if ($request->filled('patient_name')) {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('full_name', 'like', '%' . $request->patient_name . '%');
+            });
+        }
+
+        // 📄 Phân trang
+        $appointments = $query->latest()->paginate(10);
+
+        $counts = Appointment::where('doctor_id', $doctorId)
+            ->whereIn('status', ['pending', 'confirmed', 'completed'])
+            ->selectRaw("
+                COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
+                COUNT(CASE WHEN status = 'confirmed' THEN 1 END) as confirmed,
+                COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed
+            ")->first();
+
+        return view('doctor.appointments.index', [
+            'appointments' => $appointments,
+            'appointments_pending' => $counts->pending ?? 0,
+            'appointments_confirmed' => $counts->confirmed ?? 0,
+            'appointments_completed' => $counts->completed ?? 0,
+        ]);
+    }
+
+    /**
+     * Hiển thị chi tiết một lịch hẹn.
+     */
+    public function show( $id)
+    {
+
+        $doctorId = Auth::user()->doctor->id;
+
+        $appointment = Appointment::with(['patient', 'doctor', 'service'])
+            ->where('id', $id)
+            ->where('doctor_id', $doctorId)
+            ->firstOrFail();
+
         return view('doctor.appointments.show', compact('appointment'));
     }
 }

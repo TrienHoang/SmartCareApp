@@ -16,9 +16,8 @@
 
         <form method="POST" action="{{ route('admin.doctors.store') }}" enctype="multipart/form-data">
             @csrf
-
             <div class="row">
-                {{-- Full name --}}
+                {{-- Họ và tên --}}
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-semibold">Họ và tên đầy đủ <span class="text-danger">*</span></label>
                     <input type="text" name="full_name" class="form-control @error('full_name') is-invalid @enderror"
@@ -28,11 +27,11 @@
                     @enderror
                 </div>
 
-                {{-- Username --}}
+                {{-- Tên đăng nhập --}}
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-semibold">Tên đăng nhập <span class="text-danger">*</span></label>
                     <input type="text" name="username" class="form-control @error('username') is-invalid @enderror"
-                        value="{{ old('username') }}" placeholder="VD: nguyenvana123">
+                        value="{{ old('username') }}" placeholder="VD: nguyenvana123" autocomplete="off">
                     @error('username')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
@@ -48,17 +47,17 @@
                     @enderror
                 </div>
 
-                {{-- Password --}}
+                {{-- Mật khẩu --}}
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-semibold">Mật khẩu <span class="text-danger">*</span></label>
                     <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
-                        placeholder="Nhập mật khẩu...">
+                        placeholder="Nhập mật khẩu" autocomplete="new-password">
                     @error('password')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
                 </div>
 
-                {{-- Avatar --}}
+                {{-- Ảnh đại diện --}}
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-semibold">Ảnh đại diện</label>
                     <input type="file" name="avatar" class="form-control @error('avatar') is-invalid @enderror">
@@ -68,20 +67,28 @@
                 </div>
             </div>
 
-
             <hr class="my-3">
 
             <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Chuyên môn <span class="text-danger">*</span></label>
-                    <input type="text" name="specialization"
-                        class="form-control @error('specialization') is-invalid @enderror"
-                        value="{{ old('specialization') }}" placeholder="VD: Nội tổng quát">
-                    @error('specialization')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                    @enderror
-                </div>
+                {{-- Chuyên môn (Danh mục dịch vụ) --}}
+<div class="col-md-6 mb-3">
+    <label class="form-label fw-semibold">Dịch vụ <span class="text-danger">*</span></label>
+    <select name="service_id" class="form-select @error('service_id') is-invalid @enderror">
+        <option value="">-- Chọn dịch vụ --</option>
+        @foreach($services as $service)
+            <option value="{{ $service->id }}" {{ old('service_id') == $service->id ? 'selected' : '' }}>
+                {{ $service->name }}
+            </option>
+        @endforeach
+    </select>
+    @error('service_id')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+    @enderror
+</div>
 
+
+
+                {{-- Phòng ban --}}
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-semibold">Phòng ban <span class="text-danger">*</span></label>
                     <select name="department_id" class="form-select @error('department_id') is-invalid @enderror">
@@ -97,6 +104,7 @@
                     @enderror
                 </div>
 
+                {{-- Tiểu sử --}}
                 <div class="col-12 mb-3">
                     <label class="form-label fw-semibold">Tiểu sử</label>
                     <textarea name="biography" class="form-control @error('biography') is-invalid @enderror" rows="4"
@@ -108,13 +116,10 @@
             </div>
 
             <div class="d-flex justify-content-center gap-3 mt-4">
-                <button type="submit" class="btn btn-success px-4">
-                    Thêm bác sĩ
-                </button>
-                <a href="{{ route('admin.doctors.index') }}" class="btn btn-secondary px-4">
-                    Quay lại
-                </a>
+                <button type="submit" class="btn btn-success px-4">Thêm bác sĩ</button>
+                <a href="{{ route('admin.doctors.index') }}" class="btn btn-secondary px-4">Quay lại</a>
             </div>
         </form>
+
     </div>
 @endsection

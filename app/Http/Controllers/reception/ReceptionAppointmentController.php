@@ -17,6 +17,7 @@ use App\Models\PaymentHistory;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\WorkingSchedule;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
@@ -146,6 +147,7 @@ class ReceptionAppointmentController extends Controller
         $specificDates = $doctor->workingSchedules()
             ->whereNotNull('day')
             ->where('day', '>=', now()->toDateString())
+            ->where('status', 'Đã xét duyệt')
             ->pluck('day')
             ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
             ->unique()
@@ -218,6 +220,7 @@ class ReceptionAppointmentController extends Controller
         $lunchEnd   = Carbon::parse("$date 13:00");
 
         $availableSlots = [];
+        $now = now();
 
         foreach ($workings as $working) {
             $shiftStart = Carbon::parse("$date {$working->shift->start_time}");
@@ -227,6 +230,12 @@ class ReceptionAppointmentController extends Controller
             while ($start->copy()->addMinutes($slotDuration) <= $shiftEnd) {
                 $slotStart = $start->copy();
                 $slotEnd = $slotStart->copy()->addMinutes($slotDuration);
+
+                // Nếu ngày được chọn là ngày hôm nay, loại bỏ các giờ đã qua
+                if ($date === $now->toDateString() && $slotEnd <= $now) {
+                    $start->addMinutes(5);
+                    continue;
+                }
 
                 // Bỏ qua khung giờ rơi vào giờ nghỉ trưa
                 if (
@@ -281,6 +290,7 @@ class ReceptionAppointmentController extends Controller
             'doctor_id.required' => 'Vui lòng chọn bác sĩ.',
             'service_id.required' => 'Vui lòng chọn dịch vụ khám.',
             'appointment_time.required' => 'Vui lòng chọn thời gian hẹn.',
+            'appointment_time.after' => 'Thời gian hẹn phải lớn hơn hôm nay.',
             'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
         ]);
 
@@ -783,8 +793,13 @@ class ReceptionAppointmentController extends Controller
         }
 
         DB::transaction(function () use ($appointment) {
+            $today = Carbon::now()->startOfDay();
+            $appointmentDate = Carbon::parse($appointment->appointment_time)->startOfDay();
+
+            $newStatus = $appointmentDate->equalTo($today) ? 'checked_in' : 'confirmed';
+
             $appointment->update([
-                'status' => 'confirmed',
+                'status' => $newStatus,
                 'updated_by' => auth()->id(),
             ]);
 
@@ -856,5 +871,75 @@ class ReceptionAppointmentController extends Controller
         $doctors = $service->doctors()->with('user')->get();
 
         return response()->json($doctors);
+    }
+
+    public function printPaymentReceipt($id)
+    {
+        $appointment = Appointment::with([
+            'patient',
+            'doctor.user',
+            'service',
+            'payment' => function ($query) {
+                $query->with('promotion');
+            }
+        ])->findOrFail($id);
+
+        // Kiểm tra xem appointment đã có payment chưa
+        if (!$appointment->payment) {
+            return redirect()->back()->with('error', 'Lịch hẹn này chưa có thông tin thanh toán.');
+        }
+
+        // Kiểm tra trạng thái thanh toán
+        if ($appointment->payment->status !== 'paid') {
+            return redirect()->back()->with('error', 'Chỉ có thể in phiếu thanh toán cho các lịch hẹn đã thanh toán.');
+        }
+
+        return view('reception.appointments.payment-receipt', compact('appointment'));
+    }
+
+    public function printPaymentReceiptPDF($id)
+    {
+        $appointment = Appointment::with([
+            'patient',
+            'doctor.user',
+            'service',
+            'payment' => function ($query) {
+                $query->with('promotion');
+            }
+        ])->findOrFail($id);
+
+        // Kiểm tra xem appointment đã có payment chưa
+        if (!$appointment->payment) {
+            abort(404, 'Không tìm thấy thông tin thanh toán.');
+        }
+
+        // Kiểm tra trạng thái thanh toán
+        if ($appointment->payment->status !== 'paid') {
+            abort(403, 'Chỉ có thể in phiếu thanh toán cho các lịch hẹn đã thanh toán.');
+        }
+
+        $pdf = Pdf::loadView('reception.appointments.payment-receipt-pdf', compact('appointment'));
+
+        $filename = 'phieu-thanh-toan-' . $appointment->id . '-' . date('Y-m-d') . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    public function checkIn($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+
+        if ($appointment->status !== 'confirmed') {
+            return back()->with('error', 'Lịch hẹn chưa được xác nhận.');
+        }
+
+        if (\Carbon\Carbon::parse($appointment->appointment_time)->toDateString() !== now()->toDateString()) {
+            return back()->with('error', 'Chỉ được checked-in vào đúng ngày hẹn.');
+        }
+
+        $appointment->status = 'checked_in';
+        $appointment->save();
+
+        return back()->with('success', 'Bệnh nhân đã được check-in lịch hẹn.');
     }
 }

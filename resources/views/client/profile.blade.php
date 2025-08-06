@@ -22,8 +22,9 @@
                                     <i data-lucide="camera" class="w-4 h-4"></i>
                                 </button>
                             </div>
-                            <h3 class="text-xl font-bold mb-2">{{ $user->name ?? 'Người dùng' }}</h3>
+                            <h3 class="text-xl font-bold mb-2">{{ $user->full_name ?? 'Người dùng' }}</h3>
                             <p class="text-gray-600">{{ $user->email ?? 'email@example.com' }}</p>
+
                         </div>
 
                         {{-- Menu --}}
@@ -49,11 +50,11 @@
                                 <i data-lucide="clock" class="w-5 h-5"></i>
                                 <span>Lịch Hẹn</span>
                             </a>
-                            <a href="#ho-so-y-te"
+                            {{-- <a href="#ho-so-y-te"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="file-text" class="w-5 h-5"></i>
                                 <span>Hồ Sơ Y Tế</span>
-                            </a>
+                            </a> --}}
                             <a href="{{ route('client.notifications.index') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="bell" class="w-5 h-5"></i>
@@ -70,11 +71,11 @@
                                     </span>
                                 @endif
                             </a>
-                            <a href="#cai-dat"
+                            {{-- <a href="#cai-dat"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="settings" class="w-5 h-5"></i>
                                 <span>Cài Đặt</span>
-                            </a>
+                            </a> --}}
                             <a href="{{ route('client.payment_history.index') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="credit-card" class="w-5 h-5"></i>
@@ -326,36 +327,38 @@
                     @endif
                 </div>
 
+                {{-- ... giữ nguyên phần mở đầu modal và tiêu đề ... --}}
+
                 <form method="POST" action="{{ route('client.profile.update') }}" enctype="multipart/form-data"
                     class="p-6 pt-0">
                     @csrf
                     @method('PATCH')
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {{-- Full Name --}}
+                        {{-- Họ và Tên --}}
                         <div>
                             <label for="full_name" class="block text-sm font-semibold text-gray-700 mb-2">Họ và Tên
                                 *</label>
                             <input type="text" id="full_name" name="full_name"
                                 value="{{ old('full_name', $user->full_name ?? '') }}"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                required>
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                             @error('full_name')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
+
                         {{-- Email --}}
                         <div>
                             <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
                             <input type="email" id="email" name="email"
                                 value="{{ old('email', $user->email ?? '') }}"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                required>
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                             @error('email')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        {{-- Phone --}}
+
+                        {{-- Số Điện Thoại --}}
                         <div>
                             <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Số Điện
                                 Thoại</label>
@@ -366,8 +369,9 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        {{-- Date of Birth --}}
-                        <div> {{-- This div now pairs with "Phone" --}}
+
+                        {{-- Ngày Sinh --}}
+                        <div>
                             <label for="date_of_birth" class="block text-sm font-semibold text-gray-700 mb-2">Ngày
                                 Sinh</label>
                             <input type="date" id="date_of_birth" name="date_of_birth"
@@ -377,8 +381,9 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        {{-- Gender --}}
-                        <div> {{-- This div is now alone, but it will be visually fine as we move address to its own md:col-span-2 --}}
+
+                        {{-- Giới Tính --}}
+                        <div>
                             <label for="gender" class="block text-sm font-semibold text-gray-700 mb-2">Giới Tính</label>
                             <select id="gender" name="gender"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
@@ -393,7 +398,7 @@
                             @enderror
                         </div>
 
-                        {{-- Address - Ensure it spans 2 columns --}}
+                        {{-- Địa Chỉ --}}
                         <div class="md:col-span-2">
                             <label for="address" class="block text-sm font-semibold text-gray-700 mb-2">Địa Chỉ</label>
                             <textarea id="address" name="address" rows="3"
@@ -402,7 +407,8 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        {{-- Avatar - Ensure it spans 2 columns --}}
+
+                        {{-- Avatar --}}
                         <div class="md:col-span-2">
                             <label for="avatar" class="block text-sm font-semibold text-gray-700 mb-2">Ảnh Đại
                                 Diện</label>
@@ -417,58 +423,60 @@
                             @enderror
                         </div>
                     </div>
-                    <div class="mt-6 text-right"> {{-- Align button to the right --}}
+
+                    <div class="mt-6 text-right">
                         <button type="submit"
                             class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors shadow-lg">
                             Cập Nhật Thông Tin
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
 
-        {{-- Medical Record Modal (existing, assume it's styled correctly or will be) --}}
-        <div id="medicalModal"
-            class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-            {{-- Content for medical modal goes here --}}
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-2xl font-bold gradient-text">Hồ Sơ Y Tế</h2>
-                    <button onclick="closeMedicalModal()" class="text-gray-500 hover:text-gray-700 transition-colors">
-                        <i data-lucide="x" class="w-6 h-6"></i>
-                    </button>
+
+
+                {{-- Medical Record Modal (existing, assume it's styled correctly or will be) --}}
+                <div id="medicalModal"
+                    class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+                    {{-- Content for medical modal goes here --}}
+                    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-2xl font-bold gradient-text">Hồ Sơ Y Tế</h2>
+                            <button onclick="closeMedicalModal()"
+                                class="text-gray-500 hover:text-gray-700 transition-colors">
+                                <i data-lucide="x" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+                        <p>Nội dung hồ sơ y tế sẽ hiển thị ở đây.</p>
+                        <div class="mt-4 text-right">
+                            <button onclick="closeMedicalModal()"
+                                class="bg-gray-300 text-gray-800 px-4 py-2 rounded-full hover:bg-gray-400 transition-colors">Đóng</button>
+                        </div>
+                    </div>
                 </div>
-                <p>Nội dung hồ sơ y tế sẽ hiển thị ở đây.</p>
-                <div class="mt-4 text-right">
-                    <button onclick="closeMedicalModal()"
-                        class="bg-gray-300 text-gray-800 px-4 py-2 rounded-full hover:bg-gray-400 transition-colors">Đóng</button>
-                </div>
             </div>
-        </div>
-    </div>
 
-    <script>
-        function openEditModal() {
-            document.getElementById('editModal').classList.remove('hidden');
-        }
+            <script>
+                function openEditModal() {
+                    document.getElementById('editModal').classList.remove('hidden');
+                }
 
-        function closeEditModal() {
-            document.getElementById('editModal').classList.add('hidden');
-        }
+                function closeEditModal() {
+                    document.getElementById('editModal').classList.add('hidden');
+                }
 
-        function openMedicalModal() {
-            document.getElementById('medicalModal').classList.remove('hidden');
-        }
+                function openMedicalModal() {
+                    document.getElementById('medicalModal').classList.remove('hidden');
+                }
 
-        function closeMedicalModal() {
-            document.getElementById('medicalModal').classList.add('hidden');
-        }
+                function closeMedicalModal() {
+                    document.getElementById('medicalModal').classList.add('hidden');
+                }
 
-        // Add this to ensure the modal opens if there are validation errors on submission
-        @if ($errors->any() || session('success') || session('error'))
-            document.addEventListener('DOMContentLoaded', function() {
-                openEditModal();
-            });
-        @endif
-    </script>
-@endsection
+                // Add this to ensure the modal opens if there are validation errors on submission
+                @if ($errors->any() || session('success') || session('error'))
+                    document.addEventListener('DOMContentLoaded', function() {
+                        openEditModal();
+                    });
+                @endif
+            </script>
+        @endsection

@@ -47,13 +47,13 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
-'onesignal' => [
-    'app_id' => env('ONESIGNAL_APP_ID'),
-    'rest_api_key' => env('ONESIGNAL_REST_API_KEY'),
-    'user_auth_key' => env('ONESIGNAL_USER_AUTH_KEY'),
-    'guzzle_client_timeout' => env('ONESIGNAL_TIMEOUT', 10),
-    'rest_api_url' => env('ONESIGNAL_REST_API_URL', 'https://onesignal.com/api/v1'), // 👈 dòng mới cần có
-],
+    'onesignal' => [
+        'app_id' => env('ONESIGNAL_APP_ID'),
+        'rest_api_key' => env('ONESIGNAL_REST_API_KEY'),
+        'user_auth_key' => env('ONESIGNAL_USER_AUTH_KEY'),
+        'guzzle_client_timeout' => env('ONESIGNAL_TIMEOUT', 10),
+        'rest_api_url' => env('ONESIGNAL_REST_API_URL', 'https://onesignal.com/api/v1'), // 👈 dòng mới cần có
+    ],
 
     'vnpay' => [
         'tmn_code' => env('VNPAY_TMNCODE'),

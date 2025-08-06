@@ -34,7 +34,7 @@ class Service extends Model
     }
     public function appointments()
     {
-        return $this->hasMany(\App\Models\Appointment::class);
+        return $this->hasMany(Appointment::class);
     }
 
     public function orders()
