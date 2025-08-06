@@ -178,9 +178,27 @@
                                 <li class="splide__slide">
                                     <div
                                         class="bg-gray-50 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow hover-scale text-center">
-                                        <img src="{{ $doctor->user->avatar ?? asset('images/default-doctor.png') }}"
-                                            alt="{{ $doctor->user->full_name }}"
-                                            class="w-24 h-24 mx-auto rounded-full mb-4 object-cover">
+                                        @if ($doctor->user->avatar)
+                                            <div class="relative group w-24 h-24 mx-auto mb-4">
+                                                <img src="{{ asset('storage/' . $doctor->user->avatar) }}" alt="Avatar bác sĩ"
+                                                    class="w-24 h-24 rounded-full object-cover shadow-lg border-4 border-white transition-transform duration-300 group-hover:scale-105">
+                                                <span class="absolute bottom-1 right-1 bg-green-400 border-2 border-white rounded-full w-4 h-4 block"></span>
+                                                <div class="absolute inset-0 bg-black/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <span class="text-xs text-white bg-blue-600 px-2 py-1 rounded-full shadow">Bác sĩ</span>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div class="relative group w-24 h-24 mx-auto mb-4">
+                                                <div
+                                                    class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg flex-shrink-0 transition-transform duration-300 group-hover:scale-105">
+                                                    {{ substr($doctor->user->full_name, 0, 1) }}
+                                                </div>
+                                                <span class="absolute bottom-1 right-1 bg-green-400 border-2 border-white rounded-full w-4 h-4 block"></span>
+                                                <div class="absolute inset-0 bg-black/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <span class="text-xs text-white bg-blue-600 px-2 py-1 rounded-full shadow">Bác sĩ</span>
+                                                </div>
+                                            </div>
+                                        @endif
                                         <h3 class="text-xl font-semibold mb-2">{{ $doctor->user->full_name }}</h3>
                                         <div class="text-blue-600 mb-2">{{ $doctor->department->name ?? 'Chuyên khoa' }}
                                         </div>

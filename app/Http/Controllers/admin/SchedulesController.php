@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\DB;
 
 class SchedulesController extends Controller
 {
-
     public function index(Request $request)
     {
         $query = WorkingSchedule::with('shift', 'doctor.user');
@@ -73,6 +72,7 @@ class SchedulesController extends Controller
         $schedule = WorkingSchedule::with(['doctor.user', 'room', 'shift'])->findOrFail($id);
         return view('admin.schedules.show', compact('schedule'));
     }
+
     public function status($id)
     {
         try {
@@ -93,6 +93,52 @@ class SchedulesController extends Controller
             return redirect()->route('admin.schedules.index')->with('info', 'Lịch làm việc đã được xét duyệt trước đó.');
         } catch (\Exception $e) {
             Log::error("Error updating schedule $id: " . $e->getMessage());
+            return redirect()->route('admin.schedules.index')->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+        }
+    }
+
+    public function bulkApprove(Request $request)
+    {
+        try {
+            // Validate the incoming request
+            $validator = Validator::make($request->all(), [
+                'schedule_ids' => 'required|array',
+                'schedule_ids.*' => 'exists:working_schedules,id',
+            ]);
+
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
+
+            $scheduleIds = $request->input('schedule_ids');
+            $updatedCount = 0;
+
+            // Use a transaction to ensure data consistency
+            DB::transaction(function () use ($scheduleIds, &$updatedCount) {
+                foreach ($scheduleIds as $id) {
+                    $schedule = WorkingSchedule::findOrFail($id);
+                    if ($schedule->status === 'Chờ xét duyệt') {
+                        $schedule->status = 'Đã xét duyệt';
+                        if ($schedule->save()) {
+                            $updatedCount++;
+                            Log::info("Updated status to Đã xét duyệt for ID: $id");
+                        } else {
+                            Log::error("Failed to save status Đã xét duyệt for ID: $id");
+                        }
+                    }
+                }
+            });
+
+            if ($updatedCount > 0) {
+                return redirect()->route('admin.schedules.index')->with('success', "Đã xét duyệt $updatedCount lịch làm việc.");
+            }
+
+            return redirect()->route('admin.schedules.index')->with('info', 'Không có lịch làm việc nào được cập nhật vì đã được xét duyệt trước đó.');
+        } catch (ValidationException $e) {
+            Log::error("Validation error during bulk approval: " . $e->getMessage());
+            return redirect()->route('admin.schedules.index')->withErrors($e->errors())->with('error', 'Dữ liệu không hợp lệ.');
+        } catch (\Exception $e) {
+            Log::error("Error during bulk approval: " . $e->getMessage());
             return redirect()->route('admin.schedules.index')->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }

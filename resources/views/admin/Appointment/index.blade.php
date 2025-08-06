@@ -69,6 +69,8 @@
                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Chờ xác nhận</option>
                         <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Đã xác nhận
                         </option>
+                        <option value="checked_in" {{ request('status') == 'checked_in' ? 'selected' : '' }}>Đã check in
+                        </option>
                         <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Hoàn thành
                         </option>
                         <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
@@ -326,7 +328,7 @@
                                         @endif
 
                                         {{-- Hoàn thành --}}
-                                        @if ($appointment->status === 'confirmed')
+                                        @if (in_array($appointment->status, ['confirmed', 'checked_in']))
                                             <button class="btn btn-sm btn-outline-success"
                                                 onclick="updateStatus({{ $appointment->id }}, 'completed')"
                                                 title="Hoàn thành">

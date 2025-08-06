@@ -19,7 +19,8 @@
 
                 <!-- Quick Links (shortcuts) -->
                 <li class="nav-item dropdown-shortcuts navbar-dropdown dropdown me-2 me-xl-0">
-                    <a class="nav-link dropdown-toggle hide-arrow" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                    <a class="nav-link dropdown-toggle hide-arrow" href="#" data-bs-toggle="dropdown"
+                        data-bs-auto-close="outside">
                         <i class='bx bx-grid-alt bx-sm'></i>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end py-0">
@@ -32,52 +33,65 @@
                             @if ($user->role->name === 'admin')
                                 <div class="row row-bordered overflow-visible g-0">
                                     <div class="dropdown-shortcuts-item col">
-                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i class="bx bx-calendar fs-4"></i></span>
-                                        <a href="{{ route('admin.appointments.index') }}" class="stretched-link">Lịch hẹn</a>
+                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i
+                                                class="bx bx-calendar fs-4"></i></span>
+                                        <a href="{{ route('admin.appointments.index') }}" class="stretched-link">Lịch
+                                            hẹn</a>
                                     </div>
                                     <div class="dropdown-shortcuts-item col">
-                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i class="bx bx-food-menu fs-4"></i></span>
+                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i
+                                                class="bx bx-food-menu fs-4"></i></span>
                                         <a href="{{ route('orders.index') }}" class="stretched-link">Đơn hàng</a>
                                     </div>
                                 </div>
                                 <div class="row row-bordered overflow-visible g-0">
                                     <div class="dropdown-shortcuts-item col">
-                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i class="bx bx-user fs-4"></i></span>
+                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i
+                                                class="bx bx-user fs-4"></i></span>
                                         <a href="{{ route('admin.users.index') }}" class="stretched-link">Người dùng</a>
                                     </div>
                                     <div class="dropdown-shortcuts-item col">
-                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i class="bx bx-check-shield fs-4"></i></span>
+                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i
+                                                class="bx bx-check-shield fs-4"></i></span>
                                         <a href="{{ route('admin.roles.index') }}" class="stretched-link">Phân quyền</a>
                                     </div>
                                 </div>
                                 <div class="row row-bordered overflow-visible g-0">
                                     <div class="dropdown-shortcuts-item col">
-                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i class="bx bx-home-circle fs-4"></i></span>
-                                        <a href="{{ route('admin.dashboard.index') }}" class="stretched-link">Thống kê</a>
+                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i
+                                                class="bx bx-home-circle fs-4"></i></span>
+                                        <a href="{{ route('admin.dashboard.index') }}" class="stretched-link">Thống
+                                            kê</a>
                                     </div>
                                     <div class="dropdown-shortcuts-item col">
-                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i class="bx bx-cog fs-4"></i></span>
-                                        <a href="{{ route('admin.users.edit', $user->id) }}" class="stretched-link">Tài khoản</a>
+                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i
+                                                class="bx bx-cog fs-4"></i></span>
+                                        <a href="{{ route('admin.users.edit', $user->id) }}" class="stretched-link">Tài
+                                            khoản</a>
                                     </div>
                                 </div>
                             @elseif ($user->role->name === 'doctor')
                                 <div class="row row-bordered overflow-visible g-0">
                                     <div class="dropdown-shortcuts-item col">
-                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i class="bx bx-calendar-check fs-4"></i></span>
+                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i
+                                                class="bx bx-calendar-check fs-4"></i></span>
                                         <a href="#" class="stretched-link">Lịch hẹn</a>
                                     </div>
                                     <div class="dropdown-shortcuts-item col">
-                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i class="bx bx-file fs-4"></i></span>
+                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i
+                                                class="bx bx-file fs-4"></i></span>
                                         <a href="#" class="stretched-link">Hồ sơ</a>
                                     </div>
                                 </div>
                                 <div class="row row-bordered overflow-visible g-0">
                                     <div class="dropdown-shortcuts-item col">
-                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i class="bx bx-injection fs-4"></i></span>
+                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i
+                                                class="bx bx-injection fs-4"></i></span>
                                         <a href="#" class="stretched-link">Đơn thuốc</a>
                                     </div>
                                     <div class="dropdown-shortcuts-item col">
-                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i class="bx bx-cog fs-4"></i></span>
+                                        <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i
+                                                class="bx bx-cog fs-4"></i></span>
                                         <a href="#" class="stretched-link">Tài khoản</a>
                                     </div>
                                 </div>
@@ -88,10 +102,12 @@
 
                 <!-- Notifications -->
                 <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
-                    <a class="nav-link dropdown-toggle hide-arrow" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                    <a class="nav-link dropdown-toggle hide-arrow" href="#" data-bs-toggle="dropdown"
+                        data-bs-auto-close="outside">
                         <i class="bx bx-bell bx-sm"></i>
                         @if ($unreadNotifications)
-                            <span class="badge bg-danger rounded-pill badge-notifications">{{ $unreadNotifications }}</span>
+                            <span
+                                class="badge bg-danger rounded-pill badge-notifications">{{ $unreadNotifications }}</span>
                         @endif
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end py-0">
@@ -111,7 +127,8 @@
                                             <div class="flex-grow-1">
                                                 <h6 class="mb-1">{{ $notify->data['title'] ?? 'Thông báo' }}</h6>
                                                 <p class="mb-0 small">{{ $notify->data['body'] ?? '' }}</p>
-                                                <small class="text-muted">{{ $notify->created_at->diffForHumans() }}</small>
+                                                <small
+                                                    class="text-muted">{{ $notify->created_at->diffForHumans() }}</small>
                                             </div>
                                         </div>
                                     </li>
@@ -121,7 +138,8 @@
                             </ul>
                         </li>
                         <li class="dropdown-menu-footer border-top">
-                            <a href="#" class="dropdown-item d-flex justify-content-center p-3">Xem tất cả thông báo</a>
+                            <a href="#" class="dropdown-item d-flex justify-content-center p-3">Xem tất cả thông
+                                báo</a>
                         </li>
                     </ul>
                 </li>
@@ -130,7 +148,15 @@
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
                     <a class="nav-link dropdown-toggle hide-arrow" href="#" data-bs-toggle="dropdown">
                         <div class="avatar avatar-online">
-                            <img src="{{ $user->avatar_url ?? asset('admin/assets/img/avatars/1.png') }}" class="rounded-circle" alt="avatar">
+                            @if ($user->avatar)
+                                <img src="{{ asset('storage/' . $user->avatar) }}" alt="avatar"
+                                    class="w-10 h-10 rounded-full object-cover shadow-lg border-2 border-white">
+                            @else
+                                <div
+                                    class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-lg font-bold shadow-lg">
+                                    {{ substr($user->full_name, 0, 1) }}
+                                </div>
+                            @endif
                         </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -138,7 +164,17 @@
                             <a class="dropdown-item" href="#">
                                 <div class="d-flex">
                                     <div class="flex-shrink-0 me-3">
-                                        <div class="avatar avatar-online"><img src="{{ $user->avatar_url ?? asset('admin/assets/img/avatars/1.png') }}" class="rounded-circle"></div>
+                                        <div class="avatar avatar-online">
+                                            @if ($user->avatar)
+                                                <img src="{{ asset('storage/' . $user->avatar) }}" alt="avatar"
+                                                    class="w-10 h-10 rounded-full object-cover shadow-lg border-2 border-white">
+                                            @else
+                                                <div
+                                                    class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-lg font-bold shadow-lg">
+                                                    {{ substr($user->full_name, 0, 1) }}
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
                                     <div class="flex-grow-1">
                                         <span class="fw-medium d-block lh-1">{{ $user->full_name }}</span>
@@ -147,10 +183,16 @@
                                 </div>
                             </a>
                         </li>
-                        <li><div class="dropdown-divider"></div></li>
-                        <li><a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('logout-form').submit();">
-                            <i class="bx bx-power-off me-2"></i><span class="align-middle">Đăng&nbsp;xuất</span></a>
-                            <form id="logout-form" action="{{ route('logout') }}" method="GET" class="d-none"></form>
+                        <li>
+                            <div class="dropdown-divider"></div>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('logout') }}"
+                                onclick="event.preventDefault();document.getElementById('logout-form').submit();">
+                                <i class="bx bx-power-off me-2"></i><span class="align-middle">Đăng&nbsp;xuất</span>
+                            </a>
+                            <form id="logout-form" action="{{ route('logout') }}" method="GET" class="d-none">
+                            </form>
                         </li>
                     </ul>
                 </li>

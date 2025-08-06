@@ -95,15 +95,15 @@
                                 <option value="cash"
                                     {{ old('payment_method', $appointment->payment->payment_method) == 'cash' ? 'selected' : '' }}>
                                     Tiền mặt</option>
-                                <option value="card"
+                                {{-- <option value="card"
                                     {{ old('payment_method', $appointment->payment->payment_method) == 'card' ? 'selected' : '' }}>
-                                    Thẻ</option>
+                                    Thẻ</option> --}}
                                 <option value="bank"
                                     {{ old('payment_method', $appointment->payment->payment_method) == 'bank' ? 'selected' : '' }}>
                                     Chuyển khoản</option>
                             </select>
                             <div id="payment_note" class="text-muted small mt-1">
-                                Thanh toán sẽ được xử lý ngay nếu là tiền mặt. Đối với thẻ/chuyển khoản, cần xác nhận sau.
+                                Thanh toán sẽ được xử lý ngay nếu là tiền mặt. Đối với chuyển khoản, cần xác nhận sau.
                             </div>
                         </div>
 

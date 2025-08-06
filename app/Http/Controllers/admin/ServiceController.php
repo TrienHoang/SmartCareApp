@@ -68,9 +68,8 @@ class ServiceController extends Controller
         $validated['department_id'] = $request->input('department_id');
         $validated['min_booking_hours'] = $request->input('min_booking_hours');
         $validated['status'] = $request->input('status', 'active');
-        $validated['duration'] = $request->input('duration')    ; 
+        $validated['duration'] = $request->input('duration');
 
-        // Xử lý ảnh nếu có
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
@@ -78,7 +77,6 @@ class ServiceController extends Controller
             $validated['image'] = $path;
         }
 
-        // Validate danh sách bác sĩ
         $doctors = $request->input('doctors', []);
         $request->validate([
             'doctors' => 'nullable|array',
@@ -98,6 +96,7 @@ class ServiceController extends Controller
             return back()->withInput()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
+
     public function edit($id)
     {
         $service = Service::findOrFail($id);
@@ -122,25 +121,21 @@ class ServiceController extends Controller
         $validated['description'] = $validated['description'] ? trim($validated['description']) : null;
         $validated['price'] = round($validated['price'], 0);
         $validated['slug'] = str()->slug($validated['name']);
-        $validated['content'] = $request->input('content'); 
+        $validated['content'] = $request->input('content');
         $validated['department_id'] = $request->input('department_id');
         $validated['min_booking_hours'] = $request->input('min_booking_hours');
         $validated['status'] = $request->input('status', 'active');
         $validated['duration'] = $request->input('duration');
 
         $service = Service::findOrFail($id);
-
-        // Kiểm tra xem department_id có thay đổi không
         $departmentChanged = $service->department_id != $validated['department_id'];
 
-        // Nếu có ảnh mới → xử lý upload
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
             $path = $image->storeAs('services', $filename, 'public');
             $validated['image'] = $path;
         } else {
-            // Nếu không có ảnh mới → giữ nguyên ảnh cũ
             $validated['image'] = $service->image;
         }
 
@@ -154,11 +149,9 @@ class ServiceController extends Controller
             'doctors.*.exists' => 'Bác sĩ được chọn không thuộc chuyên khoa của dịch vụ.',
         ]);
 
-        // Nếu department_id thay đổi, xóa tất cả bác sĩ cũ và đồng bộ danh sách mới
         if ($departmentChanged) {
-            $service->doctors()->sync($doctors); // Xóa bác sĩ cũ và thêm bác sĩ mới
+            $service->doctors()->sync($doctors);
         } else {
-            // Nếu không đổi department_id, chỉ đồng bộ nếu danh sách bác sĩ thay đổi
             $currentDoctors = $service->doctors()->pluck('doctors.id')->toArray();
             if ($doctors !== $currentDoctors) {
                 $service->doctors()->sync($doctors);
@@ -178,15 +171,19 @@ class ServiceController extends Controller
     {
         try {
             $service = Service::findOrFail($id);
-            $service->delete(); // Laravel sẽ set deleted_at
 
+            if ($service->appointments()->exists()) {
+                return redirect()->route('admin.services.index')->with('error', 'Không thể xóa dịch vụ đã có lịch hẹn.');
+            }
+
+            $service->delete();
             return redirect()->route('admin.services.index')->with('success', 'Đã chuyển dịch vụ vào thùng rác.');
         } catch (\Exception $e) {
-            return redirect()->route('admin.services.index')->with('error', 'Không thể xóa dịch vụ.');
+            return redirect()->route('admin.services.index')->with('error', 'Không thể xóa dịch vụ. ' . $e->getMessage());
         }
     }
 
-    private function getStoreValidationRules()
+      private function getStoreValidationRules()
     {
         return [
             'service_cate_id' => 'required|exists:service_categories,id',

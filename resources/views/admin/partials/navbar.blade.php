@@ -85,12 +85,12 @@
                                 </div>
                             </div>
                             <div class="row row-bordered overflow-visible g-0">
-                                <div class="dropdown-shortcuts-item col">
+                                {{-- <div class="dropdown-shortcuts-item col">
                                     <a class="dropdown-item" href="{{ route('doctor.dashboard') }}">
                                         <i class="bx bx-transfer me-2"></i>
                                         <span class="align-middle">Chuyển sang Bác sĩ</span>
                                     </a>
-                                </div>
+                                </div> --}}
                                 {{-- <div class="dropdown-shortcuts-item col">
                                     <span class="dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2"><i
                                             class="bx bx-group fs-4"></i></span>
@@ -149,35 +149,41 @@
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
                     <a class="nav-link dropdown-toggle hide-arrow" href="#" data-bs-toggle="dropdown">
                         <div class="avatar avatar-online">
-                            <img src="{{ $admin->avatar_url ?? asset('admin/assets/img/avatars/1.png') }}"
-                                class="rounded-circle" alt="avatar">
+                            @if ($admin->avatar)
+                                <img src="{{ asset('storage/' . $admin->avatar) }}" alt="avatar"
+                                    class="w-10 h-10 rounded-full object-cover shadow-lg border-2 border-white">
+                            @else
+                                <div
+                                    class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-lg font-bold shadow-lg">
+                                    {{ substr($admin->full_name, 0, 1) }}
+                                </div>
+                            @endif
                         </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                            <a class="dropdown-item" href="{{ route('admin.users.edit', $admin->id) }}">
+                            <a class="dropdown-item" href="#">
                                 <div class="d-flex">
                                     <div class="flex-shrink-0 me-3">
-                                        <div class="avatar avatar-online"><img
-                                                src="{{ $admin->avatar_url ?? asset('admin/assets/img/avatars/1.png') }}"
-                                                class="rounded-circle"></div>
+                                        <div class="avatar avatar-online">
+                                            @if ($admin->avatar)
+                                                <img src="{{ asset('storage/' . $admin->avatar) }}" alt="avatar"
+                                                    class="w-10 h-10 rounded-full object-cover shadow-lg border-2 border-white">
+                                            @else
+                                                <div
+                                                    class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-lg font-bold shadow-lg">
+                                                    {{ substr($admin->full_name, 0, 1) }}
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
                                     <div class="flex-grow-1">
                                         <span class="fw-medium d-block lh-1">{{ $admin->full_name }}</span>
-                                        <small>{{ $admin->role->name ?? 'Admin' }}</small>
+                                        <small>{{ ucfirst($admin->role->name) }}</small>
                                     </div>
                                 </div>
                             </a>
                         </li>
-                        <li>
-                            <div class="dropdown-divider"></div>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ route('admin.users.show', $admin->id) }}"><i
-                                    class="bx bx-user me-2"></i> <span class="align-middle">Hồ sơ</span></a>
-                        </li>
-                        <li><a class="dropdown-item" href="{{ route('admin.users.edit', $admin->id) }}"><i
-                                    class="bx bx-cog me-2"></i> <span class="align-middle">Cài đặt</span></a></li>
                         <li>
                             <div class="dropdown-divider"></div>
                         </li>

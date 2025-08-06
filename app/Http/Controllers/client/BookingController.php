@@ -857,7 +857,7 @@ class BookingController extends Controller
                         ->whereColumn('appointments.id', 'payments.appointment_id')
                         ->where('status', 'cancelled');
                 })
-                ->where('created_at', '<', now()->subMinutes(5)) // Xóa sau 5 phút (theo vnp_ExpireDate)
+                ->where('created_at', '<', now()->subMinutes(1)) // Xóa sau 1 phút (theo vnp_ExpireDate)
                 ->with('appointment')
                 ->get();
 

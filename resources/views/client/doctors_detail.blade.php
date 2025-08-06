@@ -178,7 +178,7 @@
                     <!-- Specialties -->
                     @if ($doctor->specialties && $doctor->specialties->count())
                         <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 card-hover">
-                            <h2 class="text-2xl font-bold mb-6 gradient-text">Chuyên Môn</h2>
+                            <h2 class="text-2xl font-bold mb-6 gradient-text">Chuyên Khoa</h2>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 @foreach ($doctor->specialties as $specialty)
                                     <div class="skill-tag p-4 rounded-lg">
@@ -361,10 +361,22 @@
                                 <div class="border-b pb-6">
                                     <div class="flex items-start space-x-4">
                                         <!-- Avatar -->
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">
-                                            {{ $review->patient ? strtoupper(Str::substr($review->patient->full_name, 0, 1)) . '***' : 'Ẩn danh' }}
-                                        </div>
+<!-- Avatar + Tên rõ ràng -->
+<div class="flex items-center space-x-3">
+    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">
+        {{ strtoupper(Str::substr($review->patient->full_name ?? 'A', 0, 1)) }}
+    </div>
+    <div>
+        <p class="text-sm font-semibold text-blue-700">
+            {{ $review->patient->full_name ?? 'Ẩn danh' }}
+        </p>
+        <!-- Dịch vụ khám -->
+        @if ($review->service && !in_array(Str::lower($review->service->name), ['tâm lý', 'sản phụ khoa', 'bệnh xã hội']))
+            <p class="text-xs text-gray-500">Dịch vụ: {{ $review->service->name }}</p>
+        @endif
+    </div>
+</div>
+
                                         <div class="flex-1">
                                             <!-- Stars & Date -->
                                             <div class="flex items-center justify-between mb-1">
@@ -426,14 +438,7 @@
                                             @endif
                                             <!-- Hữu ích và chỉnh sửa -->
                                             <div class="flex space-x-4 text-sm text-gray-500 items-center">
-                                                <form method="POST" action="{{ route('reviews.useful', $review->id) }}">
-                                                    @csrf
-                                                    <button
-                                                        class="flex items-center space-x-1 hover:text-blue-600 font-medium">
-                                                        <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                                                        <span>Hữu ích ({{ $review->useful_count ?? 0 }})</span>
-                                                    </button>
-                                                </form>
+    
                                                 @if ($editable && request('edit_review_id') != $review->id)
                                                     <form method="GET" action="{{ url()->current() }}">
                                                         <input type="hidden" name="edit_review_id"

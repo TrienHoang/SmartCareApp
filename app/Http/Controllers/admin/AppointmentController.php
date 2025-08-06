@@ -672,12 +672,11 @@ class AppointmentController extends Controller
                         'completed_at' => now(),
                     ]);
                 } elseif ($request->status === 'confirmed') {
-                    $order->update(['status' => 'paid']);
+                    $order->update(['status' => 'confirmed']);
+                } elseif ($request->status === 'checked_in') {
+                    $order->update(['status' => 'in_progress']);
                 } elseif ($request->status === 'cancelled') {
                     $order->update(['status' => 'cancelled']);
-                } else {
-                    // fallback hoặc giữ nguyên nếu không match
-                    $order->update(['status' => 'pending']);
                 }
             }
 
@@ -1029,6 +1028,7 @@ class AppointmentController extends Controller
         $specificDates = $doctor->workingSchedules()
             ->whereNotNull('day')
             ->where('day', '>=', now()->toDateString())
+            ->where('status', 'Đã xét duyệt')
             ->pluck('day')
             ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
             ->unique()
