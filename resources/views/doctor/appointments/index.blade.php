@@ -94,6 +94,7 @@
                                 </option>
                                 <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Đã xác
                                     nhận</option>
+                                <option value="checked_in" {{ request('status') == 'checked_in' ? 'selected' : '' }}>Đã check in</option>
                                 <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Hoàn tất
                                 </option>
                             </select>
