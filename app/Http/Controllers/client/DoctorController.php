@@ -20,6 +20,7 @@ class DoctorController extends Controller
             'experiences',
             'achievements',
             'specialties',
+            'services',
             'reviews' => function ($query) {
                 $query->where('is_visible', true)
                     ->latest()
@@ -31,14 +32,23 @@ class DoctorController extends Controller
             },
         ])->findOrFail($id);
 
-        // ✅ Tính số năm kinh nghiệm
+        // Lấy năm bắt đầu sớm nhất
         $startYear = $doctor->experiences->min('start_year');
-        $endYear = $doctor->experiences->max('end_year') ?? now()->year;
 
+        // Xử lý end_year: nếu có null => coi là năm hiện tại
+        $endYears = $doctor->experiences->map(function ($exp) {
+            return $exp->end_year ?? now()->year;
+        });
+
+        // Lấy năm kết thúc muộn nhất
+        $endYear = $endYears->max();
+
+        // Tính số năm kinh nghiệm
         $experienceYears = 0;
         if ($startYear) {
-            $experienceYears = ($endYear ?? now()->year) - $startYear;
+            $experienceYears = $endYear - $startYear;
         }
+
         $doctor->experience_years = $experienceYears > 0 ? $experienceYears : null;
 
         // ✅ Tính điểm trung bình và phân bổ đánh giá
@@ -78,6 +88,17 @@ class DoctorController extends Controller
                 }
             }
         }
+
+        // Danh sách các bác sĩ cùng chuyên khoa
+        $doctor->related_doctors = Doctor::where('department_id', $doctor->department_id)
+            ->where('id', '!=', $doctor->id)
+            ->with([
+                'user',
+                'department',
+                'experiences',
+            ])
+            ->get();
+
 
         return view('client.doctors_detail', compact(
             'doctor',
