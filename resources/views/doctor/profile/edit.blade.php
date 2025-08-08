@@ -1,14 +1,37 @@
 @extends('doctor.dashboard')
 @section('title', 'Chỉnh sửa hồ sơ')
 
+@push('styles')
+    <style>
+        .remove {
+            background-color: #e3342f;
+            /* đỏ đậm */
+            color: #fff;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            max-height: 50px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: block;
+            margin-top: 30px
+                /* margin-left: auto; */
+
+        }
+
+        .remove:hover {
+            background-color: #cc1f1a;
+            /* đỏ tối hơn khi hover */
+        }
+    </style>
+@endpush
+
 @section('content')
     <div class="max-w-6xl mx-auto space-y-8">
         <h2 class="text-3xl font-bold text-gray-900 mb-6">Chỉnh sửa hồ sơ</h2>
-
         <!-- Form -->
         <form action="{{ route('doctor.profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
             @csrf
-            {{-- @method('POST') --}}
 
             <!-- Thông tin cá nhân -->
             <div
@@ -69,7 +92,7 @@
                         <input type="date"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('date_of_birth') border-red-500 ring-2 ring-red-200 @enderror"
                             id="date_of_birth" name="date_of_birth"
-                            value="{{ old('date_of_birth', $user->date_of_birth) }}">
+                            value="{{ old('date_of_birth', optional($user->date_of_birth)->format('Y-m-d')) }}">
                         @error('date_of_birth')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -118,7 +141,7 @@
                 <div class="mt-6">
                     <label for="province" class="block text-sm font-semibold text-gray-700 mb-2">Tỉnh / Thành phố</label>
                     <select id="province" name="province_code"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('province_code') border-red-500 ring-2 ring-red-200 @enderror">
                         <option value="">-- Chọn tỉnh --</option>
                     </select>
                     @error('province_code')
@@ -129,7 +152,7 @@
                 <div class="mt-6">
                     <label for="district" class="block text-sm font-semibold text-gray-700 mb-2">Quận / Huyện</label>
                     <select id="district" name="district_code"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('district_code') border-red-500 ring-2 ring-red-200 @enderror"
                         disabled>
                         <option value="">-- Chọn quận --</option>
                     </select>
@@ -141,7 +164,7 @@
                 <div class="mt-6">
                     <label for="ward" class="block text-sm font-semibold text-gray-700 mb-2">Phường / Xã</label>
                     <select id="ward" name="ward_code"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('ward_code') border-red-500 ring-2 ring-red-200 @enderror"
                         disabled>
                         <option value="">-- Chọn phường --</option>
                     </select>
@@ -150,10 +173,16 @@
                     @enderror
                 </div>
 
-                <input type="hidden" name="address" id="address" value="{{ old('address', $user->address) }}">
-                @error('address')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+                <div class="mt-6">
+                    <label for="address" class="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ chi tiết</label>
+                    <input type="text"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('address') border-red-500 ring-2 ring-red-200 @enderror"
+                        id="address" name="address" value="{{ old('address', $user->address) }}"
+                        placeholder="Nhập địa chỉ chi tiết">
+                    @error('address')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
 
             <!-- Thông tin chuyên môn -->
@@ -172,10 +201,30 @@
 
                 <div class="space-y-6">
                     <div>
-                        <label for="specialization" class="block text-sm font-semibold text-gray-700 mb-2">Chuyên môn</label>
+                        <label for="department_id" class="block text-sm font-semibold text-gray-700 mb-2">Khoa</label>
+                        <select
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('department_id') border-red-500 ring-2 ring-red-200 @enderror"
+                            id="department_id" name="department_id">
+                            <option value="">Chọn khoa</option>
+                            @foreach ($departments as $department)
+                                <option value="{{ $department->id }}"
+                                    {{ old('department_id', $doctor->department_id) == $department->id ? 'selected' : '' }}>
+                                    {{ $department->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('department_id')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="specialization" class="block text-sm font-semibold text-gray-700 mb-2">Chuyên
+                            môn</label>
                         <input type="text"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('specialization') border-red-500 ring-2 ring-red-200 @enderror"
-                            id="specialization" name="specialization" value="{{ old('specialization', $user->specialization) }}"
+                            id="specialization" name="specialization"
+                            value="{{ old('specialization', $doctor->specialization) }}"
                             placeholder="Nhập chuyên môn (ví dụ: Nội khoa, Ngoại khoa)">
                         @error('specialization')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -183,11 +232,29 @@
                     </div>
 
                     <div>
-                        <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">Mô tả chuyên môn</label>
+                        <label for="biography" class="block text-sm font-semibold text-gray-700 mb-2">Tiểu sử</label>
                         <textarea
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('description') border-red-500 ring-2 ring-red-200 @enderror"
-                            id="description" name="description" rows="3" placeholder="Mô tả về chuyên môn và kinh nghiệm">{{ old('description', $user->description) }}</textarea>
-                        @error('description')
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('biography') border-red-500 ring-2 ring-red-200 @enderror"
+                            id="biography" name="biography" rows="5" placeholder="Mô tả về chuyên môn và kinh nghiệm">{{ old('biography', $doctor->biography) }}</textarea>
+                        @error('biography')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+
+                    <div>
+                        <label class="block text-xl font-semibold text-gray-700 mb-2">Chuyên môn chi tiết</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @foreach ($specialties as $specialty)
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" name="specialty_ids[]" value="{{ $specialty->id }}"
+                                        {{ in_array($specialty->id, old('specialty_ids', $doctor->specialties->pluck('id')->toArray())) ? 'checked' : '' }}
+                                        class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <span>{{ $specialty->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        @error('specialty_ids.*')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -197,12 +264,14 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Thành tựu</label>
                         <div id="achievements-container" class="space-y-4">
                             @foreach ($achievements as $index => $achievement)
-                                <div class="achievement-entry grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg">
+                                <div
+                                    class="achievements-entry grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg">
+                                    <input type="hidden" name="achievements[{{ $index }}][id]"
+                                        value="{{ $achievement->id }}">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Tên thành tựu</label>
-                                        <input type="text"
-                                            name="achievements[{{ $index }}][title]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                        <input type="text" name="achievements[{{ $index }}][title]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('achievements.' . $index . '.title') border-red-500 ring-2 ring-red-200 @enderror"
                                             value="{{ old('achievements.' . $index . '.title', $achievement->title) }}"
                                             placeholder="Nhập tên thành tựu">
                                         @error('achievements.' . $index . '.title')
@@ -211,9 +280,8 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Tổ chức cấp</label>
-                                        <input type="text"
-                                            name="achievements[{{ $index }}][organization]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                        <input type="text" name="achievements[{{ $index }}][organization]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('achievements.' . $index . '.organization') border-red-500 ring-2 ring-red-200 @enderror"
                                             value="{{ old('achievements.' . $index . '.organization', $achievement->organization) }}"
                                             placeholder="Nhập tổ chức cấp">
                                         @error('achievements.' . $index . '.organization')
@@ -222,9 +290,8 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Năm</label>
-                                        <input type="number"
-                                            name="achievements[{{ $index }}][year]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                        <input type="number" name="achievements[{{ $index }}][year]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('achievements.' . $index . '.year') border-red-500 ring-2 ring-red-200 @enderror"
                                             value="{{ old('achievements.' . $index . '.year', $achievement->year) }}"
                                             placeholder="Nhập năm">
                                         @error('achievements.' . $index . '.year')
@@ -233,33 +300,37 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Mô tả</label>
-                                        <textarea
-                                            name="achievements[{{ $index }}][description]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                        <textarea name="achievements[{{ $index }}][description]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('achievements.' . $index . '.description') border-red-500 ring-2 ring-red-200 @enderror"
                                             rows="3" placeholder="Nhập mô tả">{{ old('achievements.' . $index . '.description', $achievement->description) }}</textarea>
                                         @error('achievements.' . $index . '.description')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
                                     </div>
-                                    <button type="button" class="remove-achievement text-red-600 hover:text-red-800">Xóa</button>
+                                    <button type="button"
+                                        class="remove-achievements px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200">
+                                        Xóa
+                                    </button>
                                 </div>
                             @endforeach
                         </div>
                         <button type="button" id="add-achievement"
-                            class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Thêm thành tựu</button>
+                            class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Thêm thành
+                            tựu</button>
                     </div>
 
                     <!-- Học vấn -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Học vấn chi tiết</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Học vấn</label>
                         <div id="educations-container" class="space-y-4">
                             @foreach ($educations as $index => $education)
-                                <div class="education-entry grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg">
+                                <div class="educations-entry grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg">
+                                    <input type="hidden" name="educations[{{ $index }}][id]"
+                                        value="{{ $education->id }}">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Bằng cấp</label>
-                                        <input type="text"
-                                            name="educations[{{ $index }}][degree]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                        <input type="text" name="educations[{{ $index }}][degree]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('educations.' . $index . '.degree') border-red-500 ring-2 ring-red-200 @enderror"
                                             value="{{ old('educations.' . $index . '.degree', $education->degree) }}"
                                             placeholder="Nhập bằng cấp">
                                         @error('educations.' . $index . '.degree')
@@ -268,9 +339,8 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Trường học</label>
-                                        <input type="text"
-                                            name="educations[{{ $index }}][school]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                        <input type="text" name="educations[{{ $index }}][school]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('educations.' . $index . '.school') border-red-500 ring-2 ring-red-200 @enderror"
                                             value="{{ old('educations.' . $index . '.school', $education->school) }}"
                                             placeholder="Nhập trường học">
                                         @error('educations.' . $index . '.school')
@@ -279,9 +349,8 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Năm bắt đầu</label>
-                                        <input type="number"
-                                            name="educations[{{ $index }}][start_year]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                        <input type="number" name="educations[{{ $index }}][start_year]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('educations.' . $index . '.start_year') border-red-500 ring-2 ring-red-200 @enderror"
                                             value="{{ old('educations.' . $index . '.start_year', $education->start_year) }}"
                                             placeholder="Nhập năm bắt đầu">
                                         @error('educations.' . $index . '.start_year')
@@ -290,9 +359,8 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Năm kết thúc</label>
-                                        <input type="number"
-                                            name="educations[{{ $index }}][end_year]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                        <input type="number" name="educations[{{ $index }}][end_year]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('educations.' . $index . '.end_year') border-red-500 ring-2 ring-red-200 @enderror"
                                             value="{{ old('educations.' . $index . '.end_year', $education->end_year) }}"
                                             placeholder="Nhập năm kết thúc">
                                         @error('educations.' . $index . '.end_year')
@@ -301,20 +369,20 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Mô tả</label>
-                                        <textarea
-                                            name="educations[{{ $index }}][description]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                        <textarea name="educations[{{ $index }}][description]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('educations.' . $index . '.description') border-red-500 ring-2 ring-red-200 @enderror"
                                             rows="3" placeholder="Nhập mô tả">{{ old('educations.' . $index . '.description', $education->description) }}</textarea>
                                         @error('educations.' . $index . '.description')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
                                     </div>
-                                    <button type="button" class="remove-education text-red-600 hover:text-red-800">Xóa</button>
+                                    <button type="button" class="remove-educations remove">Xóa</button>
                                 </div>
                             @endforeach
                         </div>
                         <button type="button" id="add-education"
-                            class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Thêm học vấn</button>
+                            class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Thêm học
+                            vấn</button>
                     </div>
 
                     <!-- Kinh nghiệm -->
@@ -322,34 +390,33 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Kinh nghiệm</label>
                         <div id="experiences-container" class="space-y-4">
                             @foreach ($experiences as $index => $experience)
-                                <div class="experience-entry grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg">
+                                <div class="experiences-entry grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg">
+                                    <input type="hidden" name="experiences[{{ $index }}][id]"
+                                        value="{{ $experience->id }}">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Chức vụ</label>
-                                        <input type="text"
-                                            name="experiences[{{ $index }}][degree]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                            value="{{ old('experiences.' . $index . '.degree', $experience->degree) }}"
+                                        <input type="text" name="experiences[{{ $index }}][position]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('experiences.' . $index . '.position') border-red-500 ring-2 ring-red-200 @enderror"
+                                            value="{{ old('experiences.' . $index . '.position', $experience->position) }}"
                                             placeholder="Nhập chức vụ">
-                                        @error('experiences.' . $index . '.degree')
+                                        @error('experiences.' . $index . '.position')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Nơi làm việc</label>
-                                        <input type="text"
-                                            name="experiences[{{ $index }}][school]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                            value="{{ old('experiences.' . $index . '.school', $experience->school) }}"
+                                        <input type="text" name="experiences[{{ $index }}][institution]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('experiences.' . $index . '.institution') border-red-500 ring-2 ring-red-200 @enderror"
+                                            value="{{ old('experiences.' . $index . '.institution', $experience->institution) }}"
                                             placeholder="Nhập nơi làm việc">
-                                        @error('experiences.' . $index . '.school')
+                                        @error('experiences.' . $index . '.institution')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Năm bắt đầu</label>
-                                        <input type="number"
-                                            name="experiences[{{ $index }}][start_year]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                        <input type="number" name="experiences[{{ $index }}][start_year]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('experiences.' . $index . '.start_year') border-red-500 ring-2 ring-red-200 @enderror"
                                             value="{{ old('experiences.' . $index . '.start_year', $experience->start_year) }}"
                                             placeholder="Nhập năm bắt đầu">
                                         @error('experiences.' . $index . '.start_year')
@@ -358,9 +425,8 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Năm kết thúc</label>
-                                        <input type="number"
-                                            name="experiences[{{ $index }}][end_year]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                        <input type="number" name="experiences[{{ $index }}][end_year]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('experiences.' . $index . '.end_year') border-red-500 ring-2 ring-red-200 @enderror"
                                             value="{{ old('experiences.' . $index . '.end_year', $experience->end_year) }}"
                                             placeholder="Nhập năm kết thúc">
                                         @error('experiences.' . $index . '.end_year')
@@ -369,20 +435,21 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Mô tả</label>
-                                        <textarea
-                                            name="experiences[{{ $index }}][description]"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                        <textarea name="experiences[{{ $index }}][description]"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 @error('experiences.' . $index . '.description') border-red-500 ring-2 ring-red-200 @enderror"
                                             rows="3" placeholder="Nhập mô tả">{{ old('experiences.' . $index . '.description', $experience->description) }}</textarea>
                                         @error('experiences.' . $index . '.description')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
                                     </div>
-                                    <button type="button" class="remove-experience text-red-600 hover:text-red-800">Xóa</button>
+                                    <button type="button" class="remove-experiences remove">Xóa</button>
+
                                 </div>
                             @endforeach
                         </div>
                         <button type="button" id="add-experience"
-                            class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Thêm kinh nghiệm</button>
+                            class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Thêm kinh
+                            nghiệm</button>
                     </div>
                 </div>
             </div>
@@ -410,6 +477,12 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                     <p class="mt-2 text-sm text-gray-500">Định dạng: JPG, PNG, GIF. Kích thước tối đa: 2MB</p>
+                    @if ($user->avatar)
+                        <div class="mt-4">
+                            <img src="{{ Storage::url($user->avatar) }}" alt="Avatar"
+                                class="w-32 h-32 rounded-full object-cover">
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -451,14 +524,15 @@
 
 @push('scripts')
     <script>
+        // Xử lý địa chỉ
         const provinceSelect = document.getElementById('province');
         const districtSelect = document.getElementById('district');
         const wardSelect = document.getElementById('ward');
         const addressInput = document.getElementById('address');
 
-        let selectedProvince = '{{ $user->province_code ? Http::get("https://provinces.open-api.vn/api/p/{$user->province_code}")->json("name") : "" }}';
-        let selectedDistrict = '{{ $user->district_code ? Http::get("https://provinces.open-api.vn/api/d/{$user->district_code}")->json("name") : "" }}';
-        let selectedWard = '{{ $user->ward_code ? Http::get("https://provinces.open-api.vn/api/w/{$user->ward_code}")->json("name") : "" }}';
+        let selectedProvince = '{{ $user->province_code ? old('province_name', '') : '' }}';
+        let selectedDistrict = '{{ $user->district_code ? old('district_name', '') : '' }}';
+        let selectedWard = '{{ $user->ward_code ? old('ward_name', '') : '' }}';
 
         // Load provinces
         fetch('https://provinces.open-api.vn/api/?depth=1')
@@ -472,7 +546,8 @@
                     provinceSelect.appendChild(opt);
                 });
                 if ('{{ $user->province_code }}') provinceSelect.dispatchEvent(new Event('change'));
-            });
+            })
+            .catch(error => console.error('Error loading provinces:', error));
 
         // When province changes
         provinceSelect.addEventListener('change', function() {
@@ -482,11 +557,9 @@
             wardSelect.innerHTML = '<option value="">-- Chọn phường --</option>';
             districtSelect.disabled = true;
             wardSelect.disabled = true;
+            addressInput.value = '';
 
-            if (!provinceCode) {
-                addressInput.value = '';
-                return;
-            }
+            if (!provinceCode) return;
 
             fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`)
                 .then(res => res.json())
@@ -500,7 +573,8 @@
                     });
                     districtSelect.disabled = false;
                     if ('{{ $user->district_code }}') districtSelect.dispatchEvent(new Event('change'));
-                });
+                })
+                .catch(error => console.error('Error loading districts:', error));
         });
 
         // When district changes
@@ -509,11 +583,9 @@
             selectedDistrict = this.options[this.selectedIndex].text;
             wardSelect.innerHTML = '<option value="">-- Chọn phường --</option>';
             wardSelect.disabled = true;
+            addressInput.value = selectedProvince ? `${selectedProvince}` : '';
 
-            if (!districtCode) {
-                addressInput.value = selectedProvince ? `${selectedProvince}` : '';
-                return;
-            }
+            if (!districtCode) return;
 
             fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`)
                 .then(res => res.json())
@@ -527,116 +599,172 @@
                     });
                     wardSelect.disabled = false;
                     if ('{{ $user->ward_code }}') wardSelect.dispatchEvent(new Event('change'));
-                });
+                })
+                .catch(error => console.error('Error loading wards:', error));
         });
 
         // When ward changes
         wardSelect.addEventListener('change', function() {
             selectedWard = this.options[this.selectedIndex].text;
-            addressInput.value = selectedWard ? `${selectedWard}, ${selectedDistrict}, ${selectedProvince}` : `${selectedDistrict}, ${selectedProvince}`;
+            addressInput.value = selectedWard ?
+                `${selectedWard}, ${selectedDistrict}, ${selectedProvince}` :
+                `${selectedDistrict}, ${selectedProvince}`;
         });
 
-        // JavaScript để thêm/xóa động các mục
-        let achievementIndex = {{ $achievements->count() }};
+        function addEntry(containerId, prefix, fields) {
+            const container = document.getElementById(containerId);
+            const index = container.querySelectorAll(`.${prefix}-entry`).length;
+            const entry = document.createElement('div');
+            entry.className = `${prefix}-entry grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg`;
+
+            let html = '';
+            fields.forEach(field => {
+                if (field.type === 'textarea') {
+                    html += `
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">${field.label}</label>
+                    <textarea name="${prefix}[${index}][${field.name}]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" rows="3" placeholder="${field.placeholder}"></textarea>
+                </div>`;
+                } else {
+                    html += `
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">${field.label}</label>
+                    <input type="${field.type}" name="${prefix}[${index}][${field.name}]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="${field.placeholder}">
+                </div>`;
+                }
+            });
+
+            // Thêm nút xóa với cấu trúc giống HTML có sẵn
+            html += `
+
+            <button type="button" class="remove-${prefix} remove">
+                Xóa
+            </button>
+`;
+
+            entry.innerHTML = html;
+            container.appendChild(entry);
+        }
+
+        // Thêm thành tựu
         document.getElementById('add-achievement').addEventListener('click', function() {
-            const container = document.getElementById('achievements-container');
-            const entry = document.createElement('div');
-            entry.className = 'achievement-entry grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg';
-            entry.innerHTML = `
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tên thành tựu</label>
-                    <input type="text" name="achievements[${achievementIndex}][title]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Nhập tên thành tựu">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tổ chức cấp</label>
-                    <input type="text" name="achievements[${achievementIndex}][organization]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Nhập tổ chức cấp">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Năm</label>
-                    <input type="number" name="achievements[${achievementIndex}][year]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Nhập năm">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Mô tả</label>
-                    <textarea name="achievements[${achievementIndex}][description]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" rows="3" placeholder="Nhập mô tả"></textarea>
-                </div>
-                <button type="button" class="remove-achievement text-red-600 hover:text-red-800">Xóa</button>
-            `;
-            container.appendChild(entry);
-            achievementIndex++;
+            addEntry('achievements-container', 'achievements', [{
+                    name: 'title',
+                    label: 'Tên thành tựu',
+                    type: 'text',
+                    placeholder: 'Nhập tên thành tựu'
+                },
+                {
+                    name: 'organization',
+                    label: 'Tổ chức cấp',
+                    type: 'text',
+                    placeholder: 'Nhập tổ chức cấp'
+                },
+                {
+                    name: 'year',
+                    label: 'Năm',
+                    type: 'number',
+                    placeholder: 'Nhập năm'
+                },
+                {
+                    name: 'description',
+                    label: 'Mô tả',
+                    type: 'textarea',
+                    placeholder: 'Nhập mô tả'
+                },
+            ]);
         });
 
-        let educationIndex = {{ $educations->count() }};
+        // Thêm học vấn
         document.getElementById('add-education').addEventListener('click', function() {
-            const container = document.getElementById('educations-container');
-            const entry = document.createElement('div');
-            entry.className = 'education-entry grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg';
-            entry.innerHTML = `
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Bằng cấp</label>
-                    <input type="text" name="educations[${educationIndex}][degree]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Nhập bằng cấp">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Trường học</label>
-                    <input type="text" name="educations[${educationIndex}][school]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Nhập trường học">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Năm bắt đầu</label>
-                    <input type="number" name="educations[${educationIndex}][start_year]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Nhập năm bắt đầu">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Năm kết thúc</label>
-                    <input type="number" name="educations[${educationIndex}][end_year]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Nhập năm kết thúc">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Mô tả</label>
-                    <textarea name="educations[${educationIndex}][description]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" rows="3" placeholder="Nhập mô tả"></textarea>
-                </div>
-                <button type="button" class="remove-education text-red-600 hover:text-red-800">Xóa</button>
-            `;
-            container.appendChild(entry);
-            educationIndex++;
+            addEntry('educations-container', 'educations', [{
+                    name: 'degree',
+                    label: 'Bằng cấp',
+                    type: 'text',
+                    placeholder: 'Nhập bằng cấp'
+                },
+                {
+                    name: 'school',
+                    label: 'Trường học',
+                    type: 'text',
+                    placeholder: 'Nhập trường học'
+                },
+                {
+                    name: 'start_year',
+                    label: 'Năm bắt đầu',
+                    type: 'number',
+                    placeholder: 'Nhập năm bắt đầu'
+                },
+                {
+                    name: 'end_year',
+                    label: 'Năm kết thúc',
+                    type: 'number',
+                    placeholder: 'Nhập năm kết thúc'
+                },
+                {
+                    name: 'description',
+                    label: 'Mô tả',
+                    type: 'textarea',
+                    placeholder: 'Nhập mô tả'
+                },
+            ]);
         });
 
-        let experienceIndex = {{ $experiences->count() }};
+        // Thêm kinh nghiệm
         document.getElementById('add-experience').addEventListener('click', function() {
-            const container = document.getElementById('experiences-container');
-            const entry = document.createElement('div');
-            entry.className = 'experience-entry grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg';
-            entry.innerHTML = `
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Chức vụ</label>
-                    <input type="text" name="experiences[${experienceIndex}][degree]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Nhập chức vụ">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nơi làm việc</label>
-                    <input type="text" name="experiences[${experienceIndex}][school]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Nhập nơi làm việc">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Năm bắt đầu</label>
-                    <input type="number" name="experiences[${experienceIndex}][start_year]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Nhập năm bắt đầu">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Năm kết thúc</label>
-                    <input type="number" name="experiences[${experienceIndex}][end_year]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Nhập năm kết thúc">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Mô tả</label>
-                    <textarea name="experiences[${experienceIndex}][description]" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" rows="3" placeholder="Nhập mô tả"></textarea>
-                </div>
-                <button type="button" class="remove-experience text-red-600 hover:text-red-800">Xóa</button>
-            `;
-            container.appendChild(entry);
-            experienceIndex++;
+            addEntry('experiences-container', 'experiences', [{
+                    name: 'position',
+                    label: 'Chức vụ',
+                    type: 'text',
+                    placeholder: 'Nhập chức vụ'
+                },
+                {
+                    name: 'institution',
+                    label: 'Nơi làm việc',
+                    type: 'text',
+                    placeholder: 'Nhập nơi làm việc'
+                },
+                {
+                    name: 'start_year',
+                    label: 'Năm bắt đầu',
+                    type: 'number',
+                    placeholder: 'Nhập năm bắt đầu'
+                },
+                {
+                    name: 'end_year',
+                    label: 'Năm kết thúc',
+                    type: 'number',
+                    placeholder: 'Nhập năm kết thúc'
+                },
+                {
+                    name: 'description',
+                    label: 'Mô tả',
+                    type: 'textarea',
+                    placeholder: 'Nhập mô tả'
+                },
+            ]);
         });
 
-        // Xóa mục
+        // Xóa mục với xác nhận - Sử dụng event delegation
         document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-achievement')) {
-                e.target.closest('.achievement-entry').remove();
-            } else if (e.target.classList.contains('remove-education')) {
-                e.target.closest('.education-entry').remove();
-            } else if (e.target.classList.contains('remove-experience')) {
-                e.target.closest('.experience-entry').remove();
+            if (e.target.classList.contains('remove-achievements') ||
+                e.target.classList.contains('remove-educations') ||
+                e.target.classList.contains('remove-experiences')) {
+
+                e.preventDefault(); // Ngăn form submit
+                e.stopPropagation(); // Ngăn event bubbling
+
+                if (confirm('Bạn có chắc muốn xóa mục này?')) {
+                    const entry = e.target.closest('.achievements-entry') ||
+                        e.target.closest('.educations-entry') ||
+                        e.target.closest('.experiences-entry');
+
+                    if (entry) {
+                        entry.remove();
+                    } else {
+                        console.log('Không tìm thấy entry để xóa');
+                    }
+                }
             }
         });
     </script>
