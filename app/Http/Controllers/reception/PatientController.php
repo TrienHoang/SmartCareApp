@@ -124,13 +124,13 @@ class PatientController extends Controller
     public function appointments($id)
     {
         // Lấy thông tin bệnh nhân
-        $patient = Patient::findOrFail($id);
+        $user = User::findOrFail($id);
 
         // Lấy lịch sử khám (giả sử bảng appointments có patient_id)
         $appointments = Appointment::where('patient_id', $id)
-            ->orderBy('appointment_date', 'desc')
+            ->orderBy('appointment_time', 'desc')
             ->get();
 
-        return view('reception.patients.appointments', compact('patient', 'appointments'));
+        return view('reception.patients.appointments', compact('user', 'appointments'));
     }
 }

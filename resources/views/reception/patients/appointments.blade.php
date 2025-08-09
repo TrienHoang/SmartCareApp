@@ -1,11 +1,11 @@
 @extends('reception.dashboard')
 
-@section('title', 'Lịch sử khám - ' . $patient->full_name)
+@section('title', 'Lịch sử khám - ' . $user->full_name)
 
 @section('content')
     <div class="container mx-auto py-8 px-4">
         <h1 class="text-2xl font-bold text-gray-800 mb-6">
-            <i class="fas fa-notes-medical mr-2"></i> Lịch sử khám - {{ $patient->full_name }}
+            <i class="fas fa-notes-medical mr-2"></i> Lịch sử khám - {{ $user->full_name }}
         </h1>
 
         <div class="bg-white shadow rounded p-6">
@@ -25,7 +25,7 @@
                         @foreach ($appointments as $appointment)
                             <tr>
                                 <td class="border border-gray-200 px-4 py-2">
-                                    {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('d/m/Y H:i') }}
+                                    {{ \Carbon\Carbon::parse($appointment->appointment_time)->format('d/m/Y H:i') }}
                                 </td>
                                 <td class="border border-gray-200 px-4 py-2">{{ $appointment->doctor_name }}</td>
                                 <td class="border border-gray-200 px-4 py-2">{{ $appointment->status }}</td>
