@@ -71,39 +71,111 @@
         @yield('content')
     </main>
 
+    <!-- Chatbox UI -->
     <div id="chatbox-button"
-        class="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center cursor-pointer transition">
-        <i class="fas fa-comment-dots text-2xl"></i>
+        class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center cursor-pointer transition-all duration-300 transform hover:scale-105">
+        <i class="fas fa-comments text-2xl"></i>
+        <div id="unread-count"
+            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold hidden">
+            0
+        </div>
     </div>
 
-    <!-- Chatbox UI -->
+    <!-- Enhanced Chatbox Modal -->
     <div id="chatbox-modal"
-        class="fixed bottom-24 right-6 w-80 max-w-[90vw] bg-white rounded-xl shadow-xl border hidden z-50 overflow-hidden">
+        class="fixed bottom-24 right-6 w-96 max-w-[95vw] bg-white rounded-2xl shadow-2xl border-0 hidden z-50 overflow-hidden">
         <!-- Header -->
-        <div class="bg-blue-500 text-white px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <i class="fas fa-user-md text-lg"></i>
-                <span class="font-semibold text-sm">Trợ lý Y tế</span>
-            </div>
-            <button id="chatbox-close" class="hover:text-gray-200 text-lg">&times;</button>
-        </div>
-
-        <!-- Chat content -->
-        <div class="p-4 space-y-3 text-sm max-h-96 overflow-y-auto" id="chatbox-content">
-            <div class="bg-gray-100 p-3 rounded-lg text-gray-700">
-                Xin chào 👋<br>Bạn cần đặt lịch khám hay tư vấn gì ạ?
-            </div>
-        </div>
-
-        <!-- Input -->
-        <div class="px-4 pb-4">
-            <div
-                class="flex items-center border rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-400">
-                <input id="chatbox-input" type="text" placeholder="Nhập tin nhắn..."
-                    class="w-full px-3 py-2 outline-none text-sm" />
-                <button id="chatbox-send" class="bg-blue-500 text-white px-4 py-2 hover:bg-blue-600 transition">
-                    <i class="fas fa-paper-plane"></i>
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user-md text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-sm">Trợ lý Y tế SmartCare</h4>
+                        <p class="text-xs text-blue-100">Online • Sẵn sàng tư vấn</p>
+                    </div>
+                </div>
+                <button id="chatbox-close" class="hover:bg-white/10 p-2 rounded-full transition">
+                    <i class="fas fa-times"></i>
                 </button>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div id="quick-actions" class="px-4 py-3 bg-gray-50 border-b">
+            <div class="flex gap-2 flex-wrap">
+                <button
+                    class="quick-action-btn bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs hover:bg-blue-200 transition"
+                    data-message="Hướng dẫn đặt lịch hẹn khám">
+                    📅 Hướng dẫn đặt lịch
+                </button>
+                {{-- <button
+                    class="quick-action-btn bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs hover:bg-green-200 transition"
+                    data-message="Bảng giá dịch vụ">
+                    💰 Bảng giá
+                </button> --}}
+                <button
+                    class="quick-action-btn bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs hover:bg-purple-200 transition"
+                    data-message="Thông tin bác sĩ">
+                    👨‍⚕️ Bác sĩ
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Content -->
+        <div class="flex flex-col h-96">
+            <div class="flex-1 p-4 space-y-4 overflow-y-auto" id="chatbox-content">
+                <div class="flex items-start gap-3">
+                    <div
+                        class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-xs"></i>
+                    </div>
+                    <div class="bg-gray-100 p-3 rounded-2xl rounded-tl-sm max-w-[80%]">
+                        <p class="text-sm text-gray-800">
+                            Xin chào! 👋 Tôi là trợ lý ảo của SmartCare.<br>
+                            Tôi có thể hỗ trợ bạn:<br>
+                            • Hướng dẫn Đặt lịch khám<br>
+                            • Tư vấn dịch vụ<br>
+                            • Thông tin bác sĩ<br>
+                            Bạn cần hỗ trợ gì ạ?
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div id="typing-indicator" class="px-4 py-2 hidden">
+                <div class="flex items-center gap-2">
+                    <div
+                        class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-xs"></i>
+                    </div>
+                    <div class="bg-gray-100 p-2 rounded-xl">
+                        <div class="flex gap-1">
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s">
+                            </div>
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 bg-gray-50 border-t">
+                <div class="flex items-end gap-3">
+                    <div class="flex-1">
+                        <textarea id="chatbox-input" placeholder="Nhập tin nhắn của bạn..." rows="1"
+                            class="w-full px-4 py-3 border border-gray-200 rounded-xl resize-none outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                            style="max-height: 120px;"></textarea>
+                    </div>
+                    <button id="chatbox-send"
+                        class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -114,79 +186,337 @@
 
     <!-- Thêm script này cuối cùng -->
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const chatBtn = document.getElementById("chatbox-button");
-            const chatModal = document.getElementById("chatbox-modal");
-            const closeChat = document.getElementById("chatbox-close");
-            const chatInput = document.getElementById("chatbox-input");
-            const chatSend = document.getElementById("chatbox-send");
-            const chatContent = document.getElementById("chatbox-content");
-
-            let lastSender = null;
-
-            chatBtn?.addEventListener("click", () => {
-                chatModal?.classList.toggle("hidden");
-            });
-
-            closeChat?.addEventListener("click", () => {
-                chatModal?.classList.add("hidden");
-            });
-
-            function appendMessage(content, from = "user") {
-                const wrapper = document.createElement("div");
-                wrapper.className = "flex mb-3 " + (from === "user" ? "justify-end" : "justify-start");
-
-                const bubbleContainer = document.createElement("div");
-                bubbleContainer.className = "max-w-[75%]";
-
-                if (lastSender !== from) {
-                    const meta = document.createElement("div");
-                    meta.className = "flex items-center gap-2 text-xs text-gray-500 mb-1";
-
-                    const icon = document.createElement("span");
-                    icon.textContent = from === "user" ? "👤" : "🤖";
-
-                    const name = document.createElement("span");
-                    name.textContent = from === "user" ? "Bạn" : "Trợ lý Y tế";
-
-                    meta.appendChild(icon);
-                    meta.appendChild(name);
-                    bubbleContainer.appendChild(meta);
-
-                    lastSender = from;
-                }
-
-                const bubble = document.createElement("div");
-                bubble.className = "px-4 py-2 text-sm rounded-xl";
-                bubble.classList.add(
-                    ...(from === "user" ?
-                        ["bg-blue-100", "text-gray-900", "rounded-br-none"] :
-                        ["bg-gray-100", "text-gray-800", "rounded-bl-none"])
-                );
-                bubble.textContent = content;
-
-                bubbleContainer.appendChild(bubble);
-                wrapper.appendChild(bubbleContainer);
-                chatContent.appendChild(wrapper);
-                chatContent.scrollTop = chatContent.scrollHeight;
+        class SmartCareChat {
+            constructor() {
+                this.sessionId = localStorage.getItem('chat_session_id');
+                this.isTyping = false;
+                this.hasShownServices = localStorage.getItem('hasShownServices') === 'true';
+                this.init();
             }
 
-            chatSend?.addEventListener("click", () => {
-                const message = chatInput.value.trim();
-                if (!message) return;
+            init() {
+                this.bindEvents();
+                this.autoResizeTextarea();
+                this.loadSavedServices();
 
-                appendMessage(message, "user");
-                chatInput.value = "";
+                if (this.sessionId) {
+                    this.loadMessages();
+                } else {
+                    this.startSession();
+                }
+            }
 
+            bindEvents() {
+                document.getElementById('chatbox-button')?.addEventListener('click', () => {
+                    this.toggleChat();
+                });
+
+                document.getElementById('chatbox-close')?.addEventListener('click', () => {
+                    this.closeChat();
+                });
+
+                document.getElementById('chatbox-send')?.addEventListener('click', () => {
+                    this.sendMessage();
+                });
+
+                document.querySelectorAll('.quick-action-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const message = e.target.dataset.message;
+                        document.getElementById('chatbox-input').value = message;
+                        this.sendMessage();
+                    });
+                });
+
+                document.getElementById('chatbox-input')?.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+            }
+
+            autoResizeTextarea() {
+                const textarea = document.getElementById('chatbox-input');
+                if (!textarea) return;
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+                });
+            }
+
+            toggleChat() {
+                const modal = document.getElementById('chatbox-modal');
+                modal.classList.toggle('hidden');
+                if (!modal.classList.contains('hidden')) {
+                    modal.classList.add('animate__animated', 'animate__slideInUp');
+                    document.getElementById('chatbox-input')?.focus();
+                }
+            }
+
+            closeChat() {
+                const modal = document.getElementById('chatbox-modal');
+                modal.classList.add('hidden');
+                modal.classList.remove('animate__slideInUp');
+            }
+
+            async startSession(resetServices = false) {
+                try {
+                    const response = await fetch('/chat/start', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            session_id: this.sessionId
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        this.sessionId = data.session.session_id;
+                        localStorage.setItem('chat_session_id', this.sessionId);
+
+                        if (resetServices) {
+                            localStorage.removeItem('hasShownServices');
+                            localStorage.removeItem('lastSuggestedServices');
+                            this.hasShownServices = false;
+                        }
+
+                        this.displayMessages(data.messages);
+                    }
+                } catch (error) {
+                    console.error('Error starting chat session:', error);
+                }
+            }
+
+            async sendMessage() {
+                const input = document.getElementById('chatbox-input');
+                const message = input.value.trim();
+
+                if (!message || this.isTyping) return;
+
+                input.value = '';
+                input.style.height = 'auto';
+                this.addMessage(message, 'user');
+                this.showTyping();
+
+                try {
+                    const response = await fetch('/chat/send', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            session_id: this.sessionId,
+                            message: message
+                        })
+                    });
+
+                    const data = await response.json();
+                    this.hideTyping();
+
+                    if (data.success) {
+                        this.displayMessages(data.messages);
+                    } else {
+                        this.addMessage('Có lỗi xảy ra, vui lòng thử lại sau.', 'bot');
+                    }
+                } catch (error) {
+                    this.hideTyping();
+                    this.addMessage('Kết nối mạng bị lỗi, vui lòng thử lại.', 'bot');
+                    console.error('Error sending message:', error);
+                }
+            }
+
+            showTyping() {
+                this.isTyping = true;
+                document.getElementById('typing-indicator')?.classList.remove('hidden');
+                this.scrollToBottom();
+            }
+
+            hideTyping() {
+                this.isTyping = false;
+                document.getElementById('typing-indicator')?.classList.add('hidden');
+            }
+
+            addMessage(message, sender, metadata = null, allMessages = []) {
+                const chatContent = document.getElementById('chatbox-content');
+                const messageDiv = document.createElement('div');
+
+                if (sender === 'user') {
+                    messageDiv.innerHTML = `
+                <div class="flex justify-end">
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 rounded-2xl rounded-br-sm max-w-[80%]">
+                        <p class="text-sm">${this.escapeHtml(message)}</p>
+                    </div>
+                </div>
+            `;
+                } else {
+                    let suggestedServices = '';
+
+                    // Nếu bot gửi gợi ý dịch vụ và chưa hiện trước đó
+                    if (metadata?.suggested_services && !this.hasShownServices) {
+                        // Kiểm tra admin reply ngay sau bot
+                        const lastTwo = allMessages.slice(-2);
+                        const adminReplied = lastTwo.some(m => m.sender_type === 'admin');
+
+                        if (!adminReplied) {
+                            suggestedServices = this.renderSuggestedServices(metadata.suggested_services);
+                            localStorage.setItem('lastSuggestedServices', JSON.stringify(metadata.suggested_services));
+                            this.hasShownServices = true;
+                            localStorage.setItem('hasShownServices', 'true');
+                        }
+                    }
+
+                    messageDiv.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-xs"></i>
+                    </div>
+                    <div class="max-w-[80%]">
+                        <div class="bg-gray-100 p-3 rounded-2xl rounded-tl-sm">
+                            <p class="text-sm text-gray-800">${this.formatMessage(message || '')}</p>
+                        </div>
+                        ${suggestedServices}
+                    </div>
+                </div>
+            `;
+                }
+
+                chatContent.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+
+            loadSavedServices() {
+                if (localStorage.getItem('adminHasReplied') === 'true') return; // ✅ Chặn load lại nếu admin đã trả lời
+
+                const saved = localStorage.getItem('lastSuggestedServices');
+                if (saved) {
+                    const services = JSON.parse(saved);
+                    const chatContent = document.getElementById('chatbox-content');
+                    const html = this.renderSuggestedServices(services);
+                    chatContent.innerHTML += html;
+                }
+            }
+
+            renderSuggestedServices(services) {
+                if (!services || services.length === 0) return '';
+
+                let html = '<div class="mt-3 space-y-2">';
+                services.forEach(service => {
+                    let id, name, price, image;
+                    if (typeof service === 'number') {
+                        id = service;
+                        name = `Dịch vụ #${service}`;
+                        price = '';
+                        image = null;
+                    } else {
+                        id = service.id;
+                        name = service.name;
+                        price = service.price;
+                        image = service.image;
+                    }
+
+                    html += `
+                <div class="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition cursor-pointer" onclick="window.location.href='/chi-tiet-dich-vu/${id}'">
+                    <div class="flex items-center gap-3">
+                        ${image ? `<img src="${image}" alt="${name}" class="w-12 h-12 object-cover rounded-lg">` : ''}
+                        <div class="flex-1">
+                            <h4 class="font-medium text-sm text-gray-800">${name}</h4>
+                            <p class="text-blue-600 font-semibold text-sm">${price ? this.formatPrice(price) : ''}</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                    </div>
+                </div>
+            `;
+                });
+                html += '</div>';
+                return html;
+            }
+
+            displayMessages(messages) {
+                console.log("Messages từ server:", messages);
+
+                // 1️⃣ Xác định admin đã từng trả lời trong toàn bộ lịch sử chưa
+                const adminHasReplied = messages.some(m => m.sender_type === 'admin');
+
+                if (adminHasReplied) {
+                    localStorage.setItem('adminHasReplied', 'true');
+                    localStorage.removeItem('lastSuggestedServices');
+                    localStorage.removeItem('hasShownServices');
+                    this.hasShownServices = true; // ✅ Quan trọng: chặn hiển thị lại
+                } else {
+                    localStorage.removeItem('adminHasReplied');
+                }
+
+                // 2️⃣ Render tin nhắn
+                const chatContent = document.getElementById('chatbox-content');
+                const welcomeMsg = chatContent.firstElementChild;
+                chatContent.innerHTML = '';
+                if (welcomeMsg) chatContent.appendChild(welcomeMsg);
+
+                messages.forEach(msg => {
+                    if (
+                        msg.sender_type === 'bot' &&
+                        !adminHasReplied && // ✅ Chỉ gợi ý nếu chưa có admin trả lời bao giờ
+                        !this.hasShownServices &&
+                        (msg.metadata?.services || msg.metadata?.suggested_services)
+                    ) {
+                        const services = msg.metadata.services || msg.metadata.suggested_services;
+                        this.hasShownServices = true;
+                        localStorage.setItem('hasShownServices', 'true');
+                        localStorage.setItem('lastSuggestedServices', JSON.stringify(services));
+
+                        const html = this.renderSuggestedServices(services);
+                        chatContent.innerHTML += html;
+                    } else {
+                        this.addMessage(msg.message, msg.sender_type, msg.metadata, messages);
+                    }
+                });
+            }
+
+
+            async loadMessages() {
+                try {
+                    const response = await fetch(`/chat/messages?session_id=${this.sessionId}`);
+                    const data = await response.json();
+                    if (data.success && data.messages.length > 0) {
+                        this.displayMessages(data.messages);
+                    }
+                } catch (error) {
+                    console.error('Error loading messages:', error);
+                }
+            }
+
+            formatMessage(message) {
+                return message.replace(/\n/g, '<br>');
+            }
+
+            formatPrice(price) {
+                if (!price) return 'Liên hệ';
+                return new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(price);
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            scrollToBottom() {
+                const chatContent = document.getElementById('chatbox-content');
                 setTimeout(() => {
-                    appendMessage("Cảm ơn bạn! Chúng tôi sẽ liên hệ để xác nhận lịch hẹn sớm nhất.",
-                        "bot");
-                }, 700);
-            });
+                    chatContent.scrollTop = chatContent.scrollHeight;
+                }, 100);
+            }
+        }
 
-            chatInput?.addEventListener("keydown", e => {
-                if (e.key === "Enter") chatSend.click();
-            });
+        document.addEventListener("DOMContentLoaded", function() {
+            new SmartCareChat();
         });
     </script>
 
