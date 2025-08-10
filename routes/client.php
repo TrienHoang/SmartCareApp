@@ -86,7 +86,8 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Route hiển thị chi tiết bác sĩ (không yêu cầu đăng nhập)
-Route::get('/doctors/{doctor}', [DoctorController::class, 'show'])->name('doctors.show');
+Route::get('/doi-ngu-bac-si', [DoctorController::class, 'index'])->name('doctors.index');
+Route::get('/chi-tiet-bac-si/{doctor}', [DoctorController::class, 'show'])->name('doctors.show');
 
 Route::middleware(['auth'])->prefix('client')->name('client.')->group(function () {
     // Danh sách lịch sử khám
