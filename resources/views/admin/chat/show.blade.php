@@ -112,7 +112,7 @@
                                 messageDiv.innerHTML = `
                                 <div class="bg-blue-500 text-white px-4 py-2 rounded-lg max-w-xs">
                                     <p class="text-sm">${escapeHtml(e.message)}</p>
-                                    <p class="text-xs opacity-75 mt-1">User • vừa xong</p>
+                                    <p class="text-xs opacity-75 mt-1">Khách hàng • vừa xong</p>
                                 </div>
                             `;
 
