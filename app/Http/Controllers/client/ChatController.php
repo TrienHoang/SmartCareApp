@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\client;
 
+use App\Events\ChatMessageSent;
 use App\Http\Controllers\Controller;
 use App\Services\ChatService;
 use Illuminate\Http\Request;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 class ChatController extends Controller
 {
     protected $chatService;
+
     public function __construct(ChatService $chatService)
     {
         $this->chatService = $chatService;
@@ -17,14 +19,14 @@ class ChatController extends Controller
 
     public function startSession(Request $request)
     {
-        $session = $request = $this->chatService->getOrCreateSession(
+        $session = $this->chatService->getOrCreateSession(
             $request->session_id,
             $request->only(['name', 'email', 'phone'])
         );
 
         return response()->json([
-            'success' => true,
-            'session' => $session,
+            'success'  => true,
+            'session'  => $session,
             'messages' => $this->chatService->getSessionMessages($session->session_id)
         ]);
     }
@@ -32,31 +34,43 @@ class ChatController extends Controller
     public function sendMessage(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'session_id' => 'required',
-            'message' => 'required|string|max:1000',
+            'session_id' => 'required', // Có thể là ID số hoặc UUID
+            'message'    => 'required|string|max:1000',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors()
             ], 422);
         }
 
         try {
+            // Lưu tin nhắn vào DB
             $this->chatService->sendMessage(
                 $request->session_id,
                 $request->message,
                 'user'
             );
 
+            // Lấy session từ DB (có cả ID số)
+            $session = $this->chatService->resolveSession($request->session_id, true);
+
+            broadcast(new ChatMessageSent($request->message, $session->id))->toOthers();
+
+            \Log::info('📡 Đã broadcast event', [
+                'message' => $request->message,
+                'session' => $session->id
+            ]);
+
             $messages = $this->chatService->getSessionMessages($request->session_id);
 
             return response()->json([
-                'success' => true,
+                'success'  => true,
                 'messages' => $messages
             ]);
         } catch (\Exception $e) {
+            \Log::error('❌ Lỗi khi gửi tin nhắn: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra, vui lòng thử lại!'
@@ -70,10 +84,10 @@ class ChatController extends Controller
             $messages = $this->chatService->getSessionMessages($request->session_id);
 
             return response()->json([
-                'success' => true,
+                'success'  => true,
                 'messages' => $messages
             ]);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Session không tồn tại'

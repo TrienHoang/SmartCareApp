@@ -191,6 +191,7 @@
                 this.sessionId = localStorage.getItem('chat_session_id');
                 this.isTyping = false;
                 this.hasShownServices = localStorage.getItem('hasShownServices') === 'true';
+                this.echoChannel = null; // ✅ Lưu reference channel
                 this.init();
             }
 
@@ -199,10 +200,35 @@
                 this.autoResizeTextarea();
                 this.loadSavedServices();
 
+                // ✅ Debug Echo
+                this.debugEcho();
+
                 if (this.sessionId) {
                     this.loadMessages();
+                    // ✅ Delay để đảm bảo Echo sẵn sàng
+                    setTimeout(() => {
+                        this.listenForMessages();
+                    }, 500);
                 } else {
                     this.startSession();
+                }
+            }
+
+            debugEcho() {
+                console.log('🔍 Echo available:', typeof window.Echo);
+                console.log('🔍 Pusher available:', typeof window.Pusher);
+
+                if (window.Echo && window.Echo.connector) {
+                    console.log('🔍 Pusher state:', window.Echo.connector.pusher.connection.state);
+
+                    // Debug connection events
+                    window.Echo.connector.pusher.connection.bind('connected', () => {
+                        console.log('✅ Pusher connected successfully');
+                    });
+
+                    window.Echo.connector.pusher.connection.bind('error', (err) => {
+                        console.error('❌ Pusher connection error:', err);
+                    });
                 }
             }
 
@@ -284,9 +310,86 @@
                         }
 
                         this.displayMessages(data.messages);
+
+                        // ✅ Setup listening sau khi có sessionId
+                        setTimeout(() => {
+                            this.listenForMessages();
+                        }, 500);
                     }
                 } catch (error) {
                     console.error('Error starting chat session:', error);
+                }
+            }
+
+            listenForMessages() {
+                if (!this.sessionId) {
+                    console.warn('⚠️ Không có sessionId để listen');
+                    return;
+                }
+
+                // ✅ Kiểm tra Echo có sẵn không
+                if (!window.Echo) {
+                    console.error('❌ Window.Echo chưa được khởi tạo');
+                    return;
+                }
+
+                console.log(`🎧 Đang setup listener cho channel: chat-session-${this.sessionId}`);
+
+                try {
+                    // ✅ Hủy channel cũ nếu có
+                    if (this.echoChannel) {
+                        console.log('🔄 Hủy channel cũ');
+                        window.Echo.leaveChannel(`private-chat-session-${this.sessionId}`);
+                    }
+
+                    // ✅ Tạo channel mới
+                    this.echoChannel = window.Echo.private(`chat-session-${this.sessionId}`);
+
+                    this.echoChannel
+                        .listen('.chat-message-sent', (e) => {
+                            console.log('📩 RECEIVED MESSAGE:', e.message);
+                            console.log('📩 Full event:', e);
+
+                            // ✅ Method 1: Direct DOM manipulation (guaranteed to work)
+                            const chatContent = document.getElementById('chatbox-content');
+                            if (chatContent) {
+                                chatContent.innerHTML += `
+                            <div style="background: #dcfce7; padding: 15px; margin: 10px 0; border-radius: 12px; border-left: 4px solid #22c55e;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                    <div style="width: 32px; height: 32px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px;">
+                                        👨‍💼
+                                    </div>
+                                    <strong style="color: #166534;">Nhân viên hỗ trợ</strong>
+                                </div>
+                                <p style="margin: 0; color: #166534; font-size: 14px; line-height: 1.5;">${this.escapeHtml(e.message)}</p>
+                                <small style="color: #22c55e; font-size: 11px;">vừa xong</small>
+                            </div>
+                        `;
+
+                                // Scroll to bottom
+                                chatContent.scrollTop = chatContent.scrollHeight;
+
+                                console.log('✅ Admin message added to UI successfully');
+                            } else {
+                                console.error('❌ chatContent not found');
+                            }
+
+                            // ✅ Method 2: Also try the original method (for debugging)
+                            try {
+                                this.addMessageRealtime(e.message, 'admin');
+                            } catch (error) {
+                                console.error('❌ addMessageRealtime failed:', error);
+                            }
+                        })
+                        .subscribed(() => {
+                            console.log('✅ Successfully subscribed to channel:', `chat-session-${this.sessionId}`);
+                        })
+                        .error((error) => {
+                            console.error('❌ Channel subscription error:', error);
+                        });
+
+                } catch (error) {
+                    console.error('❌ Error setting up channel listener:', error);
                 }
             }
 
@@ -340,24 +443,92 @@
                 document.getElementById('typing-indicator')?.classList.add('hidden');
             }
 
+            // ✅ Method riêng để thêm message realtime (không cần metadata)
+            addMessageRealtime(message, sender) {
+                console.log('🎯 Adding realtime message:', message, sender);
+
+                const chatContent = document.getElementById('chatbox-content');
+                if (!chatContent) {
+                    console.error('❌ Không tìm thấy chatbox-content');
+                    return;
+                }
+
+                // ✅ Test với HTML đơn giản trước
+                const messageDiv = document.createElement('div');
+                messageDiv.style.cssText =
+                    'margin: 10px 0; padding: 10px; background: #e8f5e8; border-radius: 8px; border: 2px solid #4ade80;';
+
+                if (sender === 'admin') {
+                    messageDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 30px; height: 30px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                        👨‍💼
+                    </div>
+                    <div>
+                        <div style="background: #dcfce7; padding: 8px 12px; border-radius: 12px;">
+                            <p style="margin: 0; font-size: 14px; color: #166534;">${this.escapeHtml(message || '')}</p>
+                            <p style="margin: 4px 0 0 0; font-size: 11px; color: #22c55e;">Nhân viên hỗ trợ • vừa xong</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+                } else {
+                    messageDiv.innerHTML = `
+                <div style="display: flex; justify-content: flex-end;">
+                    <div style="background: #3b82f6; color: white; padding: 8px 12px; border-radius: 12px; max-width: 80%;">
+                        <p style="margin: 0; font-size: 14px;">${this.escapeHtml(message)}</p>
+                    </div>
+                </div>
+            `;
+                }
+
+                console.log('🔍 About to append message div:', messageDiv);
+                console.log('🔍 Current chatContent children:', chatContent.children.length);
+
+                chatContent.appendChild(messageDiv);
+
+                console.log('🔍 After append children:', chatContent.children.length);
+                console.log('✅ Message added to UI successfully');
+
+                // ✅ Force scroll
+                setTimeout(() => {
+                    chatContent.scrollTop = chatContent.scrollHeight;
+                    console.log('📜 Scrolled to bottom');
+                }, 100);
+            }
+
             addMessage(message, sender, metadata = null, allMessages = []) {
                 const chatContent = document.getElementById('chatbox-content');
                 const messageDiv = document.createElement('div');
 
                 if (sender === 'user') {
                     messageDiv.innerHTML = `
-                <div class="flex justify-end">
+                <div class="flex justify-end mb-4">
                     <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 rounded-2xl rounded-br-sm max-w-[80%]">
                         <p class="text-sm">${this.escapeHtml(message)}</p>
                     </div>
                 </div>
             `;
+                } else if (sender === 'admin') {
+                    // ✅ Style cho admin message
+                    messageDiv.innerHTML = `
+                <div class="flex items-start gap-3 mb-4">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-user-tie text-white text-xs"></i>
+                    </div>
+                    <div class="max-w-[80%]">
+                        <div class="bg-green-100 p-3 rounded-2xl rounded-tl-sm">
+                            <p class="text-sm text-gray-800">${this.formatMessage(message || '')}</p>
+                            <p class="text-xs text-green-600 mt-1">Nhân viên hỗ trợ</p>
+                        </div>
+                    </div>
+                </div>
+            `;
                 } else {
+                    // Bot message
                     let suggestedServices = '';
 
-                    // Nếu bot gửi gợi ý dịch vụ và chưa hiện trước đó
                     if (metadata?.suggested_services && !this.hasShownServices) {
-                        // Kiểm tra admin reply ngay sau bot
                         const lastTwo = allMessages.slice(-2);
                         const adminReplied = lastTwo.some(m => m.sender_type === 'admin');
 
@@ -370,7 +541,7 @@
                     }
 
                     messageDiv.innerHTML = `
-                <div class="flex items-start gap-3">
+                <div class="flex items-start gap-3 mb-4">
                     <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-robot text-white text-xs"></i>
                     </div>
@@ -389,7 +560,7 @@
             }
 
             loadSavedServices() {
-                if (localStorage.getItem('adminHasReplied') === 'true') return; // ✅ Chặn load lại nếu admin đã trả lời
+                if (localStorage.getItem('adminHasReplied') === 'true') return;
 
                 const saved = localStorage.getItem('lastSuggestedServices');
                 if (saved) {
@@ -438,19 +609,17 @@
             displayMessages(messages) {
                 console.log("Messages từ server:", messages);
 
-                // 1️⃣ Xác định admin đã từng trả lời trong toàn bộ lịch sử chưa
                 const adminHasReplied = messages.some(m => m.sender_type === 'admin');
 
                 if (adminHasReplied) {
                     localStorage.setItem('adminHasReplied', 'true');
                     localStorage.removeItem('lastSuggestedServices');
                     localStorage.removeItem('hasShownServices');
-                    this.hasShownServices = true; // ✅ Quan trọng: chặn hiển thị lại
+                    this.hasShownServices = true;
                 } else {
                     localStorage.removeItem('adminHasReplied');
                 }
 
-                // 2️⃣ Render tin nhắn
                 const chatContent = document.getElementById('chatbox-content');
                 const welcomeMsg = chatContent.firstElementChild;
                 chatContent.innerHTML = '';
@@ -459,7 +628,7 @@
                 messages.forEach(msg => {
                     if (
                         msg.sender_type === 'bot' &&
-                        !adminHasReplied && // ✅ Chỉ gợi ý nếu chưa có admin trả lời bao giờ
+                        !adminHasReplied &&
                         !this.hasShownServices &&
                         (msg.metadata?.services || msg.metadata?.suggested_services)
                     ) {
@@ -475,7 +644,6 @@
                     }
                 });
             }
-
 
             async loadMessages() {
                 try {
@@ -515,8 +683,28 @@
             }
         }
 
+        // ✅ Debug Echo trước khi khởi tạo
         document.addEventListener("DOMContentLoaded", function() {
-            new SmartCareChat();
+            console.log('🚀 DOM loaded, khởi tạo SmartCareChat...');
+
+            // Debug Echo connection
+            if (window.Echo && window.Echo.connector) {
+                console.log('✅ Echo available, Pusher state:', window.Echo.connector.pusher.connection.state);
+
+                // Wait for connection if not ready
+                if (window.Echo.connector.pusher.connection.state !== 'connected') {
+                    console.log('⏳ Waiting for Pusher connection...');
+                    window.Echo.connector.pusher.connection.bind('connected', () => {
+                        console.log('✅ Pusher connected, initializing chat...');
+                        new SmartCareChat();
+                    });
+                } else {
+                    new SmartCareChat();
+                }
+            } else {
+                console.warn('⚠️ Echo not available, initializing anyway...');
+                new SmartCareChat();
+            }
         });
     </script>
 

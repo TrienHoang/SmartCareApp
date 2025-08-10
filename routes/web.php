@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\ChatMessageSent;
 use App\Http\Controllers\admin\AdminChatController;
 use App\Http\Controllers\admin\AdminFileController;
 use App\Http\Controllers\admin\DoctorLeaveController;
@@ -43,6 +44,7 @@ use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Notifications\LateNotification;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 
 Route::get('/', function () {
     return view('client.home');
@@ -774,7 +776,12 @@ Route::middleware(['auth', 'checkAdmin'])->prefix('admin')->name('admin.')->grou
     });
 });
 
+// Route::get('/test-broadcast', function () {
+//     broadcast(new ChatMessageSent('Hello from server!', 123))->toOthers();
+//     return 'Event đã được gửi!';
+// });
 
+Broadcast::routes(['middleware' => ['web']]);
 
 
 require __DIR__ . '/client.php';

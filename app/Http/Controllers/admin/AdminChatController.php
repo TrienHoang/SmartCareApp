@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Events\ChatMessageSent;
 use App\Http\Controllers\Controller;
 use App\Models\ChatMessage;
 use App\Models\ChatSession;
@@ -40,6 +41,12 @@ class AdminChatController extends Controller
             'sender_type' => 'admin',
             'sender_id' => auth()->id(),
             'message' => $request->message,
+        ]);
+
+        broadcast(new ChatMessageSent($request->message, $session->id))->toOthers();
+        \Log::info('📡 Đã broadcast event', [
+            'message' => $request->message,
+            'session' => $session->id
         ]);
 
         return redirect()->back()->with('success', 'Tin nhắn đã được gửi!');

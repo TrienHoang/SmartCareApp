@@ -83,8 +83,93 @@
 
 @push('scripts')
     <script>
-        // Auto scroll to bottom
-        const chatBox = document.querySelector('.chat-box');
-        chatBox.scrollTop = chatBox.scrollHeight;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto scroll to bottom
+            const chatBox = document.querySelector('.chat-box');
+            if (chatBox) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+            let sessionId = "{{ $session->id }}";
+            console.log(`🎧 Admin listening to channel: chat-session-${sessionId}`);
+
+            // ✅ Debug Echo connection
+            if (window.Echo && window.Echo.connector) {
+                console.log('✅ Echo available for admin, Pusher state:', window.Echo.connector.pusher.connection
+                    .state);
+
+                const setupListener = () => {
+                    window.Echo.private(`chat-session-${sessionId}`)
+                        .listen('.chat-message-sent', (e) => {
+                            console.log('📩 Admin received message from user:', e);
+                            console.log('📩 Message content:', e.message);
+
+                            // ✅ Tạo message element với styling đẹp
+                            let chatBoxEl = document.querySelector('.chat-box');
+                            if (chatBoxEl) {
+                                let messageDiv = document.createElement('div');
+                                messageDiv.className = 'mb-3 flex justify-end';
+                                messageDiv.innerHTML = `
+                                <div class="bg-blue-500 text-white px-4 py-2 rounded-lg max-w-xs">
+                                    <p class="text-sm">${escapeHtml(e.message)}</p>
+                                    <p class="text-xs opacity-75 mt-1">User • vừa xong</p>
+                                </div>
+                            `;
+
+                                chatBoxEl.appendChild(messageDiv);
+                                chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
+
+                                // ✅ Thêm notification sound hoặc visual indicator
+                                showNewMessageNotification();
+                            }
+                        })
+                        .subscribed(() => {
+                            console.log('✅ Admin successfully subscribed to channel');
+                        })
+                        .error((error) => {
+                            console.error('❌ Admin channel subscription error:', error);
+                        });
+                };
+
+                // Setup listener when connection is ready
+                if (window.Echo.connector.pusher.connection.state === 'connected') {
+                    setupListener();
+                } else {
+                    window.Echo.connector.pusher.connection.bind('connected', setupListener);
+                }
+            } else {
+                console.error('❌ Echo not available for admin panel');
+            }
+
+            // ✅ Helper functions
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function showNewMessageNotification() {
+                // ✅ Visual notification
+                const title = document.title;
+                document.title = '🔔 Tin nhắn mới - ' + title;
+
+                setTimeout(() => {
+                    document.title = title;
+                }, 3000);
+
+                // ✅ Browser notification (nếu được phép)
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('Tin nhắn mới từ khách hàng', {
+                        body: 'Có tin nhắn mới trong chat',
+                        icon: '/favicon.ico'
+                    });
+                }
+            }
+
+            // ✅ Request notification permission
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        });
     </script>
 @endpush
