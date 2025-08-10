@@ -26,7 +26,7 @@
                         ['name' => 'Trang Chủ', 'path' => '/'],
                         ['name' => 'Giới Thiệu', 'path' => '/gioi-thieu'],
                         ['name' => 'Dịch Vụ', 'path' => '/dich-vu'],
-                        ['name' => 'Đặt Lịch', 'path' => '/dat-lich'],
+                        ['name' => 'Đội ngũ của chúng tôi', 'path' => '/doi-ngu-bac-si'],
                         ['name' => 'Tin Tức', 'path' => '/tin-tuc'],
                         ['name' => 'Liên Hệ', 'path' => '/lien-he'],
                     ];

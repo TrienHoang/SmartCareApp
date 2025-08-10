@@ -7,10 +7,42 @@ use App\Models\Doctor;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Review;
 use App\Models\Appointment;
-
+use App\Models\Department;
 
 class DoctorController extends Controller
 {
+    public function index(){
+        $doctors = Doctor::with([
+            'user',
+            'department',
+            'educations',
+            'experiences',
+            'achievements',
+            'specialties',
+            'services',
+        ])->get();
+
+        // Tính số năm kinh nghiệm cho từng bác sĩ
+        foreach ($doctors as $doctor) {
+            $startYear = $doctor->experiences->min('start_year');
+            $endYears = $doctor->experiences->map(function ($exp) {
+                return $exp->end_year ?? now()->year;
+            });
+            $endYear = $endYears->max();
+            $experienceYears = 0;
+
+            if ($startYear) {
+                $experienceYears = $endYear - $startYear;
+            }
+
+            $doctor->experience_years = $experienceYears > 0 ? $experienceYears : null;
+        }
+
+        $departments = Department::get();
+
+        return view('client.doctors', compact('doctors', 'departments'));
+    }
+
     public function show($id)
     {
         $doctor = Doctor::with([
@@ -97,6 +129,7 @@ class DoctorController extends Controller
                 'department',
                 'experiences',
             ])
+            ->limit(4)
             ->get();
 
 

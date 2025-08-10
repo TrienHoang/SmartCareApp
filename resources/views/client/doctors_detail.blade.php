@@ -2,6 +2,200 @@
 
 @section('title', 'Thông Tin Bác Sĩ')
 
+@push('styles')
+    <style>
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Smooth scroll cho button */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Service card hover effect - subtle */
+        .hover\:shadow-md:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .md\:flex-row {
+                flex-direction: column;
+            }
+
+            .md\:w-48 {
+                width: 100%;
+            }
+        }
+
+        /* Line clamp utility if not available */
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Button focus states */
+        button:focus-visible,
+        a:focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        /* Smooth transitions */
+        * {
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bg-doctor {
+            background-image: url({{ asset('admin/assets/img/dr-profile-banner-dt-4.png') }});
+            background-size: cover;
+            background-position: center;
+
+        }
+
+        .bg-doctor-top {
+            background-image: url({{ asset('admin/assets/img/doctor-item-top-bg.png') }});
+            background-size: cover;
+            background-position: top center;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #2563eb 100%);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #2563eb 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .skill-tag {
+            background: linear-gradient(135deg, #667eea20 0%, #2563eb20 100%);
+            border: 1px solid #667eea40;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #667eea20;
+        }
+
+        .timeline-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 1.5rem;
+            width: 2px;
+            height: calc(100% + 1rem);
+            background: linear-gradient(to bottom, #667eea, #2563eb);
+            opacity: 0.3;
+        }
+
+        .rating-star {
+            color: #fbbf24;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .rating-container {
+            display: flex;
+            gap: 2px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .calendar-slot {
+            transition: all 0.3s ease;
+        }
+
+        .calendar-slot:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .calendar-slot.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .calendar-slot.unavailable {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .scroll-smooth {
+            scroll-behavior: smooth;
+        }
+
+        .sticky-header {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+    </style>
+@endpush
 
 @section('content')
 
@@ -123,7 +317,6 @@
                 </nav>
             </div>
         </section>
-
 
         <!-- Content -->
         <main class="container mx-auto px-4 py-8">
@@ -712,6 +905,7 @@
                                         @if ($appointment->service)
                                             <input type="hidden" name="service_id" value="{{ $appointment->service->id }}">
                                         @endif
+                                        <input type="hidden" name="doctor_id" value="{{ $doctor->id }}">
 
                                         <div class="flex items-center mb-4 space-x-2">
                                             <label class="text-sm">Đánh giá:</label>
@@ -743,39 +937,6 @@
                             </div>
                         @endauth
                     </div>
-
-                    <!-- JavaScript xử lý đánh giá -->
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            // Kích hoạt icon
-                            if (typeof lucide !== 'undefined') {
-                                lucide.createIcons();
-                            }
-
-                            const ratingInputs = document.querySelectorAll('.rating-input');
-                            const ratingStars = document.querySelectorAll('.rating-star');
-
-                            function updateStars(selectedValue) {
-                                ratingStars.forEach(star => {
-                                    const value = parseInt(star.getAttribute('data-value'));
-                                    if (value <= selectedValue) {
-                                        star.classList.add('text-yellow-400', 'fill-yellow-400');
-                                        star.classList.remove('text-gray-300', 'fill-none');
-                                    } else {
-                                        star.classList.remove('text-yellow-400', 'fill-yellow-400');
-                                        star.classList.add('text-gray-300', 'fill-none');
-                                    }
-                                });
-                            }
-
-                            ratingInputs.forEach(input => {
-                                input.addEventListener('change', function() {
-                                    const selected = parseInt(this.value);
-                                    updateStars(selected);
-                                });
-                            });
-                        });
-                    </script>
                 </div>
             </div>
 
@@ -783,21 +944,17 @@
             <div class="bg-white rounded-2xl shadow-lg p-8 mt-10">
                 <h2 class="text-2xl font-bold mb-6 gradient-text">Bác sĩ cùng chuyên khoa</h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="flex flex-wrap justify-center gap-6">
                     @forelse ($doctor->related_doctors as $related)
                         <a href="{{ route('doctors.show', $related->id) }}"
-                            class="block max-w-sm mx-auto rounded-3xl overflow-hidden border border-gray-200 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white">
-
+                            class="block min-w-[280px] max-w-sm flex-1 rounded-3xl overflow-hidden border border-gray-200 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white">
                             <!-- Ảnh đại diện bác sĩ -->
-                            <div class="relative w-full max-w-xs rounded-3xl overflow-hidden">
+                            <div class="relative w-full rounded-3xl overflow-hidden">
                                 <!-- Nền cong -->
                                 <div class="bg-doctor-top relative">
-                                    <!-- Ảnh bác sĩ -->
                                     <img src="{{ $related->user->avatar ? asset('storage/' . $related->user->avatar) : asset('images/default-avatar.png') }}"
                                         alt="{{ $related->user->full_name }}"
-                                        class="w-full h-85 object-cover object-top mx-auto">
-
-                                    <!-- Gradient mờ chân ảnh -->
+                                        class="w-full h-80 object-cover object-top mx-auto">
                                     <div
                                         class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#f5f8fc] via-[#f5f8fcaa] to-transparent">
                                     </div>
@@ -852,366 +1009,171 @@
             </div>
         </main>
 
-        @push('styles')
-            <style>
-                .fade-in {
-                    animation: fadeInUp 0.6s ease-out;
+    @endsection
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initialize Lucide icons
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
                 }
 
-                @keyframes fadeInUp {
-                    from {
-                        opacity: 0;
-                        transform: translateY(30px);
-                    }
+                // Add intersection observer for animations
+                const observerOptions = {
+                    threshold: 0.1,
+                    rootMargin: '0px 0px -50px 0px'
+                };
 
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-
-                /* Smooth scroll cho button */
-                html {
-                    scroll-behavior: smooth;
-                }
-
-                /* Service card hover effect - subtle */
-                .hover\:shadow-md:hover {
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-                }
-
-                /* Responsive adjustments */
-                @media (max-width: 768px) {
-                    .md\:flex-row {
-                        flex-direction: column;
-                    }
-
-                    .md\:w-48 {
-                        width: 100%;
-                    }
-                }
-
-                /* Line clamp utility if not available */
-                .line-clamp-3 {
-                    display: -webkit-box;
-                    -webkit-line-clamp: 3;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                }
-
-                /* Button focus states */
-                button:focus-visible,
-                a:focus-visible {
-                    outline: 2px solid #3b82f6;
-                    outline-offset: 2px;
-                    border-radius: 4px;
-                }
-
-                /* Smooth transitions */
-                * {
-                    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-                }
-
-                .bg-doctor {
-                    background-image: url('https://i.ibb.co/v4LjG3JR/dr-profile-banner-dt-4.png');
-                    background-size: cover;
-                    background-position: center;
-
-                }
-
-                .bg-doctor-top {
-                    background-image: url('https://i.ibb.co/zgXq6mf/doctor-item-top-bg.png');
-                    background-size: cover;
-                    background-position: top center;
-                }
-
-                .gradient-bg {
-                    background: linear-gradient(135deg, #667eea 0%, #2563eb 100%);
-                }
-
-                .gradient-text {
-                    background: linear-gradient(135deg, #667eea 0%, #2563eb 100%);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    background-clip: text;
-                }
-
-                .card-hover {
-                    transition: all 0.3s ease;
-                }
-
-                .card-hover:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-                }
-
-                .btn-primary {
-                    background: linear-gradient(135deg, #667eea 0%, #2563eb 100%);
-                    transition: all 0.3s ease;
-                }
-
-                .btn-primary:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-                }
-
-                .skill-tag {
-                    background: linear-gradient(135deg, #667eea20 0%, #2563eb20 100%);
-                    border: 1px solid #667eea40;
-                }
-
-                .timeline-item {
-                    position: relative;
-                    padding-left: 2rem;
-                }
-
-                .timeline-item::before {
-                    content: '';
-                    position: absolute;
-                    left: 0;
-                    top: 0.5rem;
-                    width: 12px;
-                    height: 12px;
-                    background: #667eea;
-                    border-radius: 50%;
-                    border: 3px solid white;
-                    box-shadow: 0 0 0 3px #667eea20;
-                }
-
-                .timeline-item:not(:last-child)::after {
-                    content: '';
-                    position: absolute;
-                    left: 5px;
-                    top: 1.5rem;
-                    width: 2px;
-                    height: calc(100% + 1rem);
-                    background: linear-gradient(to bottom, #667eea, #2563eb);
-                    opacity: 0.3;
-                }
-
-                .rating-star {
-                    color: #fbbf24;
-                }
-
-                .fade-in {
-                    opacity: 0;
-                    transform: translateY(20px);
-                    animation: fadeIn 0.6s ease forwards;
-                }
-
-                .rating-container {
-                    display: flex;
-                    gap: 2px;
-                    cursor: pointer;
-                    user-select: none;
-                }
-
-
-
-                @keyframes fadeIn {
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-
-                .calendar-slot {
-                    transition: all 0.3s ease;
-                }
-
-                .calendar-slot:hover {
-                    background: #667eea;
-                    color: white;
-                    transform: scale(1.05);
-                }
-
-                .calendar-slot.selected {
-                    background: #667eea;
-                    color: white;
-                }
-
-                .calendar-slot.unavailable {
-                    background: #f3f4f6;
-                    color: #9ca3af;
-                    cursor: not-allowed;
-                }
-
-                .scroll-smooth {
-                    scroll-behavior: smooth;
-                }
-
-                .sticky-header {
-                    backdrop-filter: blur(10px);
-                    background: rgba(255, 255, 255, 0.9);
-                }
-            </style>
-        @endpush
-
-
-        @push('scripts')
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Initialize Lucide icons
-                    if (typeof lucide !== 'undefined') {
-                        lucide.createIcons();
-                    }
-
-                    // Add intersection observer for animations
-                    const observerOptions = {
-                        threshold: 0.1,
-                        rootMargin: '0px 0px -50px 0px'
-                    };
-
-                    const observer = new IntersectionObserver(function(entries) {
-                        entries.forEach(entry => {
-                            if (entry.isIntersecting) {
-                                entry.target.style.opacity = '1';
-                                entry.target.style.transform = 'translateY(0)';
-                            }
-                        });
-                    }, observerOptions);
-
-                    // Observe all card elements
-                    document.querySelectorAll('.card-hover').forEach(card => {
-                        card.style.opacity = '0';
-                        card.style.transform = 'translateY(20px)';
-                        card.style.transition = 'all 0.6s ease-out';
-                        observer.observe(card);
+                const observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }
                     });
+                }, observerOptions);
 
-                    // Add hover effects to achievement cards
-                    document.querySelectorAll('.group').forEach(card => {
-                        card.addEventListener('mouseenter', function() {
-                            this.style.transform = 'translateY(-4px)';
-                        });
-
-                        card.addEventListener('mouseleave', function() {
-                            this.style.transform = 'translateY(0)';
-                        });
-                    });
+                // Observe all card elements
+                document.querySelectorAll('.card-hover').forEach(card => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'all 0.6s ease-out';
+                    observer.observe(card);
                 });
 
-                function scrollToBooking() {
-                    // Scroll to booking section
-                    const bookingSection = document.getElementById('booking-section');
-                    if (bookingSection) {
-                        bookingSection.scrollIntoView({
-                            behavior: 'smooth'
-                        });
-                    }
-                }
-
-                // Initialize Lucide icons
-                lucide.createIcons();
-
-                // Tab functionality
-                function showTab(tabName) {
-                    // Hide all content
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.add('hidden');
+                // Add hover effects to achievement cards
+                document.querySelectorAll('.group').forEach(card => {
+                    card.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-4px)';
                     });
 
-                    // Remove active class from all tabs
-                    document.querySelectorAll('.tab-btn').forEach(btn => {
-                        btn.classList.remove('border-blue-600', 'text-blue-600');
-                        btn.classList.add('border-transparent', 'text-gray-600');
+                    card.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0)';
                     });
+                });
+            });
 
-                    // Show selected content
-                    document.getElementById(`content-${tabName}`).classList.remove('hidden');
-
-                    // Add active class to selected tab
-                    const activeTab = document.getElementById(`tab-${tabName}`);
-                    activeTab.classList.remove('border-transparent', 'text-gray-600');
-                    activeTab.classList.add('border-blue-600', 'text-blue-600');
-                }
-
-                // Date selection
-                function selectDate(button) {
-                    document.querySelectorAll('.date-btn').forEach(btn => {
-                        btn.classList.remove('bg-blue-600', 'text-white');
-                        btn.classList.add('bg-gray-200', 'text-gray-700');
-                    });
-
-                    button.classList.remove('bg-gray-200', 'text-gray-700');
-                    button.classList.add('bg-blue-600', 'text-white');
-                }
-
-                // Time slot selection
-                function selectTime(button) {
-                    if (button.classList.contains('unavailable')) {
-                        return;
-                    }
-
-                    document.querySelectorAll('.calendar-slot').forEach(slot => {
-                        slot.classList.remove('selected');
-                    });
-
-                    button.classList.add('selected');
-                }
-
-                // Scroll to booking form
-                function scrollToBooking() {
-                    document.getElementById('booking-form').scrollIntoView({
+            function scrollToBooking() {
+                // Scroll to booking section
+                const bookingSection = document.getElementById('booking-section');
+                if (bookingSection) {
+                    bookingSection.scrollIntoView({
                         behavior: 'smooth'
                     });
                 }
+            }
 
-                // Add fade-in animation on scroll
-                function animateOnScroll() {
-                    const elements = document.querySelectorAll('.fade-in');
-                    elements.forEach(element => {
-                        const elementTop = element.getBoundingClientRect().top;
-                        const elementVisible = 150;
+            // Initialize Lucide icons
+            lucide.createIcons();
 
-                        if (elementTop < window.innerHeight - elementVisible) {
-                            element.style.opacity = '1';
-                            element.style.transform = 'translateY(0)';
-                        }
-                    });
+            // Tab functionality
+            function showTab(tabName) {
+                // Hide all content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('border-blue-600', 'text-blue-600');
+                    btn.classList.add('border-transparent', 'text-gray-600');
+                });
+
+                // Show selected content
+                document.getElementById(`content-${tabName}`).classList.remove('hidden');
+
+                // Add active class to selected tab
+                const activeTab = document.getElementById(`tab-${tabName}`);
+                activeTab.classList.remove('border-transparent', 'text-gray-600');
+                activeTab.classList.add('border-blue-600', 'text-blue-600');
+            }
+
+            // Date selection
+            function selectDate(button) {
+                document.querySelectorAll('.date-btn').forEach(btn => {
+                    btn.classList.remove('bg-blue-600', 'text-white');
+                    btn.classList.add('bg-gray-200', 'text-gray-700');
+                });
+
+                button.classList.remove('bg-gray-200', 'text-gray-700');
+                button.classList.add('bg-blue-600', 'text-white');
+            }
+
+            // Time slot selection
+            function selectTime(button) {
+                if (button.classList.contains('unavailable')) {
+                    return;
                 }
 
-                // Initialize animations
-                window.addEventListener('scroll', animateOnScroll);
-                window.addEventListener('load', animateOnScroll);
+                document.querySelectorAll('.calendar-slot').forEach(slot => {
+                    slot.classList.remove('selected');
+                });
 
-                // Hiệu ứng click vào sao khi chỉnh sửa bình luận
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Hiệu ứng cho radio star trong form chỉnh sửa review
-                    document.querySelectorAll('form[action*="/reviews/"]').forEach(function(form) {
-                        const stars = form.querySelectorAll('label .w-5.h-5');
-                        const radios = form.querySelectorAll('input[type="radio"][name="rating"]');
-                        radios.forEach(function(radio, idx) {
-                            radio.addEventListener('change', function() {
-                                stars.forEach(function(star, i) {
-                                    if (i < idx + 1) {
-                                        star.classList.add('text-yellow-400',
-                                            'fill-yellow-400');
-                                        star.classList.remove('text-gray-300', 'fill-none');
-                                    } else {
-                                        star.classList.remove('text-yellow-400',
-                                            'fill-yellow-400');
-                                        star.classList.add('text-gray-300', 'fill-none');
-                                    }
-                                });
+                button.classList.add('selected');
+            }
+
+            // Scroll to booking form
+            function scrollToBooking() {
+                document.getElementById('booking-form').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+
+            // Add fade-in animation on scroll
+            function animateOnScroll() {
+                const elements = document.querySelectorAll('.fade-in');
+                elements.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const elementVisible = 150;
+
+                    if (elementTop < window.innerHeight - elementVisible) {
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                    }
+                });
+            }
+
+            // Initialize animations
+            window.addEventListener('scroll', animateOnScroll);
+            window.addEventListener('load', animateOnScroll);
+
+            // Hiệu ứng click vào sao khi chỉnh sửa bình luận
+            document.addEventListener('DOMContentLoaded', function() {
+                // Hiệu ứng cho radio star trong form chỉnh sửa review
+                document.querySelectorAll('form[action*="/reviews/"]').forEach(function(form) {
+                    const stars = form.querySelectorAll('label .w-5.h-5');
+                    const radios = form.querySelectorAll('input[type="radio"][name="rating"]');
+                    radios.forEach(function(radio, idx) {
+                        radio.addEventListener('change', function() {
+                            stars.forEach(function(star, i) {
+                                if (i < idx + 1) {
+                                    star.classList.add('text-yellow-400',
+                                        'fill-yellow-400');
+                                    star.classList.remove('text-gray-300', 'fill-none');
+                                } else {
+                                    star.classList.remove('text-yellow-400',
+                                        'fill-yellow-400');
+                                    star.classList.add('text-gray-300', 'fill-none');
+                                }
                             });
                         });
-                        // Khởi tạo hiệu ứng ban đầu
-                        radios.forEach(function(radio, idx) {
-                            if (radio.checked) {
-                                stars.forEach(function(star, i) {
-                                    if (i < idx + 1) {
-                                        star.classList.add('text-yellow-400', 'fill-yellow-400');
-                                        star.classList.remove('text-gray-300', 'fill-none');
-                                    } else {
-                                        star.classList.remove('text-yellow-400', 'fill-yellow-400');
-                                        star.classList.add('text-gray-300', 'fill-none');
-                                    }
-                                });
-                            }
-                        });
+                    });
+                    // Khởi tạo hiệu ứng ban đầu
+                    radios.forEach(function(radio, idx) {
+                        if (radio.checked) {
+                            stars.forEach(function(star, i) {
+                                if (i < idx + 1) {
+                                    star.classList.add('text-yellow-400', 'fill-yellow-400');
+                                    star.classList.remove('text-gray-300', 'fill-none');
+                                } else {
+                                    star.classList.remove('text-yellow-400', 'fill-yellow-400');
+                                    star.classList.add('text-gray-300', 'fill-none');
+                                }
+                            });
+                        }
                     });
                 });
-            </script>
-        @endpush
-    @endsection
+            });
+        </script>
+    @endpush
