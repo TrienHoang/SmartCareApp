@@ -22,6 +22,7 @@
         "laravel/tinker": "^2.10.1",
         "maatwebsite/excel": "^3.1",
         "nesbot/carbon": "^3.10",
+        "pusher/pusher-php-server": "^7.2",
         "simplesoftwareio/simple-qrcode": "4.2",
         "spatie/laravel-permission": "*"
     },
