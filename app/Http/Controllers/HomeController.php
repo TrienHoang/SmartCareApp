@@ -24,13 +24,51 @@ class HomeController extends Controller
 
         $departments = Department::all();
 
-        $dich_vu = Service::where('status', 'active')->get();
+        $dich_vu = Appointment::whereNotIn('status', ['pending', 'cancelled'])
+            ->select('service_id', \DB::raw('COUNT(*) as total_bookings'))
+            ->groupBy('service_id')
+            ->orderByDesc('total_bookings')
+            ->with(['service' => function ($query) {
+                $query->select('id', 'service_cate_id', 'department_id', 'name', 'description', 'image', 'price', 'duration', 'status')
+                ->where('status', 'active');
+            }])
+            ->limit(6)
+            ->get();
 
         $doctors = Doctor::whereHas('user', function ($query) {
             $query->where('role_id', 2);
         })
-            ->with(['user', 'department'])
-            ->get();
+            ->with(['user', 'department', 'reviews'])
+            ->withCount('reviews')
+            // ->having('reviews_count', '>', 0) // Chỉ lấy bác sĩ có đánh giá
+            ->get()
+            ->map(function ($doctor) {
+                $doctor->average_rating = round($doctor->reviews->avg('rating'), 1);
+                return $doctor;
+            })
+            ->sortByDesc('average_rating')
+            ->take(8)
+            ->values()
+            ->take(7);
+        foreach ($doctors as $doctor) {
+            $startYear = $doctor->experiences->min('start_year');
+            $endYears = $doctor->experiences->map(function ($exp) {
+                return $exp->end_year ?? now()->year;
+            });
+            $endYear = $endYears->max();
+            $experienceYears = 0;
+
+            if ($startYear) {
+                $experienceYears = $endYear - $startYear;
+            }
+
+            $doctor->experience_years = $experienceYears > 0 ? $experienceYears : null;
+        }
+
+        $visibleReviews = $doctors->pluck('reviews')->flatten();
+        $average_rating_all = round($visibleReviews->avg('rating'), 1);
+
+
         return view('client.home', compact('testimonials', 'departments', 'doctors', 'dich_vu'));
     }
 
