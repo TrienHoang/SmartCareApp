@@ -243,8 +243,8 @@
                 <th width="30%">Tên thuốc</th>
                 <th width="10%">Đơn vị</th>
                 <th width="8%">SL</th>
-                <th width="12%">Đơn giá</th>
-                <th width="12%">Thành tiền</th>
+                {{-- <th width="12%">Đơn giá</th>
+                <th width="12%">Thành tiền</th> --}}
                 <th width="12%">Ngày SX</th>
                 <th width="23%">Cách dùng</th>
             </tr>
@@ -261,15 +261,15 @@
                     </td>
                     <td class="text-center">{{ $item->medicine->unit }}</td>
                     <td class="text-center">{{ $item->quantity }}</td>
-                    <td class="text-right">{{ number_format($item->medicine->price, 3, ',', '.') }}</td>
+                    {{-- <td class="text-right">{{ number_format($item->medicine->price, 3, ',', '.') }}</td>
                     <td class="text-right">{{ number_format($item->quantity * $item->medicine->price, 3, ',', '.') }}
-                    </td>
+                    </td> --}}
                     <td class="text-center">{{ $item->medicine->created_at->format('d/m/Y') }}</td>
                     <td>{{ $item->usage_instructions ?: 'Theo chỉ dẫn của bác sĩ' }}</td>
                 </tr>
             @endforeach
         </tbody>
-        <tfoot>
+        {{-- <tfoot>
             <tr class="total-row">
                 <td colspan="5" class="text-center"><strong>TỔNG CỘNG</strong></td>
                 <td class="text-right">
@@ -285,7 +285,7 @@
                 </td>
                 <td colspan="2"></td>
             </tr>
-        </tfoot>
+        </tfoot> --}}
 
     </table>
 

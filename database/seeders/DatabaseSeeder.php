@@ -78,6 +78,7 @@ class DatabaseSeeder extends Seeder
         SpecialtySeeder::class,
         DoctorSeeder::class,
         DoctorDetailSeeder::class,
+        ChatTemplateSeeder::class,
 
         ReviewReplySeeder::class
 
