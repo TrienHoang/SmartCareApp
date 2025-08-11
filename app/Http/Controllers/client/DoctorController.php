@@ -7,10 +7,42 @@ use App\Models\Doctor;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Review;
 use App\Models\Appointment;
-
+use App\Models\Department;
 
 class DoctorController extends Controller
 {
+    public function index(){
+        $doctors = Doctor::with([
+            'user',
+            'department',
+            'educations',
+            'experiences',
+            'achievements',
+            'specialties',
+            'services',
+        ])->get();
+
+        // Tính số năm kinh nghiệm cho từng bác sĩ
+        foreach ($doctors as $doctor) {
+            $startYear = $doctor->experiences->min('start_year');
+            $endYears = $doctor->experiences->map(function ($exp) {
+                return $exp->end_year ?? now()->year;
+            });
+            $endYear = $endYears->max();
+            $experienceYears = 0;
+
+            if ($startYear) {
+                $experienceYears = $endYear - $startYear;
+            }
+
+            $doctor->experience_years = $experienceYears > 0 ? $experienceYears : null;
+        }
+
+        $departments = Department::get();
+
+        return view('client.doctors', compact('doctors', 'departments'));
+    }
+
     public function show($id)
     {
         $doctor = Doctor::with([
@@ -20,6 +52,7 @@ class DoctorController extends Controller
             'experiences',
             'achievements',
             'specialties',
+            'services',
             'reviews' => function ($query) {
                 $query->where('is_visible', true)
                     ->latest()
@@ -31,14 +64,23 @@ class DoctorController extends Controller
             },
         ])->findOrFail($id);
 
-        // ✅ Tính số năm kinh nghiệm
+        // Lấy năm bắt đầu sớm nhất
         $startYear = $doctor->experiences->min('start_year');
-        $endYear = $doctor->experiences->max('end_year') ?? now()->year;
 
+        // Xử lý end_year: nếu có null => coi là năm hiện tại
+        $endYears = $doctor->experiences->map(function ($exp) {
+            return $exp->end_year ?? now()->year;
+        });
+
+        // Lấy năm kết thúc muộn nhất
+        $endYear = $endYears->max();
+
+        // Tính số năm kinh nghiệm
         $experienceYears = 0;
         if ($startYear) {
-            $experienceYears = ($endYear ?? now()->year) - $startYear;
+            $experienceYears = $endYear - $startYear;
         }
+
         $doctor->experience_years = $experienceYears > 0 ? $experienceYears : null;
 
         // ✅ Tính điểm trung bình và phân bổ đánh giá
@@ -78,6 +120,18 @@ class DoctorController extends Controller
                 }
             }
         }
+
+        // Danh sách các bác sĩ cùng chuyên khoa
+        $doctor->related_doctors = Doctor::where('department_id', $doctor->department_id)
+            ->where('id', '!=', $doctor->id)
+            ->with([
+                'user',
+                'department',
+                'experiences',
+            ])
+            ->limit(4)
+            ->get();
+
 
         return view('client.doctors_detail', compact(
             'doctor',
