@@ -8,12 +8,15 @@ use Illuminate\Support\Facades\Broadcast;
 
 // ✅ THÊM: Channel cho chat session
 Broadcast::channel('chat-session-{sessionId}', function ($user, $sessionId) {
-    // Với private channel, phải return true hoặc user data
     \Log::info('🔐 User trying to join channel', [
         'user' => $user ? $user->id : 'guest',
         'sessionId' => $sessionId
     ]);
 
-    // Tạm thời cho phép tất cả join để test
-    return ['id' => $user ? $user->id : 'guest'];
+    // Chỉ cho phép nếu đã đăng nhập
+    if ($user) {
+        return ['id' => $user->id, 'name' => $user->name];
+    }
+
+    return false; // Không đăng nhập thì không join được
 });

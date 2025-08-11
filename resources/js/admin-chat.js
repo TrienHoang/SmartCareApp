@@ -4,7 +4,6 @@ import Pusher from "pusher-js";
 
 window.Pusher = Pusher;
 
-// Khởi tạo Echo
 window.Echo = new Echo({
     broadcaster: "pusher",
     key: import.meta.env.VITE_PUSHER_APP_KEY,
@@ -12,38 +11,40 @@ window.Echo = new Echo({
     forceTLS: true,
 });
 
-// Lấy ID admin từ meta tag trong layout
-const adminId = document.head.querySelector('meta[name="admin-id"]').content;
+// Lấy sessionId (VD: từ URL hoặc biến server truyền vào)
+const sessionId = document.head.querySelector('meta[name="chat-session-id"]').content;
 
-// Lắng nghe kênh chat realtime
-window.Echo.private(`chat.admin.${adminId}`)
-    .listen("MessageSent", (e) => {
-        appendMessage(e.message);
+console.log("🔌 Admin joining channel: chat-session-" + sessionId);
+
+window.Echo.private(`chat-session-${sessionId}`)
+    .listen('.chat-message-sent', (e) => {
+        appendMessage(e.message, 'client');
     });
 
-// Hàm append tin nhắn vào khung chat
-function appendMessage(message) {
+function appendMessage(message, sender) {
     const container = document.getElementById("chat-messages");
     if (!container) return;
 
     const msgHTML = `
-        <div class="message ${message.sender_type === 'admin' ? 'outgoing' : 'incoming'}">
-            <strong>${message.sender_name}:</strong> ${message.content}
+        <div class="message ${sender === 'admin' ? 'outgoing' : 'incoming'}">
+            <strong>${sender}:</strong> ${message}
         </div>
     `;
     container.insertAdjacentHTML("beforeend", msgHTML);
     container.scrollTop = container.scrollHeight;
 }
 
-// Xử lý gửi tin nhắn
+// Gửi tin nhắn từ admin
 document.getElementById("chat-form")?.addEventListener("submit", function (e) {
     e.preventDefault();
     const input = document.getElementById("chat-input");
     const content = input.value.trim();
     if (!content) return;
 
-    axios.post("/admin/chat/send", { content })
-        .then(() => {
-            input.value = "";
-        });
+    axios.post(`/admin/chat/${sessionId}/send`, {
+        message: content
+    }).then(() => {
+        appendMessage(content, 'admin');
+        input.value = "";
+    });
 });

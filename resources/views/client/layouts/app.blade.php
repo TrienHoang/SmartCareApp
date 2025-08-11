@@ -444,58 +444,58 @@
             }
 
             // ✅ Method riêng để thêm message realtime (không cần metadata)
-            addMessageRealtime(message, sender) {
-                console.log('🎯 Adding realtime message:', message, sender);
+            // addMessageRealtime(message, sender) {
+            //     console.log('🎯 Adding realtime message:', message, sender);
 
-                const chatContent = document.getElementById('chatbox-content');
-                if (!chatContent) {
-                    console.error('❌ Không tìm thấy chatbox-content');
-                    return;
-                }
+            //     const chatContent = document.getElementById('chatbox-content');
+            //     if (!chatContent) {
+            //         console.error('❌ Không tìm thấy chatbox-content');
+            //         return;
+            //     }
 
-                // ✅ Test với HTML đơn giản trước
-                const messageDiv = document.createElement('div');
-                messageDiv.style.cssText =
-                    'margin: 10px 0; padding: 10px; background: #e8f5e8; border-radius: 8px; border: 2px solid #4ade80;';
+            //     // ✅ Test với HTML đơn giản trước
+            //     const messageDiv = document.createElement('div');
+            //     messageDiv.style.cssText =
+            //         'margin: 10px 0; padding: 10px; background: #e8f5e8; border-radius: 8px; border: 2px solid #4ade80;';
 
-                if (sender === 'admin') {
-                    messageDiv.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 30px; height: 30px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
-                        👨‍💼
-                    </div>
-                    <div>
-                        <div style="background: #dcfce7; padding: 8px 12px; border-radius: 12px;">
-                            <p style="margin: 0; font-size: 14px; color: #166534;">${this.escapeHtml(message || '')}</p>
-                            <p style="margin: 4px 0 0 0; font-size: 11px; color: #22c55e;">Nhân viên hỗ trợ • vừa xong</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-                } else {
-                    messageDiv.innerHTML = `
-                <div style="display: flex; justify-content: flex-end;">
-                    <div style="background: #3b82f6; color: white; padding: 8px 12px; border-radius: 12px; max-width: 80%;">
-                        <p style="margin: 0; font-size: 14px;">${this.escapeHtml(message)}</p>
-                    </div>
-                </div>
-            `;
-                }
+            //     if (sender === 'admin') {
+            //         messageDiv.innerHTML = `
+        //     <div style="display: flex; align-items: center; gap: 8px;">
+        //         <div style="width: 30px; height: 30px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+        //             👨‍💼
+        //         </div>
+        //         <div>
+        //             <div style="background: #dcfce7; padding: 8px 12px; border-radius: 12px;">
+        //                 <p style="margin: 0; font-size: 14px; color: #166534;">${this.escapeHtml(message || '')}</p>
+        //                 <p style="margin: 4px 0 0 0; font-size: 11px; color: #22c55e;">Nhân viên hỗ trợ • vừa xong</p>
+        //             </div>
+        //         </div>
+        //     </div>
+        // `;
+            //     } else {
+            //         messageDiv.innerHTML = `
+        //     <div style="display: flex; justify-content: flex-end;">
+        //         <div style="background: #3b82f6; color: white; padding: 8px 12px; border-radius: 12px; max-width: 80%;">
+        //             <p style="margin: 0; font-size: 14px;">${this.escapeHtml(message)}</p>
+        //         </div>
+        //     </div>
+        // `;
+            //     }
 
-                console.log('🔍 About to append message div:', messageDiv);
-                console.log('🔍 Current chatContent children:', chatContent.children.length);
+            //     console.log('🔍 About to append message div:', messageDiv);
+            //     console.log('🔍 Current chatContent children:', chatContent.children.length);
 
-                chatContent.appendChild(messageDiv);
+            //     chatContent.appendChild(messageDiv);
 
-                console.log('🔍 After append children:', chatContent.children.length);
-                console.log('✅ Message added to UI successfully');
+            //     console.log('🔍 After append children:', chatContent.children.length);
+            //     console.log('✅ Message added to UI successfully');
 
-                // ✅ Force scroll
-                setTimeout(() => {
-                    chatContent.scrollTop = chatContent.scrollHeight;
-                    console.log('📜 Scrolled to bottom');
-                }, 100);
-            }
+            //     // ✅ Force scroll
+            //     setTimeout(() => {
+            //         chatContent.scrollTop = chatContent.scrollHeight;
+            //         console.log('📜 Scrolled to bottom');
+            //     }, 100);
+            // }
 
             addMessage(message, sender, metadata = null, allMessages = []) {
                 const chatContent = document.getElementById('chatbox-content');
@@ -826,6 +826,12 @@
             });
         });
     </script>
+    @if (auth()->check())
+        <script>
+            localStorage.removeItem('chat_session_id');
+            localStorage.removeItem('hasShownServices');
+        </script>
+    @endif
     @stack('scripts')
 
 </body>

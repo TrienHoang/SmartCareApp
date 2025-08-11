@@ -43,10 +43,10 @@ class AdminChatController extends Controller
             'message' => $request->message,
         ]);
 
-        broadcast(new ChatMessageSent($request->message, $session->id))->toOthers();
+        broadcast(new ChatMessageSent($request->message, $session->session_id));
         \Log::info('📡 Đã broadcast event', [
             'message' => $request->message,
-            'session' => $session->id
+            'session' => $session->session_id
         ]);
 
         return redirect()->back()->with('success', 'Tin nhắn đã được gửi!');

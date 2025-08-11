@@ -18,12 +18,13 @@ class ChatMessageSent implements ShouldBroadcastNow
     public function __construct($message, $sessionId)
     {
         $this->message = $message;
-        $this->sessionId = (int) $sessionId;
+        $this->sessionId = $sessionId;
     }
 
     // Private channel để match với channels.php
     public function broadcastOn()
     {
+        \Log::info('📡 Sending broadcast on: chat-session-' . $this->sessionId);
         return new PrivateChannel('chat-session-' . $this->sessionId);
     }
 

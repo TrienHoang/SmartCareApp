@@ -90,7 +90,7 @@
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
 
-            let sessionId = "{{ $session->id }}";
+            let sessionId = document.head.querySelector('meta[name="chat-session-id"]').content;
             console.log(`🎧 Admin listening to channel: chat-session-${sessionId}`);
 
             // ✅ Debug Echo connection

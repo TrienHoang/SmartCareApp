@@ -56,11 +56,10 @@ class ChatController extends Controller
             // Lấy session từ DB (có cả ID số)
             $session = $this->chatService->resolveSession($request->session_id, true);
 
-            broadcast(new ChatMessageSent($request->message, $session->id))->toOthers();
+            broadcast(new ChatMessageSent($request->message, $session->session_id));
 
-            \Log::info('📡 Đã broadcast event', [
-                'message' => $request->message,
-                'session' => $session->id
+            \Log::info('📡 Client gửi lên channel', [
+                'channel' => 'chat-session-' . $session->session_id
             ]);
 
             $messages = $this->chatService->getSessionMessages($request->session_id);
