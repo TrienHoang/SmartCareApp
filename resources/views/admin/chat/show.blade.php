@@ -1,6 +1,9 @@
 @extends('admin.dashboard')
 
 @section('title', 'Chi tiết Chat Session')
+<head>
+    <meta name="chat-session-id" content="{{ $session->session_id }}">
+</head>
 
 @section('content')
     <div class="container-fluid">

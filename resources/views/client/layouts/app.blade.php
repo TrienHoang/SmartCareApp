@@ -826,12 +826,6 @@
             });
         });
     </script>
-    @if (auth()->check())
-        <script>
-            localStorage.removeItem('chat_session_id');
-            localStorage.removeItem('hasShownServices');
-        </script>
-    @endif
     @stack('scripts')
 
 </body>
