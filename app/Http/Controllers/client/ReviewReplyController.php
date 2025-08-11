@@ -24,6 +24,8 @@ class ReviewReplyController extends Controller
      */
     public function store(Request $request, $doctorId)
     {
+
+        // dd($request->all());
         try {
             // ✅ Tìm bác sĩ
             $doctor = Doctor::findOrFail($doctorId);

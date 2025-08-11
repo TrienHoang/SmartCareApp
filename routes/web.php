@@ -1,5 +1,7 @@
 <?php
 
+use App\Events\ChatMessageSent;
+use App\Http\Controllers\admin\AdminChatController;
 use App\Http\Controllers\admin\AdminFileController;
 use App\Http\Controllers\admin\DoctorLeaveController;
 use App\Http\Controllers\Admin\AdminNotificationController;
@@ -42,6 +44,7 @@ use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Notifications\LateNotification;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 
 Route::get('/', function () {
     return view('client.home');
@@ -411,7 +414,7 @@ Route::group([
             ->middleware('check_permission:create_rooms')->name('store');
 
         Route::get('trash', [RoomController::class, 'trash'])->name('trash');
-        
+
         Route::get('/edit/{id}', [RoomController::class, 'edit'])
             ->middleware('check_permission:edit_rooms')->name('edit');
 
@@ -762,7 +765,23 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::resource('shifts', ShiftsController::class);
 });
 
+Route::middleware(['auth', 'checkAdmin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('chat')->name('chat.')->group(function () {
+        Route::get('/', [AdminChatController::class, 'index'])->name('index');
+        Route::get('/session/{session}', [AdminChatController::class, 'show'])->name('show');
+        Route::post('/session/{session}/send', [AdminChatController::class, 'sendMessage'])->name('send');
+        Route::get('/templates', [AdminChatController::class, 'templates'])->name('templates');
+        Route::get('/templates/create', [AdminChatController::class, 'createTemplate'])->name('templates.create');
+        Route::post('/templates', [AdminChatController::class, 'storeTemplate'])->name('templates.store');
+    });
+});
 
+// Route::get('/test-broadcast', function () {
+//     broadcast(new ChatMessageSent('Hello from server!', 123))->toOthers();
+//     return 'Event đã được gửi!';
+// });
+
+Broadcast::routes(['middleware' => ['web']]);
 
 
 require __DIR__ . '/client.php';

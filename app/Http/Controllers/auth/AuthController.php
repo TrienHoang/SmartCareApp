@@ -159,6 +159,8 @@ class AuthController extends Controller
     {
         Auth::logout();
         session()->forget('user_id');
-        return redirect()->route('login')->with('success', 'Đăng xuất thành công!');
+        // Thêm query parameter logged_out=1
+        return redirect()->route('login', ['logged_out' => 1])
+            ->with('success', 'Đăng xuất thành công!');
     }
 }

@@ -21,6 +21,7 @@ use chillerlan\QRCode\{QRCode, QROptions};
 use Illuminate\Support\Facades\Response;
 
 use App\Http\Controllers\Client\AppointmentHistoryController;
+use App\Http\Controllers\client\ChatController;
 use App\Http\Controllers\Client\UserController;
 use App\Http\Controllers\Client\ProfileController;
 
@@ -71,7 +72,11 @@ Route::prefix('client/profile')->name('client.profile.')->group(function () {
 
 Route::get('/thong-tin-bac-si/{id}', [DoctorController::class, 'show'])->name('doctor.show');
 
-
+Route::prefix('chat')->name('chat.')->group(function () {
+    Route::post('/start', [ChatController::class, 'startSession'])->name('start');
+    Route::post('/send', [ChatController::class, 'sendMessage'])->name('send');
+    Route::get('/messages', [ChatController::class, 'getMessages'])->name('messages');
+});
 
 Route::middleware(['auth'])->group(function () {
     // Gửi đánh giá
@@ -86,7 +91,8 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Route hiển thị chi tiết bác sĩ (không yêu cầu đăng nhập)
-Route::get('/doctors/{doctor}', [DoctorController::class, 'show'])->name('doctors.show');
+Route::get('/doi-ngu-bac-si', [DoctorController::class, 'index'])->name('doctors.index');
+Route::get('/chi-tiet-bac-si/{doctor}', [DoctorController::class, 'show'])->name('doctors.show');
 
 Route::middleware(['auth'])->prefix('client')->name('client.')->group(function () {
     // Danh sách lịch sử khám

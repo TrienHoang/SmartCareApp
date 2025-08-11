@@ -388,10 +388,30 @@
                                                     </span>
                                                 </small>
 
-                                                @if ($payment->note)
+                                                @php
+                                                    // Kiểm tra xem note có phải JSON không
+                                                    $note = $payment->note;
+                                                    $decodedNote = json_decode($note, true);
+                                                @endphp
+
+                                                @if (is_array($decodedNote))
+                                                    @php
+                                                        unset($decodedNote['transaction_date']);
+                                                    @endphp
+
+                                                    @if (!empty($decodedNote))
+                                                        <small class="text-muted d-block mt-1">
+                                                            <i class="bx bx-info-circle me-1"></i>
+                                                            Ghi chú:
+                                                            {{ collect($decodedNote)->map(function ($v, $k) {
+                                                                    return ucfirst($k) . ': ' . $v;
+                                                                })->implode(' | ') }}
+                                                        </small>
+                                                    @endif
+                                                @elseif (!empty($note))
                                                     <small class="text-muted d-block mt-1">
                                                         <i class="bx bx-info-circle me-1"></i>
-                                                        Ghi chú: {{ $payment->note }}
+                                                        Ghi chú: {{ $note }}
                                                     </small>
                                                 @endif
                                             </div>
