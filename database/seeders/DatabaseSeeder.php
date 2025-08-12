@@ -18,7 +18,6 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RolePermissionSeeder::class,
 
-
             TaskSeeder::class,
 
             UserSeeder::class,
@@ -55,7 +54,7 @@ class DatabaseSeeder extends Seeder
             PrescriptionSeeder::class,
             PrescriptionItemSeeder::class,
 
-             TreatmentPlanSeeder::class,
+            TreatmentPlanSeeder::class,
 
 
             FileUploadSeeder::class,
@@ -64,9 +63,9 @@ class DatabaseSeeder extends Seeder
             BlogSeeder::class,
 
             ContactSeeder::class,
-      
 
-             NotificationSeeder::class,
+
+            NotificationSeeder::class,
             FaqSeeder::class,
             OrderSeeder::class,
             NotificationSeeder::class,
@@ -75,12 +74,12 @@ class DatabaseSeeder extends Seeder
             DoctorServiceSeeder::class,
             DoctorDetailSeeder::class,
 
-        SpecialtySeeder::class,
-        DoctorSeeder::class,
-        DoctorDetailSeeder::class,
-        ChatTemplateSeeder::class,
+            SpecialtySeeder::class,
+            DoctorSeeder::class,
+            DoctorDetailSeeder::class,
+            ChatTemplateSeeder::class,
 
-        ReviewReplySeeder::class
+            // ReviewReplySeeder::class
 
 
 

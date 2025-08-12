@@ -757,6 +757,8 @@
                 perPage: 3,
                 autoplay: true,
                 interval: 3000,
+                arrows: false, // Ẩn nút next/prev
+                pagination: false, // Ẩn dots
                 pauseOnHover: true,
                 pauseOnFocus: true,
                 gap: '1rem',
@@ -777,6 +779,8 @@
                 interval: 3000,
                 pauseOnHover: true,
                 pauseOnFocus: true,
+                arrows: false, // Ẩn nút next/prev
+                pagination: false, // Ẩn dots
                 gap: '1rem',
                 breakpoints: {
                     1024: {
