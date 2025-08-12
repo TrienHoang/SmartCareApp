@@ -443,7 +443,7 @@ class BookingController extends Controller
 
     public function save(Request $request)
     {
-        $this->cleanExpiredPayments(); // Dọn dẹp trước khi lưu
+        // $this->cleanExpiredPayments(); // Dọn dẹp trước khi lưu
 
         $booking_data = $request->session()->get('booking_data');
         $booking_confirm = $request->session()->get('booking_confirm');
@@ -746,7 +746,7 @@ class BookingController extends Controller
      */
     public function paymentIpn(Request $request)
     {
-        $this->cleanExpiredPayments(); // Dọn dẹp trước khi xử lý
+        // $this->cleanExpiredPayments(); // Dọn dẹp trước khi xử lý
 
         $vnp_HashSecret = env('VNPAY_HASH_SECRET');
         $vnp_SecureHash = $request->vnp_SecureHash;

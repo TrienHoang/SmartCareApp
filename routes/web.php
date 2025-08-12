@@ -71,7 +71,7 @@ Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name(
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 
 
-// VNPAY Routes 
+// VNPAY Routes
 Route::post('/vnpay/callback', [PaymentHistoryController::class, 'vnpayCallback'])
     ->name('vnpay.callback')
     ->withoutMiddleware([VerifyCsrfToken::class]); // Loại bỏ CSRF cho webhook

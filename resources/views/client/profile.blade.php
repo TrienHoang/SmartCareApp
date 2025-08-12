@@ -1,4 +1,3 @@
-{{-- resources/views/client/profile.blade.php --}}
 @extends('client.layouts.app')
 
 @section('title', 'Thông Tin Cá Nhân')
@@ -44,7 +43,11 @@
                                 <i data-lucide="clipboard-list" class="w-5 h-5"></i>
                                 <span>Đơn Thuốc</span>
                             </a>
-
+                            <a href="{{ route('client.wallet.index') }}"
+                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
+                                <i data-lucide="credit-card" class="w-5 h-5"></i>
+                                <span>Ví Tiền</span>
+                            </a>
                             <a href="{{ route('client.appointments.index') }}"
                                 class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
                                 <i data-lucide="clock" class="w-5 h-5"></i>
