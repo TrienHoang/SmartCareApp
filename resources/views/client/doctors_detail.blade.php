@@ -810,7 +810,7 @@
                                                         @endfor
                                                     </div>
                                                     <div class="mb-2">
-                                                        <textarea name="comment" rows="2" class="w-full border rounded p-2 text-sm" required>{{ old('comment', $review->comment) }}</textarea>
+                                                        <textarea name="comment" rows="2" class="w-full border rounded p-2 text-sm" >{{ old('comment', $review->comment) }}</textarea>
                                                     </div>
                                                     <div class="flex space-x-2">
                                                         <button type="submit"
@@ -923,7 +923,7 @@
                                         <div class="mb-4">
                                             <label for="comment" class="block text-sm font-medium mb-1">Nhận xét:</label>
                                             <textarea name="comment" id="comment" rows="3" class="w-full border rounded p-2 text-sm"
-                                                placeholder="Nhận xét của bạn..." required>{{ old('comment') }}</textarea>
+                                                placeholder="Nhận xét của bạn...">{{ old('comment') }}</textarea>
                                         </div>
 
                                         <div class="text-right">

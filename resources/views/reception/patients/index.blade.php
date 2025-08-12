@@ -85,9 +85,11 @@
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <a href="{{ route('receptionist.patients.appointments', $patient->id) }}"
-                                            class="btn btn-sm btn-outline-info" data-toggle="tooltip" title="Lịch sử khám">
+                                            class="btn btn-sm btn-outline-info" data-toggle="tooltip"
+                                            title="Xem lịch sử khám">
                                             <i class="fas fa-history"></i>
                                         </a>
+
                                     </td>
                                 </tr>
                             @empty
