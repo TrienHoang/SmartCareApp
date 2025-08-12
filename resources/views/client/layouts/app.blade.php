@@ -501,6 +501,19 @@
                 const chatContent = document.getElementById('chatbox-content');
                 const messageDiv = document.createElement('div');
 
+                // Kiểm tra nếu là tin nhắn cảm ơn và đã gửi hôm nay thì bỏ qua
+                if (sender === 'bot' && message.includes("Cảm ơn bạn đã liên hệ")) {
+                    const lastThanks = localStorage.getItem('lastThanksDate');
+                    const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+
+                    if (lastThanks === today) {
+                        console.log('⏩ Đã gửi tin nhắn cảm ơn hôm nay, bỏ qua.');
+                        return;
+                    } else {
+                        localStorage.setItem('lastThanksDate', today);
+                    }
+                }
+
                 if (sender === 'user') {
                     messageDiv.innerHTML = `
                 <div class="flex justify-end mb-4">
