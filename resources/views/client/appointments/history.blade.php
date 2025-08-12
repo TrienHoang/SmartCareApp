@@ -55,9 +55,7 @@
                             <i data-lucide="bell" class="w-5 h-5"></i>
                             <span>Thông Báo</span>
                             @php
-                                $currentUnreadCount = $notifications
-                                    ->where('userStatuses.0.is_read', false)
-                                    ->count();
+                                $currentUnreadCount = $notifications->where('userStatuses.0.is_read', false)->count();
                             @endphp
                             @if ($currentUnreadCount > 0)
                                 <span id="unreadCount"
@@ -93,7 +91,7 @@
                             Bạn chưa có lịch sử khám bệnh nào.
                         </div>
                     @else
-                        @foreach($appointments as $appointment)
+                        @foreach ($appointments as $appointment)
                             <div
                                 class="bg-white border-l-4 border-indigo-500 rounded-lg shadow-md p-5 mb-5 hover:shadow-lg transition">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-3">
@@ -129,17 +127,13 @@
                                     <i class="bx bx-detail mr-1"></i> Xem chi tiết
                                 </a>
 
-                                    <div class="mt-4">
-                                        <a href="{{ route('doctor.show', $appointment->doctor->id) }}"
-                                            class="inline-block text-sm font-medium bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md transition">
-                                            <i class="bx bx-star mr-1"></i> Đánh giá bác sĩ
-                                        </a>
-                                    </div>
-
-
+                                <div class="mt-4">
+                                    <a href="{{ route('doctor.show', $appointment->doctor->id) }}"
+                                        class="inline-block text-sm font-medium bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md transition">
+                                        <i class="bx bx-star mr-1"></i> Đánh giá bác sĩ
+                                    </a>
+                                </div>
                             </div>
-
-
                         @endforeach
                     @endif
                 </div>

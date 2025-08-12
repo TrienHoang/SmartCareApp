@@ -8,7 +8,6 @@
         .select2-container--default .select2-selection--single {
             background-color: white;
             border: 1px solid #bfdbfe;
-            /* border-blue-200 */
             border-radius: 0.5rem;
             /* rounded-lg */
             padding: 0.5rem 0.75rem;
@@ -94,6 +93,79 @@
             50% {
                 border-color: white;
             }
+        }
+
+        .gradient-bg-social {
+            background: linear-gradient(135deg, #356fe3 0%, #d8eef3 100%);
+        }
+
+        .media-logo {
+            transition: all 0.3s ease;
+            /* filter: grayscale(100%); */
+            opacity: 1;
+        }
+
+        .media-logo:hover {
+            filter: grayscale(0%);
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%;
+            /* 16:9 aspect ratio */
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .media-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        .logo-bg {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-icon {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            padding: 1rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
         }
     </style>
 @endpush
@@ -349,8 +421,8 @@
     </section>
 
     {{-- Services Section --}}
-    <section class="py-20 bg-gray-50">
-        <div class="container mx-auto px-4 py-12">
+    <section class=" bg-gray-50">
+        <div class="container mx-auto px-4 pt-12">
             <!-- Header Section -->
             <div class="text-center mb-16">
                 <div class="inline-block mb-4">
@@ -440,7 +512,6 @@
                         @endif
                     @endforeach
                 </div>
-
                 <!-- Call to Action -->
                 <div class="text-center">
                     <a href="{{ '/dich-vu' }}"
@@ -450,213 +521,276 @@
                         <i class="fas fa-arrow-right ml-3"></i>
                     </a>
                 </div>
-
-                {{-- Testimonials Section --}}
-                <section class="py-20 bg-gray-50">
-                    <div class="container mx-auto px-4">
-                        <div class="text-center mb-16">
-                            <h2 class="text-4xl font-bold mb-4 gradient-text">Ý Kiến Bệnh Nhân</h2>
-                            <p class="text-xl text-gray-600">Những chia sẻ chân thực từ bệnh nhân</p>
-                        </div>
-
-                        <div id="testimonial-slider" class="splide">
-                            <div class="splide__track">
-                                <ul class="splide__list">
-                                    @forelse ($testimonials as $testimonial)
-                                        <li class="splide__slide">
-                                            <div class="bg-white p-5 rounded-xl shadow-lg hover:scale-105 transition">
-                                                {{-- Stars --}}
-                                                <div class="flex items-center mb-4">
-                                                    @for ($i = 0; $i < $testimonial->rating; $i++)
-                                                        <i data-lucide="star"
-                                                            class="w-5 h-5 text-yellow-400 fill-current"></i>
-                                                    @endfor
-                                                </div>
-
-                                                {{-- Nội dung đánh giá --}}
-                                                <p class="text-gray-600 mb-6 italic">
-                                                    "{{ $testimonial->comment }}"
-                                                </p>
-
-                                                <div>
-                                                    {{-- Bệnh nhân (ẩn danh) --}}
-                                                    <div class="font-semibold">
-                                                        @if ($testimonial->patient && $testimonial->patient->full_name)
-                                                            {{ Str::substr($testimonial->patient->full_name, 0, 1) . '.***' }}
-                                                        @else
-                                                            Bệnh nhân
-                                                        @endif
-                                                    </div>
-
-                                                    {{-- Bác sĩ --}}
-                                                    <div class="text-sm text-gray-500">
-                                                        @if ($testimonial->doctor && $testimonial->doctor->user->full_name)
-                                                            Bác sĩ: {{ $testimonial->doctor->user->full_name }}
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    @empty
-                                        <li class="splide__slide">
-                                            <div class="text-gray-500">Chưa có đánh giá nào.</div>
-                                        </li>
-                                    @endforelse
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+    </section>
 
 
-                {{-- CTA Section --}}
-                <section class="py-20 gradient-bg text-white">
-                    <div class="container mx-auto px-4 text-center">
-                        <h2 class="text-4xl font-bold mb-6">Sẵn Sàng Đặt Lịch Khám?</h2>
-                        <p class="text-xl mb-8 text-blue-100">
-                            Đừng để sức khỏe chờ đợi. Đặt lịch ngay hôm nay để được chăm sóc tốt nhất!
-                        </p>
-                        <a href="{{ url('/dat-lich') }}"
-                            class="bg-white text-blue-600 px-8 py-4 rounded-full font-semibold hover:bg-blue-50 transition-colors hover-scale text-lg">
-                            Đặt Lịch Khám Ngay
-                        </a>
-                    </div>
-                </section>
+    {{-- Testimonials Section --}}
+    <section class="pb-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4 gradient-text">Ý Kiến Bệnh Nhân</h2>
+                <p class="text-xl text-gray-600">Những chia sẻ chân thực từ bệnh nhân</p>
             </div>
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
+            <div id="testimonial-slider" class="splide">
+                <div class="splide__track">
+                    <ul class="splide__list">
+                        @forelse ($testimonials as $testimonial)
+                            <li class="splide__slide">
+                                <div class="bg-white p-5 rounded-xl shadow-lg hover:scale-105 transition">
+                                    {{-- Stars --}}
+                                    <div class="flex items-center mb-4">
+                                        @for ($i = 0; $i < $testimonial->rating; $i++)
+                                            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+                                        @endfor
+                                    </div>
 
-                    class TxtType {
-                        constructor(el, toRotate, period) {
-                            this.toRotate = toRotate;
-                            this.el = el;
-                            this.loopNum = 0;
-                            this.period = parseInt(period, 10) || 2000;
-                            this.txt = '';
-                            this.isDeleting = false;
-                            this.tick();
-                        }
+                                    {{-- Nội dung đánh giá --}}
+                                    <p class="text-gray-600 mb-6 italic">
+                                        "{{ $testimonial->comment }}"
+                                    </p>
 
-                        tick() {
-                            const i = this.loopNum % this.toRotate.length;
-                            const fullTxt = this.toRotate[i];
+                                    <div>
+                                        {{-- Bệnh nhân (ẩn danh) --}}
+                                        <div class="font-semibold">
+                                            @if ($testimonial->patient && $testimonial->patient->full_name)
+                                                {{ Str::substr($testimonial->patient->full_name, 0, 5) . '.***' }}
+                                            @else
+                                                Bệnh nhân
+                                            @endif
+                                        </div>
 
-                            this.txt = this.isDeleting ?
-                                fullTxt.substring(0, this.txt.length - 1) :
-                                fullTxt.substring(0, this.txt.length + 1);
+                                        {{-- Bác sĩ --}}
+                                        <div class="text-sm text-gray-500">
+                                            @if ($testimonial->doctor && $testimonial->doctor->user->full_name)
+                                                Bác sĩ: {{ $testimonial->doctor->user->full_name }}
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        @empty
+                            <li class="splide__slide">
+                                <div class="text-gray-500">Chưa có đánh giá nào.</div>
+                            </li>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                            this.el.innerHTML = '<span class="wrap">' + this.txt + '</span>';
+    </div>
+    <section class="py-20 gradient-bg-social">
+        <div class="container mx-auto px-4">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-white mb-4">Truyền thông nói về SmartCare</h2>
+            </div>
 
-                            let delta = 200 - Math.random() * 100;
-                            if (this.isDeleting) delta /= 2;
+            <!-- Main Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <!-- Video Section -->
+                <div class="order-2 lg:order-1">
+                    <div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/FyDQljKtWnI" title="SmartCare trên VTV1"
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
 
-                            if (!this.isDeleting && this.txt === fullTxt) {
-                                delta = this.period;
-                                this.isDeleting = true;
-                            } else if (this.isDeleting && this.txt === '') {
-                                this.isDeleting = false;
-                                this.loopNum++;
-                                delta = 500;
-                            }
+                <!-- Media Logos Section -->
+                <div class="order-1 lg:order-2">
 
-                            setTimeout(() => this.tick(), delta);
-                        }
+                    <div class="media-grid">
+                        <!-- VnExpress -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/vnexpress.png') }}" alt="VnExpress"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- Sức khỏe đời sống -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/suckhoedoisong.png') }}" alt="Sức khỏe đời sống"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- VietnamNet -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/logo-vnnet.png') }}" alt="VietnamNet"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- VTV1 -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/vtv1.png') }}" alt="VTV1"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- VTC News -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/vtcnewslogosvg.png') }}" alt="VTC News"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- VnExpress (second instance) -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/vnexpress.png') }}" alt="VnExpress"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- VTV1 (second instance) -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/vtv1.png') }}" alt="VTV1"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- Dân trí -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/dantrilogo.png') }}" alt="Dân trí"
+                                class="h-8 object-contain">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+@endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            class TxtType {
+                constructor(el, toRotate, period) {
+                    this.toRotate = toRotate;
+                    this.el = el;
+                    this.loopNum = 0;
+                    this.period = parseInt(period, 10) || 2000;
+                    this.txt = '';
+                    this.isDeleting = false;
+                    this.tick();
+                }
+
+                tick() {
+                    const i = this.loopNum % this.toRotate.length;
+                    const fullTxt = this.toRotate[i];
+
+                    this.txt = this.isDeleting ?
+                        fullTxt.substring(0, this.txt.length - 1) :
+                        fullTxt.substring(0, this.txt.length + 1);
+
+                    this.el.innerHTML = '<span class="wrap">' + this.txt + '</span>';
+
+                    let delta = 200 - Math.random() * 100;
+                    if (this.isDeleting) delta /= 2;
+
+                    if (!this.isDeleting && this.txt === fullTxt) {
+                        delta = this.period;
+                        this.isDeleting = true;
+                    } else if (this.isDeleting && this.txt === '') {
+                        this.isDeleting = false;
+                        this.loopNum++;
+                        delta = 500;
                     }
 
-                    window.addEventListener("DOMContentLoaded", () => {
-                        document.querySelectorAll('.typewrite').forEach(el => {
-                            const toRotate = el.getAttribute('data-type');
-                            const period = el.getAttribute('data-period');
-                            if (toRotate) {
-                                new TxtType(el, JSON.parse(toRotate), period);
-                            }
-                        });
-                    });
+                    setTimeout(() => this.tick(), delta);
+                }
+            }
 
-                    // Khởi tạo Select2 cho tìm kiếm dịch vụ
-                    $('#service_id').select2({
-                        placeholder: '-- Nhập tên dịch vụ --',
-                        allowClear: true,
-                        minimumInputLength: 1,
-                        width: '100%',
-                        ajax: {
-                            url: '/home/search-services',
-                            dataType: 'json',
-                            delay: 250,
-                            data: function(params) {
-                                return {
-                                    query: params.term || ''
-                                };
-                            },
-                            processResults: function(data) {
-                                return {
-                                    results: data.services.map(service => ({
-                                        id: service.id,
-                                        text: `${service.name} (${service.duration} phút)`
-                                    }))
-                                };
-                            },
-                            cache: true
-                        },
-                        minimumInputLength: 1,
-                        templateResult: function(service) {
-                            if (!service.id) return service.text;
-                            return $('<span>' + service.text + '</span>');
-                        },
-                        templateSelection: function(service) {
-                            return service.text || '-- Chọn dịch vụ --';
+            window.addEventListener("DOMContentLoaded", () => {
+                document.querySelectorAll('.typewrite').forEach(el => {
+                    const toRotate = el.getAttribute('data-type');
+                    const period = el.getAttribute('data-period');
+                    if (toRotate) {
+                        new TxtType(el, JSON.parse(toRotate), period);
+                    }
+                });
+            });
+
+            // Khởi tạo Select2 cho tìm kiếm dịch vụ
+            $('#service_id').select2({
+                placeholder: '-- Nhập tên dịch vụ --',
+                allowClear: true,
+                minimumInputLength: 1,
+                width: '100%',
+                ajax: {
+                    url: '/home/search-services',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            query: params.term || ''
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.services.map(service => ({
+                                id: service.id,
+                                text: `${service.name} (${service.duration} phút)`
+                            }))
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 1,
+                templateResult: function(service) {
+                    if (!service.id) return service.text;
+                    return $('<span>' + service.text + '</span>');
+                },
+                templateSelection: function(service) {
+                    return service.text || '-- Chọn dịch vụ --';
+                }
+            });
+
+            const form = document.getElementById('booking-form');
+            const buttonText = document.getElementById('button-text');
+            const buttonLoading = document.getElementById('button-loading');
+            const searchResults = document.getElementById('search-results');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                buttonText.classList.add('hidden');
+                buttonLoading.classList.remove('hidden');
+                searchResults.innerHTML = '';
+
+                const formData = new FormData(form);
+                const queryString = new URLSearchParams(formData).toString();
+                fetch(`${form.action}?${queryString}`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         }
-                    });
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        buttonText.classList.remove('hidden');
+                        buttonLoading.classList.add('hidden');
 
-                    const form = document.getElementById('booking-form');
-                    const buttonText = document.getElementById('button-text');
-                    const buttonLoading = document.getElementById('button-loading');
-                    const searchResults = document.getElementById('search-results');
-
-                    form.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        buttonText.classList.add('hidden');
-                        buttonLoading.classList.remove('hidden');
-                        searchResults.innerHTML = '';
-
-                        const formData = new FormData(form);
-                        const queryString = new URLSearchParams(formData).toString();
-                        fetch(`${form.action}?${queryString}`, {
-                                method: 'GET',
-                                headers: {
-                                    'Accept': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                }
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                buttonText.classList.remove('hidden');
-                                buttonLoading.classList.add('hidden');
-
-                                if (data.success) {
-                                    if (data.has_slots) {
-                                        searchResults.innerHTML = `
+                        if (data.success) {
+                            if (data.has_slots) {
+                                searchResults.innerHTML = `
                         <p class="text-green-600 font-semibold mb-3">Có khung giờ trống cho ngày ${data.date_formatted}!</p>
                         <a href="${data.booking_url}" class="inline-block bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold shadow hover:bg-blue-700 transition-all">
                             Đặt lịch ngay
                         </a>
                     `;
-                                    } else {
-                                        searchResults.innerHTML =
-                                            '<p class="text-red-600">Không có khung giờ trống trong ngày này.</p>';
-                                    }
-                                } else {
-                                    searchResults.innerHTML = `<p class="text-red-600">${data.message}</p>`;
-                                }
-                            })
-                            .catch(error => {
-                                buttonText.classList.remove('hidden');
-                                buttonLoading.classList.add('hidden');
-                                searchResults.innerHTML = '<p class="text-red-600">Lỗi khi tìm lịch trống.</p>';
-                                console.error('Error:', error);
-                            });
+                            } else {
+                                searchResults.innerHTML =
+                                    '<p class="text-red-600">Không có khung giờ trống trong ngày này.</p>';
+                            }
+                        } else {
+                            searchResults.innerHTML = `<p class="text-red-600">${data.message}</p>`;
+                        }
+                    })
+                    .catch(error => {
+                        buttonText.classList.remove('hidden');
+                        buttonLoading.classList.add('hidden');
+                        searchResults.innerHTML = '<p class="text-red-600">Lỗi khi tìm lịch trống.</p>';
+                        console.error('Error:', error);
                     });
-                });
-            </script>
-        @endsection
+            });
+        });
+    </script>
+@endpush
