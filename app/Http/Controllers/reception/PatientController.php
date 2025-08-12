@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use App\Models\Appointment;
 
 class PatientController extends Controller
 {
@@ -120,11 +121,16 @@ class PatientController extends Controller
 
         return redirect()->route('receptionist.patients.index')->with('success', 'Cập nhật hồ sơ thành công!');
     }
-    // public function appointmentHistory($id)
-    // {
-    //     $patient = Patient::findOrFail($id);
-    //     $appointments = $patient->appointments()->latest()->get(); // Quan hệ appointments
+    public function appointments($id)
+    {
+        // Lấy thông tin bệnh nhân
+        $user = User::findOrFail($id);
 
-    //     return view('reception.patients.appointments', compact('patient', 'appointments'));
-    // }
+        // Lấy lịch sử khám (giả sử bảng appointments có patient_id)
+        $appointments = Appointment::where('patient_id', $id)
+            ->orderBy('appointment_time', 'desc')
+            ->get();
+
+        return view('reception.patients.appointments', compact('user', 'appointments'));
+    }
 }

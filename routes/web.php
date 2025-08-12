@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\TreatmentPlanController;
 use App\Http\Controllers\Admin\RoomController;
+use App\Http\Controllers\client\ChatController;
 use App\Models\Admin_notification;
 use App\Models\Role;
 use App\Models\User;
@@ -75,6 +76,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 });
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+
 
 // Trang nhập email để gửi link
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');

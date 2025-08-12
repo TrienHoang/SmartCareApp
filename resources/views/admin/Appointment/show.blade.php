@@ -152,6 +152,16 @@
                                 </div>
                             @endif
                         @endif
+
+                        @if ($appointment->status === 'completed')
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="bx bx-message-detail icon-wrapper"></i>
+                                    Triệu chứng
+                                </div>
+                                <div class="info-value">{{ $appointment->symptom_note ?? 'Không có' }}</div>
+                            </div>
+                        @endif
                     </div>
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-header bg-white border-bottom">
