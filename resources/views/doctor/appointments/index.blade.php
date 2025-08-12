@@ -94,6 +94,7 @@
                                 </option>
                                 <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Đã xác
                                     nhận</option>
+                                <option value="checked_in" {{ request('status') == 'checked_in' ? 'selected' : '' }}>Đã check in</option>
                                 <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Hoàn tất
                                 </option>
                             </select>
@@ -134,6 +135,8 @@
                                         do:</strong>
                                     {{ $appointment->reason }}</p>
                             @endif
+                            <p class="mb-0 text-dark fs-6"><strong><i class="fas fa-clock me-3"></i>Trạng thái:</strong>
+                                {{ ucfirst($appointment->status) }}</p>
                         </div>
                         <div class="col-md-4 text-md-end mt-4 mt-md-0"> {{-- Margin top lớn hơn trên mobile --}}
                             <a href="{{ route('doctor.appointments.show', $appointment->id) }}"
