@@ -20,6 +20,7 @@ class Appointment extends Model
         'status',
         'reason',
         'cancel_reason',
+        'symptom_note',
         'treatment_plan_id',
         'created_at',
         'updated_at',
