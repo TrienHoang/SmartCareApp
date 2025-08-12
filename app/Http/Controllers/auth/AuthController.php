@@ -11,6 +11,8 @@ use App\Http\Requests\RegisterRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
 
+use function Symfony\Component\String\b;
+
 class AuthController extends Controller
 {
     public function showLogin()
@@ -80,6 +82,11 @@ class AuthController extends Controller
 
     public function showVerifyOtpForm()
     {
+        if (!session()->has('pending_register') || !session()->has('register_otp')) {
+            return redirect()->route('login')
+                ->with('error', 'Vui lòng đăng ký trước khi xác thực OTP.')
+                ->withInput(['form_type' => 'register']);
+        }
         return view('auth.verify_otp');
     }
 
@@ -154,6 +161,8 @@ class AuthController extends Controller
     {
         Auth::logout();
         session()->forget('user_id');
-        return redirect()->route('login')->with('success', 'Đăng xuất thành công!');
+        // Thêm query parameter logged_out=1
+        return redirect()->route('login', ['logged_out' => 1])
+            ->with('success', 'Đăng xuất thành công!');
     }
 }

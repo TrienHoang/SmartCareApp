@@ -20,6 +20,7 @@ class AppointmentHelper
         // Kiểm tra trùng lịch của bác sĩ
         $doctorConflict = Appointment::where('doctor_id', $doctorId)
             ->where('appointment_time', '<', $endTime)
+            ->whereNotIn('status', ['cancelled'])
             ->whereHas('service', function ($q) use ($startTime) {
                 $q->whereRaw('DATE_ADD(appointment_time, INTERVAL duration MINUTE) > ?', [$startTime]);
             })
@@ -36,6 +37,7 @@ class AppointmentHelper
                 $q->where('room_id', $roomId);
             })
             ->where('appointment_time', '<', $endTime)
+            ->whereNotIn('status', ['cancelled'])
             ->whereHas('service', function ($q) use ($startTime) {
                 $q->whereRaw('DATE_ADD(appointment_time, INTERVAL duration MINUTE) > ?', [$startTime]);
             })

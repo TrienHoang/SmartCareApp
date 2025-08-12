@@ -1,5 +1,7 @@
 <?php
 
+use App\Events\ChatMessageSent;
+use App\Http\Controllers\admin\AdminChatController;
 use App\Http\Controllers\admin\AdminFileController;
 use App\Http\Controllers\admin\DoctorLeaveController;
 use App\Http\Controllers\Admin\AdminNotificationController;
@@ -34,6 +36,7 @@ use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\TreatmentPlanController;
 use App\Http\Controllers\Admin\RoomController;
+use App\Http\Controllers\client\ChatController;
 use App\Models\Admin_notification;
 use App\Models\Role;
 use App\Models\User;
@@ -42,16 +45,40 @@ use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Notifications\LateNotification;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('postLogin');
+Route::get('/', function () {
+    return view('client.home');
+})->name('home');
 
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('postRegister');
-Route::get('/verify-otp', [AuthController::class, 'showVerifyOtpForm'])->name('verify.otp.form');
-Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('verify.otp');
-Route::post('/resend-otp', [AuthController::class, 'resendOtp'])->name('resend.otp');
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('postLogin');
+
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('postRegister');
+
+    Route::get('/verify-otp', [AuthController::class, 'showVerifyOtpForm'])->name('verify.otp.form');
+    Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('verify.otp');
+    Route::post('/resend-otp', [AuthController::class, 'resendOtp'])->name('resend.otp');
+
+    // Đăng nhập mạng xã hội cũng chỉ cho guest
+    Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
+    Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+
+    // đăng nhập bằng facebook
+    Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
+    Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('facebook.callback');
+
+    // đăng nhập bằng google
+    Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+    Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+});
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+
 
 // Trang nhập email để gửi link
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
@@ -62,9 +89,6 @@ Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showRese
 // Gửi mật khẩu mới về server để cập nhật
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
-// đăng nhập bằng facebook
-Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
-Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('facebook.callback');
 
 // đăng nhập bằng google
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
@@ -398,6 +422,8 @@ Route::group([
         Route::post('/create', [RoomController::class, 'store'])
             ->middleware('check_permission:create_rooms')->name('store');
 
+        Route::get('trash', [RoomController::class, 'trash'])->name('trash');
+
         Route::get('/edit/{id}', [RoomController::class, 'edit'])
             ->middleware('check_permission:edit_rooms')->name('edit');
 
@@ -408,6 +434,10 @@ Route::group([
             ->middleware('check_permission:delete_rooms')->name('destroy');
 
         Route::get('/show/{id}', [RoomController::class, 'show'])->name('show');
+
+        Route::patch('rooms/{id}/toggle-status', [RoomController::class, 'toggleStatus'])->name('toggleStatus');
+
+        Route::put('restore/{id}', [RoomController::class, 'restore'])->name('restore');
     });
 
 
@@ -744,7 +774,23 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::resource('shifts', ShiftsController::class);
 });
 
+Route::middleware(['auth', 'checkAdmin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('chat')->name('chat.')->group(function () {
+        Route::get('/', [AdminChatController::class, 'index'])->name('index');
+        Route::get('/session/{session}', [AdminChatController::class, 'show'])->name('show');
+        Route::post('/session/{session}/send', [AdminChatController::class, 'sendMessage'])->name('send');
+        Route::get('/templates', [AdminChatController::class, 'templates'])->name('templates');
+        Route::get('/templates/create', [AdminChatController::class, 'createTemplate'])->name('templates.create');
+        Route::post('/templates', [AdminChatController::class, 'storeTemplate'])->name('templates.store');
+    });
+});
 
+// Route::get('/test-broadcast', function () {
+//     broadcast(new ChatMessageSent('Hello from server!', 123))->toOthers();
+//     return 'Event đã được gửi!';
+// });
+
+Broadcast::routes(['middleware' => ['web']]);
 
 
 require __DIR__ . '/client.php';

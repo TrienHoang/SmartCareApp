@@ -182,7 +182,16 @@
                                 </span>
                             </td>
                             <td>{{ Str::limit($review->comment, 60) }}</td>
-                            <td><small class="text-muted">{{ $review->created_at->format('d/m/Y H:i') }}</small></td>
+                            <td>
+                                <small class="text-muted">
+                                    @if ($review->created_at)
+                                        {{ \Carbon\Carbon::parse($review->created_at)->format('d/m/Y \l\ú\c H:i') }}
+                                    @else
+                                        Chưa xác định
+                                    @endif
+                                </small>
+                            </td>
+
                             <td>
                                 @if ($review->is_visible)
                                     <span class="badge badge-success">Hiển thị</span>

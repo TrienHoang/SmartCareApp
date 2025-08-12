@@ -1,11 +1,24 @@
+@php
+    $user = Auth::user();
+    $avatar = $user && $user->avatar ? asset('storage/' . $user->avatar) : asset('default-avatar.png');
+@endphp
+
+@if (!$user)
+    <script>
+        window.location.href = '/login';
+    </script>
+@endif
+
 <header class="bg-white shadow-md sticky top-0 z-50" x-data="{ menuOpen: false }">
     <div class="container mx-auto px-4 py-4">
         <div class="flex justify-around items-center">
             <div class="flex items-center space-x-2">
-                <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
+                {{-- <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
                     <i data-lucide="stethoscope" class="w-6 h-6 text-white"></i>
-                </div>
-                <h1 class="text-2xl font-bold gradient-text">SmartCare</h1>
+                </div> --}}
+                <a href="/">
+                    <h1 class="text-2xl font-bold gradient-text">SmartCare</h1>
+                </a>
             </div>
 
             {{-- Desktop Menu --}}
@@ -15,7 +28,7 @@
                         ['name' => 'Trang Chủ', 'path' => '/'],
                         ['name' => 'Giới Thiệu', 'path' => '/gioi-thieu'],
                         ['name' => 'Dịch Vụ', 'path' => '/dich-vu'],
-                        ['name' => 'Đặt Lịch', 'path' => '/dat-lich'],
+                        ['name' => 'Đội ngũ của chúng tôi', 'path' => '/doi-ngu-bac-si'],
                         ['name' => 'Tin Tức', 'path' => '/tin-tuc'],
                         ['name' => 'Liên Hệ', 'path' => '/lien-he'],
                     ];
@@ -31,8 +44,6 @@
             <!-- Chuông thông báo -->
             <div class="relative group cursor-pointer" style="justify-content: end" onclick="toggleNotifications()">
                 <i class="fas fa-bell text-xl text-gray-700"></i>
-
-                <!-- Số lượng chưa đọc -->
                 @if ($unreadNotificationsCount > 0)
                     <span
                         class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -40,17 +51,13 @@
                     </span>
                 @endif
 
-                <!-- Dropdown danh sách thông báo -->
                 <div id="notification-dropdown"
                     class="hidden absolute right-0 mt-2 w-96 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                     <div class="p-4 font-semibold border-b">Thông báo</div>
-
                     <div class="max-h-60 overflow-y-auto divide-y" id="notification-list">
                         @forelse ($notifications->take(5) as $notification)
                             <div class="p-3 hover:bg-gray-100 text-sm">
-                                <div class="font-medium text-gray-800">
-                                    {{ $notification->title }}
-                                </div>
+                                <div class="font-medium text-gray-800">{{ $notification->title }}</div>
                                 <div class="text-gray-500 text-xs">
                                     {{ $notification->sent_at ? \Carbon\Carbon::parse($notification->sent_at)->diffForHumans() : '' }}
                                 </div>
@@ -59,54 +66,41 @@
                             <div class="p-3 text-sm text-gray-500">Không có thông báo nào.</div>
                         @endforelse
                     </div>
-
                     <div class="text-center p-2 text-sm text-blue-500 hover:underline">
                         <a href="{{ route('client.notifications.index') }}">Xem tất cả</a>
                     </div>
                 </div>
             </div>
-            {{-- Desktop Contact & Button --}}
+
+            {{-- Tài khoản --}}
             <div class="hidden md:flex items-center space-x-4">
-                @if (Auth::check())
-                    {{-- Nếu đã đăng nhập --}}
+                @if ($user)
                     <div class="relative group">
                         <button class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors">
-                            <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
-                                alt="Avatar" class="w-8 h-8 rounded-full border object-cover">
-                            <span class="text-sm">{{ Auth::user()->name }}</span>
+                            <img src="{{ $avatar }}" alt="Avatar"
+                                class="w-8 h-8 rounded-full border object-cover shadow">
+                            <span class="text-sm">{{ $user->name }}</span>
                             <i data-lucide="chevron-down" class="w-4 h-4"></i>
                         </button>
-
 
                         {{-- Dropdown menu --}}
                         <div
                             class="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg invisible opacity-0 group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition-all z-50">
                             <a href="{{ route('client.profile.show') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                Trang cá nhân
-                            </a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                Lịch hẹn của tôi
-                            </a>
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang cá nhân</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Lịch hẹn
+                                của tôi</a>
                             <a href="{{ route('client.uploads.index') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <span>Upload File</span>
-                            </a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                Cài đặt
-                            </a>
-                            <a href="{{ route('logout') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                Đăng xuất
-                            </a>
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Upload File</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Cài
+                                đặt</a>
                             <a href="{{ route('client.payment_history.index') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                Lịch sử thanh toán
-                            </a>
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Lịch sử thanh toán</a>
+                            <a href="{{ route('logout') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Đăng xuất</a>
                         </div>
                     </div>
                 @else
-                    {{-- Nếu chưa đăng nhập --}}
                     <a href="{{ route('login') }}"
                         class="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors">
                         <i data-lucide="log-in" class="w-5 h-5"></i>
@@ -115,8 +109,7 @@
                 @endif
             </div>
 
-
-            {{-- Mobile Toggle Button --}}
+            {{-- Mobile Toggle --}}
             <button class="md:hidden" @click="menuOpen = !menuOpen">
                 <template x-if="menuOpen">
                     <i data-lucide="x" class="w-6 h-6"></i>
@@ -132,12 +125,11 @@
             @foreach ($menuItems as $item)
                 <a href="{{ url($item['path']) }}"
                     class="block w-full text-left py-2 px-4 rounded transition-colors
-            {{ request()->is(ltrim($item['path'], '/')) ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
+                {{ request()->is(ltrim($item['path'], '/')) ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                     @click="menuOpen = false">
                     {{ $item['name'] }}
                 </a>
             @endforeach
-
             <a href="{{ url('/appointment') }}"
                 class="w-full block text-center gradient-bg text-white py-2 px-4 rounded-full mt-4 hover:opacity-90 transition-opacity"
                 @click="menuOpen = false">
@@ -146,17 +138,16 @@
         </div>
     </div>
 </header>
+
 <script>
     function toggleNotifications() {
         const dropdown = document.getElementById('notification-dropdown');
         dropdown.classList.toggle('hidden');
     }
 
-    // Đóng dropdown khi click ra ngoài
     document.addEventListener('click', function(event) {
         const bell = event.target.closest('.group');
         const dropdown = document.getElementById('notification-dropdown');
-
         if (!bell && !dropdown.contains(event.target)) {
             dropdown.classList.add('hidden');
         }

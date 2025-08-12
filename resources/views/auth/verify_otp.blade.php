@@ -52,11 +52,15 @@
 
         .otp-inputs {
             display: flex;
-            gap: 10px;
             justify-content: center;
             align-items: center;
-            margin-bottom: 30px;
-            padding: 0 10px;
+            gap: 10px;
+
+            margin: 0 auto 30px auto;
+            /* căn giữa và thêm khoảng dưới */
+            width: fit-content;
+            /* chỉ chiếm vừa đủ */
+            transform: translateX(-20px)
         }
 
         .otp-input {

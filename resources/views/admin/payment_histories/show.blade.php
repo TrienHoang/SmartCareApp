@@ -67,16 +67,16 @@
               default => 'Không hoàn tiền'
             };
           @endphp
-          <p><strong>Trạng thái thanh toán:</strong> 
-            <span class="badge {{ $badgeColor }} badge-status">
-              {{ ucfirst($status) ?? 'Không rõ' }}
-            </span>
-          </p>
-          <p><strong>Trạng thái hoàn tiền:</strong> 
-            <span class="badge {{ $refundColor }} badge-status">
-              {{ $refundText }}
-            </span>
-          </p>
+<p><strong>Trạng thái thanh toán:</strong> 
+  <span class="badge {{ $badgeColor }} badge-status">
+    {{ ucfirst($status) ?? 'Không rõ' }}
+  </span>
+</p>
+<p><strong>Trạng thái hoàn tiền:</strong> 
+  <span class="badge {{ $refundColor }} badge-status">
+    {{ $refundText }}
+  </span>
+</p>
         </div>
         <div class="col-md-6">
           <p><strong>Ngày thanh toán:</strong> {{ optional($history->payment_date)->format('d/m/Y H:i') ?? '---' }}</p>

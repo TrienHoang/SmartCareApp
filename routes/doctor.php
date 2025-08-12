@@ -91,8 +91,11 @@ Route::prefix('doctor')
 
 
         // 🟪 Appointments
-        Route::get('/appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
-
+        Route::prefix('appointments')->name('appointments.')->group(function () {
+            Route::get('/', [AppointmentController::class, 'index'])->name('index');
+            Route::get('/{id}', [AppointmentController::class, 'show'])->name('show');
+            Route::put('/{id}/status', [AppointmentController::class, 'updateStatus'])->name('updateStatus');
+        });
         // Treatment Plans (Kế hoạch điều trị)
         Route::prefix('treatment-plans')
             ->name('treatment-plans.')
@@ -147,6 +150,8 @@ Route::prefix('doctor/working_schedules')->name('doctor.working_schedules.')->mi
     Route::get('/{id}/edit', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'edit'])->name('edit');
     Route::put('/{id}', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'update'])->name('update');
     Route::delete('/{id}', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'destroy'])->name('destroy');
+    Route::get('/{id}', [\App\Http\Controllers\doctor\DoctorWorkingScheduleController::class, 'show'])->name('show');           // Chi tiết
+
 });
 
 

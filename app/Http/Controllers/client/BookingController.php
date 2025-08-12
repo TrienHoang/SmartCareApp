@@ -366,41 +366,51 @@ class BookingController extends Controller
 
     public function store(Request $request)
     {
-        // Khi bắt đầu đặt lịch mới, xóa các mã đã lưu
         session()->forget('selected_promotions');
-
+    
         $booking_data = $request->session()->get('booking_data');
         if (!$booking_data) {
             return redirect()->route('client.services')->with('error', 'Vui lòng chọn dịch vụ trước.');
         }
-
+    
         $validated = $request->validate([
             'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(7)->toDateString(),
             'slot_start' => 'required|date_format:H:i',
             'reason' => 'nullable|string|max:255',
         ]);
-
+    
         $service = Service::findOrFail($booking_data['service_id']);
         $doctor_id = $booking_data['doctor_id'] ?? $request->input('doctor_id');
-
+    
         $appointment_time = Carbon::parse($validated['date'])->setTimeFromTimeString($validated['slot_start']);
-
+    
+        // Kiểm tra trùng lịch chung (loại trừ 'cancelled' và 'pending')
         $booked = Appointment::where('doctor_id', $doctor_id)
             ->where('appointment_time', $appointment_time)
-            ->where('status', '!=', 'cancelled')
+            ->whereNotIn('status', ['cancelled', 'pending'])
             ->exists();
-
+    
         if ($booked) {
             return back()->withErrors(['slot_start' => 'Khung giờ này đã được đặt.']);
         }
-
+    
+        // Kiểm tra trùng lịch của bệnh nhân (bao gồm 'pending' để tránh trùng lặp với chính mình)
+        $bookedByPatient = Appointment::where('patient_id', auth()->id())
+            ->where('appointment_time', $appointment_time)
+            ->whereNotIn('status', ['cancelled'])
+            ->exists();
+    
+        if ($bookedByPatient) {
+            return back()->withErrors(['slot_start' => 'Bạn đã có lịch hẹn vào thời gian này, vui lòng chọn giờ khác.']);
+        }
+    
         $request->session()->put('booking_confirm', [
             'service_id' => $booking_data['service_id'],
             'doctor_id' => $doctor_id,
             'appointment_time' => $appointment_time,
             'reason' => $validated['reason'],
         ]);
-
+    
         return redirect()->route('booking.confirm');
     }
 
@@ -453,19 +463,32 @@ class BookingController extends Controller
         }
 
         $validated = $request->validate([
-            'service_id' => 'required|exists:services,id',
-            'doctor_id' => 'required|exists:doctors,id',
-            'appointment_time' => 'required|date_format:Y-m-d H:i:s',
-            'reason' => 'nullable|string|max:255',
-            'full_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'gender' => 'nullable|string|in:Nam,Nữ,Khác',
-            'date_of_birth' => 'nullable|date',
-            'address' => 'nullable|string|max:500',
-            'promotion_code' => 'nullable|string|exists:promotions,code',
+            'service_id'        => 'required|exists:services,id',
+            'doctor_id'         => 'required|exists:doctors,id',
+            'appointment_time'  => 'required|date_format:Y-m-d H:i:s',
+            'reason'            => 'nullable|string|max:255',
+            'full_name'         => 'required|string|max:255',
+            'phone'             => ['required', 'regex:/^(0[0-9]{9})$/'], // Số điện thoại Việt Nam 10 số, bắt đầu bằng 0
+            'gender'            => 'nullable|string|in:Nam,Nữ,Khác',
+            'date_of_birth'     => 'nullable|date|before_or_equal:today', // Ngày sinh <= hôm nay
+            'address'           => 'nullable|string|max:500',
+            'promotion_code'    => 'nullable|string|exists:promotions,code',
         ], [
-            'full_name.required' => 'Họ và tên là bắt buộc.',
-            'phone.required' => 'Số điện thoại là bắt buộc.',
+            'service_id.required'       => 'Vui lòng chọn dịch vụ.',
+            'service_id.exists'         => 'Dịch vụ không tồn tại.',
+            'doctor_id.required'        => 'Vui lòng chọn bác sĩ.',
+            'doctor_id.exists'          => 'Bác sĩ không tồn tại.',
+            'appointment_time.required' => 'Vui lòng chọn thời gian đặt lịch.',
+            'appointment_time.date_format' => 'Thời gian đặt lịch không đúng định dạng.',
+            'full_name.required'        => 'Họ và tên là bắt buộc.',
+            'full_name.max'             => 'Họ và tên không được vượt quá 255 ký tự.',
+            'phone.required'            => 'Số điện thoại là bắt buộc.',
+            'phone.regex'               => 'Số điện thoại không đúng định dạng (VD: 0987654321).',
+            'gender.in'                 => 'Giới tính không hợp lệ.',
+            'date_of_birth.date'        => 'Ngày sinh không hợp lệ.',
+            'date_of_birth.before_or_equal' => 'Ngày sinh không được lớn hơn ngày hiện tại.',
+            'address.max'               => 'Địa chỉ không được vượt quá 500 ký tự.',
+            'promotion_code.exists'     => 'Mã khuyến mãi không tồn tại.',
         ]);
 
         $service = Service::findOrFail($validated['service_id']);

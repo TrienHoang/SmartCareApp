@@ -8,7 +8,6 @@
         .select2-container--default .select2-selection--single {
             background-color: white;
             border: 1px solid #bfdbfe;
-            /* border-blue-200 */
             border-radius: 0.5rem;
             /* rounded-lg */
             padding: 0.5rem 0.75rem;
@@ -18,6 +17,12 @@
             width: 100%;
             min-height: 44px;
             box-shadow: none;
+        }
+
+        .bg-doctor-top {
+            background-image: url({{ asset('admin/assets/img/doctor-item-top-bg.png') }});
+            background-size: cover;
+            background-position: top center;
         }
 
         .select2-container--default .select2-selection--single .select2-selection__arrow {
@@ -35,6 +40,49 @@
             animation: blink-caret 0.75s step-end infinite;
         }
 
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .group:hover .group-hover\:scale-110 {
+            transform: scale(1.1);
+        }
+
+        /* Animation for cards appearing */
+        .grid>div {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .grid>div:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .grid>div:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @keyframes blink-caret {
 
             from,
@@ -45,6 +93,79 @@
             50% {
                 border-color: white;
             }
+        }
+
+        .gradient-bg-social {
+            background: linear-gradient(135deg, #356fe3 0%, #d8eef3 100%);
+        }
+
+        .media-logo {
+            transition: all 0.3s ease;
+            /* filter: grayscale(100%); */
+            opacity: 1;
+        }
+
+        .media-logo:hover {
+            filter: grayscale(0%);
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%;
+            /* 16:9 aspect ratio */
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .media-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        .logo-bg {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-icon {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            padding: 1rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
         }
     </style>
 @endpush
@@ -177,164 +298,366 @@
                             @forelse ($doctors as $doctor)
                                 <li class="splide__slide">
                                     <div
-                                        class="bg-gray-50 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow hover-scale text-center">
-                                        <img src="{{ $doctor->user->avatar ?? asset('images/default-doctor.png') }}"
-                                            alt="{{ $doctor->user->full_name }}"
-                                            class="w-24 h-24 mx-auto rounded-full mb-4 object-cover">
-                                        <h3 class="text-xl font-semibold mb-2">{{ $doctor->user->full_name }}</h3>
-                                        <div class="text-blue-600 mb-2">{{ $doctor->department->name ?? 'Chuyên khoa' }}
-                                        </div>
-                                        <p class="text-gray-600 mb-4">
-                                            {{ $doctor->biography ?? 'Bác sĩ tận tâm, giàu kinh nghiệm.' }}</p>
-                                        <a href="{{ route('doctor.show', $doctor->id) }}"
-                                            class="inline-block bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition-colors">
-                                            Xem Hồ Sơ
-                                        </a>
+                                        class="doctor-card bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+                                        <a href="{{ route('doctors.show', $doctor->id) }}" class="block">
+                                            <!-- Doctor Image -->
+                                            <div class="relative overflow-hidden bg-doctor-top">
+                                                <img src="{{ $doctor->user->avatar ? asset('storage/' . $doctor->user->avatar) : asset('images/default-avatar.png') }}"
+                                                    alt="{{ $doctor->user->full_name }}"
+                                                    class="w-full h-65 object-cover object-top">
+                                                <div
+                                                    class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white/90 to-transparent">
+                                                </div>
+                                            </div>
+
+                                            <!-- Doctor Info -->
+                                            <div class="p-5">
+                                                <h3 class="text-xl font-semibold text-gray-900 mb-2 truncate">
+                                                    {{ $doctor->user->full_name }}
+                                                </h3>
+
+                                                <!-- Department Badge -->
+                                                <div class="bg-green-50 border border-green-200 rounded-lg p-2 mb-3">
+                                                    <p class="text-green-800 text-sm font-medium text-center">
+                                                        {{ $doctor->department->name }}
+                                                    </p>
+                                                </div>
+
+                                                <!-- Experience & Rating -->
+                                                <div class="space-y-2">
+                                                    <!-- Experience -->
+                                                    <div class="flex items-center bg-blue-50 rounded-lg p-2">
+                                                        <i data-lucide="clock" class="w-4 h-4 text-blue-600 mr-2"></i>
+                                                        <span class="text-blue-800 text-sm font-medium">
+                                                            {{ $doctor->experience_years ?? 0 }} năm kinh nghiệm
+                                                        </span>
+                                                    </div>
+
+                                                    <!-- Rating -->
+                                                    {{-- @if ($doctor->average_rating) --}}
+                                                    <div class="flex flex-wrap items-center gap-3 mt-4">
+                                                        <div
+                                                            class="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-3 py-1">
+                                                            @php
+                                                                $rating = $doctor->average_rating;
+                                                            @endphp
+
+                                                            @if (is_null($rating) || $rating == 0)
+                                                                <span class="text-blue-600 text-sm italic">Chưa có
+                                                                    đánh giá</span>
+                                                            @else
+                                                                @php
+                                                                    $fullStars = floor($rating);
+                                                                    $hasHalfStar = $rating - $fullStars >= 0.5;
+                                                                @endphp
+
+                                                                @for ($i = 1; $i <= $fullStars; $i++)
+                                                                    <i data-lucide="star"
+                                                                        class="w-4 h-4 text-yellow-300 fill-yellow-300 mr-1"></i>
+                                                                @endfor
+
+                                                                @if ($hasHalfStar)
+                                                                    <i data-lucide="star-half"
+                                                                        class="w-4 h-4 text-yellow-300 fill-yellow-300 mr-1"></i>
+                                                                @endif
+
+                                                                @for ($i = $fullStars + ($hasHalfStar ? 1 : 0); $i < 5; $i++)
+                                                                    <i data-lucide="star"
+                                                                        class="w-4 h-4 text-gray-400 mr-1"></i>
+                                                                @endfor
+
+                                                                <span
+                                                                    class="text-blue-600 text-sm ml-1">({{ number_format($rating, 1) }}/5)</span>
+                                                                {{-- @endif --}}
+                                                        </div>
+                                                    </div>
+                            @endif
+                    </div>
+                </div>
+                </a>
+            </div>
+            </li>
+        @empty
+            <li class="splide__slide">
+                <div class="text-gray-500 text-center">Chưa có thông tin bác sĩ.</div>
+            </li>
+            @endforelse
+            </ul>
+    </div>
+    </div>
+    </div>
+    </section>
+
+    {{-- Stats Section --}}
+    <section class="py-20 gradient-bg text-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="text-center">
+                    <div class="text-4xl md:text-5xl font-bold mb-2">
+                        <span class="counter" data-number="10000" data-step="300">0</span>+
+                    </div>
+                    <div class="text-blue-200">Bệnh nhân tin tưởng</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl md:text-5xl font-bold mb-2">
+                        <span class="counter" data-number="50" data-step="1">0</span>+
+                    </div>
+                    <div class="text-blue-200">Bác sĩ chuyên khoa</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl md:text-5xl font-bold mb-2">
+                        <span class="counter" data-number="15" data-step="1">0</span>+
+                    </div>
+                    <div class="text-blue-200">Năm kinh nghiệm</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl md:text-5xl font-bold mb-2">
+                        <span>24/7</span>
+                    </div>
+                    <div class="text-blue-200">Hỗ Trợ Khẩn Cấp</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- Services Section --}}
+    <section class=" bg-gray-50">
+        <div class="container mx-auto px-4 pt-12">
+            <!-- Header Section -->
+            <div class="text-center mb-16">
+                <div class="inline-block mb-4">
+                    <h2
+                        class="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
+                        Dịch Vụ Của Chúng Tôi
+                    </h2>
+                    <p class="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                        Các dịch vụ chăm sóc sức khỏe đa dạng và chuyên nghiệp với đội ngũ bác sĩ giàu kinh nghiệm
+                    </p>
+                </div>
+
+                <!-- Services Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                    @foreach ($dich_vu as $item)
+                        @if ($item->service)
+                            <div
+                                class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-gray-100">
+                                <!-- Image Container with Overlay -->
+                                <div class="relative overflow-hidden">
+                                    <img src="{{ asset('storage/' . $item->service->image) }}"
+                                        alt="{{ $item->service->name }}"
+                                        class="w-full h-56 object-cover transition-transform duration-700 group-hover:scale-110">
+
+                                    <!-- Gradient Overlay -->
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     </div>
-                                </li>
-                            @empty
-                                <li class="splide__slide">
-                                    <div class="text-gray-500 text-center">Chưa có thông tin bác sĩ.</div>
-                                </li>
-                            @endforelse
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
 
-        {{-- Stats Section --}}
-        <section class="py-20 gradient-bg text-white">
-            <div class="container mx-auto px-4">
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div class="text-center">
-                        <div class="text-4xl md:text-5xl font-bold mb-2">
-                            <span class="counter" data-number="10000" data-step="300">0</span>+
-                        </div>
-                        <div class="text-blue-200">Bệnh nhân tin tưởng</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-4xl md:text-5xl font-bold mb-2">
-                            <span class="counter" data-number="50" data-step="1">0</span>+
-                        </div>
-                        <div class="text-blue-200">Bác sĩ chuyên khoa</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-4xl md:text-5xl font-bold mb-2">
-                            <span class="counter" data-number="15" data-step="1">0</span>+
-                        </div>
-                        <div class="text-blue-200">Năm kinh nghiệm</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-4xl md:text-5xl font-bold mb-2">
-                            <span>24/7</span>
-                        </div>
-                        <div class="text-blue-200">Hỗ Trợ Khẩn Cấp</div>
-                    </div>
-                </div>
-            </div>
-        </section>
+                                    <!-- Popular Badge -->
+                                    @if ($item->total_bookings > 50)
+                                        <div
+                                            class="absolute top-4 left-4 bg-gradient-to-r from-orange-400 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                            <i class="fas fa-fire mr-1"></i> Phổ biến
+                                        </div>
+                                    @endif
+                                </div>
 
-        {{-- Services Section --}}
-        <section class="py-20 bg-gray-50">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-4 gradient-text">Dịch Vụ Của Chúng Tôi</h2>
-                    <p class="text-xl text-gray-600">Các dịch vụ chăm sóc sức khỏe đa dạng và chuyên nghiệp</p>
-                </div>
+                                <!-- Content -->
+                                <div class="p-6">
+                                    <!-- Service Name -->
+                                    <h3
+                                        class="text-xl font-bold mb-3 text-gray-800 group-hover:text-blue-600 transition-colors duration-300 line-clamp-2">
+                                        {{ $item->service->name }}
+                                    </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    @foreach ($dich_vu as $service)
-                        <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow hover-scale">
-                            <img src="{{ asset('storage/' . $service->image) }}" alt="{{ $service->name }}"
-                                class="w-full h-60 object-cover rounded-t-lg mb-2">
-                            <h3 class="text-xl font-semibold mb-3">{{ $service->name }}</h3>
-                            <p class="text-gray-600">{{ $service->description }}</p>
-                            <div class="text-blue-600 font-semibold mt-4">
-                                Giá: {{ number_format($service->price, 0, ',', '.') }} VNĐ
+                                    <!-- Description -->
+                                    <p class="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
+                                        {{ $item->service->description }}
+                                    </p>
+
+                                    <!-- Stats Row -->
+                                    <div class="flex items-center justify-between mb-4 text-sm">
+                                        <div class="flex items-center text-gray-500">
+                                            <i class="fas fa-calendar-check mr-2 text-blue-500"></i>
+                                            <span>{{ $item->total_bookings }} lượt đặt</span>
+                                        </div>
+                                        <div class="flex items-center text-yellow-500">
+                                            <i class="fas fa-star mr-1"></i>
+                                            <span class="text-gray-600">4.8</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Price -->
+                                    <div class="mb-6">
+                                        <div class="flex items-baseline">
+                                            <span class="text-2xl font-bold text-blue-600">
+                                                {{ number_format($item->service->price, 0, ',', '.') }}
+                                            </span>
+                                            <span class="text-gray-500 ml-2">VNĐ</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Button -->
+                                    <a href="{{ route('booking.showService', ['service_id' => $item->service->id]) }}"
+                                        class="block w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-center py-3 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                                        <i class="fas fa-calendar-plus mr-2"></i>
+                                        Đặt Lịch Ngay
+                                    </a>
+                                </div>
+
+                                <!-- Decorative Elements -->
+                                <div
+                                    class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-100 to-transparent rounded-bl-full opacity-50">
+                                </div>
                             </div>
-                            <a href="{{ route('booking.showService', ['service_id' => $service->id]) }}"
-                                class="inline-block mt-4 bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition-colors">
-                                Xem Chi Tiết
-                            </a>
-                        </div>
+                        @endif
                     @endforeach
                 </div>
+                <!-- Call to Action -->
+                <div class="text-center">
+                    <a href="{{ '/dich-vu' }}"
+                        class="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-th-large mr-3"></i>
+                        Xem Tất Cả Dịch Vụ
+                        <i class="fas fa-arrow-right ml-3"></i>
+                    </a>
+                </div>
+    </section>
+
+
+    {{-- Testimonials Section --}}
+    <section class="pb-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4 gradient-text">Ý Kiến Bệnh Nhân</h2>
+                <p class="text-xl text-gray-600">Những chia sẻ chân thực từ bệnh nhân</p>
             </div>
 
-            {{-- Testimonials Section --}}
-            <section class="py-20 bg-gray-50">
-                <div class="container mx-auto px-4">
-                    <div class="text-center mb-16">
-                        <h2 class="text-4xl font-bold mb-4 gradient-text">Ý Kiến Bệnh Nhân</h2>
-                        <p class="text-xl text-gray-600">Những chia sẻ chân thực từ bệnh nhân</p>
-                    </div>
+            <div id="testimonial-slider" class="splide">
+                <div class="splide__track">
+                    <ul class="splide__list">
+                        @forelse ($testimonials as $testimonial)
+                            <li class="splide__slide">
+                                <div class="bg-white p-5 rounded-xl shadow-lg hover:scale-105 transition">
+                                    {{-- Stars --}}
+                                    <div class="flex items-center mb-4">
+                                        @for ($i = 0; $i < $testimonial->rating; $i++)
+                                            <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+                                        @endfor
+                                    </div>
 
-                    <div id="testimonial-slider" class="splide">
-                        <div class="splide__track">
-                            <ul class="splide__list">
-                                @forelse ($testimonials as $testimonial)
-                                    <li class="splide__slide">
-                                        <div class="bg-white p-5 rounded-xl shadow-lg hover:scale-105 transition">
-                                            {{-- Stars --}}
-                                            <div class="flex items-center mb-4">
-                                                @for ($i = 0; $i < $testimonial->rating; $i++)
-                                                    <i data-lucide="star"
-                                                        class="w-5 h-5 text-yellow-400 fill-current"></i>
-                                                @endfor
-                                            </div>
+                                    {{-- Nội dung đánh giá --}}
+                                    <p class="text-gray-600 mb-6 italic">
+                                        "{{ $testimonial->comment }}"
+                                    </p>
 
-                                            {{-- Nội dung đánh giá --}}
-                                            <p class="text-gray-600 mb-6 italic">
-                                                "{{ $testimonial->comment }}"
-                                            </p>
-
-                                            <div>
-                                                {{-- Bệnh nhân (ẩn danh) --}}
-                                                <div class="font-semibold">
-                                                    @if ($testimonial->patient && $testimonial->patient->full_name)
-                                                        {{ Str::substr($testimonial->patient->full_name, 0, 1) . '.***' }}
-                                                    @else
-                                                        Bệnh nhân
-                                                    @endif
-                                                </div>
-
-                                                {{-- Bác sĩ --}}
-                                                <div class="text-sm text-gray-500">
-                                                    @if ($testimonial->doctor && $testimonial->doctor->user->full_name)
-                                                        Bác sĩ: {{ $testimonial->doctor->user->full_name }}
-                                                    @endif
-                                                </div>
-                                            </div>
+                                    <div>
+                                        {{-- Bệnh nhân (ẩn danh) --}}
+                                        <div class="font-semibold">
+                                            @if ($testimonial->patient && $testimonial->patient->full_name)
+                                                {{ Str::substr($testimonial->patient->full_name, 0, 5) . '.***' }}
+                                            @else
+                                                Bệnh nhân
+                                            @endif
                                         </div>
-                                    </li>
-                                @empty
-                                    <li class="splide__slide">
-                                        <div class="text-gray-500">Chưa có đánh giá nào.</div>
-                                    </li>
-                                @endforelse
-                            </ul>
+
+                                        {{-- Bác sĩ --}}
+                                        <div class="text-sm text-gray-500">
+                                            @if ($testimonial->doctor && $testimonial->doctor->user->full_name)
+                                                Bác sĩ: {{ $testimonial->doctor->user->full_name }}
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        @empty
+                            <li class="splide__slide">
+                                <div class="text-gray-500">Chưa có đánh giá nào.</div>
+                            </li>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    </div>
+    <section class="py-20 gradient-bg-social">
+        <div class="container mx-auto px-4">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-white mb-4">Truyền thông nói về SmartCare</h2>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <!-- Video Section -->
+                <div class="order-2 lg:order-1">
+                    <div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/FyDQljKtWnI" title="SmartCare trên VTV1"
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+
+                <!-- Media Logos Section -->
+                <div class="order-1 lg:order-2">
+
+                    <div class="media-grid">
+                        <!-- VnExpress -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/vnexpress.png') }}" alt="VnExpress"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- Sức khỏe đời sống -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/suckhoedoisong.png') }}" alt="Sức khỏe đời sống"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- VietnamNet -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/logo-vnnet.png') }}" alt="VietnamNet"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- VTV1 -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/vtv1.png') }}" alt="VTV1"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- VTC News -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/vtcnewslogosvg.png') }}" alt="VTC News"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- VnExpress (second instance) -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/vnexpress.png') }}" alt="VnExpress"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- VTV1 (second instance) -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/vtv1.png') }}" alt="VTV1"
+                                class="h-8 object-contain">
+                        </div>
+
+                        <!-- Dân trí -->
+                        <div class="logo-bg media-logo">
+                            <img src="{{ asset('LayoutClient/img/dantrilogo.png') }}" alt="Dân trí"
+                                class="h-8 object-contain">
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </div>
+    </section>
+@endsection
 
-
-            {{-- CTA Section --}}
-            <section class="py-20 gradient-bg text-white">
-                <div class="container mx-auto px-4 text-center">
-                    <h2 class="text-4xl font-bold mb-6">Sẵn Sàng Đặt Lịch Khám?</h2>
-                    <p class="text-xl mb-8 text-blue-100">
-                        Đừng để sức khỏe chờ đợi. Đặt lịch ngay hôm nay để được chăm sóc tốt nhất!
-                    </p>
-                    <a href="{{ url('/dat-lich') }}"
-                        class="bg-white text-blue-600 px-8 py-4 rounded-full font-semibold hover:bg-blue-50 transition-colors hover-scale text-lg">
-                        Đặt Lịch Khám Ngay
-                    </a>
-                </div>
-            </section>
-    </div>
-
+@push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
@@ -470,4 +793,4 @@
             });
         });
     </script>
-@endsection
+@endpush

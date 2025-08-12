@@ -23,17 +23,20 @@ class RoomController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:100',
-            'department_id' => 'required|exists:departments,id',
-            'description' => 'nullable|string',
-        ],
-        [
-            'name.required' => 'Tên phòng là bắt buộc.',
-            'name.max' => 'Tên phòng không được vượt quá 100 ký tự.',
-            'department_id.required' => 'Phòng phải thuộc một khoa.',
-            'department_id.exists' => 'Phòng phải thuộc một khoa hợp lệ.',
-        ]);
+        $request->validate(
+            [
+                'name' => 'required|string|max:100',
+                'department_id' => 'required|exists:departments,id',
+                'description' => 'nullable|string',
+                'status' => 'nullable|in:active,inactive',
+            ],
+            [
+                'name.required' => 'Tên phòng là bắt buộc.',
+                'name.max' => 'Tên phòng không được vượt quá 100 ký tự.',
+                'department_id.required' => 'Phòng phải thuộc một khoa.',
+                'department_id.exists' => 'Phòng phải thuộc một khoa hợp lệ.',
+            ]
+        );
 
         Room::create($request->all());
 
@@ -53,6 +56,7 @@ class RoomController extends Controller
             'name' => 'nullable|string|max:100',
             'department_id' => 'nullable|exists:departments,id',
             'description' => 'nullable|string',
+            'status' => 'nullable|in:active,inactive',
         ]);
 
         $room->update($request->all());
@@ -60,18 +64,47 @@ class RoomController extends Controller
         return redirect()->route('admin.rooms.index')->with('success', 'Cập nhật phòng thành công!');
     }
 
-
     public function show($id)
     {
         $room = Room::with('department')->findOrFail($id);
-
         return view('admin.rooms.show', compact('room'));
     }
 
     public function destroy($id)
     {
-        $room = Room::findOrFail($id)->delete();
+        $room = Room::findOrFail($id);
+        $room->delete(); // Soft delete
 
         return redirect()->route('admin.rooms.index')->with('success', 'Xoá phòng thành công!');
+    }
+
+    // ✅ Hàm đổi trạng thái
+    public function toggleStatus($id)
+    {
+        $room = Room::findOrFail($id);
+        if ($room->status === 'active') {
+            $room->status = 'inactive';
+        } elseif ($room->status === 'inactive') {
+            $room->status = 'active';
+        }
+        $room->save();
+
+        return redirect()->back()->with('success', 'Đã đổi trạng thái phòng thành công!');
+    }
+
+    // Hiển thị danh sách phòng đã xóa mềm
+    public function trash()
+    {
+        $rooms = Room::onlyTrashed()->with('department')->get();
+        return view('admin.rooms.trash', compact('rooms'));
+    }
+
+    // Khôi phục lại phòng đã xóa
+    public function restore($id)
+    {
+        $room = Room::onlyTrashed()->findOrFail($id);
+        $room->restore();
+
+        return redirect()->route('admin.rooms.trash')->with('success', 'Khôi phục phòng thành công!');
     }
 }

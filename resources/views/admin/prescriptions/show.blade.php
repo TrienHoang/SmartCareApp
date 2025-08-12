@@ -246,8 +246,6 @@
                                         <th width="25%">Thông tin thuốc</th>
                                         <th class="text-center" width="8%">Đơn vị</th>
                                         <th class="text-center" width="8%">Số lượng</th>
-                                        <th class="text-right" width="12%">Giá đơn vị</th>
-                                        <th class="text-right" width="12%">Thành tiền</th>
                                         <th class="text-center" width="12%">Ngày SX</th>
                                         <th width="18%">Hướng dẫn sử dụng</th>
                                     </tr>
@@ -292,13 +290,6 @@
                                             <td class="text-center align-middle">
                                                 <span class="badge badge-outline-primary">{{ $item->quantity }}</span>
                                             </td>
-                                            <td class="text-right align-middle">
-                                                <span class="text-muted">{{ $item->medicine->formatted_price }}</span>
-                                            </td>
-                                            <td class="text-right align-middle">
-                                                <strong class="text-success">{{ number_format($itemTotal, 3, ',', '.') }}
-                                                    VNĐ</strong>
-                                            </td>
                                             <td class="text-center align-middle">
                                                 <small class="text-muted">
                                                     <i class="fas fa-calendar"></i>
@@ -321,11 +312,6 @@
                             <div class="col-md-6">
                                 <h6 class="mb-0">Tổng số lượng: <span
                                         class="text-primary">{{ $prescription->total_quantity }}</span></h6>
-                            </div>
-                            <div class="col-md-6 text-right">
-                                <h5 class="mb-0 text-success">
-                                    <strong>Tổng tiền: {{ number_format($totalAmount, 3, ',', '.') }} VNĐ</strong>
-                                </h5>
                             </div>
                         </div>
                     </div>
