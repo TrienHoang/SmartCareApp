@@ -87,7 +87,12 @@ Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showRese
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 
-// ✅ VNPAY Routes (không cần auth - webhook từ VNPAY)
+// đăng nhập bằng google
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
+
+// VNPAY Routes
 Route::post('/vnpay/callback', [PaymentHistoryController::class, 'vnpayCallback'])
     ->name('vnpay.callback')
     ->withoutMiddleware([VerifyCsrfToken::class]); // Loại bỏ CSRF cho webhook

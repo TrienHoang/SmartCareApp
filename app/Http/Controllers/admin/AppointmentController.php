@@ -25,12 +25,12 @@ use App\Models\Shift;
 use App\Models\TreatmentPlan;
 use App\Models\User;
 use App\Models\WorkingSchedule;
+use App\Models\Wallet;
+use App\Models\WalletTransaction;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -48,45 +48,24 @@ class AppointmentController extends Controller
             'order:id,appointment_id,status',
         ]);
 
-        // Lọc theo trạng thái
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Lọc theo bác sĩ
         if ($request->filled('doctor_id')) {
             $query->where('doctor_id', $request->doctor_id);
         }
 
-        // Lọc theo khoa
         if ($request->filled('department_id')) {
             $query->whereHas('doctor', function ($q) use ($request) {
                 $q->where('department_id', $request->department_id);
             });
         }
 
-        // Lọc theo dịch vụ
         if ($request->filled('service_id')) {
             $query->where('service_id', $request->service_id);
         }
 
-        if ($request->filled('payment_status')) {
-            $status = $request->payment_status;
-            $query->whereHas('payment', function ($query) use ($status) {
-                if ($status === 'paid') {
-                    $query->where('status', 'paid')->where(function ($q) {
-                        $q->whereNull('refund_status')->orWhere('refund_status', '!=', 'completed');
-                    });
-                } elseif ($status === 'unpaid') {
-                    $query->where('status', '!=', 'paid');
-                } elseif ($status === 'refunded') {
-                    $query->where('refund_status', 'completed');
-                }
-            });
-        }
-
-
-        // Lọc theo ngày
         $from_input = $request->date_from;
         $to_input = $request->date_to;
 
@@ -113,8 +92,6 @@ class AppointmentController extends Controller
             }
         }
 
-
-        // Tìm kiếm theo tên bệnh nhân
         if ($request->filled('search')) {
             $query->whereHas('patient', function ($q) use ($request) {
                 $q->where('full_name', 'like', '%' . $request->search . '%')
@@ -122,7 +99,6 @@ class AppointmentController extends Controller
             });
         }
 
-        // Sắp xếp
         $sortBy = $request->get('sort_by', 'appointment_time');
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
@@ -130,12 +106,10 @@ class AppointmentController extends Controller
         $perPage = $request->get('per_page', 15);
         $appointments = $query->paginate($perPage)->appends($request->all());
 
-        // Dữ liệu cho filter
         $doctors = Doctor::with('user:id,full_name')->get();
         $departments = Department::all();
         $services = Service::where('status', 'active')->get();
 
-        // Thống kê nhanh
         $stats = [
             'total' => Appointment::count(),
             'pending' => Appointment::where('status', 'pending')->count(),
@@ -168,9 +142,8 @@ class AppointmentController extends Controller
 
     public function store(StoreAppointmentRequest $request)
     {
-        // dd($request->all());
         $appointmentDate = Carbon::parse($request->appointment_time);
-        $dayOfWeekEn = $appointmentDate->format('l'); // e.g., 'Monday'
+        $dayOfWeekEn = $appointmentDate->format('l');
         $dayOfWeekVN = [
             'Sunday' => 'Chủ nhật',
             'Monday' => 'Thứ hai',
@@ -222,7 +195,6 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        // === Lấy lịch làm việc ===
         $workings = WorkingSchedule::with('shift')
             ->where('doctor_id', $request->doctor_id)
             ->whereDate('day', $day)
@@ -237,7 +209,6 @@ class AppointmentController extends Controller
                 ->get();
         }
 
-        // Bác sĩ đk lịch làm việc mới đặt được lịch hẹn
         if ($workings->isEmpty()) {
             return back()->withErrors([
                 'appointment_time' => 'Bác sĩ chưa đăng ký lịch làm việc vào ngày ' . $day .
@@ -245,7 +216,6 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        // Trong giờ nghỉ trưa
         if ($timeOnly >= '12:00' && $timeOnly < '13:00') {
             return back()->withErrors([
                 'appointment_time' => 'Không thể đặt lịch trong giờ nghỉ trưa (12:00–13:00).'
@@ -275,7 +245,6 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        // === Kiểm tra thời gian có nằm trong ca làm việc không ===
         $isWithinWorkingTime = false;
 
         foreach ($workings as $w) {
@@ -306,7 +275,6 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        // === Kiểm tra bác sĩ có nghỉ phép không ===
         $onLeave = DoctorLeave::where('doctor_id', $request->doctor_id)
             ->where('start_date', '<=', $appointmentDate)
             ->where('end_date', '>=', $appointmentDate)
@@ -319,7 +287,6 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        // === Xung đột lịch bệnh nhân ===
         $patientConflict = Appointment::where('patient_id', $request->patient_id)
             ->where(function ($q) use ($appointmentDate, $appointmentEnd) {
                 $q->where('appointment_time', '<', $appointmentEnd)
@@ -333,7 +300,6 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        // === Tạo lịch hẹn ===
         $requestData = $request->only([
             'patient_id',
             'doctor_id',
@@ -349,7 +315,6 @@ class AppointmentController extends Controller
 
         $appointment = Appointment::create($requestData);
 
-        // === Tạo đơn hàng và thanh toán ===
         $price = $service->price;
 
         $order = Order::create([
@@ -407,7 +372,6 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
 
-        // Không cho cập nhật nếu đã hoàn thành hoặc đã hủy
         if (in_array($appointment->status, ['completed', 'cancelled'])) {
             return back()->withErrors([
                 'status' => 'Không thể cập nhật lịch hẹn đã hoàn thành hoặc đã hủy.'
@@ -415,11 +379,10 @@ class AppointmentController extends Controller
         }
 
         $appointmentDate = Carbon::parse($request->appointment_time);
-        $dayOfWeek       = $appointmentDate->format('l');
-        $timeOnly        = $appointmentDate->format('H:i');
-        $day             = $appointmentDate->format('Y-m-d');
+        $dayOfWeek = $appointmentDate->format('l');
+        $timeOnly = $appointmentDate->format('H:i');
+        $day = $appointmentDate->format('Y-m-d');
 
-        // Nếu chuyển sang completed mà thời gian vẫn ở tương lai → lỗi
         if (
             $appointment->status !== 'completed' &&
             $request->status === 'completed' &&
@@ -430,10 +393,9 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        $doctor  = Doctor::with(['department', 'user'])->findOrFail($request->doctor_id);
+        $doctor = Doctor::with(['department', 'user'])->findOrFail($request->doctor_id);
         $service = Service::with('department')->findOrFail($request->service_id);
 
-        // Kiểm tra chuyên khoa phù hợp
         if ((int) $doctor->department_id !== (int) $service->department_id) {
             $recommendedList = Service::where('department_id', $doctor->department_id)
                 ->limit(5)->pluck('name')->implode(', ');
@@ -446,14 +408,12 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        // Kiểm tra trạng thái hoạt động của bác sĩ
         if ($doctor->user->status !== 'online') {
             return back()->withErrors([
                 'doctor_id' => 'Bác sĩ hiện không hoạt động, vui lòng chọn bác sĩ khác.'
             ])->withInput();
         }
 
-        // Nếu lịch đã quá hạn mà muốn confirm
         if (
             $request->status === 'confirmed' &&
             $appointmentDate->isPast() &&
@@ -464,10 +424,6 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        /**
-         * CHỈ KIỂM TRA TRÙNG LỊCH NẾU CÓ THAY ĐỔI 
-         * thời gian, bác sĩ hoặc dịch vụ
-         */
         $timeChanged =
             $appointment->appointment_time != $request->appointment_time ||
             $appointment->doctor_id != $request->doctor_id ||
@@ -494,7 +450,6 @@ class AppointmentController extends Controller
             }
         }
 
-        // Kiểm tra lịch làm việc của bác sĩ
         $workings = WorkingSchedule::with('shift')
             ->where('doctor_id', $request->doctor_id)
             ->where('status', 'Đã xét duyệt')
@@ -521,18 +476,16 @@ class AppointmentController extends Controller
             }
         }
 
-        // Không đặt lịch trong giờ nghỉ trưa
         if ($timeOnly >= '12:00' && $timeOnly < '13:00') {
             return back()->withErrors([
                 'appointment_time' => 'Không thể đặt lịch trong thời gian nghỉ trưa (12:00 - 13:00).'
             ])->withInput();
         }
 
-        // Kiểm tra giờ hẹn nằm trong ca làm việc
         $isWithinWorkingTime = $workings->contains(function ($w) use ($timeOnly) {
             $appointmentTime = Carbon::createFromFormat('H:i', $timeOnly);
-            $shiftStart      = Carbon::createFromFormat('H:i:s', $w->shift->start_time);
-            $shiftEnd        = Carbon::createFromFormat('H:i:s', $w->shift->end_time);
+            $shiftStart = Carbon::createFromFormat('H:i:s', $w->shift->start_time);
+            $shiftEnd = Carbon::createFromFormat('H:i:s', $w->shift->end_time);
 
             return $appointmentTime->betweenIncluded($shiftStart, $shiftEnd);
         });
@@ -543,7 +496,6 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        // Kiểm tra nghỉ phép
         $onLeave = DoctorLeave::where('doctor_id', $request->doctor_id)
             ->where('start_date', '<=', $appointmentDate)
             ->where('end_date', '>=', $appointmentDate)
@@ -556,38 +508,34 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        // Nếu trạng thái mới là 'completed' thì tạo medical record nếu chưa có
         if ($request->status === 'completed') {
             $existing = MedicalRecord::where('appointment_id', $appointment->id)->exists();
             if (!$existing) {
                 MedicalRecord::create([
                     'appointment_id' => $appointment->id,
-                    'code'           => 'MR' . now()->format('YmdHis') . $appointment->id,
+                    'code' => 'MR' . now()->format('YmdHis') . $appointment->id,
                 ]);
             }
         }
 
-        // Chuẩn bị dữ liệu cập nhật
-        $oldStatus    = $appointment->status;
-        $oldTime      = $appointment->appointment_time;
-        $oldDoctorId  = $appointment->doctor_id;
+        $oldStatus = $appointment->status;
+        $oldTime = $appointment->appointment_time;
+        $oldDoctorId = $appointment->doctor_id;
         $oldServiceId = $appointment->service_id;
 
-        $newDoctor    = Doctor::with('user')->find($request->doctor_id);
-        $newService   = Service::find($request->service_id);
+        $newDoctor = Doctor::with('user')->find($request->doctor_id);
+        $newService = Service::find($request->service_id);
 
         $patientId = $request->has('patient_id') ? $request->patient_id : $appointment->patient_id;
 
         $appointmentTime = Carbon::parse($request->appointment_time);
-        $duration        = $newService->duration;
-        $endTime         = $appointmentTime->copy()->addMinutes($duration);
+        $duration = $newService->duration;
+        $endTime = $appointmentTime->copy()->addMinutes($duration);
 
-        // Không cho đặt lịch rơi vào hoặc kéo dài sang giờ nghỉ trưa
         $lunchStart = $appointmentDate->copy()->setTime(12, 0);
-        $lunchEnd   = $appointmentDate->copy()->setTime(13, 0);
+        $lunchEnd = $appointmentDate->copy()->setTime(13, 0);
 
         if (
-            // Bắt đầu trước 13:00 và kết thúc sau 12:00 -> có giao nhau
             $appointmentDate->lt($lunchEnd) &&
             $endTime->gt($lunchStart)
         ) {
@@ -596,7 +544,6 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        // Kiểm tra bệnh nhân có lịch khác bị trùng không
         $overlappedAppointments = Appointment::where('patient_id', $patientId)
             ->where('id', '!=', $appointment->id)
             ->where('status', '!=', 'cancelled')
@@ -612,14 +559,13 @@ class AppointmentController extends Controller
             ])->withInput();
         }
 
-        // Chuẩn bị dữ liệu cập nhật
         $updateData = [
-            'doctor_id'         => $request->doctor_id,
-            'service_id'        => $request->service_id,
-            'appointment_time'  => $request->appointment_time,
-            'end_time'          => $endTime,
-            'status'            => $request->status,
-            'reason'            => $request->reason,
+            'doctor_id' => $request->doctor_id,
+            'service_id' => $request->service_id,
+            'appointment_time' => $request->appointment_time,
+            'end_time' => $endTime,
+            'status' => $request->status,
+            'reason' => $request->reason,
             'treatment_plan_id' => $request->treatment_plan_id,
         ];
 
@@ -634,14 +580,13 @@ class AppointmentController extends Controller
             }
         }
 
-        // Ghi log thay đổi
         $changes = [];
         if ($oldTime != $request->appointment_time) {
             $changes[] = 'Thời gian: ' . optional($oldTime)->format('d/m/Y H:i') .
                 ' → ' . Carbon::parse($request->appointment_time)->format('d/m/Y H:i');
         }
         if ($oldDoctorId != $request->doctor_id) {
-            $oldDoctor     = optional($appointment->doctor->user)->full_name ?? 'Không xác định';
+            $oldDoctor = optional($appointment->doctor->user)->full_name ?? 'Không xác định';
             $newDoctorName = optional($newDoctor->user)->full_name ?? 'Không xác định';
             $changes[] = 'Bác sĩ: ' . $oldDoctor . ' → ' . $newDoctorName;
         }
@@ -665,24 +610,22 @@ class AppointmentController extends Controller
         try {
             $appointment->update($updateData);
 
-            // Ghi log nếu có thay đổi
             if (!empty($changes)) {
                 AppointmentLog::create([
                     'appointment_id' => $appointment->id,
-                    'changed_by'     => auth()->id(),
-                    'status_before'  => $oldStatus,
-                    'status_after'   => $request->status,
-                    'change_time'    => now(),
-                    'note'           => implode("\n", $changes),
+                    'changed_by' => auth()->id(),
+                    'status_before' => $oldStatus,
+                    'status_after' => $request->status,
+                    'change_time' => now(),
+                    'note' => implode("\n", $changes),
                 ]);
             }
 
-            // Đồng bộ trạng thái Order (luôn thực hiện)
             $order = Order::where('appointment_id', $appointment->id)->first();
             if ($order) {
                 if ($request->status === 'completed') {
                     $order->update([
-                        'status'       => 'completed',
+                        'status' => 'completed',
                         'completed_at' => now(),
                     ]);
                 } elseif ($request->status === 'confirmed') {
@@ -694,12 +637,10 @@ class AppointmentController extends Controller
                 }
             }
 
-            // Cập nhật trạng thái kế hoạch điều trị
             TreatmentPlanHelper::updatePlanStatus($appointment->treatment_plan_id);
 
             DB::commit();
 
-            // Gửi email nếu chuyển sang trạng thái xác nhận
             if ($oldStatus !== 'confirmed' && $request->status === 'confirmed') {
                 Mail::to($appointment->patient->email)->send(new AppointmentConfirmed(
                     $appointment->fresh(['patient', 'doctor.user', 'service'])
@@ -712,19 +653,17 @@ class AppointmentController extends Controller
             DB::rollBack();
             Log::error('Error updating appointment', [
                 'appointment_id' => $appointment->id,
-                'error'          => $e->getMessage(),
-                'changes'        => $changes,
+                'error' => $e->getMessage(),
+                'changes' => $changes,
             ]);
             return back()->withErrors(['error' => 'Đã xảy ra lỗi khi cập nhật lịch hẹn.']);
         }
     }
 
-
     public function cancel($id)
     {
         $appointment = Appointment::with('payment')->findOrFail($id);
 
-        // 1. Không cho hủy nếu đã hoàn thành hoặc đã hủy
         if (in_array($appointment->status, ['completed', 'cancelled'])) {
             return redirect()->route('admin.appointments.index')->withErrors([
                 'status' => 'Không thể hủy lịch hẹn đã hoàn thành hoặc đã hủy trước đó.',
@@ -733,34 +672,24 @@ class AppointmentController extends Controller
 
         $payment = $appointment->payment;
 
-        /**
-         * 2. Nếu đã thanh toán
-         */
         if ($payment && $payment->status === 'paid') {
-
-            // 2.1 Đã xác nhận
             if ($appointment->status === 'confirmed') {
-
-                // Kiểm tra xem bác sĩ có nghỉ đột xuất (urgent) và không có người thay thế hay không
                 if ($this->checkDoctorUnavailable($appointment)) {
-
-                    // Trường hợp do lỗi của phòng khám => hủy và HOÀN TIỀN
                     $appointment->status = 'cancelled';
                     $appointment->save();
 
-                    $result = $this->performVnpayRefund($payment);
+                    $result = $this->refund($id); // Use wallet refund
                     $this->logRefundResult($payment, $result, 'Hủy do bác sĩ nghỉ đột xuất');
 
                     if ($result['success']) {
                         return redirect()->route('admin.appointments.index')
-                            ->with('success', 'Hủy lịch hẹn do bác sĩ nghỉ đột xuất và đã hoàn tiền qua VNPay.');
+                            ->with('success', 'Hủy lịch hẹn do bác sĩ nghỉ đột xuất và đã hoàn tiền vào ví.');
                     }
 
                     return redirect()->route('admin.appointments.index')
                         ->withErrors(['error' => 'Hủy thành công nhưng hoàn tiền thất bại: ' . $result['message']]);
                 }
 
-                // Nếu không phải do lỗi phòng khám => hủy nhưng KHÔNG HOÀN TIỀN
                 $appointment->status = 'cancelled';
                 $appointment->save();
 
@@ -772,26 +701,14 @@ class AppointmentController extends Controller
                     ->with('success', 'Hủy lịch hẹn thành công. Không hoàn tiền.');
             }
 
-            // 2.2 Đã thanh toán nhưng chưa xác nhận => hủy và hoàn tiền
             if ($appointment->status === 'pending') {
                 $appointment->status = 'cancelled';
                 $appointment->save();
 
-                return $this->refund($appointment->id);
-
-                if ($result['success']) {
-                    return redirect()->route('admin.appointments.index')
-                        ->with('success', 'Hủy lịch hẹn thành công và đã hoàn tiền qua VNPay.');
-                }
-
-                return redirect()->route('admin.appointments.index')
-                    ->withErrors(['error' => 'Hủy thành công nhưng hoàn tiền thất bại: ' . $result['message']]);
+                return $this->refund($id);
             }
         }
 
-        /**
-         * 3. Nếu chưa thanh toán => hủy bình thường
-         */
         if (in_array($appointment->status, ['pending', 'confirmed'])) {
             $appointment->status = 'cancelled';
             $appointment->save();
@@ -804,9 +721,6 @@ class AppointmentController extends Controller
         ]);
     }
 
-    /**
-     * Kiểm tra bác sĩ có nghỉ đột xuất không (urgent + approved)
-     */
     protected function checkDoctorUnavailable($appointment)
     {
         $date = Carbon::parse($appointment->appointment_time)->toDateString();
@@ -819,9 +733,6 @@ class AppointmentController extends Controller
             ->exists();
     }
 
-    /**
-     * Ghi lại kết quả refund vào payment
-     */
     protected function logRefundResult($payment, $result, $reason)
     {
         if ($result['success']) {
@@ -833,7 +744,6 @@ class AppointmentController extends Controller
         }
         $payment->save();
     }
-
 
     public function show($id)
     {
@@ -855,7 +765,6 @@ class AppointmentController extends Controller
         $remainingAmount = max($totalAmount - $paidAmount, 0);
         $overpaidAmount = max($paidAmount - $totalAmount, 0);
 
-
         return view('admin.Appointment.show', compact(
             'appointment',
             'totalAmount',
@@ -871,26 +780,18 @@ class AppointmentController extends Controller
         $oldStatus = $appointment->status;
         $appointmentDate = Carbon::parse($appointment->appointment_time);
 
-        if ($request->status === 'completed' && $appointmentDate->isFuture()) {
+        if (
+            $request->status === 'completed' &&
+            $appointmentDate->isFuture()
+        ) {
             return redirect()->back()->withErrors([
                 'status' => 'Không thể hoàn thành lịch hẹn khi thời gian hẹn vẫn còn ở tương lai.'
             ]);
         }
 
-        // Validate symptom_note nếu completed
-        if ($request->status === 'completed') {
-            $request->validate([
-                'symptom_note' => 'required|string',
-            ], [
-                'symptom_note.required' => 'Vui lòng nhập triệu chứng bệnh.',
-            ]);
-        }
-
-        // Cập nhật trạng thái, lý do hủy, triệu chứng
         $appointment->update([
             'status' => $request->status,
-            'cancel_reason' => $request->status === 'cancelled' ? $request->note : null,
-            'symptom_note' => $request->status === 'completed' ? $request->symptom_note : null
+            'cancel_reason' => $request->status === 'cancelled' ? $request->note : null
         ]);
 
         $appointment->logs()->create([
@@ -914,7 +815,6 @@ class AppointmentController extends Controller
 
         return redirect()->back()->with('success', 'Cập nhật trạng thái thành công!');
     }
-
 
     public function searchPatients(Request $request)
     {
@@ -954,46 +854,43 @@ class AppointmentController extends Controller
         if (!$payment) {
             $payment = Payment::create([
                 'appointment_id' => $appointment->id,
-                'amount'         => $servicePrice,
-                'status'         => 'unpaid',
+                'amount' => $servicePrice,
+                'status' => 'unpaid',
             ]);
         }
 
-        // Tính lại số tiền đã thanh toán
         $alreadyPaid = PaymentHistory::where('payment_id', $payment->id)->sum('amount');
         $remaining = $servicePrice - $alreadyPaid;
 
-        // Nếu đã trả đủ hoặc thừa
         if ($remaining <= 0) {
             if ($remaining < 0) {
                 $payment->update([
                     'status' => 'overpaid',
-                    'note'   => 'Bệnh nhân đã thanh toán dư: ' . number_format(abs($remaining)) . '₫',
+                    'note' => 'Bệnh nhân đã thanh toán dư: ' . number_format(abs($remaining)) . '₫',
                 ]);
                 return back()->with('warning', 'Bệnh nhân đã thanh toán dư: ' . number_format(abs($remaining)) . '₫, cần hoàn tiền.');
             }
 
             $payment->update([
                 'status' => 'paid',
-                'note'   => null,
+                'note' => null,
             ]);
             return back()->with('info', 'Lịch hẹn đã được thanh toán đủ.');
         }
 
-        // Thu phần còn thiếu
         PaymentHistory::create([
-            'payment_id'     => $payment->id,
-            'amount'         => $remaining,
+            'payment_id' => $payment->id,
+            'amount' => $remaining,
             'payment_method' => 'bank',
-            'payment_date'   => now(),
+            'payment_date' => now(),
         ]);
 
         $payment->update([
-            'status'         => 'paid',
+            'status' => 'paid',
             'payment_method' => 'bank',
-            'paid_at'        => now(),
-            'note'           => null,
-            'amount'         => $servicePrice,
+            'paid_at' => now(),
+            'note' => null,
+            'amount' => $servicePrice,
         ]);
 
         if ($appointment->order && $appointment->order->status !== 'completed') {
@@ -1028,7 +925,6 @@ class AppointmentController extends Controller
             'Thứ bảy' => 6,
         ];
 
-        // Ngày làm việc theo thứ (0-6)
         $daysOfWeek = $doctor->workingSchedules()
             ->whereNotNull('day_of_week')
             ->pluck('day_of_week')
@@ -1038,23 +934,19 @@ class AppointmentController extends Controller
             ->values()
             ->toArray();
 
-        // ⚡ Nếu không có dữ liệu, mặc định Thứ 2–Thứ 7
         if (empty($daysOfWeek)) {
             $daysOfWeek = [1, 2, 3, 4, 5, 6];
         }
 
-        // Ngày làm việc cụ thể (YYYY-MM-DD)
         $specificDates = $doctor->workingSchedules()
             ->whereNotNull('day')
             ->where('day', '>=', now()->toDateString())
-            ->where('status', 'Đã xét duyệt')
             ->pluck('day')
             ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
             ->unique()
             ->values()
             ->toArray();
 
-        // Ngày nghỉ phép (đã duyệt)
         $vacationDates = $doctor->leaves()
             ->where('end_date', '>=', now())
             ->get()
@@ -1104,127 +996,86 @@ class AppointmentController extends Controller
 
     public function refund($appointmentId)
     {
-        $appointment = Appointment::with('payment')->findOrFail($appointmentId);
-        $payment = $appointment->payment;
-
-        if (!$payment || $payment->status !== 'paid') {
-            return back()->withErrors(['error' => 'Lịch hẹn chưa được thanh toán.']);
-        }
-
-        if ($payment->refund_status === 'completed') {
-            return back()->withErrors(['error' => 'Giao dịch đã được hoàn tiền trước đó.']);
-        }
-
-        // VNPay config
-        $tmnCode     = config('services.vnpay.tmn_code');
-        $hashSecret  = config('services.vnpay.hash_secret');
-        $refundUrl   = config('services.vnpay.refund_url');
-
-        // Lấy dữ liệu giao dịch gốc
-        $amount            = intval($payment->amount * 100); // VNPay dùng đơn vị xu
-        $txnRef            = $payment->vnp_txn_ref;
-        $transactionNo     = $payment->vnp_transaction_no;
-        $transactionDate   = \Carbon\Carbon::parse($payment->paid_at)->format('YmdHis');
-        $requestId         = Str::random(13);
-        $createDate        = now()->format('YmdHis');
-        $ipAddr            = request()->ip();
-
-        $data = [
-            'vnp_Version'          => '2.1.0',
-            'vnp_Command'          => 'refund',
-            'vnp_TmnCode'          => $tmnCode,
-            'vnp_TransactionType'  => '02', // Hoàn tiền toàn phần
-            'vnp_TxnRef'           => $txnRef,
-            'vnp_TransactionNo'    => $transactionNo,
-            'vnp_Amount'           => $amount,
-            'vnp_OrderInfo'        => "Hoàn tiền lịch hẹn #$appointment->id",
-            'vnp_TransactionDate'  => $transactionDate,
-            'vnp_CreateBy'         => 'system',
-            'vnp_CreateDate'       => $createDate,
-            'vnp_IpAddr'           => $ipAddr,
-            'vnp_RequestId'        => $requestId,
-        ];
-
-        // Tạo secure hash
-        ksort($data);
-        $hashData = urldecode(http_build_query($data));
-        $secureHash = hash_hmac('sha512', $hashData, $hashSecret);
-        $data['vnp_SecureHash'] = $secureHash;
-
-        \Log::info('🧾 Gọi refund thực tế', ['payment_id' => $payment->id]);
-        \Log::debug('🔐 Hash string', ['hash_string' => $hashData]);
-        \Log::debug('VNPay Refund input data', $data);
-
+        DB::beginTransaction();
         try {
-            // Gửi POST JSON
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post($refundUrl, $data);
+            $appointment = Appointment::with(['payment', 'patient'])->findOrFail($appointmentId);
+            $payment = $appointment->payment;
 
-            \Log::info('📥 VNPay Refund HTTP Status: ' . $response->status());
-            \Log::info('📥 VNPay Refund Body: ' . $response->body());
+            Log::info('Refund attempt for Appointment ID: ' . $appointmentId . ', Payment Status: ' . optional($payment)->status);
 
-            if ($response->successful()) {
-                $reason = 'Hoàn tiền theo yêu cầu. Lịch hẹn đã bị hủy.';
-                $payment->update([
-                    'status'         => 'refunded',
-                    'refund_status'  => 'completed',
-                    'refunded_at'    => now(),
-                    'note'           => $reason . ' - Hoàn tiền thành công', // Ghi chú rõ ràng
-                ]);
-
-                PaymentHistory::create([
-                    'payment_id'      => $payment->id,
-                    'amount'          => -1 * $payment->amount,
-                    'payment_method'  => 'vnpay',
-                    'payment_date'    => now(),
-                ]);
-
-                try {
-                    $this->sendRefundMail($appointment, $reason);
-                } catch (\Throwable $e) {
-                    \Log::error('Lỗi gửi mail hoàn tiền', [
-                        'appointment_id' => $appointment->id,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-
-                return back()->with('success', 'Hoàn tiền thành công.');
-            } else {
-                $payment->update(['refund_status' => 'failed']);
-
-                \Log::error('❌ VNPay HTTP ERROR', [
-                    'status' => $response->status(),
-                    'body'   => $response->body(),
-                ]);
-
-                return back()->withErrors(['error' => 'Hoàn tiền thất bại: ' . $response->body()]);
+            if (!$payment || $payment->status !== 'paid') {
+                Log::warning('Refund failed: No payment or not paid', ['appointment_id' => $appointmentId]);
+                return back()->withErrors(['error' => 'Lịch hẹn chưa được thanh toán.']);
             }
-        } catch (\Exception $e) {
-            $payment->update(['refund_status' => 'failed']);
 
-            \Log::error('❌ Exception refund', [
-                'message' => $e->getMessage(),
-                'trace'   => $e->getTraceAsString(),
+            if ($payment->refund_status === 'completed') {
+                Log::warning('Refund failed: Already refunded', ['appointment_id' => $appointmentId]);
+                return back()->withErrors(['error' => 'Giao dịch đã được hoàn tiền trước đó.']);
+            }
+
+            $wallet = Wallet::where('user_id', $appointment->patient_id)->first();
+            if (!$wallet) {
+                Log::error('Refund failed: Wallet not found', ['user_id' => $appointment->patient_id]);
+                return back()->withErrors(['error' => 'Không tìm thấy ví của người dùng.']);
+            }
+
+            $refundAmount = $payment->amount;
+            if ($wallet->balance < $refundAmount) {
+                Log::error('Refund failed: Insufficient balance', ['balance' => $wallet->balance, 'amount' => $refundAmount]);
+                return back()->withErrors(['error' => 'Số dư ví không đủ để hoàn tiền: ' . number_format($refundAmount) . '₫']);
+            }
+
+            $wallet->balance += $refundAmount; // Giảm số dư ví (sửa logic nếu cần cộng tiền)
+            $wallet->save();
+
+            $payment->update([
+                'status' => 'refunded',
+                'refund_status' => 'completed',
+                'refunded_at' => now(),
+                'note' => 'Hoàn tiền vào ví người dùng cho lịch hẹn #' . $appointment->id,
             ]);
 
-            return back()->withErrors(['error' => 'Có lỗi xảy ra khi gửi yêu cầu hoàn tiền.']);
+            PaymentHistory::create([
+                'payment_id' => $payment->id,
+                'amount' => -1 * $refundAmount,
+                'payment_method' => 'wallet_refund',
+                'payment_date' => now(),
+            ]);
+
+            WalletTransaction::create([
+                'wallet_id' => $wallet->id,
+                'amount' => $refundAmount, // Cộng tiền vào ví
+                'type' => 'refund',
+                'description' => 'Hoàn tiền cho lịch hẹn #' . $appointment->id,
+                'created_at' => now(),
+            ]);
+
+            try {
+                $reason = 'Hoàn tiền vào ví người dùng do hủy lịch hẹn.';
+                Mail::to($appointment->patient->email)->send(new RefundSuccessfulMail($appointment, $reason));
+            } catch (\Throwable $e) {
+                Log::error('Failed to send refund email', ['appointment_id' => $appointment->id, 'error' => $e->getMessage()]);
+            }
+
+            DB::commit();
+            return back()->with('success', 'Hoàn tiền thành công vào ví người dùng: ' . number_format($refundAmount) . '₫');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Refund error', ['appointment_id' => $appointmentId, 'error' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Có lỗi xảy ra khi hoàn tiền: ' . $e->getMessage()]);
         }
     }
 
     public function performVnpayRefund($payment)
     {
-        // MOCK refund khi chạy local/testing để demo
         if (app()->environment(['local', 'testing'])) {
             \Log::info('MOCK VNPay Refund (local/testing)', ['payment_id' => $payment->id]);
 
-            // Cập nhật trạng thái thanh toán
             $payment->refund_status = 'completed';
             $payment->status = 'refunded';
             $payment->refunded_at = now();
             $payment->save();
 
-            // Ghi lịch sử hoàn tiền
             PaymentHistory::create([
                 'payment_id' => $payment->id,
                 'amount' => -1 * $payment->amount,
@@ -1232,7 +1083,6 @@ class AppointmentController extends Controller
                 'payment_date' => now(),
             ]);
 
-            // Gửi mail hoàn tiền
             try {
                 $appointment = $payment->appointment()
                     ->with(['patient', 'service', 'doctor.user', 'doctor.room'])
@@ -1268,36 +1118,36 @@ class AppointmentController extends Controller
             return ['success' => false, 'message' => 'Không có thời gian giao dịch để hoàn tiền.'];
         }
 
-        $vnp_TmnCode     = config('services.vnpay.tmn_code');
-        $vnp_HashSecret  = config('services.vnpay.hash_secret');
-        $vnp_RefundUrl   = config('services.vnpay.refund_url');
+        $vnp_TmnCode = config('services.vnpay.tmn_code');
+        $vnp_HashSecret = config('services.vnpay.hash_secret');
+        $vnp_RefundUrl = config('services.vnpay.refund_url');
 
-        $vnp_RequestId       = uniqid();
-        $vnp_Version         = '2.1.0';
-        $vnp_Command         = 'refund';
-        $vnp_TxnRef          = $payment->vnp_txn_ref;
-        $vnp_Amount          = $payment->amount * 100;
+        $vnp_RequestId = uniqid();
+        $vnp_Version = '2.1.0';
+        $vnp_Command = 'refund';
+        $vnp_TxnRef = $payment->vnp_txn_ref;
+        $vnp_Amount = $payment->amount * 100;
         $vnp_TransactionType = '02';
-        $vnp_TransactionNo   = $payment->vnp_transaction_no;
+        $vnp_TransactionNo = $payment->vnp_transaction_no;
         $vnp_TransactionDate = $transactionDate;
-        $vnp_CreateBy        = auth()->user()->name ?? 'system';
-        $vnp_CreateDate      = now()->format('YmdHis');
-        $vnp_IpAddr          = request()->ip();
+        $vnp_CreateBy = auth()->user()->name ?? 'system';
+        $vnp_CreateDate = now()->format('YmdHis');
+        $vnp_IpAddr = request()->ip();
 
         $inputData = [
-            'vnp_RequestId'       => $vnp_RequestId,
-            'vnp_Version'         => $vnp_Version,
-            'vnp_Command'         => $vnp_Command,
-            'vnp_TmnCode'         => $vnp_TmnCode,
+            'vnp_RequestId' => $vnp_RequestId,
+            'vnp_Version' => $vnp_Version,
+            'vnp_Command' => $vnp_Command,
+            'vnp_TmnCode' => $vnp_TmnCode,
             'vnp_TransactionType' => $vnp_TransactionType,
-            'vnp_TxnRef'          => $vnp_TxnRef,
-            'vnp_Amount'          => $vnp_Amount,
-            'vnp_TransactionNo'   => $vnp_TransactionNo,
+            'vnp_TxnRef' => $vnp_TxnRef,
+            'vnp_Amount' => $vnp_Amount,
+            'vnp_TransactionNo' => $vnp_TransactionNo,
             'vnp_TransactionDate' => $vnp_TransactionDate,
-            'vnp_CreateBy'        => $vnp_CreateBy,
-            'vnp_CreateDate'      => $vnp_CreateDate,
-            'vnp_IpAddr'          => $vnp_IpAddr,
-            'vnp_OrderInfo'       => 'Hoàn tiền lịch hẹn #' . $payment->appointment_id,
+            'vnp_CreateBy' => $vnp_CreateBy,
+            'vnp_CreateDate' => $vnp_CreateDate,
+            'vnp_IpAddr' => $vnp_IpAddr,
+            'vnp_OrderInfo' => 'Hoàn tiền lịch hẹn #' . $payment->appointment_id,
         ];
 
         ksort($inputData);
@@ -1312,9 +1162,9 @@ class AppointmentController extends Controller
             if (!$response->ok()) {
                 \Log::error('VNPay Refund HTTP error', [
                     'status' => $response->status(),
-                    'body'   => $response->body(),
-                    'url'    => $vnp_RefundUrl,
-                    'input'  => $inputData
+                    'body' => $response->body(),
+                    'url' => $vnp_RefundUrl,
+                    'input' => $inputData
                 ]);
                 return ['success' => false, 'message' => 'VNPay không phản hồi đúng: HTTP ' . $response->status()];
             }
@@ -1332,13 +1182,6 @@ class AppointmentController extends Controller
                 $payment->status = 'refunded';
                 $payment->refunded_at = now();
                 $payment->save();
-
-                // \App\Models\PaymentHistory::create([
-                //     'payment_id' => $payment->id,
-                //     'amount' => -1 * $payment->amount,
-                //     'payment_method' => 'vnpay_refund',
-                //     'payment_date' => now(),
-                // ]);
 
                 try {
                     $appointment = $payment->appointment()
@@ -1364,12 +1207,11 @@ class AppointmentController extends Controller
         } catch (\Throwable $e) {
             \Log::error('VNPay Refund exception', [
                 'message' => $e->getMessage(),
-                'trace'   => $e->getTraceAsString(),
+                'trace' => $e->getTraceAsString(),
             ]);
             return ['success' => false, 'message' => 'Có lỗi khi hoàn tiền: ' . $e->getMessage()];
         }
     }
-
 
     protected function sendRefundMail(Appointment $appointment, string $reason)
     {
@@ -1410,7 +1252,6 @@ class AppointmentController extends Controller
             return response()->json(['message' => 'Thiếu ngày khám'], 400);
         }
 
-        // ⏱️ Lấy thời lượng của dịch vụ nếu có
         if ($serviceId) {
             $service = Service::find($serviceId);
             if ($service && $service->duration) {
@@ -1418,7 +1259,6 @@ class AppointmentController extends Controller
             }
         }
 
-        // 🔄 Nếu có treatment_plan_id, override doctor
         if ($treatmentPlanId) {
             $plan = TreatmentPlan::find($treatmentPlanId);
             if ($plan && $plan->doctor_id) {
@@ -1432,7 +1272,6 @@ class AppointmentController extends Controller
 
         $dayOfWeek = Carbon::parse($date)->format('l');
 
-        // Lấy lịch làm việc (nếu có)
         $workings = WorkingSchedule::with('shift')
             ->where('doctor_id', $doctor->id)
             ->where('status', 'Đã xét duyệt')
@@ -1449,19 +1288,17 @@ class AppointmentController extends Controller
                 if ($w->shift) {
                     $workingPeriods[] = [
                         'start' => $w->shift->start_time,
-                        'end'   => $w->shift->end_time,
+                        'end' => $w->shift->end_time,
                     ];
                 }
             }
         } else {
-            // fallback mặc định khi không có lịch
             $workingPeriods = [
                 ['start' => '07:00', 'end' => '12:00'],
                 ['start' => '13:00', 'end' => '17:00'],
             ];
         }
 
-        // 📆 Lấy các lịch đã đặt trong ngày
         $appointments = Appointment::where('doctor_id', $doctor->id)
             ->whereDate('appointment_time', $date)
             ->whereNotIn('status', ['cancelled'])
@@ -1472,14 +1309,13 @@ class AppointmentController extends Controller
             ->map(function ($a) use ($slotDuration) {
                 return [
                     'start' => Carbon::parse($a->appointment_time),
-                    'end'   => $a->end_time
+                    'end' => $a->end_time
                         ? Carbon::parse($a->end_time)
                         : Carbon::parse($a->appointment_time)->copy()->addMinutes($slotDuration),
                 ];
             });
 
         $availableSlots = [];
-        $now = now();
 
         foreach ($workingPeriods as $block) {
             $start = Carbon::parse("$date {$block['start']}");
@@ -1488,12 +1324,6 @@ class AppointmentController extends Controller
             while ($start->copy()->addMinutes($slotDuration) <= $end) {
                 $slotStart = $start->copy();
                 $slotEnd = $start->copy()->addMinutes($slotDuration);
-
-                // Nếu ngày được chọn là ngày hôm nay, loại bỏ các giờ đã qua
-                if ($date === $now->toDateString() && $slotStart <= $now) {
-                    $start->addMinutes(5);
-                    continue;
-                }
 
                 $conflict = false;
                 foreach ($appointments as $appt) {
@@ -1508,7 +1338,6 @@ class AppointmentController extends Controller
                     continue;
                 }
 
-                // Nếu không xung đột, thêm slot này
                 $availableSlots[] = $slotStart->format('H:i');
                 $start = $slotEnd;
             }
