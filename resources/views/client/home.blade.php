@@ -167,6 +167,12 @@
             justify-content: center;
             margin-bottom: 1rem;
         }
+
+        .bg-vipro {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(https://i.ibb.co/Z1MF5LzK/khambenh.png);
+            background-size: cover;
+            background-position: center;
+        }
     </style>
 @endpush
 
@@ -389,32 +395,32 @@
     </section>
 
     {{-- Stats Section --}}
-    <section class="py-20 gradient-bg text-white">
+    <section class="py-20 bg-vipro text-white">
         <div class="container mx-auto px-4">
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
                 <div class="text-center">
                     <div class="text-4xl md:text-5xl font-bold mb-2">
                         <span class="counter" data-number="10000" data-step="300">0</span>+
                     </div>
-                    <div class="text-blue-200">Bệnh nhân tin tưởng</div>
+                    <div class="text-white">Bệnh nhân tin tưởng</div>
                 </div>
                 <div class="text-center">
                     <div class="text-4xl md:text-5xl font-bold mb-2">
                         <span class="counter" data-number="50" data-step="1">0</span>+
                     </div>
-                    <div class="text-blue-200">Bác sĩ chuyên khoa</div>
+                    <div class="text-white">Bác sĩ chuyên khoa</div>
                 </div>
                 <div class="text-center">
                     <div class="text-4xl md:text-5xl font-bold mb-2">
                         <span class="counter" data-number="15" data-step="1">0</span>+
                     </div>
-                    <div class="text-blue-200">Năm kinh nghiệm</div>
+                    <div class="text-white">Năm kinh nghiệm</div>
                 </div>
                 <div class="text-center">
                     <div class="text-4xl md:text-5xl font-bold mb-2">
                         <span>24/7</span>
                     </div>
-                    <div class="text-blue-200">Hỗ Trợ Khẩn Cấp</div>
+                    <div class="text-white">Hỗ Trợ Khẩn Cấp</div>
                 </div>
             </div>
         </div>

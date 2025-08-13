@@ -22,7 +22,7 @@
         }
 
         .banner-person {
-            background:  url({{ asset('admin/assets/img/doctor-banner-person-1.png') }}) right / contain no-repeat;
+            background: url({{ asset('admin/assets/img/doctor-banner-person-1.png') }}) right / contain no-repeat;
             position: absolute;
             top: 0px;
             right: 0;
@@ -33,7 +33,7 @@
         }
 
         .bg-doctor-top {
-            background-image:  url({{ asset('admin/assets/img/doctor-item-top-bg.png') }});
+            background-image: url({{ asset('admin/assets/img/doctor-item-top-bg.png') }});
             background-size: cover;
             background-position: top center;
         }
@@ -120,11 +120,11 @@
                 height: 600px;
             }
 
-            .content{
+            .content {
                 padding: 0px 10px;
             }
 
-            .banner-person{
+            .banner-person {
                 display: none
             }
 
@@ -221,7 +221,7 @@
 
             <!-- Doctors Grid -->
             <div id="doctorsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                @foreach ($doctors->take(12) as $doctor)
+                @foreach ($doctors as $doctor)
                     <div class="doctor-card bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm"
                         data-doctor-name="{{ strtolower($doctor->user->full_name) }}"
                         data-doctor-department="{{ $doctor->department->id }}"
@@ -240,7 +240,7 @@
 
                             <!-- Doctor Info -->
                             <div class="p-5">
-                                <h3 class="text-lg font-semibold text-gray-900 mb-2 truncate">
+                                <h3 class="text-lg font-semibold text-center text-gray-900 mb-2 truncate">
                                     {{ $doctor->user->full_name }}
                                 </h3>
 
@@ -276,13 +276,12 @@
                     </div>
                 @endforeach
             </div>
-
             <!-- Load More Button -->
-            @if ($doctors->count() > 6)
+            @if ($doctors->count() > 12)
                 <div class="text-center">
                     <button id="loadMoreBtn"
-                        class="inline-flex items-center px-8 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium">
-                        <span>Xem thêm bác sĩ</span>
+                        class="inline-flex items-center px-8 py-3 bg-blue-400 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium">
+                        <span class="text-white">Xem thêm bác sĩ</span>
                         <i data-lucide="chevron-down" class="w-5 h-5 ml-2"></i>
                     </button>
 
@@ -363,6 +362,7 @@
                     }
                 });
 
+                // Reset displayed count when filtering
                 displayedCount = Math.min(loadStep, filteredDoctors.length);
                 updateDisplay();
                 updateActiveFilters();
@@ -370,34 +370,47 @@
 
             // Update display
             function updateDisplay() {
-                // Hide all doctors
+                // Ẩn tất cả các thẻ bác sĩ hiện có
                 allDoctors.forEach(doctor => {
                     doctor.style.display = 'none';
                 });
 
-                // Show filtered doctors
+                // Hiển thị các bác sĩ đã được lọc và sắp xếp
                 const doctorsToShow = filteredDoctors.slice(0, displayedCount);
                 doctorsToShow.forEach(doctor => {
                     doctor.style.display = 'block';
+                    // Thêm animation khi hiển thị
+                    doctor.classList.add('filter-fade-in');
                 });
 
-                // Update results count
+                // Cập nhật số lượng kết quả
                 resultsCount.textContent = `Hiển thị ${doctorsToShow.length} / ${filteredDoctors.length} bác sĩ`;
 
-                // Show/hide load more button
-                if (displayedCount >= filteredDoctors.length) {
-                    loadMoreBtn.style.display = 'none';
-                } else {
-                    loadMoreBtn.style.display = 'inline-flex';
-                }
+                // Kiểm tra và hiển thị nút "Xem thêm"
+                updateLoadMoreButton();
 
-                // Show/hide no results
+                // Xử lý trường hợp không có kết quả
                 if (filteredDoctors.length === 0) {
                     noResults.classList.remove('hidden');
                     doctorsGrid.style.display = 'none';
                 } else {
                     noResults.classList.add('hidden');
                     doctorsGrid.style.display = 'grid';
+                }
+            }
+
+            // Separate function to handle load more button visibility
+            function updateLoadMoreButton() {
+                if (loadMoreBtn && loadingBtn) {
+                    if (displayedCount >= filteredDoctors.length) {
+                        // Không còn bác sĩ nào để hiển thị
+                        loadMoreBtn.classList.add('hidden');
+                        loadingBtn.classList.add('hidden');
+                    } else {
+                        // Còn bác sĩ để hiển thị
+                        loadMoreBtn.classList.remove('hidden');
+                        loadingBtn.classList.add('hidden');
+                    }
                 }
             }
 
@@ -416,9 +429,9 @@
 
                 if (filters.length > 0) {
                     activeFilters.innerHTML = `
-                        <span class="text-sm text-gray-600">Đang lọc:</span>
-                        ${filters.map(filter => `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">${filter}</span>`).join('')}
-                    `;
+                <span class="text-sm text-gray-600">Đang lọc:</span>
+                ${filters.map(filter => `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">${filter}</span>`).join('')}
+            `;
                     activeFilters.classList.remove('hidden');
                     clearFilters.classList.remove('hidden');
                 } else {
@@ -441,22 +454,36 @@
                 filterDoctors();
             });
 
-            // Load more functionality
-            loadMoreBtn.addEventListener('click', function() {
-                loadMoreBtn.style.display = 'none';
-                loadingBtn.classList.remove('hidden');
+            // Load more functionality - FIX HERE
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
 
-                // Simulate loading delay
-                setTimeout(() => {
-                    displayedCount = Math.min(displayedCount + loadStep, filteredDoctors.length);
-                    updateDisplay();
+                    // Debug log
+                    console.log('Load more clicked');
+                    console.log('Current displayed count:', displayedCount);
+                    console.log('Filtered doctors count:', filteredDoctors.length);
 
-                    loadingBtn.classList.add('hidden');
-                    if (displayedCount < filteredDoctors.length) {
-                        loadMoreBtn.style.display = 'inline-flex';
-                    }
-                }, 500);
-            });
+                    // Hiển thị trạng thái loading
+                    loadMoreBtn.classList.add('hidden');
+                    loadingBtn.classList.remove('hidden');
+
+                    // Simulate loading delay
+                    setTimeout(() => {
+                        // Tăng số lượng hiển thị
+                        const newDisplayCount = Math.min(displayedCount + loadStep, filteredDoctors
+                            .length);
+
+                        console.log('New display count:', newDisplayCount);
+
+                        displayedCount = newDisplayCount;
+                        updateDisplay();
+
+                        // Debug log sau khi update
+                        console.log('After update - displayed count:', displayedCount);
+                    }, 500);
+                });
+            }
 
             // Debounce function
             function debounce(func, wait) {
@@ -472,6 +499,9 @@
             }
 
             // Initialize
+            console.log('Initial setup:');
+            console.log('All doctors count:', allDoctors.length);
+            console.log('Initial displayed count:', displayedCount);
             updateDisplay();
         });
     </script>

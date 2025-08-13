@@ -215,15 +215,15 @@
             }
 
             debugEcho() {
-                console.log('🔍 Echo available:', typeof window.Echo);
-                console.log('🔍 Pusher available:', typeof window.Pusher);
+                // console.log('🔍 Echo available:', typeof window.Echo);
+                // console.log('🔍 Pusher available:', typeof window.Pusher);
 
                 if (window.Echo && window.Echo.connector) {
-                    console.log('🔍 Pusher state:', window.Echo.connector.pusher.connection.state);
+                    // console.log('🔍 Pusher state:', window.Echo.connector.pusher.connection.state);
 
                     // Debug connection events
                     window.Echo.connector.pusher.connection.bind('connected', () => {
-                        console.log('✅ Pusher connected successfully');
+                        // console.log('✅ Pusher connected successfully');
                     });
 
                     window.Echo.connector.pusher.connection.bind('error', (err) => {
@@ -323,7 +323,7 @@
 
             listenForMessages() {
                 if (!this.sessionId) {
-                    console.warn('⚠️ Không có sessionId để listen');
+                    // console.warn('⚠️ Không có sessionId để listen');
                     return;
                 }
 
@@ -333,12 +333,12 @@
                     return;
                 }
 
-                console.log(`🎧 Đang setup listener cho channel: chat-session-${this.sessionId}`);
+                // console.log(`🎧 Đang setup listener cho channel: chat-session-${this.sessionId}`);
 
                 try {
                     // ✅ Hủy channel cũ nếu có
                     if (this.echoChannel) {
-                        console.log('🔄 Hủy channel cũ');
+                        // console.log('🔄 Hủy channel cũ');
                         window.Echo.leaveChannel(`private-chat-session-${this.sessionId}`);
                     }
 
@@ -347,8 +347,8 @@
 
                     this.echoChannel
                         .listen('.chat-message-sent', (e) => {
-                            console.log('📩 RECEIVED MESSAGE:', e.message);
-                            console.log('📩 Full event:', e);
+                            // console.log('📩 RECEIVED MESSAGE:', e.message);
+                            // console.log('📩 Full event:', e);
 
                             // ✅ Method 1: Direct DOM manipulation (guaranteed to work)
                             const chatContent = document.getElementById('chatbox-content');
@@ -369,7 +369,7 @@
                                 // Scroll to bottom
                                 chatContent.scrollTop = chatContent.scrollHeight;
 
-                                console.log('✅ Admin message added to UI successfully');
+                                // console.log('✅ Admin message added to UI successfully');
                             } else {
                                 console.error('❌ chatContent not found');
                             }
@@ -685,17 +685,17 @@
 
         // ✅ Debug Echo trước khi khởi tạo
         document.addEventListener("DOMContentLoaded", function() {
-            console.log('🚀 DOM loaded, khởi tạo SmartCareChat...');
+            // console.log('🚀 DOM loaded, khởi tạo SmartCareChat...');
 
             // Debug Echo connection
             if (window.Echo && window.Echo.connector) {
-                console.log('✅ Echo available, Pusher state:', window.Echo.connector.pusher.connection.state);
+                // console.log('✅ Echo available, Pusher state:', window.Echo.connector.pusher.connection.state);
 
                 // Wait for connection if not ready
                 if (window.Echo.connector.pusher.connection.state !== 'connected') {
-                    console.log('⏳ Waiting for Pusher connection...');
+                    // console.log('⏳ Waiting for Pusher connection...');
                     window.Echo.connector.pusher.connection.bind('connected', () => {
-                        console.log('✅ Pusher connected, initializing chat...');
+                        // console.log('✅ Pusher connected, initializing chat...');
                         new SmartCareChat();
                     });
                 } else {

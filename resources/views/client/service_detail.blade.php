@@ -161,8 +161,6 @@
                 </div>
             </div>
 
-            {{-- <hr class="my-5"> Divider --}}
-
             {{-- Content grid: details + banner --}}
             <div id="content" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {{-- Left Column: Package Details --}}
@@ -198,7 +196,7 @@
                                         class="doctor-card transform bg-white rounded-lg shadow p-4 flex items-center space-x-4 hover:shadow-md transition border-2 border-transparent duration-300 hover:scale-105 focus-within:border-blue-500  has-[:checked]:bg-[#FFB340]">
                                         <input type="radio" id="doctor_{{ $doctor->id }}" name="selected_doctor"
                                             value="{{ $doctor->id }}" class="sr-only" hidden>
-                                        <img src="{{ $doctor->user->avatar }}" alt="{{ $doctor->user->full_name }}"
+                                        <img src="{{ asset('storage/' . $doctor->user->avatar) }}" alt="{{ $doctor->user->full_name }}"
                                             class="w-20 h-20 rounded-full object-cover">
                                         <div class="flex-1">
                                             <h4 class="text-lg font-semibold text-gray-800">{{ $doctor->user->full_name }}

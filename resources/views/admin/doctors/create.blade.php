@@ -71,7 +71,7 @@
 
             <div class="row">
                 {{-- Chuyên môn (Danh mục dịch vụ) --}}
-<div class="col-md-6 mb-3">
+{{-- <div class="col-md-6 mb-3">
     <label class="form-label fw-semibold">Dịch vụ <span class="text-danger">*</span></label>
     <select name="service_id" class="form-select @error('service_id') is-invalid @enderror">
         <option value="">-- Chọn dịch vụ --</option>
@@ -84,7 +84,7 @@
     @error('service_id')
         <div class="invalid-feedback d-block">{{ $message }}</div>
     @enderror
-</div>
+</div> --}}
 
 
 

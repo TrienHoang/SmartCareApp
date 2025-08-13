@@ -47,9 +47,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 
-Route::get('/', function () {
-    return view('client.home');
-})->name('home');
 
 
 Route::middleware('guest')->group(function () {

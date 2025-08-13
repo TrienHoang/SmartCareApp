@@ -113,7 +113,7 @@
                                 <div class="flex items-center mb-2 text-sm text-gray-600">
                                     <i class="bx bx-notepad mr-2 text-indigo-500"></i>
                                     <strong class="w-36">Chẩn đoán:</strong>
-                                    <span>{{ $appointment->medicalRecord->diagnosis ?? 'Chưa có thông tin' }}</span>
+                                    <span>{{ $appointment->symptom_note ?? 'Chưa có thông tin' }}</span>
                                 </div>
 
                                 <div class="flex items-center mb-2 text-sm text-gray-600">
