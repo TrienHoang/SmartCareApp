@@ -143,172 +143,179 @@
                                 </div>
                             @else
                                 <div class="space-y-6">
+
                                     @foreach ($appointments as $item)
-                                        @php
-                                            $statusConfig = match ($item->status) {
-                                                'pending' => [
-                                                    'class' => 'text-amber-700 bg-amber-50 border-amber-200',
-                                                    'icon' => 'clock',
-                                                    'color' => 'amber',
-                                                ],
-                                                'confirmed' => [
-                                                    'class' => 'text-blue-700 bg-blue-50 border-blue-200',
-                                                    'icon' => 'check-circle',
-                                                    'color' => 'blue',
-                                                ],
-                                                'completed' => [
-                                                    'class' => 'text-emerald-700 bg-emerald-50 border-emerald-200',
-                                                    'icon' => 'check-circle-2',
-                                                    'color' => 'emerald',
-                                                ],
-                                                'cancelled' => [
-                                                    'class' => 'text-red-700 bg-red-50 border-red-200',
-                                                    'icon' => 'x-circle',
-                                                    'color' => 'red',
-                                                ],
-                                                default => [
-                                                    'class' => 'text-gray-700 bg-gray-50 border-gray-200',
-                                                    'icon' => 'help-circle',
-                                                    'color' => 'gray',
-                                                ],
-                                            };
-                                        @endphp
+                                        @if ($item->status !== 'completed')
+                                            @php
+                                                $statusConfig = match ($item->status) {
+                                                    'pending' => [
+                                                        'class' => 'text-amber-700 bg-amber-50 border-amber-200',
+                                                        'icon' => 'clock',
+                                                        'color' => 'amber',
+                                                    ],
+                                                    'confirmed' => [
+                                                        'class' => 'text-blue-700 bg-blue-50 border-blue-200',
+                                                        'icon' => 'check-circle',
+                                                        'color' => 'blue',
+                                                    ],
+                                                    'completed' => [
+                                                        'class' => 'text-emerald-700 bg-emerald-50 border-emerald-200',
+                                                        'icon' => 'check-circle-2',
+                                                        'color' => 'emerald',
+                                                    ],
+                                                    'cancelled' => [
+                                                        'class' => 'text-red-700 bg-red-50 border-red-200',
+                                                        'icon' => 'x-circle',
+                                                        'color' => 'red',
+                                                    ],
+                                                    default => [
+                                                        'class' => 'text-gray-700 bg-gray-50 border-gray-200',
+                                                        'icon' => 'help-circle',
+                                                        'color' => 'gray',
+                                                    ],
+                                                };
+                                            @endphp
 
-                                        <div
-                                            class="group relative bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                                            <!-- Header với gradient -->
-                                            <div class="flex items-start justify-between mb-6">
-                                                <div class="flex items-center gap-4">
-                                                    <div
-                                                        class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                                                        <i data-lucide="user" class="w-6 h-6 text-white"></i>
-                                                    </div>
-                                                    <div>
-                                                        <h3 class="text-xl font-bold text-gray-900 mb-1">
-                                                            {{ $item->patient->full_name ?? auth()->user()->name }}
-                                                        </h3>
-                                                        <div class="flex items-center gap-2">
-                                                            <i data-lucide="{{ $statusConfig['icon'] }}"
-                                                                class="w-4 h-4 text-{{ $statusConfig['color'] }}-500"></i>
-                                                            <span
-                                                                class="px-3 py-1 rounded-full text-xs font-semibold border {{ $statusConfig['class'] }}">
-                                                                {{ $item->status_text ?? ucfirst($item->status) }}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Quick actions -->
-                                                <div
-                                                    class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                    @if ($item->status === 'pending')
-                                                        <button type="button"
-                                                            onclick="openCancelModal({{ $item->id }})"
-                                                            class="w-10 h-10 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors duration-200"
-                                                            title="Hủy lịch hẹn">
-                                                            <i data-lucide="x" class="w-4 h-4 text-red-600"></i>
-                                                        </button>
-                                                    @endif
-                                                </div>
-                                            </div>
-
-                                            <!-- Thông tin chi tiết -->
-                                            <div class="grid md:grid-cols-2 gap-4 mb-6">
-                                                <div class="space-y-4">
-                                                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                                        <div
-                                                            class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                                            <i data-lucide="stethoscope"
-                                                                class="w-4 h-4 text-blue-600"></i>
-                                                        </div>
-                                                        <div>
-                                                            <p
-                                                                class="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                                                                Chuyên khoa</p>
-                                                            <p class="text-sm font-semibold text-gray-900">
-                                                                {{ $item->doctor->specialization ?? '---' }}</p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                                        <div
-                                                            class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                                                            <i data-lucide="activity" class="w-4 h-4 text-green-600"></i>
-                                                        </div>
-                                                        <div>
-                                                            <p
-                                                                class="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                                                                Dịch vụ</p>
-                                                            <p class="text-sm font-semibold text-gray-900">
-                                                                {{ $item->service->name ?? '---' }}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="space-y-4">
-                                                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                                        <div
-                                                            class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                                            <i data-lucide="calendar-days"
-                                                                class="w-4 h-4 text-purple-600"></i>
-                                                        </div>
-                                                        <div>
-                                                            <p
-                                                                class="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                                                                Ngày khám</p>
-                                                            <p class="text-sm font-semibold text-gray-900">
-                                                                {{ \Carbon\Carbon::parse($item->appointment_time)->format('d/m/Y') }}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                                        <div
-                                                            class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                                                            <i data-lucide="clock" class="w-4 h-4 text-orange-600"></i>
-                                                        </div>
-                                                        <div>
-                                                            <p
-                                                                class="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                                                                Giờ khám</p>
-                                                            <p class="text-sm font-semibold text-gray-900">
-                                                                {{ \Carbon\Carbon::parse($item->appointment_time)->format('H:i') }}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Footer actions -->
-                                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-                                                <div class="flex items-center gap-2 text-xs text-gray-500">
-                                                    <i data-lucide="calendar" class="w-3 h-3"></i>
-                                                    <span>Lịch hẹn #{{ $item->id }}</span>
-                                                </div>
-
-                                                <div class="flex items-center gap-3">
-                                                    <a href="{{ route('client.appointments.show', $item) }}"
-                                                        class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200">
-                                                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                                                        Xem chi tiết
-                                                    </a>
-                                                    @if ($item->status === 'pending')
-                                                        <button type="button"
-                                                            onclick="openCancelModal({{ $item->id }})"
-                                                            class="inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-medium text-sm transition-colors duration-200">
-                                                            <i data-lucide="x-circle" class="w-4 h-4"></i>
-                                                            Hủy lịch
-                                                        </button>
-                                                    @endif
-                                                </div>
-                                            </div>
-
-                                            <!-- Decorative element -->
                                             <div
-                                                class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 rounded-bl-full">
+                                                class="group relative bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                                                <!-- Header với gradient -->
+                                                <div class="flex items-start justify-between mb-6">
+                                                    <div class="flex items-center gap-4">
+                                                        <div
+                                                            class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                                                            <i data-lucide="user" class="w-6 h-6 text-white"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h3 class="text-xl font-bold text-gray-900 mb-1">
+                                                                {{ $item->patient->full_name ?? auth()->user()->name }}
+                                                            </h3>
+                                                            <div class="flex items-center gap-2">
+                                                                <i data-lucide="{{ $statusConfig['icon'] }}"
+                                                                    class="w-4 h-4 text-{{ $statusConfig['color'] }}-500"></i>
+                                                                <span
+                                                                    class="px-3 py-1 rounded-full text-xs font-semibold border {{ $statusConfig['class'] }}">
+                                                                    {{ $item->status_text ?? ucfirst($item->status) }}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Quick actions -->
+                                                    <div
+                                                        class="flex items-center gap-2 opacity-0 ">
+                                                        @if ($item->status === 'pending')
+                                                            <button type="button"
+                                                                onclick="openCancelModal({{ $item->id }})"
+                                                                class="w-10 h-10 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors duration-200"
+                                                                title="Hủy lịch hẹn">
+                                                                <i data-lucide="x" class="w-4 h-4 text-red-600"></i>
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                                </div>
+
+                                                <!-- Thông tin chi tiết -->
+                                                <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                                    <div class="space-y-4">
+                                                        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <div
+                                                                class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                                <i data-lucide="stethoscope"
+                                                                    class="w-4 h-4 text-blue-600"></i>
+                                                            </div>
+                                                            <div>
+                                                                <p
+                                                                    class="text-xs text-gray-500 uppercase tracking-wide font-medium">
+                                                                    Chuyên khoa</p>
+                                                                <p class="text-sm font-semibold text-gray-900">
+                                                                    {{ $item->doctor->specialization ?? '---' }}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <div
+                                                                class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                                                <i data-lucide="activity"
+                                                                    class="w-4 h-4 text-green-600"></i>
+                                                            </div>
+                                                            <div>
+                                                                <p
+                                                                    class="text-xs text-gray-500 uppercase tracking-wide font-medium">
+                                                                    Dịch vụ</p>
+                                                                <p class="text-sm font-semibold text-gray-900">
+                                                                    {{ $item->service->name ?? '---' }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="space-y-4">
+                                                        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <div
+                                                                class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                                                <i data-lucide="calendar-days"
+                                                                    class="w-4 h-4 text-purple-600"></i>
+                                                            </div>
+                                                            <div>
+                                                                <p
+                                                                    class="text-xs text-gray-500 uppercase tracking-wide font-medium">
+                                                                    Ngày khám</p>
+                                                                <p class="text-sm font-semibold text-gray-900">
+                                                                    {{ \Carbon\Carbon::parse($item->appointment_time)->format('d/m/Y') }}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <div
+                                                                class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                                                                <i data-lucide="clock"
+                                                                    class="w-4 h-4 text-orange-600"></i>
+                                                            </div>
+                                                            <div>
+                                                                <p
+                                                                    class="text-xs text-gray-500 uppercase tracking-wide font-medium">
+                                                                    Giờ khám</p>
+                                                                <p class="text-sm font-semibold text-gray-900">
+                                                                    {{ \Carbon\Carbon::parse($item->appointment_time)->format('H:i') }}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Footer actions -->
+                                                <div
+                                                    class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                                    <div class="flex items-center gap-2 text-xs text-gray-500">
+                                                        <i data-lucide="calendar" class="w-3 h-3"></i>
+                                                        <span>Lịch hẹn #{{ $item->id }}</span>
+                                                    </div>
+
+                                                    <div class="flex items-center gap-3">
+                                                        <a href="{{ route('client.appointments.show', $item) }}"
+                                                            class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200">
+                                                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                                            Xem chi tiết
+                                                        </a>
+                                                        @if ($item->status === 'pending')
+                                                            <button type="button"
+                                                                onclick="openCancelModal({{ $item->id }})"
+                                                                class="inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-medium text-sm transition-colors duration-200">
+                                                                <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                                                Hủy lịch
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                                </div>
+
+                                                <!-- Decorative element -->
+                                                <div
+                                                    class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 rounded-bl-full">
+                                                </div>
                                             </div>
-                                        </div>
-                                    @endforeach
+                                            @endif
+                                        @endforeach
+                                    
                                 </div>
                             @endif
                         </div>

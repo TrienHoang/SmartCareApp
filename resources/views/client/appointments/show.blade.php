@@ -123,24 +123,7 @@
                                     </span>
                                 </div>
 
-                                @if ($appointment->check_in_time ?? false)
-                                    <div class="mt-4 pt-4 border-t border-gray-100">
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                            <div class="flex items-center text-gray-600">
-                                                <i class="fas fa-sign-in-alt mr-2 text-green-500"></i>
-                                                <span><strong>Giờ đến:</strong>
-                                                    {{ $appointment->check_in_time->format('H:i d/m/Y') ?? '08:55 25/12/2023' }}</span>
-                                            </div>
-                                            @if ($appointment->end_time ?? false)
-                                                <div class="flex items-center text-gray-600">
-                                                    <i class="fas fa-sign-out-alt mr-2 text-red-500"></i>
-                                                    <span><strong>Giờ kết thúc:</strong>
-                                                        {{ $appointment->end_time->format('H:i d/m/Y') ?? '09:30 25/12/2023' }}</span>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                @endif
+                             
                             </div>
                         </div>
 
