@@ -28,9 +28,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($sessions as $session)
+                                    @foreach ($sessions as $key => $session)
                                         <tr>
-                                            <td>#{{ $session->id }}</td>
+                                            <td>{{ $loop->iteration + ($sessions->currentPage() - 1) * $sessions->perPage() }}</td>
                                             <td>
                                                 @if ($session->user)
                                                     <strong>{{ $session->user->full_name }}</strong><br>
