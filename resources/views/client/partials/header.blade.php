@@ -13,10 +13,12 @@
     <div class="container mx-auto px-4 py-4">
         <div class="flex justify-around items-center">
             <div class="flex items-center space-x-2">
-                <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
+                {{-- <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
                     <i data-lucide="stethoscope" class="w-6 h-6 text-white"></i>
-                </div>
-                <h1 class="text-2xl font-bold gradient-text">SmartCare</h1>
+                </div> --}}
+                <a href="/">
+                    <h1 class="text-2xl font-bold gradient-text">SmartCare</h1>
+                </a>
             </div>
 
             {{-- Desktop Menu --}}
