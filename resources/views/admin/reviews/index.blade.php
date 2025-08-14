@@ -232,8 +232,15 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <small class="text-muted">{{ $review->created_at->format('d/m/Y H:i') }}</small>
+                                        <small class="text-muted">
+                                            @if ($review->created_at)
+                                                {{ \Carbon\Carbon::parse($review->created_at)->translatedFormat('d/m/Y \l\ú\c H:i') }}
+                                            @else
+                                                Chưa xác định
+                                            @endif
+                                        </small>
                                     </td>
+
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
                                             <a href="{{ route('admin.reviews.show', $review) }}"

@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\TreatmentPlanController;
 use App\Http\Controllers\Admin\RoomController;
+use App\Http\Controllers\client\ChatController;
 use App\Models\Admin_notification;
 use App\Models\Role;
 use App\Models\User;
@@ -76,6 +77,9 @@ Route::middleware('guest')->group(function () {
 });
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+
+
 // Trang nhập email để gửi link
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 // Gửi email chứa link reset
@@ -86,7 +90,12 @@ Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showRese
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 
-// ✅ VNPAY Routes (không cần auth - webhook từ VNPAY)
+// đăng nhập bằng google
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
+
+// VNPAY Routes
 Route::post('/vnpay/callback', [PaymentHistoryController::class, 'vnpayCallback'])
     ->name('vnpay.callback')
     ->withoutMiddleware([VerifyCsrfToken::class]); // Loại bỏ CSRF cho webhook

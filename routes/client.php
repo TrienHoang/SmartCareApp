@@ -8,23 +8,19 @@ use App\Http\Controllers\client\ClientFileController;
 use App\Http\Controllers\Client\PaymentHistoryClientController;
 use App\Http\Controllers\Client\BookingController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\Client\PaymentController;
 use Illuminate\Support\Facades\Route;
-
-
-
 use App\Http\Controllers\Client\ReviewReplyController;
 use App\Http\Controllers\Client\AppointmentController;
 use App\Http\Controllers\Client\DoctorController;
 use App\Http\Controllers\Client\AppointmentClientController;
 use chillerlan\QRCode\{QRCode, QROptions};
 use Illuminate\Support\Facades\Response;
-
 use App\Http\Controllers\Client\AppointmentHistoryController;
 use App\Http\Controllers\client\ChatController;
 use App\Http\Controllers\Client\UserController;
 use App\Http\Controllers\Client\ProfileController;
-
+use App\Http\Controllers\Client\WalletController;
+use App\Models\Wallet;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -199,4 +195,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/promotions/apply/{promotion}', [PromotionController::class, 'apply'])->name('client.promotions.apply');
     Route::post('/promotions/remove', [PromotionController::class, 'remove'])->name('client.promotions.remove');
 
+});
+Route::prefix('wallet')->middleware(['auth'])->group(function () {
+    Route::get('/', [WalletController::class, 'index'])->name('client.wallet.index');
+    Route::post('/withdraw', [WalletController::class, 'withdraw'])->name('wallet.withdraw');
 });

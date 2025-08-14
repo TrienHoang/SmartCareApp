@@ -1,8 +1,9 @@
-@extends('admin.dashboard')
+@extends('client.layouts.profile-layout')
 
-@section('title', '🧾 Chi tiết hóa đơn - Cảm ơn bạn!')
 
-@section('content')
+@section('title', 'Chi tiết thanh toán')
+
+@section('profile-content')
 <style>
   @media (max-width: 768px) {
     .card-body p {

@@ -233,7 +233,7 @@
                         @endif
 
                         <div class="form-group mb-0">
-                            <a href="#" class="btn btn-outline-primary btn-sm">
+                            <a href="{{ route('doctor.appointments.show', $file->appointment->id) }}" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-eye"></i> Xem chi tiết cuộc hẹn
                             </a>
                         </div>

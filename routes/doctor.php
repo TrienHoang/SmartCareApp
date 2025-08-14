@@ -94,6 +94,7 @@ Route::prefix('doctor')
         Route::prefix('appointments')->name('appointments.')->group(function () {
             Route::get('/', [AppointmentController::class, 'index'])->name('index');
             Route::get('/{id}', [AppointmentController::class, 'show'])->name('show');
+            Route::put('/{id}/status', [AppointmentController::class, 'updateStatus'])->name('updateStatus');
         });
         // Treatment Plans (Kế hoạch điều trị)
         Route::prefix('treatment-plans')
