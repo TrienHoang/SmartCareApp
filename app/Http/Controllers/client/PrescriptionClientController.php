@@ -12,6 +12,7 @@ class PrescriptionClientController extends Controller
 {
     public function index(Request $request)
     {
+           $user = Auth::user();
         $search = $request->input('search');
 
         $appointments = Appointment::with(['medicalRecord', 'doctor.user'])
@@ -29,13 +30,14 @@ class PrescriptionClientController extends Controller
             ->orderBy('appointment_time', 'desc')
             ->get();
 
-        return view('client.prescriptions.index', compact('appointments', 'search'));
+        return view('client.prescriptions.index', compact('appointments', 'search','user'));
     }
 
 
 
     public function show($id)
     {
+          $user = Auth::user();
         $prescription = Prescription::with(['prescriptionItems.medicine', 'doctor.user:id,full_name'])
             ->findOrFail($id);
 
@@ -44,6 +46,6 @@ class PrescriptionClientController extends Controller
             abort(403, 'Không có quyền truy cập đơn thuốc này.');
         }
 
-        return view('client.prescriptions.show', compact('prescription'));
+        return view('client.prescriptions.show', compact('prescription','user'));
     }
 }

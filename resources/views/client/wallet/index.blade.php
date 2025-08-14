@@ -1,8 +1,9 @@
-@extends('client.layouts.app')
+@extends('client.layouts.profile-layout')
 
-@section('title', 'Ví của tôi')
 
-@section('content')
+@section('title', 'Ví')
+
+@section('profile-content')
     <div class="max-w-5xl mx-auto px-4 py-8 space-y-8">
         <!-- Card số dư -->
         <div

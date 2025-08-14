@@ -27,6 +27,7 @@ class ReviewReplyController extends Controller
 
         // dd($request->all());
         try {
+            
             // ✅ Tìm bác sĩ
             $doctor = Doctor::findOrFail($doctorId);
 
@@ -159,6 +160,7 @@ class ReviewReplyController extends Controller
      */
     public function show($id)
     {
+          $user = Auth::user();
         $doctor = Doctor::with('specialty')->findOrFail($id); // load cả chuyên khoa nếu cần
 
         $reviews = Review::where('doctor_id', $doctor->id)
@@ -186,7 +188,8 @@ class ReviewReplyController extends Controller
             'averageRating',
             'reviewCount',
             'userReview',
-            'userReviewEditable'
+            'userReviewEditable',
+            'user'
         ));
     }
 
@@ -197,6 +200,7 @@ class ReviewReplyController extends Controller
      */
     public function index()
     {
+          $user = Auth::user();
         $reviews = Review::where('patient_id', Auth::id())
             ->latest()
             ->get();
@@ -206,6 +210,6 @@ class ReviewReplyController extends Controller
             $review->editable = \Carbon\Carbon::parse($review->created_at)->diffInMinutes(now()) <= 60;
         }
 
-        return view('client.review.index', compact('reviews'));
+        return view('client.review.index', compact('reviews','user'));
     }
 }

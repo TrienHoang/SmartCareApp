@@ -216,7 +216,17 @@
             </div>
         </div>
     </div>
-
+<!-- Nút quay lại ngay sau header -->
+<div class="container mx-auto px-4 pt-6">
+    <a href="{{ route('booking.confirm') }}" class="inline-flex items-center text-blue-700 hover:text-blue-900 mb-4 group">
+        <div class="flex items-center bg-white hover:bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300">
+            <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            <span class="font-semibold">Quay lại xác nhận đặt lịch</span>
+        </div>
+    </a>
+</div>3
     <div class="container mx-auto px-4 section-compact">
         
         {{-- DANH SÁCH MÃ CÓ THỂ DÙNG --}}
@@ -384,7 +394,6 @@
                     </div>
                 </div>
             </div>
-            
             {{-- Modal Content --}}
             <div class="p-6">
                 {{-- Discount Display --}}
@@ -469,6 +478,9 @@
             </div>
         </div>
     </div>
+    <!-- Nút quay lại đẹp với Bootstrap -->
+
+
     
     {{-- Copy Success Notification --}}
     <div :class="{ 'show': showNotification }" class="notification">
