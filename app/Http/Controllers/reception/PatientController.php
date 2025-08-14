@@ -47,9 +47,9 @@ class PatientController extends Controller
                 'phone'          => [
                     'required',
                     'regex:/^(03|05|07|08|09)[0-9]{8}$/',
-                    'unique:patients,phone',
+                    'unique:users,phone',
                 ],
-                'email'          => ['nullable', 'email', 'unique:patients,email'],
+                'email'          => ['nullable', 'email', 'unique:users,email'],
                 'gender' => ['nullable', 'in:Nam,Nữ'],
                 'date_of_birth'  => ['nullable', 'date', 'before:today'],
                 'address'        => ['nullable', 'string', 'max:255'],

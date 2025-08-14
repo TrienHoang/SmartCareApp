@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+@extends('reception.dashboard')
 
 @section('title', 'Chi tiết Chat Session')
 
@@ -22,14 +22,14 @@
                             style="height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; margin-bottom: 15px;">
                             @foreach ($messages as $message)
                                 @php
-                                    $isAdminOrBot = in_array($message->sender_type, ['admin', 'receptionist', 'bot']);
+                                    $isReceptionOrBot = in_array($message->sender_type, ['admin','receptionist', 'bot']);
                                 @endphp
 
                                 <div
-                                    class="message mb-3 d-flex {{ $isAdminOrBot ? 'justify-content-end' : 'justify-content-start' }}">
+                                    class="message mb-3 d-flex {{ $isReceptionOrBot ? 'justify-content-end' : 'justify-content-start' }}">
                                     <div class="message-content" style="max-width: 70%;">
                                         <div
-                                            class="message-bubble p-3 rounded {{ $isAdminOrBot ? 'bg-primary text-white' : 'bg-light' }}">
+                                            class="message-bubble p-3 rounded {{ $isReceptionOrBot ? 'bg-primary text-white' : 'bg-light' }}">
                                             {{ $message->message }}
                                         </div>
                                         <small class="text-muted d-block mt-1">
@@ -50,7 +50,7 @@
                         </div>
 
                         <!-- Reply Form -->
-                        <form action="{{ route('admin.chat.send', $session) }}" method="POST">
+                        <form action="{{ route('receptionist.chat.send', $session->id) }}" method="POST">
                             @csrf
                             <div class="input-group">
                                 <textarea name="message" class="form-control" placeholder="Nhập phản hồi..." rows="2" required></textarea>
@@ -96,7 +96,7 @@
     </div>
 @endsection
 
-@push('scripts')
+{{-- @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Auto scroll to bottom
@@ -106,66 +106,68 @@
             }
 
             let sessionId = document.head.querySelector('meta[name="chat-session-id"]').content;
-            console.log(`🎧 Admin listening to channel: chat-session-${sessionId}`);
+            console.log(`🎧 Reception listening to channel: chat-session-${sessionId}`);
 
-            // ✅ Debug Echo connection
             if (window.Echo && window.Echo.connector) {
-                console.log('✅ Echo available for admin, Pusher state:', window.Echo.connector.pusher.connection
+                console.log('✅ Echo available for reception, Pusher state:', window.Echo.connector.pusher.connection
                     .state);
 
                 const setupListener = () => {
                     window.Echo.private(`chat-session-${sessionId}`)
                         .listen('.chat-message-sent', (e) => {
-                            console.log('📩 Admin received message:', e);
+                            console.log('📩 Reception received message:', e);
 
-                            // Chặn tin nhắn cảm ơn bot lặp lại
+                            // 🚫 Chặn tin nhắn cảm ơn lặp lại
                             if (e.sender_type === 'bot' && e.message.includes("Cảm ơn bạn đã liên hệ")) {
                                 const today = new Date().toISOString().split('T')[0];
-                                const lastThanksDate = localStorage.getItem('lastThanksDate');
+                                const lastThanksDate = localStorage.getItem('lastThanksDateReception');
                                 const receptionistReplied = localStorage.getItem('receptionistReplied') ===
                                     'true';
 
-                                if (receptionistReplied || lastThanksDate === today) return;
+                                if (receptionistReplied) {
+                                    console.log('⏩ Bỏ qua tin cảm ơn vì lễ tân đã trả lời');
+                                    return;
+                                }
 
-                                localStorage.setItem('lastThanksDate', today);
+                                if (lastThanksDate === today) {
+                                    console.log('⏩ Bỏ qua tin cảm ơn vì đã hiển thị hôm nay');
+                                    return;
+                                }
+
+                                localStorage.setItem('lastThanksDateReception', today);
                             }
 
-                            // Nếu lễ tân gửi tin => đánh dấu đã trả lời
+                            // ✅ Đánh dấu nếu lễ tân đã trả lời
                             if (e.sender_type === 'receptionist') {
                                 localStorage.setItem('receptionistReplied', 'true');
                             }
 
-                            // ---- Tạo element tin nhắn ----
+                            // ---- Render tin nhắn ----
                             let chatBoxEl = document.querySelector('.chat-box');
                             if (chatBoxEl) {
                                 let messageDiv = document.createElement('div');
-
-                                // Admin và lễ tân + bot hiển thị bên phải
-                                let isAdminOrReceptionOrBot = ['admin', 'receptionist', 'bot'].includes(e
-                                    .sender_type);
+                                let isReceptionOrBot = ['receptionist', 'bot'].includes(e.sender_type);
 
                                 messageDiv.className =
-                                    `mb-3 flex ${isAdminOrReceptionOrBot ? 'justify-end' : 'justify-start'}`;
+                                    `mb-3 flex ${isReceptionOrBot ? 'justify-end' : 'justify-start'}`;
                                 messageDiv.innerHTML = `
-                        <div class="${isAdminOrReceptionOrBot ? 'bg-blue-500 text-white' : 'bg-light'} px-4 py-2 rounded-lg max-w-xs">
-                            <p class="text-sm">${escapeHtml(e.message)}</p>
-                            <p class="text-xs opacity-75 mt-1">
-                                ${e.sender_type === 'admin' ? 'Admin' :
-                                  e.sender_type === 'bot' ? 'Bot' :
-                                  e.sender_type === 'receptionist' ? 'Lễ tân' : 'Khách hàng'} • vừa xong
-                            </p>
-                        </div>
-                    `;
+            <div class="${isReceptionOrBot ? 'bg-blue-500 text-white' : 'bg-light'} px-4 py-2 rounded-lg max-w-xs">
+                <p class="text-sm">${escapeHtml(e.message)}</p>
+                <p class="text-xs opacity-75 mt-1">
+                    ${e.sender_type === 'receptionist' ? 'Lễ tân' : e.sender_type === 'bot' ? 'Bot' : 'Khách hàng'} • vừa xong
+                </p>
+            </div>
+        `;
                                 chatBoxEl.appendChild(messageDiv);
                                 chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
                                 showNewMessageNotification();
                             }
                         })
                         .subscribed(() => {
-                            console.log('✅ Admin successfully subscribed to channel');
+                            console.log('✅ Reception successfully subscribed to channel');
                         })
                         .error((error) => {
-                            console.error('❌ Admin channel subscription error:', error);
+                            console.error('❌ Reception channel subscription error:', error);
                         });
                 };
 
@@ -175,7 +177,7 @@
                     window.Echo.connector.pusher.connection.bind('connected', setupListener);
                 }
             } else {
-                console.error('❌ Echo not available for admin panel');
+                console.error('❌ Echo not available for reception panel');
             }
 
             // ✅ Helper functions
@@ -186,7 +188,6 @@
             }
 
             function showNewMessageNotification() {
-                // ✅ Visual notification
                 const title = document.title;
                 document.title = '🔔 Tin nhắn mới - ' + title;
 
@@ -194,7 +195,6 @@
                     document.title = title;
                 }, 3000);
 
-                // ✅ Browser notification (nếu được phép)
                 if ('Notification' in window && Notification.permission === 'granted') {
                     new Notification('Tin nhắn mới từ khách hàng', {
                         body: 'Có tin nhắn mới trong chat',
@@ -203,10 +203,9 @@
                 }
             }
 
-            // ✅ Request notification permission
             if ('Notification' in window && Notification.permission === 'default') {
                 Notification.requestPermission();
             }
         });
     </script>
-@endpush
+@endpush --}}

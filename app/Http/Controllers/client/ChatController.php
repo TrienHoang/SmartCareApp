@@ -6,6 +6,7 @@ use App\Events\ChatMessageSent;
 use App\Http\Controllers\Controller;
 use App\Services\ChatService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class ChatController extends Controller
@@ -19,6 +20,9 @@ class ChatController extends Controller
 
     public function startSession(Request $request)
     {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
         $session = $this->chatService->getOrCreateSession(
             $request->session_id,
             $request->only(['name', 'email', 'phone'])
@@ -56,7 +60,7 @@ class ChatController extends Controller
             // Lấy session từ DB (có cả ID số)
             $session = $this->chatService->resolveSession($request->session_id, true);
 
-            broadcast(new ChatMessageSent($request->message, $session->session_id));
+            broadcast(new ChatMessageSent($request->message, $session->session_id, 'user', $session->user_id));
 
             \Log::info('📡 Client gửi lên channel', [
                 'channel' => 'chat-session-' . $session->session_id

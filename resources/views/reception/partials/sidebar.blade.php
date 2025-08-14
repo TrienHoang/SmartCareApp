@@ -47,6 +47,12 @@
                     <div>Lịch làm việc bác sĩ</div>
                 </a>
             </li>
+            <li class="menu-item">
+                <a href="{{ route('receptionist.chat.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-chat"></i>
+                    <div>Chat</div>
+                </a>
+            </li>
         @endif
 
         {{-- Nếu là Admin --}}
