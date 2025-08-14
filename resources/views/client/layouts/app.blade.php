@@ -311,6 +311,11 @@
                 observer.observe(counter);
             });
         });
+        // window.currentUser = {
+        //     id: {{ auth()->id() }},
+        //     name: "{{ auth()->user()->name }}",
+        //     role: "{{ auth()->user()->role }}"
+        // };
     </script>
     @stack('scripts')
 

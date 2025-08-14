@@ -46,7 +46,7 @@ window.Echo.private(`chat-session-${sessionId}`)
             localStorage.setItem('receptionistReplied', 'true');
         }
 
-        appendMessage(e.message, e.sender_type);
+        appendMessage(e.message, e.sender_type, e.sender_name);
         showNewMessageNotification();
 
         // ✅ Cuộn xuống cuối ngay sau khi render
@@ -78,7 +78,7 @@ if (form && input && chatBoxEl) {
 function appendMessage(message, sender) {
     if (!chatBoxEl) return;
 
-    const isReceptionOrBot = ['receptionist', 'bot'].includes(sender);
+    const isReceptionOrBot = ['receptionist', 'bot', 'admin'].includes(sender);
 
     const messageDiv = document.createElement('div');
     messageDiv.className = `mb-3 d-flex ${isReceptionOrBot ? 'justify-content-end' : 'justify-content-start'}`;
@@ -86,7 +86,7 @@ function appendMessage(message, sender) {
         <div class="${isReceptionOrBot ? 'bg-primary text-white' : 'bg-light'} p-3 rounded" style="max-width:70%;">
             ${escapeHtml(message)}
             <small class="text-muted d-block mt-1">
-                ${sender === 'receptionist' ? 'Lễ tân' : sender === 'bot' ? 'Bot' : 'Khách hàng'} • vừa xong
+                ${sender === 'receptionist' ? 'Lễ tân' : sender === 'bot' ? 'Bot' : sender === 'admin' ? 'Admin' : 'Khách hàng'} • vừa xong
             </small>
         </div>
     `;

@@ -22,7 +22,7 @@
                             style="height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; margin-bottom: 15px;">
                             @foreach ($messages as $message)
                                 @php
-                                    $isReceptionOrBot = in_array($message->sender_type, ['receptionist', 'bot']);
+                                    $isReceptionOrBot = in_array($message->sender_type, ['admin','receptionist', 'bot']);
                                 @endphp
 
                                 <div

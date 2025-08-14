@@ -56,7 +56,7 @@ class ChatController extends Controller
             // Lấy session từ DB (có cả ID số)
             $session = $this->chatService->resolveSession($request->session_id, true);
 
-            broadcast(new ChatMessageSent($request->message, $session->session_id));
+            broadcast(new ChatMessageSent($request->message, $session->session_id, 'user', $session->user_id));
 
             \Log::info('📡 Client gửi lên channel', [
                 'channel' => 'chat-session-' . $session->session_id

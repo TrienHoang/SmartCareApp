@@ -22,7 +22,7 @@
                             style="height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; margin-bottom: 15px;">
                             @foreach ($messages as $message)
                                 @php
-                                    $isAdminOrBot = in_array($message->sender_type, ['admin', 'bot']);
+                                    $isAdminOrBot = in_array($message->sender_type, ['admin', 'receptionist', 'bot']);
                                 @endphp
 
                                 <div
@@ -116,28 +116,17 @@
                 const setupListener = () => {
                     window.Echo.private(`chat-session-${sessionId}`)
                         .listen('.chat-message-sent', (e) => {
-                            console.log('📩 Admin received message from user:', e);
+                            console.log('📩 Admin received message:', e);
 
-                            // Chặn tin nhắn cảm ơn bị lặp lại
+                            // Chặn tin nhắn cảm ơn bot lặp lại
                             if (e.sender_type === 'bot' && e.message.includes("Cảm ơn bạn đã liên hệ")) {
                                 const today = new Date().toISOString().split('T')[0];
                                 const lastThanksDate = localStorage.getItem('lastThanksDate');
                                 const receptionistReplied = localStorage.getItem('receptionistReplied') ===
                                     'true';
 
-                                // ❌ Nếu lễ tân đã trả lời rồi => bỏ qua
-                                if (receptionistReplied) {
-                                    console.log('⏩ Bỏ qua tin nhắn cảm ơn vì lễ tân đã trả lời');
-                                    return;
-                                }
+                                if (receptionistReplied || lastThanksDate === today) return;
 
-                                // ❌ Nếu hôm nay đã gửi tin cảm ơn => bỏ qua
-                                if (lastThanksDate === today) {
-                                    console.log('⏩ Bỏ qua tin nhắn cảm ơn vì đã gửi hôm nay');
-                                    return;
-                                }
-
-                                // ✅ Ghi nhận đã gửi hôm nay
                                 localStorage.setItem('lastThanksDate', today);
                             }
 
@@ -146,24 +135,27 @@
                                 localStorage.setItem('receptionistReplied', 'true');
                             }
 
-                            // ---- Tạo element tin nhắn như cũ ----
+                            // ---- Tạo element tin nhắn ----
                             let chatBoxEl = document.querySelector('.chat-box');
                             if (chatBoxEl) {
                                 let messageDiv = document.createElement('div');
-                                let isAdminOrBot = ['admin', 'bot'].includes(e.sender_type);
+
+                                // Admin và lễ tân + bot hiển thị bên phải
+                                let isAdminOrReceptionOrBot = ['admin', 'receptionist', 'bot'].includes(e
+                                    .sender_type);
 
                                 messageDiv.className =
-                                    `mb-3 flex ${isAdminOrBot ? 'justify-end' : 'justify-start'}`;
+                                    `mb-3 flex ${isAdminOrReceptionOrBot ? 'justify-end' : 'justify-start'}`;
                                 messageDiv.innerHTML = `
-            <div class="${isAdminOrBot ? 'bg-blue-500 text-white' : 'bg-light'} px-4 py-2 rounded-lg max-w-xs">
-                <p class="text-sm">${escapeHtml(e.message)}</p>
-                <p class="text-xs opacity-75 mt-1">
-                    ${e.sender_type === 'admin' ? 'Admin' :
-                      e.sender_type === 'bot' ? 'Bot' :
-                      e.sender_type === 'receptionist' ? 'Lễ tân' : 'Khách hàng'} • vừa xong
-                </p>
-            </div>
-        `;
+                        <div class="${isAdminOrReceptionOrBot ? 'bg-blue-500 text-white' : 'bg-light'} px-4 py-2 rounded-lg max-w-xs">
+                            <p class="text-sm">${escapeHtml(e.message)}</p>
+                            <p class="text-xs opacity-75 mt-1">
+                                ${e.sender_type === 'admin' ? 'Admin' :
+                                  e.sender_type === 'bot' ? 'Bot' :
+                                  e.sender_type === 'receptionist' ? 'Lễ tân' : 'Khách hàng'} • vừa xong
+                            </p>
+                        </div>
+                    `;
                                 chatBoxEl.appendChild(messageDiv);
                                 chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
                                 showNewMessageNotification();
@@ -177,7 +169,6 @@
                         });
                 };
 
-                // Setup listener when connection is ready
                 if (window.Echo.connector.pusher.connection.state === 'connected') {
                     setupListener();
                 } else {

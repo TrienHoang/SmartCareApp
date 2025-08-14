@@ -42,7 +42,7 @@ class ReceptionChatController extends Controller
             'message' => $request->message,
         ]);
 
-        broadcast(new ChatMessageSent($request->message, $session->session_id));
+        broadcast(new ChatMessageSent($request->message, $session->session_id, 'receptionist', auth()->user()->name));
         \Log::info('📡 Đã broadcast event', [
             'message' => $request->message,
             'session' => $session->session_id
