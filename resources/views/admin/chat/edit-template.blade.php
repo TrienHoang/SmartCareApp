@@ -25,7 +25,7 @@
                                         <label for="keyword">Từ khóa <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control @error('keyword') is-invalid @enderror"
                                             id="keyword" name="keyword" value="{{ old('keyword', $template->keyword) }}"
-                                            placeholder="Ví dụ: chào hỏi, giá cả, dịch vụ..." required>
+                                            placeholder="Ví dụ: chào hỏi, giá cả, dịch vụ...">
                                         @error('keyword')
                                             <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
                                         @enderror
@@ -35,7 +35,7 @@
                                     <div class="form-group">
                                         <label for="response">Nội dung phản hồi <span class="text-danger">*</span></label>
                                         <textarea class="form-control @error('response') is-invalid @enderror" id="response" name="response" rows="6"
-                                            placeholder="Nhập nội dung phản hồi tự động..." required>{{ old('response', $template->response) }}</textarea>
+                                            placeholder="Nhập nội dung phản hồi tự động...">{{ old('response', $template->response) }}</textarea>
                                         @error('response')
                                             <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
                                         @enderror

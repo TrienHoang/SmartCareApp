@@ -253,9 +253,9 @@
 
 
         <li class="menu-item">
-            <a href="{{ route('admin.chat.index') }}" class="menu-link">
+            <a href="{{ route('admin.chat.templates') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-chat"></i>
-                <div>Chat</div>
+                <div>Hộp Thoại Bệnh Nhân</div>
             </a>
         </li>
 

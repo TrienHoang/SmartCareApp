@@ -83,6 +83,15 @@ class AdminChatController extends Controller
             'priority' => 'integer|min:0|max:10',
             'suggested_services' => 'nullable|array',
             'suggested_services.*' => 'integer|exists:services,id'
+        ], [
+            'keyword.required' => 'Vui lòng nhập từ khóa.',
+            'keyword.unique' => 'Từ khóa đã tồn tại.',
+            'response.required' => 'Vui lòng nhập phản hồi.',
+            'priority.integer' => 'Độ ưu tiên phải là một số nguyên.',
+            'priority.min' => 'Độ ưu tiên phải lớn hơn hoặc bằng 0.',
+            'priority.max' => 'Độ ưu tiên phải nhỏ hơn hoặc bằng 10.',
+            'suggested_services.*.integer' => 'Dịch vụ gợi ý không hợp lệ.',
+            'suggested_services.*.exists' => 'Dịch vụ gợi ý không tồn tại.'
         ]);
 
         $data = $request->only(['keyword', 'response', 'priority']);
@@ -125,6 +134,15 @@ class AdminChatController extends Controller
             'priority' => 'integer|min:0|max:10',
             'suggested_services' => 'nullable|array',
             'suggested_services.*' => 'integer|exists:services,id'
+        ], [
+            'keyword.required' => 'Vui lòng nhập từ khóa.',
+            'keyword.unique' => 'Từ khóa đã tồn tại.',
+            'response.required' => 'Vui lòng nhập phản hồi.',
+            'priority.integer' => 'Độ ưu tiên phải là một số nguyên.',
+            'priority.min' => 'Độ ưu tiên phải lớn hơn hoặc bằng 0.',
+            'priority.max' => 'Độ ưu tiên phải nhỏ hơn hoặc bằng 10.',
+            'suggested_services.*.integer' => 'Dịch vụ gợi ý không hợp lệ.',
+            'suggested_services.*.exists' => 'Dịch vụ gợi ý không tồn tại.'
         ]);
 
         $data = $request->only(['keyword', 'response', 'priority']);

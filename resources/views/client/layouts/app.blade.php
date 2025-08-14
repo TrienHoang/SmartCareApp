@@ -1,3 +1,6 @@
+@php
+    $user = Auth::user();
+@endphp
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -71,114 +74,118 @@
         @yield('content')
     </main>
 
-    <!-- Chatbox UI -->
-    <div id="chatbox-button"
-        class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center cursor-pointer transition-all duration-300 transform hover:scale-105">
-        <i class="fas fa-comments text-2xl"></i>
-        <div id="unread-count"
-            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold hidden">
-            0
-        </div>
-    </div>
-
-    <!-- Enhanced Chatbox Modal -->
-    <div id="chatbox-modal"
-        class="fixed bottom-24 right-6 w-96 max-w-[95vw] bg-white rounded-2xl shadow-2xl border-0 hidden z-50 overflow-hidden">
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                        <i class="fas fa-user-md text-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold text-sm">Trợ lý Y tế SmartCare</h4>
-                        <p class="text-xs text-blue-100">Online • Sẵn sàng tư vấn</p>
-                    </div>
-                </div>
-                <button id="chatbox-close" class="hover:bg-white/10 p-2 rounded-full transition">
-                    <i class="fas fa-times"></i>
-                </button>
+    @if ($user)
+        <!-- Chatbox UI -->
+        <div id="chatbox-button"
+            class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center cursor-pointer transition-all duration-300 transform hover:scale-105">
+            <i class="fas fa-comments text-2xl"></i>
+            <div id="unread-count"
+                class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold hidden">
+                0
             </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div id="quick-actions" class="px-4 py-3 bg-gray-50 border-b">
-            <div class="flex gap-2 flex-wrap">
-                <button
-                    class="quick-action-btn bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs hover:bg-blue-200 transition"
-                    data-message="Hướng dẫn đặt lịch hẹn khám">
-                    📅 Hướng dẫn đặt lịch
-                </button>
-                {{-- <button
+        <!-- Enhanced Chatbox Modal -->
+        <div id="chatbox-modal"
+            class="fixed bottom-24 right-6 w-96 max-w-[95vw] bg-white rounded-2xl shadow-2xl border-0 hidden z-50 overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user-md text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-sm">Trợ lý Y tế SmartCare</h4>
+                            <p class="text-xs text-blue-100">Online • Sẵn sàng tư vấn</p>
+                        </div>
+                    </div>
+                    <button id="chatbox-close" class="hover:bg-white/10 p-2 rounded-full transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div id="quick-actions" class="px-4 py-3 bg-gray-50 border-b">
+                <div class="flex gap-2 flex-wrap">
+                    <button
+                        class="quick-action-btn bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs hover:bg-blue-200 transition"
+                        data-message="Hướng dẫn đặt lịch hẹn khám">
+                        📅 Hướng dẫn đặt lịch
+                    </button>
+                    {{-- <button
                     class="quick-action-btn bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs hover:bg-green-200 transition"
                     data-message="Bảng giá dịch vụ">
                     💰 Bảng giá
                 </button> --}}
-                <button
-                    class="quick-action-btn bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs hover:bg-purple-200 transition"
-                    data-message="Thông tin bác sĩ">
-                    👨‍⚕️ Bác sĩ
-                </button>
-            </div>
-        </div>
-
-        <!-- Chat Content -->
-        <div class="flex flex-col h-96">
-            <div class="flex-1 p-4 space-y-4 overflow-y-auto" id="chatbox-content">
-                <div class="flex items-start gap-3">
-                    <div
-                        class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-robot text-white text-xs"></i>
-                    </div>
-                    <div class="bg-gray-100 p-3 rounded-2xl rounded-tl-sm max-w-[80%]">
-                        <p class="text-sm text-gray-800">
-                            Xin chào! 👋 Tôi là trợ lý ảo của SmartCare.<br>
-                            Tôi có thể hỗ trợ bạn:<br>
-                            • Hướng dẫn Đặt lịch khám<br>
-                            • Tư vấn dịch vụ<br>
-                            • Thông tin bác sĩ<br>
-                            Bạn cần hỗ trợ gì ạ?
-                        </p>
-                    </div>
+                    <button
+                        class="quick-action-btn bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs hover:bg-purple-200 transition"
+                        data-message="Thông tin bác sĩ">
+                        👨‍⚕️ Bác sĩ
+                    </button>
                 </div>
             </div>
 
-            <!-- Typing Indicator -->
-            <div id="typing-indicator" class="px-4 py-2 hidden">
-                <div class="flex items-center gap-2">
-                    <div
-                        class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-robot text-white text-xs"></i>
+            <!-- Chat Content -->
+            <div class="flex flex-col h-96">
+                <div class="flex-1 p-4 space-y-4 overflow-y-auto" id="chatbox-content">
+                    <div class="flex items-start gap-3">
+                        <div
+                            class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-robot text-white text-xs"></i>
+                        </div>
+                        <div class="bg-gray-100 p-3 rounded-2xl rounded-tl-sm max-w-[80%]">
+                            <p class="text-sm text-gray-800">
+                                Xin chào! 👋 Tôi là trợ lý ảo của SmartCare.<br>
+                                Tôi có thể hỗ trợ bạn:<br>
+                                • Hướng dẫn Đặt lịch khám<br>
+                                • Tư vấn dịch vụ<br>
+                                • Thông tin bác sĩ<br>
+                                Bạn cần hỗ trợ gì ạ?
+                            </p>
+                        </div>
                     </div>
-                    <div class="bg-gray-100 p-2 rounded-xl">
-                        <div class="flex gap-1">
-                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s">
-                            </div>
-                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s">
+                </div>
+
+                <!-- Typing Indicator -->
+                <div id="typing-indicator" class="px-4 py-2 hidden">
+                    <div class="flex items-center gap-2">
+                        <div
+                            class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-robot text-white text-xs"></i>
+                        </div>
+                        <div class="bg-gray-100 p-2 rounded-xl">
+                            <div class="flex gap-1">
+                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"
+                                    style="animation-delay: 0.2s">
+                                </div>
+                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"
+                                    style="animation-delay: 0.4s">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Input Area -->
-            <div class="p-4 bg-gray-50 border-t">
-                <div class="flex items-end gap-3">
-                    <div class="flex-1">
-                        <textarea id="chatbox-input" placeholder="Nhập tin nhắn của bạn..." rows="1"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-xl resize-none outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                            style="max-height: 120px;"></textarea>
+                <!-- Input Area -->
+                <div class="p-4 bg-gray-50 border-t">
+                    <div class="flex items-end gap-3">
+                        <div class="flex-1">
+                            <textarea id="chatbox-input" placeholder="Nhập tin nhắn của bạn..." rows="1"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl resize-none outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                style="max-height: 120px;"></textarea>
+                        </div>
+                        <button id="chatbox-send"
+                            class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
                     </div>
-                    <button id="chatbox-send"
-                        class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 
 
     {{-- Footer --}}
