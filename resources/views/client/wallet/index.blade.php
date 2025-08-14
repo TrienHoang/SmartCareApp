@@ -38,11 +38,11 @@
                 @csrf
                 <!-- Số tiền -->
                 <input type="number" name="amount" placeholder="Số tiền cần rút"
-                    class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
 
                 <!-- Ngân hàng -->
                 <select name="bank_name"
-                    class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
                     <option value="">-- Chọn ngân hàng --</option>
                     <option value="Vietcombank">Vietcombank - TMCP Ngoại thương VN</option>
                     <option value="VietinBank">VietinBank - TMCP Công Thương VN</option>
@@ -68,7 +68,7 @@
 
                 <!-- Số tài khoản -->
                 <input type="text" name="bank_account" placeholder="Số tài khoản ngân hàng"
-                    class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
 
                 <!-- Nút submit -->
                 <button type="submit"
@@ -104,7 +104,7 @@
                                 <td class="px-4 py-2">
                                     <span
                                         class="px-2 py-1 text-sm rounded-full
-                                    {{ $t->type === 'deposit' ? 'bg-green-100 text-green-600' : ($t->type === 'withdraw' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600') }}">
+                                        {{ $t->type === 'deposit' || $t->type === 'refund' ? 'bg-green-100 text-green-600' : ($t->type === 'withdraw' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600') }}">
                                         {{ ucfirst($t->type) }}
                                     </span>
                                 </td>
@@ -116,7 +116,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-4 py-4 text-center text-gray-500">
+                                <td colspan="5" class="px-4 py-4 text-center text-gray-500">
                                     Chưa có giao dịch nào
                                 </td>
                             </tr>

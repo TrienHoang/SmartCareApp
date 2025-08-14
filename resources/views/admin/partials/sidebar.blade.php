@@ -253,9 +253,15 @@
 
 
         <li class="menu-item">
-            <a href="{{ route('admin.chat.index') }}" class="menu-link">
+            <a href="{{ route('admin.chat.templates') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-chat"></i>
-                <div>Chat</div>
+                <div>Hộp Thoại Bệnh Nhân</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a href="{{ route('admin.wallet.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-wallet"></i>
+                <div>Quản lý ví</div>
             </a>
         </li>
 

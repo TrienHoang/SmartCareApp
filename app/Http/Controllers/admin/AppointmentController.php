@@ -780,18 +780,26 @@ class AppointmentController extends Controller
         $oldStatus = $appointment->status;
         $appointmentDate = Carbon::parse($appointment->appointment_time);
 
-        if (
-            $request->status === 'completed' &&
-            $appointmentDate->isFuture()
-        ) {
+        if ($request->status === 'completed' && $appointmentDate->isFuture()) {
             return redirect()->back()->withErrors([
                 'status' => 'Không thể hoàn thành lịch hẹn khi thời gian hẹn vẫn còn ở tương lai.'
             ]);
         }
 
+        // Validate symptom_note nếu completed
+        if ($request->status === 'completed') {
+            $request->validate([
+                'symptom_note' => 'required|string',
+            ], [
+                'symptom_note.required' => 'Vui lòng nhập triệu chứng bệnh.',
+            ]);
+        }
+
+        // Cập nhật trạng thái, lý do hủy, triệu chứng
         $appointment->update([
             'status' => $request->status,
-            'cancel_reason' => $request->status === 'cancelled' ? $request->note : null
+            'cancel_reason' => $request->status === 'cancelled' ? $request->note : null,
+            'symptom_note' => $request->status === 'completed' ? $request->symptom_note : null
         ]);
 
         $appointment->logs()->create([

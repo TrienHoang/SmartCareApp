@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+@extends('reception.dashboard')
 
 @section('title', 'Quản lý Chat')
 
@@ -9,9 +9,6 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h3 class="card-title">Danh sách Chat Sessions</h3>
-                        <a href="{{ route('admin.chat.templates') }}" class="btn btn-primary">
-                            <i class="fas fa-cog"></i> Quản lý Templates
-                        </a>
                     </div>
 
                     <div class="card-body">
@@ -30,7 +27,8 @@
                                 <tbody>
                                     @foreach ($sessions as $key => $session)
                                         <tr>
-                                            <td>{{ $loop->iteration + ($sessions->currentPage() - 1) * $sessions->perPage() }}</td>
+                                            <td>{{ $loop->iteration + ($sessions->currentPage() - 1) * $sessions->perPage() }}
+                                            </td>
                                             <td>
                                                 @if ($session->user)
                                                     <strong>{{ $session->user->full_name }}</strong><br>
@@ -59,7 +57,7 @@
                                             </td>
                                             <td>{{ $session->started_at->format('d/m/Y H:i') }}</td>
                                             <td>
-                                                <a href="{{ route('admin.chat.show', $session) }}"
+                                                <a href="{{ route('receptionist.chat.show', $session->id) }}"
                                                     class="btn btn-sm btn-primary">
                                                     <i class="fas fa-eye"></i> Xem
                                                 </a>

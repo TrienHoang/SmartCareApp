@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminWalletController;
 use App\Events\ChatMessageSent;
 use App\Http\Controllers\admin\AdminChatController;
 use App\Http\Controllers\admin\AdminFileController;
@@ -774,15 +775,30 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::resource('shifts', ShiftsController::class);
 });
 
-Route::middleware(['auth', 'checkAdmin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::prefix('chat')->name('chat.')->group(function () {
-        Route::get('/', [AdminChatController::class, 'index'])->name('index');
-        Route::get('/session/{session}', [AdminChatController::class, 'show'])->name('show');
-        Route::post('/session/{session}/send', [AdminChatController::class, 'sendMessage'])->name('send');
-        Route::get('/templates', [AdminChatController::class, 'templates'])->name('templates');
-        Route::get('/templates/create', [AdminChatController::class, 'createTemplate'])->name('templates.create');
-        Route::post('/templates', [AdminChatController::class, 'storeTemplate'])->name('templates.store');
+Route::middleware(['auth', 'checkAdmin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::prefix('chat')->name('chat.')->group(function () {
+            Route::get('/', [AdminChatController::class, 'index'])->name('index');
+            Route::get('/services/search', [AdminChatController::class, 'searchServices'])->name('services.search');
+            Route::get('/session/{session}', [AdminChatController::class, 'show'])->name('show');
+            Route::post('/session/{session}/send', [AdminChatController::class, 'sendMessage'])->name('send');
+            Route::get('/templates', [AdminChatController::class, 'templates'])->name('templates');
+            Route::get('/templates/create', [AdminChatController::class, 'createTemplate'])->name('templates.create');
+            Route::post('/templates', [AdminChatController::class, 'storeTemplate'])->name('templates.store');
+            Route::get('/templates/{template}/edit', [AdminChatController::class, 'editTemplate'])->name('templates.edit');
+            Route::put('/templates/{template}', [AdminChatController::class, 'updateTemplate'])->name('templates.update');
+            Route::delete('/templates/{template}', [AdminChatController::class, 'destroyTemplate'])->name('templates.destroy');
+            Route::post('/templates/{template}/toggle', [AdminChatController::class, 'toggleTemplate'])->name('templates.toggle');
+        });
     });
+
+
+
+Route::middleware(['auth', 'checkAdmin'])->prefix('admin')->group(function () {
+    Route::get('/wallet', [AdminWalletController::class, 'index'])->name('admin.wallet.index');
+    Route::post('/wallet/{transactionId}/update-status', [AdminWalletController::class, 'updateStatus'])->name('admin.wallet.updateStatus');
 });
 
 // Route::get('/test-broadcast', function () {
