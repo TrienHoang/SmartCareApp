@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminWalletController;
 use App\Events\ChatMessageSent;
 use App\Http\Controllers\admin\AdminChatController;
 use App\Http\Controllers\admin\AdminFileController;
@@ -780,6 +781,13 @@ Route::middleware(['auth', 'checkAdmin'])->prefix('admin')->name('admin.')->grou
         Route::get('/templates/create', [AdminChatController::class, 'createTemplate'])->name('templates.create');
         Route::post('/templates', [AdminChatController::class, 'storeTemplate'])->name('templates.store');
     });
+});
+
+
+
+Route::middleware(['auth', 'checkAdmin'])->prefix('admin')->group(function () {
+    Route::get('/wallet', [AdminWalletController::class, 'index'])->name('admin.wallet.index');
+    Route::post('/wallet/{transactionId}/update-status', [AdminWalletController::class, 'updateStatus'])->name('admin.wallet.updateStatus');
 });
 
 // Route::get('/test-broadcast', function () {

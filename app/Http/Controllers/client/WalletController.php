@@ -34,14 +34,17 @@ class WalletController extends Controller
     {
         $request->validate([
             'amount' => 'required|numeric|min:10000',
-            'bank_account' => 'required|string'
+            'bank_account' => 'required|string',
+            'bank_name' => 'required|string'
         ]);
 
         $this->walletService->deductBalance(
             auth()->id(),
             $request->amount,
             'withdraw',
-            'Rút về TK ngân hàng: ' . $request->bank_account
+            'Rút về TK ngân hàng: ' . $request->bank_account . ' (' . $request->bank_name . ')',
+            $request->bank_name,
+            'Chờ xử lý'
         );
 
         return back()->with('success', 'Yêu cầu rút tiền đã được gửi.');
@@ -58,9 +61,27 @@ class WalletController extends Controller
             auth()->id(),
             $request->amount,
             'payment',
-            'Thanh toán đặt lịch khám'
+            'Thanh toán đặt lịch khám',
+            null,
+            'Hoàn thành'
         );
 
         return back()->with('success', 'Thanh toán từ ví thành công.');
+    }
+
+    // Hoàn tiền
+    public function refund(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1000'
+        ]);
+
+        $this->walletService->refundBalance(
+            auth()->id(),
+            $request->amount,
+            'Hoàn tiền cho giao dịch trước đó'
+        );
+
+        return back()->with('success', 'Hoàn tiền đã được thực hiện.');
     }
 }
