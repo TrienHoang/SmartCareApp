@@ -378,6 +378,12 @@ class SmartCareChat {
 document.addEventListener("DOMContentLoaded", function () {
     console.log('🚀 DOM loaded, khởi tạo SmartCareChat...');
 
+    if (!window.isLoggedIn) {
+        console.log('🚫 Người dùng chưa đăng nhập → ẩn chatbox.');
+        document.getElementById('chatbox-button').style.display = 'none';
+        return;
+    }
+
     if (window.Echo && window.Echo.connector) {
         console.log('✅ Echo available, Pusher state:', window.Echo.connector.pusher.connection.state);
 

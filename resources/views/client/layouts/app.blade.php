@@ -1,6 +1,3 @@
-@php
-    $user = Auth::user();
-@endphp
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -74,7 +71,7 @@
         @yield('content')
     </main>
 
-    @if ($user)
+    @auth
         <!-- Chatbox UI -->
         <div id="chatbox-button"
             class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center cursor-pointer transition-all duration-300 transform hover:scale-105">
@@ -158,11 +155,9 @@
                         <div class="bg-gray-100 p-2 rounded-xl">
                             <div class="flex gap-1">
                                 <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"
-                                    style="animation-delay: 0.2s">
+                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s">
                                 </div>
-                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"
-                                    style="animation-delay: 0.4s">
+                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s">
                                 </div>
                             </div>
                         </div>
@@ -185,7 +180,7 @@
                 </div>
             </div>
         </div>
-    @endif
+    @endauth
 
 
     {{-- Footer --}}
@@ -311,11 +306,9 @@
                 observer.observe(counter);
             });
         });
-        // window.currentUser = {
-        //     id: {{ auth()->id() }},
-        //     name: "{{ auth()->user()->name }}",
-        //     role: "{{ auth()->user()->role }}"
-        // };
+    </script>
+    <script>
+        window.isLoggedIn = @json(Auth::check());
     </script>
     @stack('scripts')
 

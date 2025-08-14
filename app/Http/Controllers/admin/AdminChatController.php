@@ -17,6 +17,7 @@ class AdminChatController extends Controller
     public function index()
     {
         $sessions = ChatSession::with(['latestMessage', 'user'])
+            ->whereHas('messages')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
