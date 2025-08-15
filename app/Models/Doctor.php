@@ -110,4 +110,8 @@ class Doctor extends Model
     {
         return $this->belongsToMany(Doctor::class, 'doctor_service', 'service_id', 'doctor_id');
     }
+
+
+
+    
 }

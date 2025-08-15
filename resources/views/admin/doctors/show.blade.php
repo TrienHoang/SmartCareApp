@@ -1,93 +1,63 @@
 @extends('admin.dashboard')
 
-@section('title', 'Chi tiết bác sĩ')
-
 @section('content')
-<style>
-    .card-3d {
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border-radius: 1rem;
-    }
-
-    .card-3d:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-    }
-
-    .btn-3d {
-        transition: all 0.2s ease-in-out;
-        border-radius: 0.5rem;
-    }
-
-    .btn-3d:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-    }
-
-    .info-label {
-        font-weight: 600;
-        color: #0d6efd;
-    }
-
-    .info-value {
-        font-weight: 500;
-        color: #333;
-    }
-
-    .status-badge {
-        font-weight: 600;
-    }
-</style>
-
 <div class="container my-4">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-8">
-            <div class="card card-3d">
-                <div class="card-header bg-primary text-white rounded-top">
-                    <h4 class="mb-0">
-                        👨‍⚕️ Chi tiết bác sĩ: {{ $doctor->user->full_name ?? 'Không rõ' }}
-                    </h4>
-                </div>
+    <h3 class="mb-4">Chi tiết bác sĩ</h3>
 
-                <div class="card-body bg-light">
-                    <div class="mb-3">
-                        <span class="info-label">💼 Chuyên môn:</span>
-                        <span class="info-value">{{ $doctor->specialization }}</span>
-                    </div>
+    <div class="card">
+        <div class="card-body">
+            {{-- Ảnh đại diện --}}
+            <div class="mb-3 text-center">
+                @if($doctor->user->avatar)
+                    <img src="{{ asset('storage/' . $doctor->user->avatar) }}" 
+                         alt="Avatar" class="rounded-circle" 
+                         style="width: 150px; height: 150px; object-fit: cover;">
+                @else
+                    <img src="https://via.placeholder.com/150" 
+                         alt="No Avatar" class="rounded-circle">
+                @endif
+            </div>
 
-                    <div class="mb-3">
-                        <span class="info-label">🏥 Phòng ban:</span>
-                        <span class="info-value">{{ $doctor->department->name ?? 'N/A' }}</span>
-                    </div>
+            {{-- Thông tin cá nhân --}}
+            <table class="table table-bordered">
+                <tr>
+                    <th>Họ và tên</th>
+                    <td>{{ $doctor->user->full_name }}</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>{{ $doctor->user->email }}</td>
+                </tr>
+                <tr>
+                    <th>Phòng ban</th>
+                    <td>{{ $doctor->department->name ?? 'Chưa có phòng ban' }}</td>
+                </tr>
 
-                    {{-- <div class="mb-3">
-                        <span class="info-label">🏨 Phòng khám:</span>
-                        <span class="info-value">{{ $doctor->room->name ?? 'N/A' }}</span>
-                    </div> --}}
-
-                    <div class="mb-3">
-                        <span class="info-label">📝 Tiểu sử:</span>
-                        <div class="info-value">
-                            {{ $doctor->biography ?? 'Không có' }}
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <span class="info-label">📅 Trạng thái hôm nay:</span>
-                        @if ($doctor->isOnLeaveToday())
-                            <span class="text-danger status-badge">Đang nghỉ</span>
+                <tr>
+                    <th>Tiểu sử</th>
+                    <td>{{ $doctor->biography ?? 'Chưa có' }}</td>
+                </tr>
+                <tr>
+                    <th>Dịch vụ</th>
+                    <td>
+                        @if($doctor->services->count() > 0)
+                            @foreach($doctor->services as $service)
+                                <span class="badge bg-info text-dark">{{ $service->name }}</span>
+                            @endforeach
                         @else
-                            <span class="text-success status-badge">Đang làm việc</span>
+                            <span class="text-muted">Chưa có dịch vụ</span>
                         @endif
-                    </div>
+                    </td>
+                </tr>
+            </table>
 
-                    <div class="text-center">
-                        <a href="{{ route('admin.doctors.index') }}" class="btn btn-secondary btn-3d px-4">
-                            ← Quay lại danh sách
-                        </a>
-                    </div>
-                </div>
+            <div class="mt-3 text-end">
+                <a href="{{ route('admin.doctors.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+                </a>
+                <a href="{{ route('admin.doctors.edit', $doctor->id) }}" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i> Chỉnh sửa
+                </a>
             </div>
         </div>
     </div>

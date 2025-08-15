@@ -15,7 +15,7 @@
                             </div>
                             <div>
                                 <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý Bác sĩ</h2>
-                                <p class="text-muted mb-0">Quản lý thông tin bác sĩ và chuyên Khoa trong hệ thống</p>
+                                <p class="text-muted mb-0">Quản lý thông tin bác sĩ và Dịch Vụ trong hệ thống</p>
                             </div>
                         </div>
                         <div class="breadcrumb-wrapper col-12">
@@ -107,7 +107,7 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white mb-0">{{ $doctors->unique('specialization')->count() }}</h4>
-                                    <small class="text-white">Chuyên Khoa </small>
+                                    <small class="text-white">Dịch Vụ</small>
                                 </div>
                             </div>
                         </div>
@@ -164,16 +164,22 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-lg-3 col-md-6 mb-2">
-                                    <label class="form-label font-weight-semibold">
-                                        <i class="bx bx-search mr-1 text-info"></i>Chuyên Khoa
-                                    </label>
-                                    <div class="input-group">
-                                        <input type="text" name="specialization" class="form-control"
-                                               placeholder="Nhập chuyên Khoa..." value="{{ request('specialization') }}">
-                                    </div>
-            
-                                </div>
+<div class="col-lg-3 col-md-6 mb-2">
+    <label class="form-label font-weight-semibold">
+        <i class="bx bx-search mr-1 text-info"></i>Dịch Vụ
+    </label>
+    <div class="input-group">
+        <select name="service_id" class="form-control">
+            <option value="">-- Chọn dịch vụ --</option>
+            @foreach($services as $service)
+                <option value="{{ $service->id }}" {{ request('service_id') == $service->id ? 'selected' : '' }}>
+                    {{ $service->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+</div>
+
                                 <div class="col-lg-3 col-md-6 mb-2">
                                     <label class="form-label font-weight-semibold">
                                         <i class="bx bx-user mr-1 text-success"></i>Tên bác sĩ
@@ -213,7 +219,7 @@
                                         <i class="bx bx-user mr-1"></i>Thông tin bác sĩ
                                     </th>
                                     <th class="border-top-0">
-                                        <i class="bx bx-star mr-1"></i>Chuyên Khoa
+                                        <i class="bx bx-star mr-1"></i>Dịch Vụ
                                     </th>
                                     <th class="border-top-0">
                                         <i class="bx bx-building mr-1"></i>Phòng ban
@@ -263,12 +269,20 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
-                                            <span class="badge badge-info badge-pill">
-                                                <i class="bx bx-star mr-1"></i>
-                                                {{ $doctor->specialization }}
-                                            </span>
-                                        </td>
+<td>
+    @if($doctor->services->isEmpty())
+        <span class="badge badge-info badge-pill">
+            <i class="bx bx-star mr-1"></i> Chưa có dịch vụ
+        </span>
+    @else
+        @foreach($doctor->services as $service)
+            <span class="badge badge-info badge-pill">
+                <i class="bx bx-star mr-1"></i> {{ $service->name }}
+            </span>
+        @endforeach
+    @endif
+</td>
+
                                         <td>
                                             <span class="badge badge-success badge-pill">
                                                 <i class="bx bx-building mr-1"></i>
