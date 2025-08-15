@@ -11,30 +11,22 @@
             /* gray-700 */
             font-weight: 600;
             /* semi-bold */
-            /* Add any other styles you want for labels */
         }
 
         .form-input {
             display: block;
             width: 100%;
             padding: 0.75rem 1rem;
-            /* p-3 p-4 equivalent */
             border-width: 1px;
-            /* border */
             border-color: #e2e8f0;
-            /* border-gray-200 */
             border-radius: 0.5rem;
-            /* rounded-lg */
             font-size: 1rem;
             line-height: 1.5;
-            /* Add focus styles, etc. */
         }
 
         .error-message {
             color: #ef4444;
-            /* red-500 */
             font-size: 0.875rem;
-            /* text-sm */
             margin-top: 0.25rem;
             display: flex;
             align-items: center;
@@ -49,7 +41,6 @@
             font-weight: 600;
             color: #ffffff;
             background-color: #3b82f6;
-            /* blue-500 */
             border: none;
             cursor: pointer;
             transition: background-color 0.2s;
@@ -57,7 +48,6 @@
 
         .btn-primary:hover {
             background-color: #2563eb;
-            /* blue-600 */
         }
 
         .btn-secondary {
@@ -76,11 +66,9 @@
 
         .btn-secondary:hover {
             background-color: #e2e8f0;
-            /* gray-300 */
         }
 
         .floating-element {
-            /* Initial state for animation */
             opacity: 0;
             transform: translateY(20px);
             transition: all 0.6s ease-out;
@@ -92,9 +80,6 @@
     <div class="container mx-auto px-4 py-8 max-w-5xl">
         <div class="page-header">
             <div class="flex items-center justify-center mb-4">
-                {{-- <svg class="w-12 h-12 mr-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                </svg> --}}
                 <h1 class="text-4xl font-bold">Xác nhận đặt lịch khám bệnh</h1>
             </div>
             <p class="text-blue-500 text-lg">Vui lòng kiểm tra thông tin và xác nhận lịch hẹn của bạn</p>
@@ -104,9 +89,6 @@
             <div class="lg:col-span-2 space-y-6">
                 <div class="info-card floating-element">
                     <div class="section-header text-2xl font-bold m-2">
-                        {{-- <svg class="w-6 h-6 mr-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg> --}}
                         Dịch vụ đã chọn
                     </div>
                     <div class="space-y-3">
@@ -188,7 +170,7 @@
 
                     <form action="{{ route('booking.save') }}" method="POST">
                         @csrf
-                        {{-- Hidden fields for booking data --}}
+                        <!-- Hidden fields for booking data -->
                         <input type="hidden" name="service_id" value="{{ $booking_confirm['service_id'] }}">
                         <input type="hidden" name="doctor_id" value="{{ $booking_confirm['doctor_id'] }}">
                         <input type="hidden" name="appointment_time" value="{{ $appointment_time->toDateTimeString() }}">
@@ -318,6 +300,35 @@
                                     </p>
                                 @enderror
                             </div>
+
+                            <!-- Thêm lựa chọn phương thức thanh toán -->
+                            <div class="md:col-span-2">
+                                <label for="payment_method" class="form-label">
+                                    <svg class="w-4 h-4 inline mr-2 text-gray-600" fill="currentColor"
+                                        viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6zm2 2a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm0 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm0 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    Phương thức thanh toán <span class="text-red-500">*</span>
+                                </label>
+                                <select id="payment_method" name="payment_method" class="form-input" required>
+                                    <option value="">Chọn phương thức thanh toán</option>
+                                    <option value="vnpay">Thanh toán qua VNPay</option>
+                                    <option value="wallet">Thanh toán qua Ví</option>
+                                    <!-- Có thể thêm phương thức khác nếu cần -->
+                                </select>
+                                @error('payment_method')
+                                    <p class="error-message">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
                         </div>
 
                         <div class="flex flex-col sm:flex-row gap-4 justify-between pt-6 border-t-2 border-gray-100">
@@ -331,7 +342,7 @@
                                 Quay lại chỉnh sửa
                             </a>
                             <button type="submit" class="btn-primary w-full sm:w-auto">
-                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 0 20 20">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd"
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                         clip-rule="evenodd" />
@@ -431,7 +442,7 @@
                                 </p>
                             </div>
 
-                            {{-- Nút chọn mã giảm giá (cập nhật) --}}
+                            <!-- Giữ nguyên mục chọn mã giảm giá -->
                             <div class="mb-6">
                                 @if (session('selected_promotion_code'))
                                     <div class="flex items-center space-x-3">
@@ -463,7 +474,6 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Add floating animation to cards on scroll
             const observerOptions = {
                 threshold: 0.1,
                 rootMargin: '0px 0px -50px 0px'
@@ -478,7 +488,6 @@
                 });
             }, observerOptions);
 
-            // Observe all floating elements
             document.querySelectorAll('.floating-element').forEach(el => {
                 el.style.opacity = '0';
                 el.style.transform = 'translateY(20px)';
@@ -486,18 +495,14 @@
                 observer.observe(el);
             });
 
-            // Form submission loading state
             const form = document.querySelector('form');
             const submitBtn = form.querySelector('button[type="submit"]');
 
             form.addEventListener('submit', function(e) {
-                // Optional: Basic client-side validation before showing loading
-                // You might already have server-side validation, but this enhances UX
                 let isValid = true;
                 form.querySelectorAll('[required]').forEach(input => {
                     if (!input.value) {
                         isValid = false;
-                        // Add some visual feedback for invalid fields (e.g., red border)
                         input.classList.add('border-red-500', 'ring-red-200');
                     } else {
                         input.classList.remove('border-red-500', 'ring-red-200');
@@ -505,8 +510,7 @@
                 });
 
                 if (!isValid) {
-                    e.preventDefault(); // Prevent form submission if not valid
-                    // Scroll to the first invalid element if needed
+                    e.preventDefault();
                     const firstInvalid = form.querySelector(':invalid');
                     if (firstInvalid) {
                         firstInvalid.scrollIntoView({
