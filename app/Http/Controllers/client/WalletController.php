@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class WalletController extends Controller
 {
@@ -18,6 +19,7 @@ class WalletController extends Controller
     // Xem ví và lịch sử giao dịch
     public function index()
     {
+          $user = Auth::user();
         $wallet = auth()->user()
             ->wallet()
             ->with('transactions')
@@ -26,7 +28,7 @@ class WalletController extends Controller
                 ['balance' => 0]             // nếu tạo mới
             );
 
-        return view('client.wallet.index', compact('wallet'));
+        return view('client.wallet.index', compact('wallet','user'));
     }
 
     // Rút tiền

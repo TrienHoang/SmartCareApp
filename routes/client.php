@@ -217,6 +217,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/promotions', [PromotionController::class, 'index'])->name('client.promotions.index');
     Route::post('/promotions/apply/{promotion}', [PromotionController::class, 'apply'])->name('client.promotions.apply');
     Route::post('/promotions/remove', [PromotionController::class, 'remove'])->name('client.promotions.remove');
+
 });
 Route::prefix('wallet')->middleware(['auth'])->group(function () {
     Route::get('/', [WalletController::class, 'index'])->name('client.wallet.index');

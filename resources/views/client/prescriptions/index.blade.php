@@ -1,258 +1,176 @@
-@extends('client.layouts.app') {{-- Đảm bảo layout chính của bạn có @yield('content') --}}
+@extends('client.layouts.profile-layout')
 
-@section('title', 'Danh Sách Đơn Thuốc') {{-- Đặt tiêu đề cho trang này --}}
 
-@section('content')
-    <div class="min-h-screen bg-gray-50 py-12"> {{-- Bao bọc toàn bộ nội dung trong một container chính --}}
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col lg:flex-row gap-8">
-                {{-- Sidebar: KHÔNG THAY ĐỔI, GIỮ NGUYÊN TỪ LAYOUT CHUNG --}}
-                <div class="lg:w-1/4">
-                    <div class="bg-white rounded-xl shadow-lg p-6 sticky top-6">
-                        {{-- Profile Avatar --}}
-                        <div class="text-center mb-8">
-                            <div class="relative inline-block">
-                                <img id="profile-avatar" src="{{ auth()->user()->avatar ?? '/images/default-avatar.png' }}"
-                                    alt="Avatar"
-                                    class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-100 object-cover">
-                                <button onclick="openAvatarModal()"
-                                    class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 hover:bg-blue-700 transition-colors shadow-lg">
-                                    <i data-lucide="camera" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                            <h3 class="text-xl font-bold mb-2">{{ auth()->user()->name ?? 'Người dùng' }}</h3>
-                            <p class="text-gray-600">{{ auth()->user()->email ?? 'email@example.com' }}</p>
-                        </div>
+@section('title', 'Danh sách đơn thuốc')
 
-                        {{-- Menu --}}
-                        <nav class="space-y-2">
-                            <a href="{{ route('client.profile.show') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="user" class="w-5 h-5"></i>
-                                <span>Thông Tin Cá Nhân</span>
-                            </a>
-                            <a href="{{ route('client.appointments.history') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="calendar" class="w-5 h-5"></i>
-                                <span>Lịch Sử Khám</span>
-                            </a>
+@section('profile-content')
+    <div class="lg:w-3/4">
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            {{-- Bắt đầu mã "Danh Sách Đơn Thuốc" --}}
+            <div class="prescription-list-container">
+                {{-- Thanh tìm kiếm --}}
+                <form method="GET" action="{{ route('client.prescriptions.index') }}" class="mb-4 w-full max-w-xl">
+                    <div class="flex gap-2 items-center">
+                        {{-- Ô tìm kiếm --}}
+                        <input type="text" name="search" value="{{ request('search') }}"
+                            placeholder="Tìm bác sĩ, triệu chứng hoặc chẩn đoán"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300 text-sm">
+
+                        {{-- Nút tìm kiếm --}}
+                        <button type="submit"
+                            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm flex items-center gap-1">
+                            <i class="fas fa-search"></i>
+                            <span>Tìm Kiếm</span>
+                        </button>
+
+                        {{-- Nút reset, chỉ hiển thị nếu đang có từ khoá tìm kiếm --}}
+                        @if (request('search'))
                             <a href="{{ route('client.prescriptions.index') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 text-blue-600 border-l-4 border-blue-600">
-                                <i data-lucide="clipboard-list" class="w-5 h-5"></i>
-                                <span class="font-semibold">Đơn Thuốc</span>
+                                class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm flex items-center gap-1">
+                                <i class="fas fa-times"></i>
+                                <span>Reset</span>
                             </a>
-                            <a href="{{ route('client.appointments.index') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="clock" class="w-5 h-5"></i>
-                                <span>Lịch Hẹn</span>
-                            </a>
-                            <a href="#ho-so-y-te"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="file-text" class="w-5 h-5"></i>
-                                <span>Hồ Sơ Y Tế</span>
-                            </a>
-                            <a href="{{ route('client.uploads.index') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="upload" class="w-5 h-5"></i>
-                                <span>Upload File</span>
-                            </a>
-                            <a href="{{ route('client.notifications.index') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="bell" class="w-5 h-5"></i>
-                                <span>Thông Báo</span>
-                                @php
-                                    $currentUnreadCount = $notifications
-                                        ->where('userStatuses.0.is_read', false)
-                                        ->count();
-                                @endphp
-                                @if ($currentUnreadCount > 0)
-                                    <span id="unreadCount"
-                                        class="ml-2 px-2 py-0.5 bg-red-500 text-white rounded-full text-xs font-semibold">
-                                        {{ $currentUnreadCount }}
-                                    </span>
-                                @endif
-                            </a>
-                            <a href="#cai-dat"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="settings" class="w-5 h-5"></i>
-                                <span>Cài Đặt</span>
-                            </a>
-                        </nav>
+                        @endif
+                    </div>
+                </form>
+
+
+
+
+                {{-- Header --}}
+                <div class="page-header" style="background: none; padding: 0; margin-bottom: 0;">
+                    <div class="container-fluid" style="padding: 0;">
+                        <div class="header-content" style="gap: 1rem;">
+                            <div class="header-info">
+                                <h1 class="page-title" style="font-size: 2rem; margin-bottom: 0;color:#4338ca">
+                                    <i class="fas fa-prescription-bottle-alt"></i>
+                                    Danh Sách Đơn Thuốc
+                                </h1>
+                                <p class="page-subtitle" style="font-size: 0.9rem;">Quản lý và theo dõi các đơn
+                                    thuốc của bạn</p>
+                            </div>
+                            <div class="header-stats">
+                                <div class="stat-item" style="background: none; padding: 0;">
+                                    <span class="stat-number text-indigo-600">{{ count($appointments) }}</span>
+                                    <span class="stat-label text-gray-500">Lịch khám</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Main Content: Dán mã giao diện "Danh Sách Đơn Thuốc" của bạn vào đây --}}
-                <div class="lg:w-3/4">
-                    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
-                        {{-- Bắt đầu mã "Danh Sách Đơn Thuốc" --}}
-                        <div class="prescription-list-container">
-                            {{-- Thanh tìm kiếm --}}
-                            <form method="GET" action="{{ route('client.prescriptions.index') }}"
-                                class="mb-4 w-full max-w-xl">
-                                <div class="flex gap-2 items-center">
-                                    {{-- Ô tìm kiếm --}}
-                                    <input type="text" name="search" value="{{ request('search') }}"
-                                        placeholder="Tìm bác sĩ, triệu chứng hoặc chẩn đoán"
-                                        class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300 text-sm">
-
-                                    {{-- Nút tìm kiếm --}}
-                                    <button type="submit"
-                                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm flex items-center gap-1">
-                                        <i class="fas fa-search"></i>
-                                        <span>Tìm Kiếm</span>
-                                    </button>
-
-                                    {{-- Nút reset, chỉ hiển thị nếu đang có từ khoá tìm kiếm --}}
-                                    @if (request('search'))
-                                        <a href="{{ route('client.prescriptions.index') }}"
-                                            class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm flex items-center gap-1">
-                                            <i class="fas fa-times"></i>
-                                            <span>Reset</span>
-                                        </a>
-                                    @endif
+                {{-- Nội dung --}}
+                <div class="container-fluid p-0">
+                    <div class="appointments-grid p-0">
+                        @forelse($appointments as $appointment)
+                            <div class="appointment-card">
+                                <div class="doctor-info">
+                                    <div class="doctor-avatar">
+                                        <i class="fas fa-user-md"></i>
+                                    </div>
+                                    <div class="doctor-details">
+                                        <h3 class="doctor-name">
+                                            {{ $appointment->doctor->user->full_name ?? 'Không xác định' }}
+                                        </h3>
+                                        <p class="doctor-role">Bác sĩ khám bệnh</p>
+                                    </div>
                                 </div>
-                            </form>
 
-
-
-
-                            {{-- Header --}}
-                            <div class="page-header" style="background: none; padding: 0; margin-bottom: 0;">
-                                <div class="container-fluid" style="padding: 0;">
-                                    <div class="header-content" style="gap: 1rem;">
-                                        <div class="header-info">
-                                            <h1 class="page-title" style="font-size: 2rem; margin-bottom: 0;color:#4338ca">
-                                                <i class="fas fa-prescription-bottle-alt"></i>
-                                                Danh Sách Đơn Thuốc
-                                            </h1>
-                                            <p class="page-subtitle" style="font-size: 0.9rem;">Quản lý và theo dõi các đơn
-                                                thuốc của bạn</p>
+                                <div class="appointment-info">
+                                    <div class="info-row">
+                                        <div class="info-item">
+                                            <i class="fas fa-calendar-check"></i>
+                                            <span>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('d/m/Y - H:i') }}</span>
                                         </div>
-                                        <div class="header-stats">
-                                            <div class="stat-item" style="background: none; padding: 0;">
-                                                <span class="stat-number text-indigo-600">{{ count($appointments) }}</span>
-                                                <span class="stat-label text-gray-500">Lịch khám</span>
-                                            </div>
+                                        <div class="status-badge completed">
+                                            <i class="fas fa-check-circle"></i>
+                                            Đã khám
                                         </div>
                                     </div>
                                 </div>
+
+                                {{-- Triệu chứng --}}
+                                @if ($appointment->medicalRecord && $appointment->medicalRecord->symptoms)
+                                    <div class="medical-detail-section">
+                                        <div class="section-header">
+                                            <h4 class="section-title">Triệu chứng</h4>
+                                        </div>
+                                        <p class="medical-text">{{ $appointment->medicalRecord->symptoms }}
+                                        </p>
+                                    </div>
+                                @endif
+
+                                {{-- Chẩn đoán --}}
+                                @if ($appointment->medicalRecord && $appointment->medicalRecord->diagnosis)
+                                    <div class="medical-detail-section">
+                                        <div class="section-header">
+                                            <h4 class="section-title">Chẩn đoán</h4>
+                                        </div>
+                                        <p class="medical-text">{{ $appointment->medicalRecord->diagnosis }}
+                                        </p>
+                                    </div>
+                                @endif
+
+                                {{-- Đơn thuốc --}}
+                                @if ($appointment->medicalRecord && count($appointment->medicalRecord->prescriptions))
+                                    <div class="prescriptions-section">
+                                        <div class="section-header">
+                                            <h4 class="section-title">Đơn thuốc</h4>
+                                            <span
+                                                class="prescription-count">{{ count($appointment->medicalRecord->prescriptions) }}
+                                                đơn</span>
+                                        </div>
+
+                                        <div class="prescriptions-list">
+                                            @foreach ($appointment->medicalRecord->prescriptions as $index => $prescription)
+                                                <div class="prescription-item">
+                                                    <div class="prescription-info">
+                                                        <div class="prescription-id">
+                                                            <span class="id-badge">{{ $index + 1 }}</span>
+                                                            <span class="id-text">Đơn
+                                                                #{{ $prescription->id }}</span>
+                                                        </div>
+                                                        <div class="prescription-date">
+                                                            <i class="fas fa-calendar"></i>
+                                                            {{ \Carbon\Carbon::parse($prescription->created_at)->format('d/m/Y') }}
+                                                        </div>
+                                                    </div>
+                                                    <a href="{{ route('client.prescriptions.show', $prescription->id) }}"
+                                                        class="view-btn">
+                                                        <i class="fas fa-eye"></i>
+                                                        Chi tiết
+                                                    </a>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="no-prescription">
+                                        <div class="no-prescription-icon">
+                                            <i class="fas fa-hourglass-half"></i>
+                                        </div>
+                                        <div class="no-prescription-text">
+                                            <h4>Chưa có đơn thuốc</h4>
+                                            <p>Đơn thuốc sẽ được tạo sau khi bác sĩ hoàn thành khám</p>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
-
-                            {{-- Nội dung --}}
-                            <div class="container-fluid p-0">
-                                <div class="appointments-grid p-0">
-                                    @forelse($appointments as $appointment)
-                                        <div class="appointment-card">
-                                            <div class="doctor-info">
-                                                <div class="doctor-avatar">
-                                                    <i class="fas fa-user-md"></i>
-                                                </div>
-                                                <div class="doctor-details">
-                                                    <h3 class="doctor-name">
-                                                        {{ $appointment->doctor->user->full_name ?? 'Không xác định' }}
-                                                    </h3>
-                                                    <p class="doctor-role">Bác sĩ khám bệnh</p>
-                                                </div>
-                                            </div>
-
-                                            <div class="appointment-info">
-                                                <div class="info-row">
-                                                    <div class="info-item">
-                                                        <i class="fas fa-calendar-check"></i>
-                                                        <span>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('d/m/Y - H:i') }}</span>
-                                                    </div>
-                                                    <div class="status-badge completed">
-                                                        <i class="fas fa-check-circle"></i>
-                                                        Đã khám
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {{-- Triệu chứng --}}
-                                            @if ($appointment->medicalRecord && $appointment->medicalRecord->symptoms)
-                                                <div class="medical-detail-section">
-                                                    <div class="section-header">
-                                                        <h4 class="section-title">Triệu chứng</h4>
-                                                    </div>
-                                                    <p class="medical-text">{{ $appointment->medicalRecord->symptoms }}
-                                                    </p>
-                                                </div>
-                                            @endif
-
-                                            {{-- Chẩn đoán --}}
-                                            @if ($appointment->medicalRecord && $appointment->medicalRecord->diagnosis)
-                                                <div class="medical-detail-section">
-                                                    <div class="section-header">
-                                                        <h4 class="section-title">Chẩn đoán</h4>
-                                                    </div>
-                                                    <p class="medical-text">{{ $appointment->medicalRecord->diagnosis }}
-                                                    </p>
-                                                </div>
-                                            @endif
-
-                                            {{-- Đơn thuốc --}}
-                                            @if ($appointment->medicalRecord && count($appointment->medicalRecord->prescriptions))
-                                                <div class="prescriptions-section">
-                                                    <div class="section-header">
-                                                        <h4 class="section-title">Đơn thuốc</h4>
-                                                        <span
-                                                            class="prescription-count">{{ count($appointment->medicalRecord->prescriptions) }}
-                                                            đơn</span>
-                                                    </div>
-
-                                                    <div class="prescriptions-list">
-                                                        @foreach ($appointment->medicalRecord->prescriptions as $index => $prescription)
-                                                            <div class="prescription-item">
-                                                                <div class="prescription-info">
-                                                                    <div class="prescription-id">
-                                                                        <span class="id-badge">{{ $index + 1 }}</span>
-                                                                        <span class="id-text">Đơn
-                                                                            #{{ $prescription->id }}</span>
-                                                                    </div>
-                                                                    <div class="prescription-date">
-                                                                        <i class="fas fa-calendar"></i>
-                                                                        {{ \Carbon\Carbon::parse($prescription->created_at)->format('d/m/Y') }}
-                                                                    </div>
-                                                                </div>
-                                                                <a href="{{ route('client.prescriptions.show', $prescription->id) }}"
-                                                                    class="view-btn">
-                                                                    <i class="fas fa-eye"></i>
-                                                                    Chi tiết
-                                                                </a>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <div class="no-prescription">
-                                                    <div class="no-prescription-icon">
-                                                        <i class="fas fa-hourglass-half"></i>
-                                                    </div>
-                                                    <div class="no-prescription-text">
-                                                        <h4>Chưa có đơn thuốc</h4>
-                                                        <p>Đơn thuốc sẽ được tạo sau khi bác sĩ hoàn thành khám</p>
-                                                    </div>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    @empty
-                                        <div class="empty-state">
-                                            <div class="empty-icon">
-                                                <i class="fas fa-prescription-bottle-alt"></i>
-                                            </div>
-                                            <div class="empty-content">
-                                                <h3>Chưa có lịch khám nào</h3>
-                                                <p>Bạn chưa có lịch khám nào để hiển thị đơn thuốc</p>
-                                                <a href="#" class="cta-btn">
-                                                    <i class="fas fa-plus"></i>
-                                                    Đặt lịch khám
-                                                </a>
-                                            </div>
-                                        </div>
-                                    @endforelse
+                        @empty
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fas fa-prescription-bottle-alt"></i>
+                                </div>
+                                <div class="empty-content">
+                                    <h3>Chưa có lịch khám nào</h3>
+                                    <p>Bạn chưa có lịch khám nào để hiển thị đơn thuốc</p>
+                                    <a href="#" class="cta-btn">
+                                        <i class="fas fa-plus"></i>
+                                        Đặt lịch khám
+                                    </a>
                                 </div>
                             </div>
-                        </div>
+                        @endforelse
                     </div>
                 </div>
             </div>

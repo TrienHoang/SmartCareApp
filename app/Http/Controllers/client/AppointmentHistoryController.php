@@ -30,7 +30,7 @@ class AppointmentHistoryController extends Controller
             ->orderByDesc('appointment_time')
             ->get();
 
-        return view('client.appointments.history', compact('appointments'));
+        return view('client.appointments.history', compact('appointments','user'));
     }
 
     /**
@@ -38,6 +38,7 @@ class AppointmentHistoryController extends Controller
      */
     public function show($id)
     {
+         $user = Auth::user();
         $appointment = Appointment::with([
             'doctor.user',
             'service',
@@ -54,6 +55,6 @@ class AppointmentHistoryController extends Controller
                 ->withErrors(['not_found' => 'Không tìm thấy cuộc hẹn hoặc bạn không có quyền xem.']);
         }
 
-        return view('client.appointments.detail', compact('appointment'));
+        return view('client.appointments.detail', compact('appointment','user'));
     }
 }
