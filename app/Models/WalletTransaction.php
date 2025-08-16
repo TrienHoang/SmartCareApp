@@ -9,7 +9,7 @@ class WalletTransaction extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['wallet_id', 'type', 'amount', 'description', 'bank_name', 'status'];
+    protected $fillable = ['wallet_id', 'type', 'amount', 'description', 'bank_name', 'status', 'account_holder_name', 'account_number'];
 
     // Quan hệ với ví
     public function wallet()
