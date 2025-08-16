@@ -17,6 +17,10 @@ class AdminChatController extends Controller
     public function index()
     {
         $sessions = ChatSession::with(['latestMessage', 'user'])
+            ->withCount(['messages as unread_count' => function ($q) {
+                $q->where('is_read', 0)
+                    ->whereIn('sender_type', ['user', 'bot']);
+            }])
             ->whereHas('messages')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
@@ -26,6 +30,12 @@ class AdminChatController extends Controller
 
     public function show(ChatSession $session)
     {
+        // Đánh dấu tin nhắn chưa đọc thành đã đọc
+        $session->messages()
+            ->where('is_read', 0)
+            ->whereIn('sender_type', ['user', 'bot'])
+            ->update(['is_read' => 1]);
+            
         $messages = $session->messages()
             ->with('sender')
             ->orderBy('created_at')
