@@ -22,39 +22,48 @@ class DoctorController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Doctor::whereHas('user', function ($q) {
-            $q->where('role_id', 2);
-        })->with(['user', 'department', 'room']);
+$query = Doctor::whereHas('user', function ($q) use ($request) {
+    $q->where('role_id', 2);
 
+    // Nếu có từ khóa tìm kiếm
+    if ($request->filled('search')) {
+        $q->where('full_name', 'like', '%' . $request->search . '%');
+    }
+})->with(['user', 'department', 'room', 'services']);
+
+        // Lọc theo phòng ban
         if ($request->filled('department_id')) {
             $query->where('department_id', $request->department_id);
         }
 
-        if ($request->filled('specialization')) {
-            $query->where('specialization', 'like', '%' . $request->specialization . '%');
+        // Lọc theo dịch vụ
+        if ($request->filled('service_id')) {
+            $query->whereHas('services', function ($q) use ($request) {
+                $q->where('services.id', $request->service_id);
+            });
         }
 
         $doctors = $query->paginate(10);
         $departments = Department::all();
-            $services = Service::all(); // Lấy danh sách dịch vụ
+        $services = Service::all();
 
-
-    return view('admin.doctors.index', compact('doctors', 'departments', 'services'));
+        return view('admin.doctors.index', compact('doctors', 'departments', 'services'));
     }
 
-public function create()
-{
-    $existingDoctorUserIds = Doctor::pluck('user_id')->toArray();
 
-    $availableUsers = User::where('role_id', 2)
-        ->whereNotIn('id', $existingDoctorUserIds)
-        ->get();
+    public function create()
+    {
+        $existingDoctorUserIds = Doctor::pluck('user_id')->toArray();
 
-    $departments = Department::all();
-    $services = Service::where('status', 'active')->orderBy('name')->get(); // 👈 sửa ở đây
+        $availableUsers = User::where('role_id', 2)
+            ->whereNotIn('id', $existingDoctorUserIds)
+            ->get();
 
-    return view('admin.doctors.create', compact('availableUsers', 'departments', 'services'));
-}
+        $departments = Department::all();
+        $services = Service::where('status', 'active')->orderBy('name')->get(); // 👈 sửa ở đây
+
+        return view('admin.doctors.create', compact('availableUsers', 'departments', 'services'));
+    }
 
 
 
@@ -74,60 +83,60 @@ public function create()
         ]);
     }
 
-public function store(Request $request)
-{
-    $request->validate([
-        'full_name'       => 'required|string|max:100',
-        'username'        => 'required|string|max:50|unique:users,username',
-        'email'           => 'required|email|unique:users,email',
-        'password'        => 'required|string|min:6',
-        'avatar'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'department_id'   => 'required|exists:departments,id',
-        'service_id'      => 'required|exists:services,id', // sửa từ service_ids sang service_id
-    ], [
-        'full_name.required'     => 'Họ và tên không được để trống.',
-        'username.required'      => 'Tên đăng nhập không được để trống.',
-        'username.unique'        => 'Tên đăng nhập đã tồn tại.',
-        'email.required'         => 'Email không được để trống.',
-        'email.email'            => 'Email không hợp lệ.',
-        'email.unique'           => 'Email đã tồn tại.',
-        'password.required'      => 'Mật khẩu không được để trống.',
-        'password.min'           => 'Mật khẩu phải có ít nhất :min ký tự.',
-        'avatar.image'           => 'Ảnh đại diện phải là hình ảnh.',
-        'avatar.mimes'           => 'Ảnh đại diện phải có định dạng: jpeg, png, jpg, gif.',
-        'department_id.required' => 'Vui lòng chọn phòng ban.',
-        'department_id.exists'   => 'Phòng ban đã chọn không hợp lệ.',
-        'service_id.required'    => 'Vui lòng chọn dịch vụ.',
-        'service_id.exists'      => 'Dịch vụ đã chọn không hợp lệ.',
-    ]);
+    public function store(Request $request)
+    {
+        $request->validate([
+            'full_name'       => 'required|string|max:100',
+            'username'        => 'required|string|max:50|unique:users,username',
+            'email'           => 'required|email|unique:users,email',
+            'password'        => 'required|string|min:6',
+            'avatar'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'department_id'   => 'required|exists:departments,id',
+            'service_id'      => 'required|exists:services,id', // sửa từ service_ids sang service_id
+        ], [
+            'full_name.required'     => 'Họ và tên không được để trống.',
+            'username.required'      => 'Tên đăng nhập không được để trống.',
+            'username.unique'        => 'Tên đăng nhập đã tồn tại.',
+            'email.required'         => 'Email không được để trống.',
+            'email.email'            => 'Email không hợp lệ.',
+            'email.unique'           => 'Email đã tồn tại.',
+            'password.required'      => 'Mật khẩu không được để trống.',
+            'password.min'           => 'Mật khẩu phải có ít nhất :min ký tự.',
+            'avatar.image'           => 'Ảnh đại diện phải là hình ảnh.',
+            'avatar.mimes'           => 'Ảnh đại diện phải có định dạng: jpeg, png, jpg, gif.',
+            'department_id.required' => 'Vui lòng chọn phòng ban.',
+            'department_id.exists'   => 'Phòng ban đã chọn không hợp lệ.',
+            'service_id.required'    => 'Vui lòng chọn dịch vụ.',
+            'service_id.exists'      => 'Dịch vụ đã chọn không hợp lệ.',
+        ]);
 
-    $avatarPath = null;
-    if ($request->hasFile('avatar')) {
-        $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        $avatarPath = null;
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $user = User::create([
+            'full_name' => $request->full_name,
+            'username'  => $request->username,
+            'email'     => $request->email,
+            'password'  => Hash::make($request->password),
+            'role_id'   => 2,
+            'avatar'    => $avatarPath,
+            'status'    => 'online',
+        ]);
+
+        $doctor = Doctor::create([
+            'user_id'       => $user->id,
+            'department_id' => $request->department_id,
+            'biography'     => $request->biography,
+        ]);
+
+        // Gán một dịch vụ cho bác sĩ
+        $doctor->services()->attach([$request->service_id]);
+
+
+        return redirect()->route('admin.doctors.index')->with('success', 'Đã thêm bác sĩ mới thành công.');
     }
-
-    $user = User::create([
-        'full_name' => $request->full_name,
-        'username'  => $request->username,
-        'email'     => $request->email,
-        'password'  => Hash::make($request->password),
-        'role_id'   => 2,
-        'avatar'    => $avatarPath,
-        'status'    => 'online',
-    ]);
-
-    $doctor = Doctor::create([
-        'user_id'       => $user->id,
-        'department_id' => $request->department_id,
-        'biography'     => $request->biography,
-    ]);
-
-    // Gán một dịch vụ cho bác sĩ
-    $doctor->services()->attach([$request->service_id]);
-    
-
-    return redirect()->route('admin.doctors.index')->with('success', 'Đã thêm bác sĩ mới thành công.');
-}
 
 
 
@@ -149,59 +158,59 @@ public function store(Request $request)
         return $username;
     }
 
-public function edit(Doctor $doctor)
-{
-    $departments = Department::all();
-    $services = Service::where('status', 'active')->orderBy('name')->get();
-    $selectedServiceIds = $doctor->services()->pluck('services.id')->toArray();
+    public function edit(Doctor $doctor)
+    {
+        $departments = Department::all();
+        $services = Service::where('status', 'active')->orderBy('name')->get();
+        $selectedServiceIds = $doctor->services()->pluck('services.id')->toArray();
 
-    return view('admin.doctors.edit', compact('doctor', 'departments', 'services', 'selectedServiceIds'));
-}
-
-public function update(Request $request, Doctor $doctor)
-{
-    $request->validate([
-        'full_name'       => 'required|string|max:100',
-        'email'           => 'required|email|unique:users,email,' . $doctor->user_id,
-        'avatar'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'department_id'   => 'required|exists:departments,id',
-        'service_id'      => 'required|exists:services,id', // chỉ 1 dịch vụ
-        'specialization'  => 'nullable|string|max:100',
-        'biography'       => 'nullable|string|max:1000',
-    ]);
-
-    try {
-        DB::beginTransaction();
-
-        $avatarPath = $doctor->user->avatar;
-        if ($request->hasFile('avatar')) {
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
-        }
-
-        $doctor->user->update([
-            'full_name' => $request->full_name,
-            'email'     => $request->email,
-            'avatar'    => $avatarPath,
-        ]);
-
-        $doctor->update([
-            'department_id'  => $request->department_id,
-            'specialization' => $request->specialization,
-            'biography'      => $request->biography,
-        ]);
-
-        // Cập nhật dịch vụ (many-to-many)
-        $doctor->services()->sync([$request->service_id]);
-
-        DB::commit();
-
-        return redirect()->route('admin.doctors.index')->with('success', 'Cập nhật thông tin bác sĩ thành công.');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Lỗi khi cập nhật bác sĩ: ' . $e->getMessage());
-        return back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật. Vui lòng thử lại.');
+        return view('admin.doctors.edit', compact('doctor', 'departments', 'services', 'selectedServiceIds'));
     }
-}
+
+    public function update(Request $request, Doctor $doctor)
+    {
+        $request->validate([
+            'full_name'       => 'required|string|max:100',
+            'email'           => 'required|email|unique:users,email,' . $doctor->user_id,
+            'avatar'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'department_id'   => 'required|exists:departments,id',
+            'service_id'      => 'required|exists:services,id', // chỉ 1 dịch vụ
+            'specialization'  => 'nullable|string|max:100',
+            'biography'       => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $avatarPath = $doctor->user->avatar;
+            if ($request->hasFile('avatar')) {
+                $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            }
+
+            $doctor->user->update([
+                'full_name' => $request->full_name,
+                'email'     => $request->email,
+                'avatar'    => $avatarPath,
+            ]);
+
+            $doctor->update([
+                'department_id'  => $request->department_id,
+                'specialization' => $request->specialization,
+                'biography'      => $request->biography,
+            ]);
+
+            // Cập nhật dịch vụ (many-to-many)
+            $doctor->services()->sync([$request->service_id]);
+
+            DB::commit();
+
+            return redirect()->route('admin.doctors.index')->with('success', 'Cập nhật thông tin bác sĩ thành công.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Lỗi khi cập nhật bác sĩ: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật. Vui lòng thử lại.');
+        }
+    }
 
 
 

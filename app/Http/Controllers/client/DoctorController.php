@@ -11,7 +11,8 @@ use App\Models\Department;
 
 class DoctorController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         $doctors = Doctor::with([
             'user',
             'department',
@@ -67,7 +68,7 @@ class DoctorController extends Controller
         // Lấy năm bắt đầu sớm nhất
         $startYear = $doctor->experiences->min('start_year');
 
-        // Xử lý end_year: nếu có null => coi là năm hiện tại
+        // Xử lý end_year: nếu null thì lấy năm hiện tại
         $endYears = $doctor->experiences->map(function ($exp) {
             return $exp->end_year ?? now()->year;
         });
@@ -80,7 +81,6 @@ class DoctorController extends Controller
         if ($startYear) {
             $experienceYears = $endYear - $startYear;
         }
-
         $doctor->experience_years = $experienceYears > 0 ? $experienceYears : null;
 
         // ✅ Tính điểm trung bình và phân bổ đánh giá
@@ -92,34 +92,34 @@ class DoctorController extends Controller
             return [$star => $visibleReviews->where('rating', $star)->count()];
         });
 
-        // ✅ Kiểm tra người dùng đăng nhập và lấy lịch hẹn đã hoàn thành
+        // ✅ Kiểm tra lịch hẹn đã hoàn thành và có dịch vụ
         $appointment = null;
         $alreadyReviewed = false;
         $userReview = null;
 
-        if (Auth::check()) {
-            $appointment = Appointment::where('doctor_id', $doctor->id)
+if (Auth::check()) {
+    $appointment = Appointment::where('doctor_id', $doctor->id)
+        ->where('patient_id', Auth::id())
+        ->where('status', 'completed') // chỉ completed mới cho đánh giá
+        ->whereHas('order.services') // phải có dịch vụ
+        ->latest()
+        ->first();
+
+    if ($appointment) {
+        $alreadyReviewed = Review::where('appointment_id', $appointment->id)
+            ->where('patient_id', Auth::id())
+            ->exists();
+
+        if ($alreadyReviewed) {
+            $userReview = Review::where('appointment_id', $appointment->id)
                 ->where('patient_id', Auth::id())
-                ->where('status', 'completed')
-                ->latest()
+                ->with(['replies.user', 'appointment.order.services'])
                 ->first();
-
-            if ($appointment) {
-                $alreadyReviewed = Review::where('appointment_id', $appointment->id)
-                    ->where('patient_id', Auth::id())
-                    ->exists();
-
-                if ($alreadyReviewed) {
-                    $userReview = Review::where('appointment_id', $appointment->id)
-                        ->where('patient_id', Auth::id())
-                        ->with([
-                            'replies.user',
-                            'appointment.order.services'
-                        ])
-                        ->first();
-                }
-            }
         }
+    }
+}
+
+
 
         // Danh sách các bác sĩ cùng chuyên khoa
         $doctor->related_doctors = Doctor::where('department_id', $doctor->department_id)
@@ -131,7 +131,6 @@ class DoctorController extends Controller
             ])
             ->limit(4)
             ->get();
-
 
         return view('client.doctors_detail', compact(
             'doctor',

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class WalletController extends Controller
 {
@@ -18,15 +19,18 @@ class WalletController extends Controller
     // Xem ví và lịch sử giao dịch
     public function index()
     {
+        $user = Auth::user();
         $wallet = auth()->user()
             ->wallet()
-            ->with('transactions')
+            ->with(['transactions' => function ($query) {
+                $query->whereIn('type', ['withdraw'])->orderBy('created_at', 'desc');
+            }])
             ->firstOrCreate(
-                ['user_id' => auth()->id()], // điều kiện tìm
-                ['balance' => 0]             // nếu tạo mới
+                ['user_id' => auth()->id()],
+                ['balance' => 0]
             );
 
-        return view('client.wallet.index', compact('wallet'));
+        return view('client.wallet.index', compact('wallet', 'user'));
     }
 
     // Rút tiền
@@ -34,22 +38,25 @@ class WalletController extends Controller
     {
         $request->validate([
             'amount' => 'required|numeric|min:10000',
-            'bank_account' => 'required|string',
-            'bank_name' => 'required|string'
+            'account_holder_name' => 'required|string|max:255',
+            'account_number' => 'required|string|max:255',
+            'bank_name' => 'required|string',
         ]);
 
         $this->walletService->deductBalance(
             auth()->id(),
             $request->amount,
             'withdraw',
-            'Rút về TK ngân hàng: ' . $request->bank_account . ' (' . $request->bank_name . ')',
+            'Rút về TK ngân hàng: ' . $request->account_number . ' (' . $request->bank_name . ') - Chủ tài khoản: ' . $request->account_holder_name,
             $request->bank_name,
-            'Chờ xử lý'
+            'Chờ xử lý',
+            $request->account_holder_name,
+
         );
+
 
         return back()->with('success', 'Yêu cầu rút tiền đã được gửi.');
     }
-
     // Thanh toán từ ví
     public function payWithWallet(Request $request)
     {

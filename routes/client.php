@@ -21,6 +21,7 @@ use App\Http\Controllers\Client\UserController;
 use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\Client\WalletController;
 use App\Models\Wallet;
+use App\Models\Service;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -72,6 +73,28 @@ Route::prefix('chat')->name('chat.')->group(function () {
     Route::post('/start', [ChatController::class, 'startSession'])->name('start');
     Route::post('/send', [ChatController::class, 'sendMessage'])->name('send');
     Route::get('/messages', [ChatController::class, 'getMessages'])->name('messages');
+
+    Route::get('/api/services/{id}', function ($id) {
+        try {
+            $service = Service::where('id', $id)->where('status', 'active')->first();
+
+            if ($service) {
+                return response()->json([
+                    'success' => true,
+                    'service' => [
+                        'id' => $service->id,
+                        'name' => $service->name,
+                        'price' => $service->price,
+                        'image' => $service->image ? asset($service->image) : null
+                    ]
+                ]);
+            }
+
+            return response()->json(['success' => false, 'message' => 'Service not found']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    });
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -194,6 +217,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/promotions', [PromotionController::class, 'index'])->name('client.promotions.index');
     Route::post('/promotions/apply/{promotion}', [PromotionController::class, 'apply'])->name('client.promotions.apply');
     Route::post('/promotions/remove', [PromotionController::class, 'remove'])->name('client.promotions.remove');
+
 });
 Route::prefix('wallet')->middleware(['auth'])->group(function () {
     Route::get('/', [WalletController::class, 'index'])->name('client.wallet.index');

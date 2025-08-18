@@ -1,6 +1,9 @@
-@extends('client.layouts.app')
+@extends('client.layouts.profile-layout')
 
-@section('content')
+
+@section('title', 'chi tiết thông báo')
+
+@section('profile-content')
 <div class="max-w-3xl mx-auto py-6 px-4">
     <h2 class="text-3xl font-extrabold text-gray-800 mb-6 text-center relative">
         <i class="fas fa-bell text-yellow-500 mr-3"></i>Thông báo của bạn

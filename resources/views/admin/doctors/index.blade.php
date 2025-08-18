@@ -185,8 +185,8 @@
                                         <i class="bx bx-user mr-1 text-success"></i>Tên bác sĩ
                                     </label>
                                     <div class="input-group">
-                                        <input type="text" name="name" class="form-control"
-                                               placeholder="Nhập tên bác sĩ..." value="{{ request('name') }}">
+<input type="text" name="search" class="form-control"
+       placeholder="Nhập tên bác sĩ..." value="{{ request('search') }}">
                                     </div>
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">

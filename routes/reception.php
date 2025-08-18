@@ -8,7 +8,8 @@ use App\Http\Controllers\Reception\ReceptionAppointmentController;
 use App\Http\Controllers\reception\ReceptionistController;
 use App\Http\Controllers\Reception\WorkingScheduleController;
 use App\Http\Controllers\Reception\PatientController;
-
+use App\Http\Controllers\reception\ReceptionChatController;
+use Illuminate\Support\Facades\Broadcast;
 
 // ✅ Dashboard và thống kê
 Route::prefix('receptionist')
@@ -92,4 +93,13 @@ Route::prefix('receptionist')
             // Xem lịch sử đặt lịch
             Route::get('/{id}/appointments', [PatientController::class, 'appointments'])->name('appointments');
         });
+
+        // chat cho bên lễ tân
+        Route::prefix('chat')->name('chat.')->group(function () {
+            Route::get('/', [ReceptionChatController::class, 'index'])->name('index');
+            Route::get('/session/{session}', [ReceptionChatController::class, 'show'])->name('show');
+            Route::post('/session/{session}/send', [ReceptionChatController::class, 'sendMessage'])->name('send');
+        });
+
+        Broadcast::routes(['middleware' => ['web']]);
     });
