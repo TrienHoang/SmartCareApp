@@ -9,13 +9,13 @@ import { createIcons, icons } from 'lucide';
 createIcons({ icons });
 
 const sessionId = localStorage.getItem('chat_session_id');
-console.log("🔌 Joining channel: chat-session-" + sessionId);
+// console.log("🔌 Joining channel: chat-session-" + sessionId);
 if (sessionId) {
     window.Echo.private(`chat-session-${sessionId}`)
         .listen('.chat-message-sent', (e) => {
-            console.log('📩 Tin nhắn mới:', e.message);
-            console.log('📩 Toàn bộ e:', e);
-            console.log('📩 e.message:', e.message);
+            // console.log('📩 Tin nhắn mới:', e.message);
+            // console.log('📩 Toàn bộ e:', e);
+            // console.log('📩 e.message:', e.message);
 
 //             const newMessageHtml = `
 //     <div class="flex items-start gap-2 my-2">

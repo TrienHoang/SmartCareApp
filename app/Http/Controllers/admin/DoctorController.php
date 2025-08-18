@@ -81,7 +81,7 @@ public function store(Request $request)
         'password'        => 'required|string|min:6',
         'avatar'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'department_id'   => 'required|exists:departments,id',
-        'service_ids'     => 'required|array',
+        // 'service_ids'     => 'required|array',
         'service_ids.*'   => 'exists:services,id',
     ]);
 

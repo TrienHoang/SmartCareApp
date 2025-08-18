@@ -11,16 +11,20 @@ use App\Models\Department;
 
 class DoctorController extends Controller
 {
-    public function index(){
-        $doctors = Doctor::with([
-            'user',
-            'department',
-            'educations',
-            'experiences',
-            'achievements',
-            'specialties',
-            'services',
-        ])->get();
+    public function index()
+    {
+        $doctors = Doctor::withWhereHas('user', function ($query) {
+            $query->where('status', 'online');
+        })
+            ->with([
+                'department',
+                'educations',
+                'experiences',
+                'achievements',
+                'specialties',
+                'services',
+            ])
+            ->get();
 
         // Tính số năm kinh nghiệm cho từng bác sĩ
         foreach ($doctors as $doctor) {
@@ -39,6 +43,10 @@ class DoctorController extends Controller
         }
 
         $departments = Department::get();
+
+        \Log::info('Danh sách bác sĩ:', [
+            'count' => $doctors->count(),
+        ]);
 
         return view('client.doctors', compact('doctors', 'departments'));
     }

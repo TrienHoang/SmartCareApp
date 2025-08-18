@@ -45,19 +45,15 @@
                     @endif
 
                     <!-- Hồ sơ khám -->
-                    @if ($appointment->medicalRecord)
+                    @if ($appointment->symptom_note)
                         <div
                             style="background-color: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 20px;">
                             <div style="display: flex; align-items: center; margin-bottom: 16px;">
                                 <i class="bx bx-file-medical" style="font-size: 24px; margin-right: 8px;"></i>
                                 <h3 style="font-weight: 600;">Hồ sơ khám bệnh</h3>
                             </div>
-                            <div style="margin-bottom: 10px;"><i class="bx bx-body"></i> <strong>Triệu chứng:</strong>
-                                {{ $appointment->medicalRecord->symptoms }}</div>
                             <div style="margin-bottom: 10px;"><i class="bx bx-search-alt"></i> <strong>Chẩn đoán:</strong>
-                                {{ $appointment->medicalRecord->diagnosis }}</div>
-                            <div><i class="bx bx-first-aid"></i> <strong>Hướng điều trị:</strong>
-                                {{ $appointment->medicalRecord->treatment }}</div>
+                                {{ $appointment->symptom_note}}</div>
                         </div>
                     @endif
 
