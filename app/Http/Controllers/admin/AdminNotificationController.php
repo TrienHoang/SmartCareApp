@@ -9,8 +9,8 @@ use App\Models\User;
 use App\Notifications\AdminPanelNotification; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log; 
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class AdminNotificationController extends Controller
 {
@@ -95,39 +95,53 @@ class AdminNotificationController extends Controller
     public function store(Request $request)
     {
 
-        $request->validate([
+        // dd($request->all());
+
+        $rules = [
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'type' => 'required|string|in:system,appointment_related,promotion,reminder,other',
             'recipient_type' => 'required|string|in:all,specific_users,roles',
-            'recipient_ids' => 'nullable|array',
-            'recipient_ids.*' => 'integer',
+            'recipient_ids' => [
+                'nullable',
+                'array',
+                Rule::requiredIf(function () use ($request) {
+                    return in_array($request->recipient_type, ['specific_users', 'roles']);
+                }),
+                'min:1',
+            ],
+            'recipient_ids.*' => [
+                'integer',
+                Rule::when($request->recipient_type == 'specific_users', 'exists:users,id'),
+                Rule::when($request->recipient_type == 'roles', 'exists:roles,id'),
+            ],
             'scheduled_at' => 'nullable|date|after_or_equal:now',
             'send_now_checkbox' => 'nullable|boolean',
-        ], [
+        ];
+    
+        $messages = [
             'title.required' => 'Tiêu đề là bắt buộc.',
             'title.string' => 'Tiêu đề phải là chuỗi ký tự.',
             'title.max' => 'Tiêu đề không được vượt quá 255 ký tự.',
-        
             'content.required' => 'Nội dung là bắt buộc.',
             'content.string' => 'Nội dung phải là chuỗi ký tự.',
-        
             'type.required' => 'Loại thông báo là bắt buộc.',
             'type.string' => 'Loại thông báo phải là chuỗi.',
             'type.in' => 'Loại thông báo không hợp lệ.',
-        
             'recipient_type.required' => 'Loại người nhận là bắt buộc.',
             'recipient_type.string' => 'Loại người nhận phải là chuỗi.',
             'recipient_type.in' => 'Loại người nhận không hợp lệ.',
-        
             'recipient_ids.array' => 'Danh sách người nhận phải là một mảng.',
+            'recipient_ids.required' => 'Vui lòng chọn ít nhất một người dùng hoặc vai trò.',
+            'recipient_ids.min' => 'Vui lòng chọn ít nhất một người dùng hoặc vai trò.',
             'recipient_ids.*.integer' => 'Mỗi ID người nhận phải là một số nguyên.',
-        
+            'recipient_ids.*.exists' => 'Người dùng hoặc vai trò được chọn không tồn tại.',
             'scheduled_at.date' => 'Thời gian gửi phải là định dạng ngày hợp lệ.',
             'scheduled_at.after_or_equal' => 'Thời gian gửi phải lớn hơn hoặc bằng thời gian hiện tại.',
-        
             'send_now_checkbox.boolean' => 'Giá trị gửi ngay phải là true hoặc false.',
-        ]);
+        ];
+    
+        $validated = $request->validate($rules, $messages);
 
         try {
             DB::beginTransaction(); 

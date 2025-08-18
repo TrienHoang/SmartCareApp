@@ -233,6 +233,13 @@
             </ul>
         </li>
 
+        <li class="menu-item">
+            <a href="{{ route('admin.wallet.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-wallet"></i>
+                <div>Quản lý ví</div>
+            </a>
+        </li>
+
         <!-- Liên lạc -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Liên lạc</span></li>
 
@@ -258,13 +265,5 @@
                 <div>Hộp Thoại Bệnh Nhân</div>
             </a>
         </li>
-        <li class="menu-item">
-            <a href="{{ route('admin.wallet.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-wallet"></i>
-                <div>Quản lý ví</div>
-            </a>
-        </li>
-
-
     </ul>
 </aside>

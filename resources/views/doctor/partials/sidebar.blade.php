@@ -35,20 +35,20 @@
 
             <li class="menu-header small text-uppercase"><span class="menu-header-text">Bác sĩ</span></li>
 
-<li class="menu-item">
-    <a href="{{ route('doctor.profile.show') }}" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-user-circle"></i>
-        <div>Thông tin cá nhân</div>
-    </a>
-</li>
-
-
             <li class="menu-item">
+                <a href="{{ route('doctor.profile.show') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-user-circle"></i>
+                    <div>Thông tin cá nhân</div>
+                </a>
+            </li>
+
+
+            {{-- <li class="menu-item">
                 <a href="{{ route('doctor.appointments.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-calendar"></i>
                     <div>Lịch hẹn của tôi</div>
                 </a>
-            </li>
+            </li> --}}
 
             <li class="menu-item">
                 <a href="{{ route('doctor.files.index') }}" class="menu-link">
@@ -78,12 +78,12 @@
                 </a>
             </li>
 
-            <li class="menu-item">
+            {{-- <li class="menu-item">
                 <a href="{{ route('doctor.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-user"></i>
                     <span>Danh sách bác sĩ</span>
                 </a>
-            </li>
+            </li> --}}
 
             <li class="menu-item">
                 <a href="{{ route('doctor.history.index') }}" class="menu-link">
@@ -102,7 +102,7 @@
             <li class="menu-item">
                 <a href="{{ route('doctor.calendar.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-calendar"></i>
-                    <span>Lịch bác sĩ</span>
+                    <span>Lịch hẹn của tôi</span>
                 </a>
             </li>
             <li class="menu-item">

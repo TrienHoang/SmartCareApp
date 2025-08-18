@@ -1,6 +1,6 @@
 @extends('admin.dashboard')
 
-@section('title', 'Quản lý Dịch vụ')
+@section('title', 'Thùng rác Dịch vụ')
 
 @section('content')
     <div class="content-wrapper">
@@ -11,23 +11,28 @@
                     <div class="col-12">
                         <div class="d-flex align-items-center mb-3">
                             <div class="icon-circle bg-primary mr-3">
-                                <i class="bx bx-cog text-white"></i>
+                                <i class="bx bx-recycle text-white"></i>
                             </div>
                             <div>
-                                <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý Dịch vụ</h2>
-                                <p class="text-muted mb-0">Quản lý và theo dõi tất cả dịch vụ trong hệ thống</p>
+                                <h2 class="content-header-title mb-0 text-primary font-weight-bold">Thùng rác Dịch vụ</h2>
+                                <p class="text-muted mb-0">Xem và khôi phục các dịch vụ đã xóa</p>
                             </div>
                         </div>
                         <div class="breadcrumb-wrapper col-12">
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb bg-transparent p-0">
-                                    <li class="">
+                                    <li class="breadcrumb-item">
                                         <a href="{{ route('admin.dashboard.index') }}" class="text-decoration-none">
                                             Trang chủ >
                                         </a>
                                     </li>
+                                    <li class="breadcrumb-item">
+                                        <a href="{{ route('admin.services.index') }}" class="text-decoration-none">
+                                            Dịch vụ >
+                                        </a>
+                                    </li>
                                     <li class="breadcrumb-item active text-primary font-weight-semibold">
-                                        Dịch vụ
+                                        Thùng rác
                                     </li>
                                 </ol>
                             </nav>
@@ -57,92 +62,17 @@
                 </div>
             @endif
 
-            <!-- Statistics Cards -->
-            <div class="row mb-4">
-                <div class="col-lg-3 col-md-6 col-12">
-                    <div class="card gradient-card bg-gradient-success">
-                        <div class="card-body text-white">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar bg-rgba-white mr-2">
-                                    <div class="avatar-content">
-                                        <i class="bx bx-check-circle font-medium-5"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="text-white mb-0">{{ $services->where('status', 'active')->count() }}</h4>
-                                    <small class="text-white">Hoạt động</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-12">
-                    <div class="card gradient-card bg-gradient-danger">
-                        <div class="card-body text-white">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar bg-rgba-white mr-2">
-                                    <div class="avatar-content">
-                                        <i class="bx bx-x-circle font-medium-5"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="text-white mb-0">{{ $services->where('status', 'inactive')->count() }}</h4>
-                                    <small class="text-white">Không hoạt động</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-12">
-                    <div class="card gradient-card bg-gradient-info">
-                        <div class="card-body text-white">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar bg-rgba-white mr-2">
-                                    <div class="avatar-content">
-                                        <i class="bx bx-category font-medium-5"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="text-white mb-0">{{ $categories->count() }}</h4>
-                                    <small class="text-white">Danh mục</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-12">
-                    <div class="card gradient-card bg-gradient-warning">
-                        <div class="card-body text-white">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar bg-rgba-white mr-2">
-                                    <div class="avatar-content">
-                                        <i class="bx bx-list-ul font-medium-5"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="text-white mb-0">{{ $services->total() }}</h4>
-                                    <small class="text-white">Tổng dịch vụ</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Main Content Card -->
             <div class="card border-0 shadow-lg">
                 <div class="card-header bg-gradient-primary text-white border-0">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
-                            <i class="bx bx-list mr-2"></i>
-                            <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách Dịch vụ</h4>
+                            <i class="bx bx-recycle mr-2"></i>
+                            <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách Dịch vụ đã xóa</h4>
                         </div>
                         <div class="card-tools">
-                            <a href="{{ route('admin.services.create') }}" class="btn btn-light btn-sm">
-                                <i class="bx bx-plus mr-1"></i>Thêm dịch vụ
-                            </a>
-                            <a href="{{ route('admin.services.trash') }}" class="btn btn-light btn-sm">
-                                <i class="bx bx-recycle mr-1"></i>Xem thùng rác
+                            <a href="{{ route('admin.services.index') }}" class="btn btn-light btn-sm">
+                                <i class="bx bx-arrow-back mr-1"></i>Quay lại Danh sách Dịch vụ
                             </a>
                         </div>
                     </div>
@@ -151,7 +81,7 @@
                 <div class="card-body p-0">
                     <!-- Enhanced Filter Section -->
                     <div class="filter-section bg-light p-4 border-bottom">
-                        <form method="GET" action="{{ route('admin.services.index') }}" class="filter-form">
+                        <form method="GET" action="{{ route('admin.services.trash') }}" class="filter-form">
                             <div class="row align-items-end">
                                 <div class="col-lg-3 col-md-6 mb-2">
                                     <label class="form-label font-weight-semibold">
@@ -175,28 +105,13 @@
                                     </select>
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
-                                    <label class="form-label font-weight-semibold">
-                                        <i class="bx bx-activity mr-1 text-success"></i>Trạng thái
-                                    </label>
-                                    <select name="status" class="form-control custom-select">
-                                        <option value="">-- Tất cả trạng thái --</option>
-                                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Hoạt
-                                            động</option>
-                                        <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>
-                                            Không hoạt động</option>
-                                    </select>
-                                </div>
-                                <div class="col-lg-3 col-md-6 mb-2">
                                     <div class="btn-group w-100" role="group">
                                         <button type="submit" class="btn btn-primary">
                                             <i class="bx bx-filter mr-1"></i>Lọc
                                         </button>
-                                        <a href="{{ route('admin.services.index') }}" class="btn btn-outline-secondary">
-                                            <i class="bx bx-refresh-cw mr-1"></i>Reset
-                                            <a href="{{ route('admin.services.index') }}"
-                                                class="btn btn-outline-secondary">
-                                                <i class="bx bx-refresh mr-1"></i>Reset
-                                            </a>
+                                        <a href="{{ route('admin.services.trash') }}" class="btn btn-outline-secondary">
+                                            <i class="bx bx-refresh mr-1"></i>Reset
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -213,7 +128,7 @@
                                             <input type="checkbox" class="custom-control-input" id="select-all">
                                             <label class="custom-control-label" for="select-all"></label>
                                         </div>
-                                    </th>                            
+                                    </th>
                                     <th class="border-top-0">
                                         <i class="bx bx-service mr-1"></i>Tên dịch vụ
                                     </th>
@@ -230,7 +145,7 @@
                                         <i class="bx bx-time mr-1"></i>Thời gian
                                     </th>
                                     <th class="border-top-0">
-                                        <i class="bx bx-activity mr-1"></i>Trạng thái
+                                        <i class="bx bx-calendar-x mr-1"></i>Ngày xóa
                                     </th>
                                     <th class="border-top-0 text-center">
                                         <i class="bx bx-cog mr-1"></i>Thao tác
@@ -246,7 +161,6 @@
                                                     id="service-{{ $service->id }}" value="{{ $service->id }}">
                                                 <label class="custom-control-label"
                                                     for="service-{{ $service->id }}"></label>
-
                                             </div>
                                         </td>
                                         <td>
@@ -273,6 +187,7 @@
                                                 <span class="font-weight-bold text-success">
                                                     {{ number_format($service->price, 0, ',', '.') }}₫
                                                 </span>
+                                            </div>
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">
@@ -281,60 +196,37 @@
                                             </div>
                                         </td>
                                         <td>
-                                            @if ($service->status === 'active')
-                                                <span class="badge badge-success badge-pill">
-                                                    <i class="bx bx-check-circle "></i>Hoạt động
-                                                </span>
-                                            @else
-                                                <span class="badge badge-danger badge-pill">
-                                                    <i class="bx bx-x-circle "></i>Không hoạt động
-                                                </span>
-                                            @endif
+                                            <span class="font-weight-semibold">
+                                                {{ $service->deleted_at->format('d/m/Y H:i') }}
+                                            </span>
                                         </td>
-
                                         <td class="text-center">
                                             <div class="btn-group-sm" role="group">
-                                                <a href="{{ route('admin.services.show', $service->id) }}"
-                                                    class="btn btn-outline-info btn-sm" data-toggle="tooltip"
-                                                    title="Xem chi tiết">
-                                                    <i class="bx bx-show-alt"></i>
-                                                </a>
-                                                <a href="{{ route('admin.services.edit', $service->id) }}"
-                                                    class="btn btn-outline-warning btn-sm" data-toggle="tooltip"
-                                                    title="Chỉnh sửa">
-                                                    <i class="bx bx-edit"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-outline-danger btn-sm"
-                                                    data-toggle="tooltip" title="Xóa"
-                                                    onclick="deleteService({{ $service->id }})">
-                                                    <i class="bx bx-trash"></i>
+                                                <button type="button" class="btn btn-outline-success btn-sm"
+                                                    data-toggle="tooltip" title="Khôi phục"
+                                                    onclick="restoreService({{ $service->id }})">
+                                                    <i class="bx bx-recycle"></i>
                                                 </button>
                                             </div>
 
-                                            <!-- Hidden form for delete -->
-                                            <form id="delete-form-{{ $service->id }}"
-                                                action="{{ route('admin.services.destroy', $service->id) }}"
+                                            <!-- Hidden form for restore -->
+                                            <form id="restore-form-{{ $service->id }}"
+                                                action="{{ route('admin.services.restore', $service->id) }}"
                                                 method="POST" style="display: none;">
                                                 @csrf
-                                                @method('DELETE')
                                             </form>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center py-5">
+                                        <td colspan="8" class="text-center py-5">
                                             <div class="empty-state">
-                                                <i class="bx bx-cog text-muted" style="font-size: 48px;"></i>
-                                                <h5 class="mt-3 text-muted">Không có dịch vụ nào</h5>
-                                                <p class="text-muted">Chưa có dịch vụ nào được tạo hoặc không tìm thấy
-                                                    kết quả phù hợp.</p>
-                                                <a href="{{ route('admin.services.create') }}" class="btn btn-primary">
-                                                    <p class="text-muted">Chưa có dịch vụ nào được tạo hoặc không tìm thấy
-                                                        kết quả phù hợp.</p>
-                                                    <a href="{{ route('admin.services.create') }}"
-                                                        class="btn btn-primary">
-                                                        <i class="bx bx-plus mr-1"></i>Tạo dịch vụ đầu tiên
-                                                    </a>
+                                                <i class="bx bx-recycle text-muted" style="font-size: 48px;"></i>
+                                                <h5 class="mt-3 text-muted">Thùng rác trống</h5>
+                                                <p class="text-muted">Chưa có dịch vụ nào bị xóa hoặc không tìm thấy kết quả phù hợp.</p>
+                                                <a href="{{ route('admin.services.index') }}" class="btn btn-primary">
+                                                    <i class="bx bx-arrow-back mr-1"></i>Quay lại Danh sách Dịch vụ
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
@@ -534,20 +426,20 @@
             });
         });
 
-        // Delete service function
-        function deleteService(id) {
+        // Restore service function
+        function restoreService(id) {
             Swal.fire({
-                title: 'Xóa dịch vụ',
-                text: 'Bạn chắc chắn muốn xóa dịch vụ này?',
-                icon: 'warning',
+                title: 'Khôi phục dịch vụ',
+                text: 'Bạn chắc chắn muốn khôi phục dịch vụ này?',
+                icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#dc3545',
+                confirmButtonColor: '#28a745',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Xóa',
+                confirmButtonText: 'Khôi phục',
                 cancelButtonText: 'Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    document.getElementById('delete-form-' + id).submit();
+                    document.getElementById('restore-form-' + id).submit();
                 }
             });
         }

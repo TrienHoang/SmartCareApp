@@ -41,21 +41,38 @@ class WalletController extends Controller
             'account_holder_name' => 'required|string|max:255',
             'account_number' => 'required|string|max:255',
             'bank_name' => 'required|string',
+        ], [
+            'amount.required' => 'Vui lòng nhập số tiền.',
+            'amount.numeric'  => 'Số tiền phải là số.',
+            'amount.min'      => 'Số tiền tối thiểu là 10.000 VNĐ.',
+
+            'account_holder_name.required' => 'Vui lòng nhập tên chủ tài khoản.',
+            'account_holder_name.string'   => 'Tên chủ tài khoản phải là chuỗi ký tự.',
+            'account_holder_name.max'      => 'Tên chủ tài khoản không được vượt quá 255 ký tự.',
+
+            'account_number.required' => 'Vui lòng nhập số tài khoản.',
+            'account_number.string'   => 'Số tài khoản không hợp lệ.',
+            'account_number.max'      => 'Số tài khoản không được vượt quá 255 ký tự.',
+
+            'bank_name.required' => 'Vui lòng nhập tên ngân hàng.',
+            'bank_name.string'   => 'Tên ngân hàng không hợp lệ.',
         ]);
 
-        $this->walletService->deductBalance(
-            auth()->id(),
-            $request->amount,
-            'withdraw',
-            'Rút về TK ngân hàng: ' . $request->account_number . ' (' . $request->bank_name . ') - Chủ tài khoản: ' . $request->account_holder_name,
-            $request->bank_name,
-            'Chờ xử lý',
-            $request->account_holder_name,
+        try {
+            $this->walletService->deductBalance(
+                auth()->id(),
+                $request->amount,
+                'withdraw',
+                'Rút về TK ngân hàng: ' . $request->account_number . ' (' . $request->bank_name . ') - Chủ tài khoản: ' . $request->account_holder_name,
+                $request->bank_name,
+                'Chờ xử lý',
+                $request->account_holder_name,
+            );
 
-        );
-
-
-        return back()->with('success', 'Yêu cầu rút tiền đã được gửi.');
+            return back()->with('success', 'Yêu cầu rút tiền đã được gửi.');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
     // Thanh toán từ ví
     public function payWithWallet(Request $request)
