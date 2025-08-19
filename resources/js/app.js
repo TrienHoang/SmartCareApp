@@ -1,5 +1,8 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
+import './client-notification-realtime';
+import './client-notification-sidebar';
+import './client-notification-list';
 
 window.Alpine = Alpine;
 Alpine.start();
