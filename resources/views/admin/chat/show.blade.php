@@ -224,26 +224,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Quick Actions Card -->
-                {{-- <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-bolt mr-2"></i>Thao tác
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <button class="btn btn-success btn-block mb-2" onclick="markAsResolved()">
-                            <i class="fas fa-check mr-2"></i>Đánh dấu đã giải quyết
-                        </button>
-                        <button class="btn btn-warning btn-block mb-2" onclick="transferToAgent()">
-                            <i class="fas fa-user-tie mr-2"></i>Chuyển cho nhân viên khác
-                        </button>
-                        <button class="btn btn-info btn-block" onclick="exportChat()">
-                            <i class="fas fa-download mr-2"></i>Xuất lịch sử chat
-                        </button>
-                    </div>
-                </div> --}}
             </div>
         </div>
     </div>

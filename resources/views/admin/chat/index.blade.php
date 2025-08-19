@@ -470,8 +470,8 @@
                 console.log('🔄 Setting up realtime listeners...');
 
                 // Listen to all chat sessions for new messages
-                window.Echo.private('admin-chat-notifications')
-                    .listen('.new-chat-message', (e) => {
+                window.Echo.channel('chat-global')
+                    .listen('.chat-message-sent', (e) => {
                         console.log('📨 New message received:', e);
                         this.handleNewMessage(e);
                     })
@@ -488,20 +488,6 @@
 
                 // Alternative: Listen to specific session channels
                 // This assumes you have session IDs available
-                const sessionIds = Array.from(document.querySelectorAll('[data-session-id]'))
-                    .map(el => el.dataset.sessionId);
-
-                sessionIds.forEach(sessionId => {
-                    window.Echo.private(`chat-session-${sessionId}`)
-                        .listen('.chat-message-sent', (e) => {
-                            console.log('📩 Admin received message:', e);
-                            this.handleNewMessage({
-                                session_id: sessionId,
-                                message: e,
-                                sender_type: e.sender_type
-                            });
-                        });
-                });
             }
 
             handleNewMessage(data) {
@@ -599,6 +585,11 @@
                     document.getElementById('total-unread-count').textContent = total;
                     this.$totalUnreadNotification.style.display = 'block';
 
+                    clearTimeout(this._notificationTimeout);
+                    this._notificationTimeout = setTimeout(() => {
+                        this.$totalUnreadNotification.style.display = 'none';
+                    }, 3000);
+
                     // Update page title
                     document.title = `(${total}) Quản lý Chat - Admin`;
                 } else {
@@ -636,7 +627,7 @@
 
             moveSessionToTop(sessionId) {
                 const sessionRow = document.querySelector(`[data-session-id="${sessionId}"]`);
-                if (sessionRow && this.currentSort === 'newest') {
+                if (sessionRow) {
                     this.$sessionsTable.insertBefore(sessionRow, this.$sessionsTable.firstChild);
                     this.updateRowNumbers();
                 }

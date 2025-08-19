@@ -19,10 +19,15 @@ class AdminChatController extends Controller
         $sessions = ChatSession::with(['latestMessage', 'user'])
             ->withCount(['messages as unread_count' => function ($q) {
                 $q->where('is_read', 0)
-                    ->whereIn('sender_type', ['user', 'bot']);
+                    ->whereIn('sender_type', ['user']);
             }])
             ->whereHas('messages')
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc(
+                ChatMessage::select('created_at')
+                    ->whereColumn('chat_messages.chat_session_id', 'chat_sessions.id')
+                    ->latest()
+                    ->take(1)
+            )
             ->paginate(20);
 
         return view('admin.chat.index', compact('sessions'));
@@ -35,7 +40,7 @@ class AdminChatController extends Controller
             ->where('is_read', 0)
             ->whereIn('sender_type', ['user', 'bot'])
             ->update(['is_read' => 1]);
-            
+
         $messages = $session->messages()
             ->with('sender')
             ->orderBy('created_at')
