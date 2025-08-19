@@ -33,15 +33,13 @@
                 </ul>
             </div>
 
-            {{-- Chuyên Khoa --}}
+            {{-- Dịch Vụ --}}
             <div>
-                <h4 class="text-xl font-semibold mb-4">Chuyên Khoa</h4>
+                <h4 class="text-xl font-semibold mb-4">Danh mục dịch vụ </h4>
                 <ul class="space-y-2">
-                    <li><span class="text-gray-300">Nội Khoa</span></li>
-                    <li><span class="text-gray-300">Ngoại Khoa</span></li>
-                    <li><span class="text-gray-300">Sản Phụ Khoa</span></li>
-                    <li><span class="text-gray-300">Nhi Khoa</span></li>
-                    <li><span class="text-gray-300">Tim Mạch</span></li>
+                    @foreach ($danh_muc_dich_vu as $danh_muc )
+                     <li><a href="{{ route('client.services.show', ['id' => $danh_muc->id]) }}"><span class="text-gray-300">{{ $danh_muc->name }}</span></a</li>
+                    @endforeach 
                 </ul>
             </div>
 
@@ -64,7 +62,7 @@
                     <div class="flex items-start space-x-3">
                         <i data-lucide="clock" class="w-5 h-5 text-blue-400 mt-1"></i>
                         <div class="text-gray-300">
-                            <p>T2-T7: 8:00 - 17:00</p>
+                            <p>T2-T7: 07:00 - 18:00</p>
                         </div>
                     </div>
                 </div>

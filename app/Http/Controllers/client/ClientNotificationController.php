@@ -19,6 +19,7 @@ class ClientNotificationController extends Controller
 
     public function index()
     {
+          $user = Auth::user();
         $userId = Auth::id();
 
         if (!$userId) {
@@ -82,7 +83,7 @@ class ClientNotificationController extends Controller
             return !$status || !$status->is_read;
         })->count();
 
-        return view('client.notifications.index', compact('notifications', 'unreadNotificationsCount'));
+        return view('client.notifications.index', compact('notifications', 'unreadNotificationsCount','user'));
     }
 
 

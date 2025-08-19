@@ -22,6 +22,7 @@ class AdminWalletController extends Controller
     {
         $transactions = WalletTransaction::where('type', 'withdraw')
             ->with('wallet.user')
+            ->orderBy('created_at', 'desc')
             ->get();
         return view('admin.wallet.index', compact('transactions'));
     }

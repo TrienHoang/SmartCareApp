@@ -27,9 +27,9 @@ class WalletService
     }
 
     // Trừ tiền
-    public function deductBalance($userId, $amount, $type, $description = null, $bankName = null, $status = 'Chờ xử lý')
+    public function deductBalance($userId, $amount, $type, $description = null, $bankName = null, $status = 'Chờ xử lý', $accountHolderName = null)
     {
-        return DB::transaction(function () use ($userId, $amount, $type, $description, $bankName, $status) {
+        return DB::transaction(function () use ($userId, $amount, $type, $description, $bankName, $status, $accountHolderName) {
             $wallet = Wallet::where('user_id', $userId)->firstOrFail();
 
             if ($wallet->balance < $amount && $type !== 'refund') {
@@ -44,7 +44,8 @@ class WalletService
                 'amount' => $amount,
                 'description' => $description,
                 'bank_name' => $bankName,
-                'status' => $status
+                'status' => $status,
+                'account_holder_name' => $accountHolderName
             ]);
 
             return $wallet;

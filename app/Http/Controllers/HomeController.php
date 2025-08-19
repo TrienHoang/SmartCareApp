@@ -8,9 +8,12 @@ use App\Models\Doctor;
 use App\Models\DoctorLeave;
 use App\Models\Review;
 use App\Models\Service;
+use App\Models\ServiceCategory;
 use App\Models\WorkingSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\View;
+
 
 class HomeController extends Controller
 {
@@ -30,7 +33,7 @@ class HomeController extends Controller
             ->orderByDesc('total_bookings')
             ->with(['service' => function ($query) {
                 $query->select('id', 'service_cate_id', 'department_id', 'name', 'description', 'image', 'price', 'duration', 'status')
-                ->where('status', 'active');
+                    ->where('status', 'active');
             }])
             ->limit(6)
             ->get();
@@ -67,7 +70,6 @@ class HomeController extends Controller
 
         $visibleReviews = $doctors->pluck('reviews')->flatten();
         $average_rating_all = round($visibleReviews->avg('rating'), 1);
-
 
         return view('client.home', compact('testimonials', 'departments', 'doctors', 'dich_vu'));
     }

@@ -183,6 +183,44 @@ class ServiceController extends Controller
         }
     }
 
+    
+    public function trash(Request $request)
+    {
+        $query = Service::onlyTrashed()->with('category', 'department');
+
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                    ->orWhere('description', 'like', "%$search%");
+            });
+        }
+
+        if ($request->filled('category')) {
+            $query->where('service_cate_id', $request->get('category'));
+        }
+
+        $query->orderBy('deleted_at', 'desc');
+        $services = $query->paginate(10);
+        $services->appends($request->query());
+
+        $categories = ServiceCategory::where('status', 'active')->orderBy('name')->get();
+
+        return view('admin.services.trash', compact('services', 'categories'));
+    }
+
+    public function restore($id)
+    {
+        try {
+            $service = Service::onlyTrashed()->findOrFail($id);
+            $service->restore();
+            return redirect()->route('admin.services.trash')->with('success', 'Khôi phục dịch vụ thành công!');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.services.trash')->with('error', 'Không thể khôi phục dịch vụ. ' . $e->getMessage());
+        }
+    }
+
+
       private function getStoreValidationRules()
     {
         return [

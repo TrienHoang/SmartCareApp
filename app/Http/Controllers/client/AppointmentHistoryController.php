@@ -18,18 +18,19 @@ class AppointmentHistoryController extends Controller
         $user = Auth::user();
 
         // Lấy danh sách các cuộc hẹn đã hoàn thành
- $appointments = Appointment::with([
-    'doctor.user',
-    'service',
-    'medicalRecord.prescription.items',
-    'payment',
-    'review',
-])
-->where('patient_id', $user->id)
-->orderByDesc('appointment_time')
-->get();
+        $appointments = Appointment::with([
+            'doctor.user',
+            'service',
+            'medicalRecord.prescription.items',
+            'payment',
+            'review',
+        ])
+            ->where('patient_id', $user->id)
+            ->where('status', 'completed') // Chỉ lấy các cuộc hẹn đã hoàn thành
+            ->orderByDesc('appointment_time')
+            ->get();
 
-        return view('client.appointments.history', compact('appointments'));
+        return view('client.appointments.history', compact('appointments','user'));
     }
 
     /**
@@ -37,6 +38,7 @@ class AppointmentHistoryController extends Controller
      */
     public function show($id)
     {
+         $user = Auth::user();
         $appointment = Appointment::with([
             'doctor.user',
             'service',
@@ -44,15 +46,15 @@ class AppointmentHistoryController extends Controller
             'payment',
             'review',
         ])
-        ->where('id', $id)
-        ->where('patient_id', Auth::id())
-        ->first();
+            ->where('id', $id)
+            ->where('patient_id', Auth::id())
+            ->first();
 
         if (!$appointment) {
             return redirect()->route('client.appointments.history')
                 ->withErrors(['not_found' => 'Không tìm thấy cuộc hẹn hoặc bạn không có quyền xem.']);
         }
 
-        return view('client.appointments.detail', compact('appointment'));
+        return view('client.appointments.detail', compact('appointment','user'));
     }
 }

@@ -1,8 +1,8 @@
-@extends('client.layouts.app')
+@extends('client.layouts.profile-layout')
 
-@section('title', 'Ví của tôi')
+@section('title', 'Ví')
 
-@section('content')
+@section('profile-content')
     <div class="max-w-5xl mx-auto px-4 py-8 space-y-8">
         <!-- Card số dư -->
         <div
@@ -33,10 +33,14 @@
                 </svg>
                 Rút tiền
             </h3>
-            <form action="{{ route('wallet.withdraw') }}" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <form action="{{ route('wallet.withdraw') }}" method="POST" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 @csrf
                 <!-- Số tiền -->
                 <input type="number" name="amount" placeholder="Số tiền cần rút"
+                    class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+
+                <!-- Họ và tên (Tên chủ tài khoản) -->
+                <input type="text" name="account_holder_name" placeholder="Tên chủ tài khoản ngân hàng"
                     class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
 
                 <!-- Ngân hàng -->
@@ -66,8 +70,8 @@
                 </select>
 
                 <!-- Số tài khoản -->
-                <input type="text" name="bank_account" placeholder="Số tài khoản ngân hàng"
-                    class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                <input type="text" name="account_number" placeholder="Số tài khoản ngân hàng"
+                    class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
 
                 <!-- Nút submit -->
                 <button type="submit"
@@ -93,6 +97,8 @@
                         <tr>
                             <th class="px-4 py-2 text-left">Loại</th>
                             <th class="px-4 py-2 text-right">Số tiền</th>
+                            <th class="px-4 py-2">Tên ngân hàng</th>
+                            <th class="px-4 py-2">Tên tài khoản rút</th>
                             <th class="px-4 py-2">Mô tả</th>
                             <th class="px-4 py-2">Ngày</th>
                         </tr>
@@ -110,12 +116,18 @@
                                 <td class="px-4 py-2 text-right font-medium">
                                     {{ number_format($t->amount, 0, ',', '.') }} VNĐ
                                 </td>
+                                <td class="px-4 py-2">
+                                    {{ $t->type === 'withdraw' && $t->bank_name ? $t->bank_name : 'Chưa xác định' }}
+                                </td>
+                                <td class="px-4 py-2">
+                                    {{ $t->type === 'withdraw' && $t->account_holder_name ? $t->account_holder_name : 'Chưa xác định' }}
+                                </td>
                                 <td class="px-4 py-2">{{ $t->description }}</td>
                                 <td class="px-4 py-2 text-gray-500">{{ $t->created_at->format('d/m/Y H:i') }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-4 text-center text-gray-500">
+                                <td colspan="7" class="px-4 py-4 text-center text-gray-500">
                                     Chưa có giao dịch nào
                                 </td>
                             </tr>
