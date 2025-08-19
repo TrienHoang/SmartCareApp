@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="user-id" content="{{ auth()->id() }}">
     <title>@yield('title', 'SmartCare - Hệ thống Y tế')</title>
     <link rel="icon" href="{{ asset('path/to/your-icon.png') }}" type="image/png">
     <!-- Google Fonts -->
@@ -24,7 +25,11 @@
 
     <!-- App Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Phải có trong <head> -->
 
+    @auth
+        <meta name="user-id" content="{{ auth()->id() }}">
+    @endauth
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -72,6 +77,24 @@
     </main>
 
     @auth
+        <a href="{{ route('client.notifications.index') }}">
+            <div id="notification-button"
+                class="fixed bottom-[120px] right-6 z-50 bg-gradient-to-r from-blue-600 to-blue-700 
+           hover:from-blue-700 hover:to-blue-800 text-white 
+           w-16 h-16 rounded-full shadow-2xl flex items-center justify-center 
+           cursor-pointer transition-all duration-300 transform hover:scale-105">
+
+                {{-- Icon chuông --}}
+                <i class="fas fa-bell text-2xl"></i>
+
+                {{-- Badge đỏ hiển thị số lượng --}}
+                <span id="notification-badge"
+                    class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center
+               {{ $unreadNotificationsCount > 0 ? '' : 'hidden' }}">
+                    {{ $unreadNotificationsCount }}
+                </span>
+            </div>
+        </a>
         <!-- Chatbox UI -->
         <div id="chatbox-button"
             class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center cursor-pointer transition-all duration-300 transform hover:scale-105">
@@ -81,6 +104,7 @@
                 0
             </div>
         </div>
+
 
         <!-- Enhanced Chatbox Modal -->
         <div id="chatbox-modal"

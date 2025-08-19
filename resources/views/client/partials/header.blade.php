@@ -35,35 +35,9 @@
                 @endforeach
             </nav>
             <!-- Chuông thông báo -->
-            <div class="relative group cursor-pointer" style="justify-content: end" onclick="toggleNotifications()">
-                <i class="fas fa-bell text-xl text-gray-700"></i>
-                @if ($unreadNotificationsCount > 0)
-                    <span
-                        class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {{ $unreadNotificationsCount }}
-                    </span>
-                @endif
 
-                <div id="notification-dropdown"
-                    class="hidden absolute right-0 mt-2 w-96 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                    <div class="p-4 font-semibold border-b">Thông báo</div>
-                    <div class="max-h-60 overflow-y-auto divide-y" id="notification-list">
-                        @forelse ($notifications->take(5) as $notification)
-                            <div class="p-3 hover:bg-gray-100 text-sm">
-                                <div class="font-medium text-gray-800">{{ $notification->title }}</div>
-                                <div class="text-gray-500 text-xs">
-                                    {{ $notification->sent_at ? \Carbon\Carbon::parse($notification->sent_at)->diffForHumans() : '' }}
-                                </div>
-                            </div>
-                        @empty
-                            <div class="p-3 text-sm text-gray-500">Không có thông báo nào.</div>
-                        @endforelse
-                    </div>
-                    <div class="text-center p-2 text-sm text-blue-500 hover:underline">
-                        <a href="{{ route('client.notifications.index') }}">Xem tất cả</a>
-                    </div>
-                </div>
-            </div>
+          
+
 
             {{-- Tài khoản --}}
             <div class="hidden md:flex items-center space-x-4">
