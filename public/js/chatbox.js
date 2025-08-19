@@ -3,6 +3,7 @@ class SmartCareChat {
         this.sessionId = localStorage.getItem('chat_session_id');
         this.isTyping = false;
         this.echoChannel = null;
+        this.unreadCount = parseInt(localStorage.getItem('chat_unread_count')) || 0;
         this.init();
     }
 
@@ -10,6 +11,8 @@ class SmartCareChat {
         this.bindEvents();
         this.autoResizeTextarea();
         this.debugEcho();
+
+        this.updateUnreadBadge();
 
         if (this.sessionId) {
             this.loadMessages();
@@ -82,6 +85,9 @@ class SmartCareChat {
             modal.classList.remove('hidden');
             modal.classList.add('animate__animated', 'animate__slideInUp');
             document.getElementById('chatbox-input')?.focus();
+            this.unreadCount = 0;
+            localStorage.setItem('chat_unread_count', this.unreadCount);
+            this.updateUnreadBadge();
         } else {
             this.closeChat();
         }
@@ -122,6 +128,8 @@ class SmartCareChat {
     }
 
     listenForMessages() {
+        if (!this.sessionId || !window.Echo) return;
+
         if (!this.sessionId || !window.Echo) {
             console.warn('⚠️ Không có sessionId hoặc Echo chưa được khởi tạo');
             return;
@@ -157,6 +165,12 @@ class SmartCareChat {
                         `;
                         chatContent.scrollTop = chatContent.scrollHeight;
                         console.log('✅ Admin message added to UI successfully');
+                        const modal = document.getElementById('chatbox-modal');
+                        if (modal.classList.contains('hidden')) {
+                            this.unreadCount++;
+                            localStorage.setItem('chat_unread_count', this.unreadCount); // lưu lại
+                            this.updateUnreadBadge();
+                        }
                     }
                 })
                 .subscribed(() => {
@@ -168,6 +182,18 @@ class SmartCareChat {
 
         } catch (error) {
             console.error('❌ Error setting up channel listener:', error);
+        }
+    }
+
+    updateUnreadBadge() {
+        const badge = document.getElementById('unread-count');
+        if (!badge) return;
+
+        if (this.unreadCount > 0) {
+            badge.textContent = this.unreadCount;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
         }
     }
 
