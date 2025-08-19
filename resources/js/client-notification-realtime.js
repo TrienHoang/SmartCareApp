@@ -126,7 +126,7 @@ function animateBellIcon() {
     // Reset sau 2 giây
     setTimeout(() => {
         bellIcon.classList.remove('animate-bounce');
-        bellIcon.style.color = '#374151'; // Gray-700
+        bellIcon.style.color = '#ffffffff'; // Gray-700
         bellIcon.style.filter = '';
     }, 2000);
 }

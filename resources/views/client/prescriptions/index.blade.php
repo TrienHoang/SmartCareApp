@@ -4,7 +4,7 @@
 @section('title', 'Danh sách đơn thuốc')
 
 @section('profile-content')
-    <div class="lg:w-3.5/4">
+    {{-- <div class="lg:w-3/4"> --}}
         <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
             {{-- Bắt đầu mã "Danh Sách Đơn Thuốc" --}}
             <div class="prescription-list-container">
@@ -175,7 +175,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    {{-- </div> --}}
 
     @push('styles')
         <style>

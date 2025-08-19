@@ -3,7 +3,7 @@
 @section('title', 'Hồ sơ cá nhân')
 
 @section('profile-content')
- <div class="lg:w-3.5/4 space-y-8">
+ {{-- <div class="lg:w-3/4 space-y-8"> --}}
                     {{-- Personal Information --}}
                     <div id="thong-tin-ca-nhan" class="bg-white rounded-xl shadow-lg p-8">
                         <div class="flex items-center justify-between mb-6">
@@ -209,7 +209,7 @@
                             </div>
                         </form>
                     </div>
-                </div>
+                {{-- </div> --}}
 
 
     {{-- Edit Profile Modal --}}

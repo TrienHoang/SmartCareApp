@@ -48,9 +48,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 
-Route::get('/', function () {
-    return view('client.home');
-})->name('home');
 
 
 Route::middleware('guest')->group(function () {
@@ -482,11 +479,13 @@ Route::patch('admin/categories/toggle-status/{id}', [ServiceCategoryController::
 // quản lý dịch vụ
 Route::get('admin/services', [ServiceController::class, 'index'])->name('admin.services.index');
 Route::get('admin/services/create', [ServiceController::class, 'create'])->name('admin.services.create');
+Route::get('admin/services/trash', [ServiceController::class, 'trash'])->name('admin.services.trash');
 Route::post('admin/services', [ServiceController::class, 'store'])->name('admin.services.store'); // Sửa ở đây
 Route::get('admin/services/{id}', [ServiceController::class, 'show'])->name('admin.services.show');
 Route::get('admin/services/{id}/edit', [ServiceController::class, 'edit'])->name('admin.services.edit');
 Route::put('admin/services/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
 Route::delete('admin/services/{id}', [ServiceController::class, 'destroy'])->name('admin.services.destroy');
+Route::post('admin/services/{id}/restore', [ServiceController::class, 'restore'])->name('admin.services.restore');
 Route::get('/admin/doctors-by-department/{departmentId}', [ServiceController::class, 'getDoctorsByDepartment'])->name('admin.doctors.byDepartment');
 
 

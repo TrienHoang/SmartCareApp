@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Log;
 
 // ✅ THÊM: Channel cho chat session
 Broadcast::channel('chat-session-{sessionId}', function ($user, $sessionId) {
-    \Log::info('🔐 User trying to join channel', [
-        'user' => $user ? $user->id : 'guest',
-        'sessionId' => $sessionId
-    ]);
+    // \Log::info('🔐 User trying to join channel', [
+    //     'user' => $user ? $user->id : 'guest',
+    //     'sessionId' => $sessionId
+    // ]);
 
     // Chỉ cho phép nếu đã đăng nhập
     if ($user) {
