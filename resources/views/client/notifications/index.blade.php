@@ -300,18 +300,8 @@
                                     notifEl.querySelector('.status-dot, .unread-indicator')?.remove();
                                 }
 
-                                // ✅ Giảm biến toàn cục unreadCount
-                                const unreadBadge = document.querySelector('#unreadCount');
-                                if (Alpine.store('notification').unreadCount > 0) {
-                                    Alpine.store('notification').unreadCount--;
-                                    if (Alpine.store('notification').unreadCount <= 0) {
-                                        Alpine.store('notification').unreadCount = 0;
-                                        if (unreadBadge) unreadBadge.remove();
-                                    } else if (unreadBadge) {
-                                        unreadBadge.textContent = Alpine.store('notification')
-                                            .unreadCount;
-                                    }
-                                }
+                                // ✅ Giảm biến toàn cục
+                                this.decreaseUnread();
 
                                 this.markAsRead(notificationId);
                             } else {
@@ -348,11 +338,39 @@
                             .then(data => {
                                 if (data.success) {
                                     console.log('Đánh dấu đã đọc thành công');
+
+                                    // Bắn event để các nơi khác (sidebar, chuông) cùng giảm
+                                    window.dispatchEvent(new CustomEvent('notificationRead', {
+                                        detail: {
+                                            notificationId: notificationId
+                                        }
+                                    }));
                                 }
                             })
                             .catch(error => {
                                 console.error('Lỗi khi đánh dấu đã đọc:', error);
                             });
+                    },
+
+                    decreaseUnread() {
+                        const unreadBadge = document.querySelector('#unreadCount');
+                        const bellBadge = document.querySelector('#notification-badge');
+
+                        if (Alpine.store('notification').unreadCount > 0) {
+                            Alpine.store('notification').unreadCount--;
+
+                            if (Alpine.store('notification').unreadCount <= 0) {
+                                Alpine.store('notification').unreadCount = 0;
+                                if (unreadBadge) unreadBadge.remove();
+                                if (bellBadge) bellBadge.classList.add('hidden');
+                            } else {
+                                if (unreadBadge) unreadBadge.textContent = Alpine.store('notification')
+                                    .unreadCount;
+                                if (bellBadge) bellBadge.textContent = Alpine.store('notification')
+                                    .unreadCount;
+                                bellBadge.classList.remove('hidden');
+                            }
+                        }
                     },
 
                     formatDate(isoString) {
@@ -369,7 +387,27 @@
                 }));
             });
 
-            // Modal xử lý đánh dấu tất cả / xoá tất cả
+            // ✅ Lắng nghe event toàn cục, cập nhật cả chuông và sidebar
+            window.addEventListener('notificationRead', () => {
+                const unreadBadge = document.querySelector('#unreadCount');
+                const bellBadge = document.querySelector('#notification-badge');
+
+                if (Alpine.store('notification').unreadCount > 0) {
+                    Alpine.store('notification').unreadCount--;
+
+                    if (Alpine.store('notification').unreadCount <= 0) {
+                        Alpine.store('notification').unreadCount = 0;
+                        if (unreadBadge) unreadBadge.remove();
+                        if (bellBadge) bellBadge.classList.add('hidden');
+                    } else {
+                        if (unreadBadge) unreadBadge.textContent = Alpine.store('notification').unreadCount;
+                        if (bellBadge) bellBadge.textContent = Alpine.store('notification').unreadCount;
+                        bellBadge.classList.remove('hidden');
+                    }
+                }
+            });
+
+            // ==== Modal xử lý đánh dấu tất cả / xoá tất cả ====
             function openMarkAllModal() {
                 document.getElementById('markAllModal').classList.remove('hidden');
                 document.getElementById('markAllModal').classList.add('flex');
@@ -410,6 +448,7 @@
             }
         </script>
     @endpush
+
 
     @push('styles')
         <style>

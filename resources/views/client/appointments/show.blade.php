@@ -4,7 +4,7 @@
 @section('title', 'Chi tiết lịch hẹn')
 
 @section('profile-content')
-    <div class="lg:w-3/4">
+    <div class="lg:w-3.5/4">
         <!-- Header Section -->
         <div class="gradient-bg text-white py-8 mb-8 rounded-2xl">
             <div class="max-w-6xl mx-auto px-6">
