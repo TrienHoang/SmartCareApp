@@ -1,6 +1,6 @@
 @extends('admin.dashboard')
 @section('content')
-    <div class="container-fluid py-4 dashboard-scroll" style="height:991.98px;">
+    <div class="container-fluid py-4" style="height:991.98px;">
         <div class="d-flex justify-content-end mb-3 gap-2">
             <button class="btn btn-success btn-sm" onclick="exportData('excel')">
                 <i class="fas fa-file-excel me-1"></i> Xuất Excel
@@ -202,7 +202,7 @@
 
         <!-- Biểu đồ và tăng trưởng -->
         <div class="row g-4 mb-4">
-            <div class="col-lg-8">
+            <div class="col-lg-12">
                 <div class="card border-0 shadow h-100">
                     <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
                         <h5 class="mb-0 fw-bold">
@@ -246,19 +246,52 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="row g-4">
+            {{-- Bộ lọc tháng/năm --}}
+            <form method="GET" action="{{ route('admin.dashboard.index') }}" class="row g-3 align-items-end mb-4">
+                <div class="col-lg-6">
+                    <label for="month" class="form-label">Tháng</label>
+                    <select class="form-select" id="month" name="month">
+                        @for ($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}" {{ $m == $month ? 'selected' : '' }}>
+                                Tháng {{ $m }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
 
-            <div class="col-lg-4">
+                <div class="col-md-3">
+                    <label for="year" class="form-label">Năm</label>
+                    <select class="form-select" id="year" name="year">
+                        @for ($y = now()->year; $y >= now()->year - 5; $y--)
+                            <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>
+                                {{ $y }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-1"></i> Lọc
+                    </button>
+                </div>
+            </form>
+
+            {{-- Card tăng trưởng đặt lịch --}}
+            <div class="col-lg-6">
                 <div class="card border-0 shadow h-100">
                     <div class="card-header bg-white border-0 py-3">
                         <h5 class="mb-0 fw-bold">
-                            <i class="fas fa-trending-up text-success me-2"></i>
-                            Tăng trưởng
+                            <i class="fas fa-calendar-check text-primary me-2"></i>
+                            Tăng trưởng Đặt lịch
                         </h5>
                     </div>
                     <div class="card-body d-flex flex-column justify-content-center text-center">
                         <div class="mb-3">
                             @if ($bookingGrowthValue > 0)
-                                <div class=" bg-opacity-10 p-4 rounded-3 mb-3">
+                                <div class="bg-success bg-opacity-10 p-4 rounded-3 mb-3">
                                     <i class="fas fa-arrow-up text-success fa-3x mb-2"></i>
                                     <h3 class="text-success fw-bold mb-0">+{{ $bookingGrowthValue }}%</h3>
                                 </div>
@@ -276,13 +309,64 @@
                                 </div>
                                 <p class="text-secondary fw-semibold mb-1">Không thay đổi</p>
                             @endif
-                            <small class="text-muted">{{ $bookingGrowthLabel ?? 'so với tháng trước' }}</small>
+
+                            <small class="text-muted">
+                                {{ $bookingGrowthLabel ?? 'So với kỳ trước' }}
+                            </small>
+                        </div>
+
+                        <div class="d-flex justify-content-between text-muted small">
+                            <span>Hiện tại: <strong>{{ $bookingCurrent }}</strong></span>
+                            <span>Kỳ trước: <strong>{{ $bookingPrevious }}</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Card tăng trưởng doanh thu --}}
+            <div class="col-lg-6">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-dollar-sign text-success me-2"></i>
+                            Tăng trưởng Doanh thu
+                        </h5>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-center text-center">
+                        <div class="mb-3">
+                            @if ($revenueGrowthValue > 0)
+                                <div class="bg-success bg-opacity-10 p-4 rounded-3 mb-3">
+                                    <i class="fas fa-arrow-up text-success fa-3x mb-2"></i>
+                                    <h3 class="text-success fw-bold mb-0">+{{ $revenueGrowthValue }}%</h3>
+                                </div>
+                                <p class="text-success fw-semibold mb-1">Tăng trưởng tích cực</p>
+                            @elseif($revenueGrowthValue < 0)
+                                <div class="bg-danger bg-opacity-10 p-4 rounded-3 mb-3">
+                                    <i class="fas fa-arrow-down text-danger fa-3x mb-2"></i>
+                                    <h3 class="text-danger fw-bold mb-0">{{ $revenueGrowthValue }}%</h3>
+                                </div>
+                                <p class="text-danger fw-semibold mb-1">Giảm so với kỳ trước</p>
+                            @else
+                                <div class="bg-secondary bg-opacity-10 p-4 rounded-3 mb-3">
+                                    <i class="fas fa-minus text-secondary fa-3x mb-2"></i>
+                                    <h3 class="text-secondary fw-bold mb-0">0%</h3>
+                                </div>
+                                <p class="text-secondary fw-semibold mb-1">Không thay đổi</p>
+                            @endif
+
+                            <small class="text-muted">
+                                {{ $revenueGrowthLabel ?? 'So với kỳ trước' }}
+                            </small>
+                        </div>
+
+                        <div class="d-flex justify-content-between text-muted small">
+                            <span>Hiện tại: <strong>{{ number_format($revenueCurrent) }} đ</strong></span>
+                            <span>Kỳ trước: <strong>{{ number_format($revenuePrevious) }} đ</strong></span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
         <!-- Bảng thống kê chi tiết -->
         <div class="row g-4 mb-4">
             <div class="col-12">
@@ -337,24 +421,35 @@
         <div class="row g-4 mb-4">
             <div class="col-lg-6">
                 <div class="card border-0 shadow h-100">
-                    <div class="card-header bg-white border-0 py-3">
+                    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 fw-bold">
                             <i class="fas fa-chart-pie text-warning me-2"></i>
                             Thống kê dịch vụ
+                            <span class="text-muted small" id="serviceFilterLabel">
+                                ({{ request('type') == 'month' ? 'Tháng ' . request('month') . '/' . request('year') : 'Năm ' . request('year', now()->year) }})
+                            </span>
                         </h5>
+
                     </div>
+
                     <div class="card-body">
                         <canvas id="serviceChart" height="200"></canvas>
+
                         <div class="text-center mt-3 p-3 bg-light rounded-3">
                             <strong class="text-muted">Dịch vụ phổ biến nhất:</strong>
                             <div class="mt-2">
-                                <span class="badge bg-primary fs-6">{{ $topService['name'] ?? 'Không có dữ liệu' }}</span>
-                                <div class="text-muted small mt-1">{{ $topService['bookings'] ?? 0 }} lượt đặt</div>
+                                <span class="badge bg-primary fs-6" id="topServiceName">
+                                    {{ $topService['name'] ?? 'Không có dữ liệu' }}
+                                </span>
+                                <div class="text-muted small mt-1" id="topServiceBookings">
+                                    {{ $topService['bookings'] ?? 0 }} lượt đặt
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
 
             <div class="col-lg-6">
                 <div class="card border-0 shadow h-100">
@@ -423,9 +518,9 @@
                                     <div class="d-flex align-items-center">
                                         <i class="fas fa-clock text-success fa-2x me-3"></i>
                                         <div class="flex-grow-1">
-                                            <h6 class="text-muted mb-1">Tỷ lệ khám đúng hẹn</h6>
+                                            <h6 class="text-muted mb-1">Tỷ lệ hoàn thành</h6>
                                             <h3 class="fw-bold text-success mb-0">
-                                                {{ $performanceStats['on_time_rate'] ?? '--' }}%</h3>
+                                                {{ $performanceStats['completed_rate'] ?? '--' }}%</h3>
                                         </div>
                                     </div>
                                 </div>

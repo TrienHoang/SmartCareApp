@@ -16,7 +16,8 @@ class DoctorLeave extends Model
         'end_date',
         'reason',
         'created_at',
-        'approved'
+        'approved',
+        'replacement_doctor_id',
     ];
     public function doctor()
     {
@@ -25,5 +26,9 @@ class DoctorLeave extends Model
     public function room()
     {
         return $this->belongsTo(Room::class);
+    }
+    public function replacementDoctor()
+    {
+        return $this->belongsTo(Doctor::class, 'replacement_doctor_id');
     }
 }
