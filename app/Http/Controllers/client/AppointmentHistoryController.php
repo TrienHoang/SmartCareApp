@@ -26,6 +26,7 @@ class AppointmentHistoryController extends Controller
             'review',
         ])
             ->where('patient_id', $user->id)
+            ->where('status', 'completed') // Chỉ lấy các cuộc hẹn đã hoàn thành
             ->orderByDesc('appointment_time')
             ->get();
 

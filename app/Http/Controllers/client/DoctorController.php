@@ -1,226 +1,152 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 use App\Models\Doctor;
-use App\Models\User;
-use App\Models\Department;
-use App\Models\Room;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Review;
 use App\Models\Appointment;
-use App\Models\Service;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-
-
+use App\Models\Department;
 
 class DoctorController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $query = Doctor::whereHas('user', function ($q) {
-            $q->where('role_id', 2);
-        })->with(['user', 'department', 'room']);
+        $doctors = Doctor::withWhereHas('user', function ($query) {
+            $query->where('status', 'online');
+        })
+            ->with([
+                'department',
+                'educations',
+                'experiences',
+                'achievements',
+                'specialties',
+                'services',
+            ])
+            ->get();
 
-        if ($request->filled('department_id')) {
-            $query->where('department_id', $request->department_id);
-        }
+        // Tính số năm kinh nghiệm cho từng bác sĩ
+        foreach ($doctors as $doctor) {
+            $startYear = $doctor->experiences->min('start_year');
+            $endYears = $doctor->experiences->map(function ($exp) {
+                return $exp->end_year ?? now()->year;
+            });
+            $endYear = $endYears->max();
+            $experienceYears = 0;
 
-        if ($request->filled('specialization')) {
-            $query->where('specialization', 'like', '%' . $request->specialization . '%');
-        }
-
-        $doctors = $query->paginate(10);
-        $departments = Department::all();
-
-        return view('admin.doctors.index', compact('doctors', 'departments'));
-    }
-
-public function create()
-{
-    $existingDoctorUserIds = Doctor::pluck('user_id')->toArray();
-
-    $availableUsers = User::where('role_id', 2)
-        ->whereNotIn('id', $existingDoctorUserIds)
-        ->get();
-
-    $departments = Department::all();
-    $services = Service::where('status', 'active')->orderBy('name')->get(); // 👈 sửa ở đây
-
-    return view('admin.doctors.create', compact('availableUsers', 'departments', 'services'));
-}
-
-
-
-    public function toggleStatus(Request $request, User $user)
-    {
-        if ($user->role_id != 2) {
-            return response()->json(['success' => false, 'message' => 'Không phải tài khoản bác sĩ.']);
-        }
-
-        $user->status = $user->status === 'online' ? 'offline' : 'online';
-        $user->save();
-
-        return response()->json([
-            'success' => true,
-            'status' => $user->status,
-            'message' => 'Trạng thái đã được cập nhật.'
-        ]);
-    }
-
-public function store(Request $request)
-{
-    $request->validate([
-        'full_name'      => 'required|string|max:100',
-        'username'       => 'required|string|max:50|unique:users,username',
-        'email'          => 'required|email|unique:users,email',
-        'password'       => 'required|string|min:6',
-        'avatar'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'department_id'  => 'required|exists:departments,id',
-        'specialization' => 'required|string|max:100',
-        'biography'      => 'nullable|string|max:1000',
-    ], [
-        'full_name.required'      => 'Vui lòng nhập họ tên.',
-        'username.required'       => 'Vui lòng nhập tên đăng nhập.',
-        'username.unique'         => 'Tên đăng nhập đã tồn tại.',
-        'email.required'          => 'Vui lòng nhập email.',
-        'email.email'             => 'Email không hợp lệ.',
-        'email.unique'            => 'Email đã tồn tại.',
-        'password.required'       => 'Vui lòng nhập mật khẩu.',
-        'password.min'            => 'Mật khẩu phải có ít nhất :min ký tự.',
-        'department_id.required'  => 'Vui lòng chọn phòng ban.',
-        'specialization.required' => 'Vui lòng nhập chuyên khoa.',
-    ]);
-
-    $avatarPath = null;
-    if ($request->hasFile('avatar')) {
-        $avatarPath = $request->file('avatar')->store('avatars', 'public');
-    }
-
-    $user = User::create([
-        'full_name' => $request->full_name,
-        'username'  => $request->username,
-        'email'     => $request->email,
-        'password'  => Hash::make($request->password),
-        'role_id'   => 2, // bác sĩ
-        'avatar'    => $avatarPath,
-        'status'    => 'online',
-    ]);
-
-    Doctor::create([
-        'user_id'       => $user->id,
-        'department_id' => $request->department_id,
-        'specialization'=> $request->specialization,
-        'biography'     => $request->biography,
-    ]);
-
-    return redirect()->route('admin.doctors.index')->with('success', 'Đã thêm bác sĩ mới thành công.');
-}
-
-
-
-
-
-
-
-
-    protected function generateUsername($fullName)
-    {
-        $base = Str::slug($fullName);
-        $username = $base;
-        $i = 1;
-
-        while (User::where('username', $username)->exists()) {
-            $username = $base . $i++;
-        }
-
-        return $username;
-    }
-
-    public function edit(Doctor $doctor)
-    {
-        $departments = Department::all();
-        $rooms = Room::all();
-        $users = User::all();
-
-        return view('admin.doctors.edit', compact('doctor', 'departments', 'rooms', 'users'));
-    }
-
-public function update(Request $request, Doctor $doctor)
-{
-    $validator = Validator::make($request->all(), [
-        'specialization' => 'required|string|max:100',
-        'department_id'  => 'required|exists:departments,id',
-        'biography'      => 'nullable|string|max:1000',
-    ], [
-        'specialization.required' => 'Vui lòng nhập chuyên khoa.',
-        'department_id.required'  => 'Vui lòng chọn phòng ban.',
-    ]);
-
-    if ($validator->fails()) {
-        return back()->withErrors($validator)->withInput();
-    }
-
-    try {
-        DB::beginTransaction();
-
-        // cập nhật bác sĩ
-        $doctor->update([
-            'specialization' => $request->specialization,
-            'department_id'  => $request->department_id,
-            'biography'      => $request->biography,
-        ]);
-
-        // cập nhật thông tin user (nếu cần)
-        if ($doctor->user) {
-            $doctor->user->update([
-                'full_name' => $request->full_name,
-                'email'     => $request->email,
-            ]);
-        }
-
-        DB::commit();
-
-        $name = $doctor->user->full_name ?? 'bác sĩ';
-        return redirect()->route('admin.doctors.index')->with('success', "Đã cập nhật thông tin bác sĩ {$name} thành công.");
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Lỗi khi cập nhật bác sĩ: ' . $e->getMessage());
-
-        return back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật. Vui lòng thử lại.');
-    }
-}
-
-
-
-    public function destroy(Doctor $doctor)
-    {
-        $userName = $doctor->user->full_name ?? 'bác sĩ';
-
-        try {
-            if (Appointment::where('doctor_id', $doctor->id)->exists()) {
-                return redirect()->route('admin.doctors.index')
-                    ->with('error', "Không thể xóa bác sĩ {$userName} vì đã có lịch hẹn.");
+            if ($startYear) {
+                $experienceYears = $endYear - $startYear;
             }
 
-            $doctor->delete();
-
-            return redirect()->route('admin.doctors.index')
-                ->with('success', "Đã xóa bác sĩ {$userName} thành công.");
-        } catch (\Exception $e) {
-            Log::error('Lỗi khi xóa bác sĩ: ' . $e->getMessage());
-
-            return redirect()->route('admin.doctors.index')
-                ->with('error', 'Có lỗi xảy ra khi xóa bác sĩ. Vui lòng thử lại.');
+            $doctor->experience_years = $experienceYears > 0 ? $experienceYears : null;
         }
+
+        $departments = Department::get();
+
+        \Log::info('Danh sách bác sĩ:', [
+            'count' => $doctors->count(),
+        ]);
+
+        return view('client.doctors', compact('doctors', 'departments'));
     }
 
-    public function show(Doctor $doctor)
+    public function show($id)
     {
-        return view('admin.doctors.show', compact('doctor'));
+        $doctor = Doctor::with([
+            'user',
+            'department',
+            'educations',
+            'experiences',
+            'achievements',
+            'specialties',
+            'services',
+            'reviews' => function ($query) {
+                $query->where('is_visible', true)
+                    ->latest()
+                    ->with([
+                        'patient',
+                        'replies.user',
+                        'appointment.order.services'
+                    ]);
+            },
+        ])->findOrFail($id);
+
+        // Lấy năm bắt đầu sớm nhất
+        $startYear = $doctor->experiences->min('start_year');
+
+        // Xử lý end_year: nếu có null => coi là năm hiện tại
+        $endYears = $doctor->experiences->map(function ($exp) {
+            return $exp->end_year ?? now()->year;
+        });
+
+        // Lấy năm kết thúc muộn nhất
+        $endYear = $endYears->max();
+
+        // Tính số năm kinh nghiệm
+        $experienceYears = 0;
+        if ($startYear) {
+            $experienceYears = $endYear - $startYear;
+        }
+
+        $doctor->experience_years = $experienceYears > 0 ? $experienceYears : null;
+
+        // ✅ Tính điểm trung bình và phân bổ đánh giá
+        $visibleReviews = $doctor->reviews;
+        $doctor->average_rating = round($visibleReviews->avg('rating'), 1);
+        $doctor->review_count = $visibleReviews->count();
+
+        $ratingBreakdown = collect([5, 4, 3, 2, 1])->mapWithKeys(function ($star) use ($visibleReviews) {
+            return [$star => $visibleReviews->where('rating', $star)->count()];
+        });
+
+        // ✅ Kiểm tra người dùng đăng nhập và lấy lịch hẹn đã hoàn thành
+        $appointment = null;
+        $alreadyReviewed = false;
+        $userReview = null;
+
+        if (Auth::check()) {
+            $appointment = Appointment::where('doctor_id', $doctor->id)
+                ->where('patient_id', Auth::id())
+                ->where('status', 'completed')
+                ->latest()
+                ->first();
+
+            if ($appointment) {
+                $alreadyReviewed = Review::where('appointment_id', $appointment->id)
+                    ->where('patient_id', Auth::id())
+                    ->exists();
+
+                if ($alreadyReviewed) {
+                    $userReview = Review::where('appointment_id', $appointment->id)
+                        ->where('patient_id', Auth::id())
+                        ->with([
+                            'replies.user',
+                            'appointment.order.services'
+                        ])
+                        ->first();
+                }
+            }
+        }
+
+        // Danh sách các bác sĩ cùng chuyên khoa
+        $doctor->related_doctors = Doctor::where('department_id', $doctor->department_id)
+            ->where('id', '!=', $doctor->id)
+            ->with([
+                'user',
+                'department',
+                'experiences',
+            ])
+            ->limit(4)
+            ->get();
+
+
+        return view('client.doctors_detail', compact(
+            'doctor',
+            'ratingBreakdown',
+            'appointment',
+            'alreadyReviewed',
+            'userReview'
+        ));
     }
 }

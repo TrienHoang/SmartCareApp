@@ -182,8 +182,8 @@
                         </p>
                         <div class="text-center">
                             <a href="tel:0987654321"
-                                class="inline-block bg-red-600 text-white px-8 py-4 rounded-full font-bold text-xl hover:bg-red-700 transition-colors">
-                                📞 0999.889.998
+                                class="inline-block bg-red-600 text-white px-5 py-3 rounded-full font-bold text-xl hover:bg-red-700 transition-colors">
+                                0999.889.998
                             </a>
                         </div>
                         <p class="text-sm text-red-600 mt-4 text-center">
@@ -249,7 +249,7 @@
                         <div class="rounded-lg overflow-hidden shadow-lg">
                             <iframe
                                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.804950433347!2d105.73387658047295!3d21.04048903740518!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3134550ab1db2433%3A0x9febb50e17509deb!2zMTMgUC4gVHLhu4tuaCBWxINuIELDtCwgWHXDom4gUGjGsMahbmcsIE5hbSBU4burIExpw6ptLCBIw6AgTuG7mWksIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1753007264074!5m2!1svi!2s"
-                                width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"
+                                width="700" height="400" style="border:0;" allowfullscreen="" loading="lazy"
                                 referrerpolicy="no-referrer-when-downgrade"></iframe>
                         </div>
                     </div>
@@ -365,23 +365,11 @@
                     phone: '0999.383.838'
                 },
                 {
-                    name: 'Đặt Lịch Hẹn',
-                    phone: '0666.456.789'
-                },
-                {
                     name: 'Khẩn Cấp',
                     phone: '0363.366.666'
                 },
                 {
-                    name: 'Tư Vấn Y Khoa',
-                    phone: '0122.242.222'
-                },
-                {
-                    name: 'Kế Toán',
-                    phone: '0355.456.553'
-                },
-                {
-                    name: 'Khiếu Nại',
+                    name: 'Tư vấn',
                     phone: '0677.767.766'
                 }
             ];
