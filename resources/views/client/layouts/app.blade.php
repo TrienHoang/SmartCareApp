@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="user-id" content="{{ auth()->id() }}">
     <title>@yield('title', 'SmartCare - Hệ thống Y tế')</title>
-
+    <link rel="icon" href="{{ asset('path/to/your-icon.png') }}" type="image/png">
     <!-- Google Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
 
