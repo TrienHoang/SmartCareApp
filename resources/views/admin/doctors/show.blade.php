@@ -4,60 +4,46 @@
 <div class="container my-4">
     <h3 class="mb-4">Chi tiết bác sĩ</h3>
 
-    <div class="card">
+    <div class="card shadow-sm border-0">
         <div class="card-body">
-            {{-- Ảnh đại diện --}}
-            <div class="mb-3 text-center">
-                @if($doctor->user->avatar)
-                    <img src="{{ asset('storage/' . $doctor->user->avatar) }}" 
-                         alt="Avatar" class="rounded-circle" 
-                         style="width: 150px; height: 150px; object-fit: cover;">
-                @else
-                    <img src="https://via.placeholder.com/150" 
-                         alt="No Avatar" class="rounded-circle">
-                @endif
+            <div class="row">
+                {{-- Ảnh đại diện --}}
+                <div class="col-md-3 text-center mb-3">
+                    @if($doctor->user && $doctor->user->avatar)
+                        <img src="{{ asset('storage/' . $doctor->user->avatar) }}" 
+                             alt="Avatar" class="img-thumbnail rounded-circle" width="150">
+                    @else
+                        <img src="https://via.placeholder.com/150" 
+                             alt="Avatar" class="img-thumbnail rounded-circle">
+                    @endif
+                </div>
+
+                {{-- Thông tin cơ bản --}}
+                <div class="col-md-9">
+                    <h4 class="fw-bold mb-3">{{ $doctor->user->full_name ?? 'Không rõ tên' }}</h4>
+                    <p><strong>Email:</strong> {{ $doctor->user->email ?? 'N/A' }}</p>
+                    <p><strong>Tên đăng nhập:</strong> {{ $doctor->user->username ?? 'N/A' }}</p>
+                    <p><strong>Phòng ban:</strong> {{ $doctor->department->name ?? 'Chưa phân công' }}</p>
+                    <p><strong>Chuyên khoa:</strong> {{ $doctor->specialization ?? 'Chưa cập nhật' }}</p>
+                    <p><strong>Trạng thái:</strong> 
+                        <span class="badge bg-{{ $doctor->user->status === 'online' ? 'success' : 'secondary' }}">
+                            {{ ucfirst($doctor->user->status) }}
+                        </span>
+                    </p>
+                </div>
             </div>
 
-            {{-- Thông tin cá nhân --}}
-            <table class="table table-bordered">
-                <tr>
-                    <th>Họ và tên</th>
-                    <td>{{ $doctor->user->full_name }}</td>
-                </tr>
-                <tr>
-                    <th>Email</th>
-                    <td>{{ $doctor->user->email }}</td>
-                </tr>
-                <tr>
-                    <th>Phòng ban</th>
-                    <td>{{ $doctor->department->name ?? 'Chưa có phòng ban' }}</td>
-                </tr>
+            <hr>
 
-                <tr>
-                    <th>Tiểu sử</th>
-                    <td>{{ $doctor->biography ?? 'Chưa có' }}</td>
-                </tr>
-                <tr>
-                    <th>Dịch vụ</th>
-                    <td>
-                        @if($doctor->services->count() > 0)
-                            @foreach($doctor->services as $service)
-                                <span class="badge bg-info text-dark">{{ $service->name }}</span>
-                            @endforeach
-                        @else
-                            <span class="text-muted">Chưa có dịch vụ</span>
-                        @endif
-                    </td>
-                </tr>
-            </table>
+            {{-- Tiểu sử --}}
+            <div class="mt-3">
+                <h5 class="fw-semibold">Tiểu sử</h5>
+                <p>{{ $doctor->biography ?: 'Chưa có thông tin tiểu sử.' }}</p>
+            </div>
 
-            <div class="mt-3 text-end">
-                <a href="{{ route('admin.doctors.index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
-                </a>
-                <a href="{{ route('admin.doctors.edit', $doctor->id) }}" class="btn btn-primary">
-                    <i class="fas fa-edit me-1"></i> Chỉnh sửa
-                </a>
+            <div class="d-flex justify-content-end mt-4">
+                <a href="{{ route('admin.doctors.edit', $doctor->id) }}" class="btn btn-warning me-2">Chỉnh sửa</a>
+                <a href="{{ route('admin.doctors.index') }}" class="btn btn-secondary">Quay lại</a>
             </div>
         </div>
     </div>

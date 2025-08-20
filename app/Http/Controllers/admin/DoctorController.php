@@ -158,59 +158,62 @@ $query = Doctor::whereHas('user', function ($q) use ($request) {
         return $username;
     }
 
-    public function edit(Doctor $doctor)
-    {
-        $departments = Department::all();
-        $services = Service::where('status', 'active')->orderBy('name')->get();
-        $selectedServiceIds = $doctor->services()->pluck('services.id')->toArray();
+public function edit(Doctor $doctor)
+{
+    $departments = Department::all();
+    $services = Service::where('status', 'active')->orderBy('name')->get();
 
-        return view('admin.doctors.edit', compact('doctor', 'departments', 'services', 'selectedServiceIds'));
-    }
+    // chỉ 1 dịch vụ (service_id), lấy ID đầu tiên nếu có
+    $selectedServiceId = $doctor->services()->pluck('services.id')->first();
 
-    public function update(Request $request, Doctor $doctor)
-    {
-        $request->validate([
-            'full_name'       => 'required|string|max:100',
-            'email'           => 'required|email|unique:users,email,' . $doctor->user_id,
-            'avatar'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'department_id'   => 'required|exists:departments,id',
-            'service_id'      => 'required|exists:services,id', // chỉ 1 dịch vụ
-            'specialization'  => 'nullable|string|max:100',
-            'biography'       => 'nullable|string|max:1000',
+    return view('admin.doctors.edit', compact('doctor', 'departments', 'services', 'selectedServiceId'));
+}
+
+public function update(Request $request, Doctor $doctor)
+{
+    $request->validate([
+        'full_name'       => 'required|string|max:100',
+        'email'           => 'required|email|unique:users,email,' . $doctor->user_id,
+        'avatar'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'department_id'   => 'required|exists:departments,id',
+        'service_id'      => 'required|exists:services,id', // đồng bộ với store
+        'specialization'  => 'nullable|string|max:100',
+        'biography'       => 'nullable|string|max:1000',
+    ]);
+
+    try {
+        DB::beginTransaction();
+
+        $avatarPath = $doctor->user->avatar;
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $doctor->user->update([
+            'full_name' => $request->full_name,
+            'email'     => $request->email,
+            'avatar'    => $avatarPath,
         ]);
 
-        try {
-            DB::beginTransaction();
+        $doctor->update([
+            'department_id'  => $request->department_id,
+            'specialization' => $request->specialization,
+            'biography'      => $request->biography,
+        ]);
 
-            $avatarPath = $doctor->user->avatar;
-            if ($request->hasFile('avatar')) {
-                $avatarPath = $request->file('avatar')->store('avatars', 'public');
-            }
+        // Gán lại dịch vụ (một dịch vụ duy nhất)
+        $doctor->services()->sync([$request->service_id]);
 
-            $doctor->user->update([
-                'full_name' => $request->full_name,
-                'email'     => $request->email,
-                'avatar'    => $avatarPath,
-            ]);
+        DB::commit();
 
-            $doctor->update([
-                'department_id'  => $request->department_id,
-                'specialization' => $request->specialization,
-                'biography'      => $request->biography,
-            ]);
-
-            // Cập nhật dịch vụ (many-to-many)
-            $doctor->services()->sync([$request->service_id]);
-
-            DB::commit();
-
-            return redirect()->route('admin.doctors.index')->with('success', 'Cập nhật thông tin bác sĩ thành công.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Lỗi khi cập nhật bác sĩ: ' . $e->getMessage());
-            return back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật. Vui lòng thử lại.');
-        }
+        return redirect()->route('admin.doctors.index')->with('success', 'Cập nhật thông tin bác sĩ thành công.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Lỗi khi cập nhật bác sĩ: ' . $e->getMessage());
+        return back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật. Vui lòng thử lại.');
     }
+}
+
 
 
 

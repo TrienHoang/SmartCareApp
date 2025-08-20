@@ -70,26 +70,6 @@
             <hr class="my-3">
 
             <div class="row">
-                {{-- Chuyên môn (Danh mục dịch vụ) --}}
-<div class="col-md-6 mb-3">
-    <label class="form-label fw-semibold">Dịch vụ <span class="text-danger">*</span></label>
-    <select name="service_id" class="form-select @error('service_id') is-invalid @enderror">
-        <option value="">-- Chọn dịch vụ --</option>
-        @foreach($services as $service)
-            <option value="{{ $service->id }}" {{ old('service_id') == $service->id ? 'selected' : '' }}>
-                {{ $service->name }}
-            </option>
-        @endforeach
-    </select>
-    @error('service_id')
-        <div class="invalid-feedback d-block">{{ $message }}</div>
-    @enderror
-</div>
-
-
-
-
-
                 {{-- Phòng ban --}}
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-semibold">Phòng ban <span class="text-danger">*</span></label>
@@ -102,6 +82,16 @@
                         @endforeach
                     </select>
                     @error('department_id')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                {{-- Chuyên khoa --}}
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-semibold">Chuyên khoa <span class="text-danger">*</span></label>
+                    <input type="text" name="specialization" class="form-control @error('specialization') is-invalid @enderror"
+                           value="{{ old('specialization') }}" placeholder="VD: Nội khoa, Ngoại khoa, Tim mạch...">
+                    @error('specialization')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
                 </div>
@@ -122,6 +112,5 @@
                 <a href="{{ route('admin.doctors.index') }}" class="btn btn-secondary px-4">Quay lại</a>
             </div>
         </form>
-
     </div>
 @endsection
