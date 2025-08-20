@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('permissions', function (Blueprint $table) {
+        Schema::create('specialties', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique(); 
-            $table->string('description');   
-            $table->string('group');          
+            $table->string('name')->unique();            // Tên chuyên khoa (unique)
+            $table->string('description')->nullable();   // Mô tả chuyên khoa
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('permissions');
+        Schema::dropIfExists('specialties');
     }
 };
