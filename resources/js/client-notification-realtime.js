@@ -48,7 +48,7 @@ if (userId) {
 
             // Dropdown bell icon
             updateNotificationCountRealtime(e);
-            addNotificationToDropdown(e);
+            // addNotificationToDropdown(e);
             animateBellIcon();
             showToastNotification(e);
             prependNotificationToList(e); // danh sách @foreach
@@ -82,35 +82,35 @@ function updateNotificationCountRealtime(notification) {
 }
 
 // Thêm notification mới vào dropdown
-function addNotificationToDropdown(notification) {
-    if (!notificationList) return;
+// function addNotificationToDropdown(notification) {
+//     if (!notificationList) return;
 
-    // Xóa "Không có thông báo nào" nếu có
-    const emptyMessage = notificationList.querySelector('.text-gray-500');
-    if (emptyMessage && emptyMessage.textContent.includes('Không có thông báo')) {
-        emptyMessage.remove();
-    }
+//     // Xóa "Không có thông báo nào" nếu có
+//     const emptyMessage = notificationList.querySelector('.text-gray-500');
+//     if (emptyMessage && emptyMessage.textContent.includes('Không có thông báo')) {
+//         emptyMessage.remove();
+//     }
 
-    // Tạo notification item mới
-    const newNotificationHTML = `
-        <div class="p-3 hover:bg-gray-100 text-sm bg-blue-50 border-l-4 border-blue-400">
-            <div class="font-medium text-gray-800">${notification.title}</div>
-            <div class="text-gray-600 text-xs mt-1 line-clamp-2">${notification.content}</div>
-            <div class="text-blue-600 text-xs mt-1 font-medium">
-                Vừa xong • Mới
-            </div>
-        </div>
-    `;
+//     // Tạo notification item mới
+//     const newNotificationHTML = `
+//         <div class="p-3 hover:bg-gray-100 text-sm bg-blue-50 border-l-4 border-blue-400">
+//             <div class="font-medium text-gray-800">${notification.title}</div>
+//             <div class="text-gray-600 text-xs mt-1 line-clamp-2">${notification.content}</div>
+//             <div class="text-blue-600 text-xs mt-1 font-medium">
+//                 Vừa xong • Mới db
+//             </div>
+//         </div>
+//     `;
 
-    // Thêm vào đầu list
-    notificationList.insertAdjacentHTML('afterbegin', newNotificationHTML);
+//     // Thêm vào đầu list
+//     notificationList.insertAdjacentHTML('afterbegin', newNotificationHTML);
 
-    // Giới hạn chỉ hiển thị 5 notifications mới nhất
-    const allItems = notificationList.querySelectorAll('.p-3');
-    if (allItems.length > 5) {
-        allItems[allItems.length - 1].remove();
-    }
-}
+//     // Giới hạn chỉ hiển thị 5 notifications mới nhất
+//     const allItems = notificationList.querySelectorAll('.p-3');
+//     if (allItems.length > 5) {
+//         allItems[allItems.length - 1].remove();
+//     }
+// }
 
 // Animation icon chuông
 function animateBellIcon() {
