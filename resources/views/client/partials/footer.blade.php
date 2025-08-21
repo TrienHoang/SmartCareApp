@@ -3,11 +3,12 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {{-- Logo và mô tả --}}
             <div>
-                <div class="flex items-center space-x-2 mb-4">
-                    <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
-                        <i data-lucide="stethoscope" class="w-6 h-6 text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold">SmartCare</h3>
+                <div class="flex items-center space-x-2 mx-5">
+                    <a href="/">
+                        <img src="{{ asset('LayoutClient/img/logo.png') }}"
+                             alt="SmartCare"
+                             class="h-20 w-auto object-contain"> 
+                    </a>
                 </div>
                 <p class="text-gray-300 mb-4">
                     Hệ thống đặt lịch khám bệnh trực tuyến hiện đại, mang đến sự tiện lợi và chất lượng dịch vụ tốt nhất

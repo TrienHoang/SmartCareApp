@@ -3,24 +3,17 @@
     $avatar = $user && $user->avatar ? asset('storage/' . $user->avatar) : asset('default-avatar.png');
 @endphp
 
-{{-- @if (!$user)
-    <script>
-        window.location.href = '/login';
-    </script>
-@endif --}}
 
 <header class="bg-white shadow-md sticky top-0 z-50" x-data="{ menuOpen: false }">
     <div class="container mx-auto px-4 py-4">
         <div class="flex justify-around items-center">
             <div class="flex items-center space-x-2">
-                {{-- <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
-                    <i data-lucide="stethoscope" class="w-6 h-6 text-white"></i>
-                </div> --}}
                 <a href="/">
-                    <h1 class="text-2xl font-bold gradient-text">SmartCare</h1>
+                    <img src="{{ asset('LayoutClient/img/logo.png') }}"
+                         alt="SmartCare"
+                         class="h-10 w-auto object-contain"> 
                 </a>
             </div>
-
             {{-- Desktop Menu --}}
             <nav class="hidden md:flex space-x-8">
                 @php

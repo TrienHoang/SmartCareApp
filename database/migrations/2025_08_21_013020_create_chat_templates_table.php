@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('permissions', function (Blueprint $table) {
+        Schema::create('chat_templates', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique(); 
-            $table->string('description');   
-            $table->string('group');          
+            $table->string('keyword');
+            $table->text('response');
+            $table->json('suggested_services')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->integer('priority')->default(0);
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('permissions');
+        Schema::dropIfExists('chat_templates');
     }
 };

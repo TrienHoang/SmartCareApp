@@ -24,8 +24,6 @@ class ServiceController extends Controller
         ->limit(6)
         ->get();
 
-        // dd($danh_muc_dich_vu);
-
         return view('client.services.index', compact('categories','danh_muc_dich_vu'));
     }
 
