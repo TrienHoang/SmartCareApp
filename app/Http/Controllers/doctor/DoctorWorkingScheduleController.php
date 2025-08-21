@@ -236,4 +236,6 @@ class DoctorWorkingScheduleController extends Controller
 
         return redirect()->route('doctor.working_schedules.index')->with('success', 'Xóa lịch làm việc thành công.');
     }
+
+
 }
