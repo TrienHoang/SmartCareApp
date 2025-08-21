@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\NewAdminNotification;
 use App\Http\Controllers\Controller;
 use App\Models\Admin_notification;
 use App\Models\Role;
@@ -362,7 +363,17 @@ class AdminNotificationController extends Controller
                 'content' => $adminNotification->content,
                 'type' => $adminNotification->type,
             ]));
+            Log::info("Broadcasting to user: " . $user->id);
+
+            event(new NewAdminNotification([
+                'id'      => $adminNotification->id,
+                'title'   => $adminNotification->title,
+                'content' => $adminNotification->content,
+                'type'    => $adminNotification->type,
+                'time'    => now()->toDateTimeString(),
+            ], $user->id));
         }
+
 
         if ($adminNotification->status === 'sending') {
             $adminNotification->update(['status' => 'sent', 'sent_at' => now()]);

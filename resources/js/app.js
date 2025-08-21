@@ -1,5 +1,8 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
+import './client-notification-realtime';
+import './client-notification-sidebar';
+import './client-notification-list';
 
 window.Alpine = Alpine;
 Alpine.start();
@@ -7,6 +10,8 @@ Alpine.start();
 // ✅ Đúng thư viện, đúng cú pháp
 import { createIcons, icons } from 'lucide';
 createIcons({ icons });
+
+    initNotifications();
 
 const sessionId = localStorage.getItem('chat_session_id');
 // console.log("🔌 Joining channel: chat-session-" + sessionId);

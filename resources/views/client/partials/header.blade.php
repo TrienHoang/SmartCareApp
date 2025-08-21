@@ -3,24 +3,17 @@
     $avatar = $user && $user->avatar ? asset('storage/' . $user->avatar) : asset('default-avatar.png');
 @endphp
 
-{{-- @if (!$user)
-    <script>
-        window.location.href = '/login';
-    </script>
-@endif --}}
 
 <header class="bg-white shadow-md sticky top-0 z-50" x-data="{ menuOpen: false }">
     <div class="container mx-auto px-4 py-4">
         <div class="flex justify-around items-center">
             <div class="flex items-center space-x-2">
-                {{-- <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
-                    <i data-lucide="stethoscope" class="w-6 h-6 text-white"></i>
-                </div> --}}
                 <a href="/">
-                    <h1 class="text-2xl font-bold gradient-text">SmartCare</h1>
+                    <img src="{{ asset('LayoutClient/img/logo.png') }}"
+                         alt="SmartCare"
+                         class="h-10 w-auto object-contain"> 
                 </a>
             </div>
-
             {{-- Desktop Menu --}}
             <nav class="hidden md:flex space-x-8">
                 @php
@@ -42,35 +35,9 @@
                 @endforeach
             </nav>
             <!-- Chuông thông báo -->
-            <div class="relative group cursor-pointer" style="justify-content: end" onclick="toggleNotifications()">
-                <i class="fas fa-bell text-xl text-gray-700"></i>
-                @if ($unreadNotificationsCount > 0)
-                    <span
-                        class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {{ $unreadNotificationsCount }}
-                    </span>
-                @endif
 
-                <div id="notification-dropdown"
-                    class="hidden absolute right-0 mt-2 w-96 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                    <div class="p-4 font-semibold border-b">Thông báo</div>
-                    <div class="max-h-60 overflow-y-auto divide-y" id="notification-list">
-                        @forelse ($notifications->take(5) as $notification)
-                            <div class="p-3 hover:bg-gray-100 text-sm">
-                                <div class="font-medium text-gray-800">{{ $notification->title }}</div>
-                                <div class="text-gray-500 text-xs">
-                                    {{ $notification->sent_at ? \Carbon\Carbon::parse($notification->sent_at)->diffForHumans() : '' }}
-                                </div>
-                            </div>
-                        @empty
-                            <div class="p-3 text-sm text-gray-500">Không có thông báo nào.</div>
-                        @endforelse
-                    </div>
-                    <div class="text-center p-2 text-sm text-blue-500 hover:underline">
-                        <a href="{{ route('client.notifications.index') }}">Xem tất cả</a>
-                    </div>
-                </div>
-            </div>
+          
+
 
             {{-- Tài khoản --}}
             <div class="hidden md:flex items-center space-x-4">

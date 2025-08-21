@@ -53,8 +53,8 @@ class DashboardController extends Controller
             ->whereYear('appointment_time', now()->year)
             ->groupBy('services.name')
             ->orderByDesc('bookings')
+            ->limit(10)   // 👉 chỉ lấy 10 dịch vụ có số bookings nhiều nhất
             ->get();
-
         $topService = $serviceStats->sortByDesc('bookings')->first();
 
         $today = Carbon::today();
@@ -67,9 +67,10 @@ class DashboardController extends Controller
         // Thống kê hôm nay
         $dailyStat = (object)[
             'total_revenue' => Appointment::whereDate('appointment_time', $today)
-                ->where('appointments.status', 'completed')
-                ->join('services', 'appointments.service_id', '=', 'services.id')
-                ->sum('services.price'),
+                ->whereIn('appointments.status', ['completed', 'pending', 'confirmed'])
+                ->join('payments', 'appointments.id', '=', 'payments.appointment_id')
+                ->sum('payments.amount'),
+
 
             'total_doctors' => Doctor::count(),
 
@@ -93,7 +94,14 @@ class DashboardController extends Controller
 
         // Thống kê toàn bộ hệ thống
         $globalStat = (object)[
-            'total_revenue' => Payment::where('status', 'paid')->sum('amount'),
+
+            'total_revenue' => Payment::where('status', 'paid')
+                ->where(function ($q) {
+                    $q->where('refund_status', 'none')
+                        ->orWhere('refund_status', 'failed')
+                        ->orWhereNull('refund_status');
+                })
+                ->sum('amount'),
             'total_doctors' => Doctor::count(),
             'total_patients' => $patientRole
                 ? User::where('role_id', $patientRole->id)->count()
@@ -105,24 +113,67 @@ class DashboardController extends Controller
             'appointments_cancelled' => Appointment::where('status', 'cancelled')->count(),
         ];
 
-        // 2. Thống kê tháng hiện tại & tháng trước
-        $monthlyStat = Statistic::where('type', 'monthly')
-            ->whereMonth('date', $month)
-            ->whereYear('date', $year)
-            ->first();
+        // Lấy tháng/năm từ request, mặc định = hiện tại
+        $month = $request->input('month', Carbon::now()->month);
+        $year = $request->input('year', Carbon::now()->year);
 
-        $prevMonth = Carbon::create($year, $month)->subMonth();
-        $prevMonthlyStat = Statistic::where('type', 'monthly')
-            ->whereMonth('date', $prevMonth->month)
-            ->whereYear('date', $prevMonth->year)
-            ->first();
+        // Tháng trước
+        $prevMonth = Carbon::create($year, $month, 1)->subMonth();
 
-        $bookingCurrent = $monthlyStat->total_appointments ?? 0;
-        $bookingPrevious = $prevMonthlyStat->total_appointments ?? 0;
-        $bookingGrowthValue = $bookingPrevious > 0
-            ? round((($bookingCurrent - $bookingPrevious) / $bookingPrevious) * 100)
-            : 0;
-        $bookingGrowthLabel = 'so với tháng trước';
+        // ===============================
+        // 📊 1. Lượt đặt lịch
+        // ===============================
+        $bookingCurrent = Appointment::whereMonth('appointment_time', $month)
+            ->whereYear('appointment_time', $year)
+            ->where('status', '!=', 'cancelled')
+            ->count();
+
+        $bookingPrevious = Appointment::whereMonth('appointment_time', $prevMonth->month)
+            ->whereYear('appointment_time', $prevMonth->year)
+            ->where('status', '!=', 'cancelled')
+            ->count();
+
+        if ($bookingPrevious > 0) {
+            $bookingGrowthValue = round((($bookingCurrent - $bookingPrevious) / $bookingPrevious) * 100);
+        } else {
+            $bookingGrowthValue = $bookingCurrent > 0 ? 100 : 0;
+        }
+        $bookingGrowthLabel = "So với {$prevMonth->month}/{$prevMonth->year}";
+
+        // ===============================
+        // 💰 2. Doanh thu
+        // ===============================
+
+
+        $revenueCurrent = Payment::whereMonth('paid_at', $month)
+            ->whereYear('paid_at', $year)
+            ->where('status', 'paid')
+            ->where('refund_status', 'none')
+            ->sum('amount');
+
+        $revenuePrevious = Payment::whereMonth('paid_at', $prevMonth->month)
+            ->whereYear('paid_at', $prevMonth->year)
+            ->where('status', 'paid')
+            ->where('refund_status', 'none')
+            ->sum('amount');
+
+        $revenueGrowthValue = $revenuePrevious > 0
+            ? round((($revenueCurrent - $revenuePrevious) / $revenuePrevious) * 100)
+            : ($revenueCurrent > 0 ? 100 : 0);
+
+        $revenueGrowthLabel = "So với {$prevMonth->month}/{$prevMonth->year}";
+
+
+
+
+        // Doanh thu
+        // $revenueCurrent = $monthlyStat->total_revenue ?? 0;
+        // $revenuePrevious = $prevMonthlyStat->total_revenue ?? 0;
+        // $revenueGrowthValue = $revenuePrevious > 0
+        //     ? round((($revenueCurrent - $revenuePrevious) / $revenuePrevious) * 100)
+        //     : 0;
+        // $revenueGrowthLabel = "So với {$prevMonth->month}/{$prevMonth->year}";
+
 
         // 3. Thống kê năm
         $yearlyStat = Statistic::where('type', 'yearly')
@@ -154,7 +205,7 @@ class DashboardController extends Controller
         foreach ($dates as $date) {
             $dailyLabels[] = $date->format('d/m');
             $dailyData[] = Appointment::whereDate('appointment_time', $date)
-                ->where('status', 'completed')
+                ->whereIn('status', ['completed', 'pending', 'confirmed'])
                 ->count();
         }
 
@@ -181,12 +232,16 @@ class DashboardController extends Controller
                 while ($currentDate <= $end) {
                     $timeLabels[] = $currentDate->format('d/m');
 
-                    $timeBookings[] = Appointment::whereDate('appointment_time', $currentDate)->count();
+                    $timeBookings[] = Appointment::whereDate('appointment_time', $currentDate)
+                        ->whereIn('status', ['completed', 'pending', 'confirmed'])
+                        ->count();
+
 
                     $timeRevenues[] = Appointment::whereDate('appointment_time', $currentDate)
-                        ->where('appointments.status', 'completed')
-                        ->join('services', 'appointments.service_id', '=', 'services.id')
-                        ->sum('services.price');
+                        ->whereIn('appointments.status', ['completed', 'pending', 'confirmed'])
+                        ->join('payments', 'appointments.id', '=', 'payments.appointment_id')
+                        ->sum('payments.amount');
+
 
                     $currentDate->addDay();
                 }
@@ -201,12 +256,16 @@ class DashboardController extends Controller
 
                     $timeLabels[] = $currentStart->format('d/m') . ' - ' . $weekEnd->format('d/m');
 
-                    $timeBookings[] = Appointment::whereBetween('appointment_time', [$currentStart, $weekEnd])->count();
+                    $timeBookings[] = Appointment::whereBetween('appointment_time', [$currentStart, $weekEnd])
+                        ->whereIn('status', ['completed', 'pending', 'confirmed'])
+                        ->count();
+
 
                     $timeRevenues[] = Appointment::whereBetween('appointment_time', [$currentStart, $weekEnd])
-                        ->where('appointments.status', 'completed')
-                        ->join('services', 'appointments.service_id', '=', 'services.id')
-                        ->sum('services.price');
+                        ->whereIn('appointments.status', ['completed', 'pending', 'confirmed'])
+                        ->join('payments', 'appointments.id', '=', 'payments.appointment_id')
+                        ->sum('payments.amount');
+
 
                     $currentStart->addWeek();
                 }
@@ -218,11 +277,14 @@ class DashboardController extends Controller
                     $dates = collect(range(0, 6))->map(fn($i) => now()->subDays($i))->reverse();
                     foreach ($dates as $date) {
                         $timeLabels[] = $date->format('d/m');
-                        $timeBookings[] = Appointment::whereDate('appointment_time', $date)->count();
+                        $timeBookings[] = Appointment::whereDate('appointment_time', $date)
+                            ->whereIn('status', ['completed', 'pending', 'confirmed'])
+                            ->count();
+
                         $timeRevenues[] = Appointment::whereDate('appointment_time', $date)
-                            ->where('appointments.status', 'completed')
-                            ->join('services', 'appointments.service_id', '=', 'services.id')
-                            ->sum('services.price');
+                            ->whereIn('appointments.status', ['completed', 'pending', 'confirmed'])
+                            ->join('payments', 'appointments.id', '=', 'payments.appointment_id')
+                            ->sum('payments.amount');
                     }
                     break;
 
@@ -232,11 +294,14 @@ class DashboardController extends Controller
                         $end = now()->copy()->subWeeks($i)->endOfWeek();
 
                         $timeLabels[] = 'Tuần ' . $start->format('d/m') . ' - ' . $end->format('d/m');
-                        $timeBookings[] = Appointment::whereBetween('appointment_time', [$start, $end])->count();
+                        $timeBookings[] = Appointment::whereBetween('appointment_time', [$start, $end])
+                            ->whereIn('status', ['completed', 'pending', 'confirmed'])
+                            ->count();
+
                         $timeRevenues[] = Appointment::whereBetween('appointment_time', [$start, $end])
-                            ->where('appointments.status', 'completed')
-                            ->join('services', 'appointments.service_id', '=', 'services.id')
-                            ->sum('services.price');
+                            ->whereIn('appointments.status', ['completed', 'pending', 'confirmed'])
+                            ->join('payments', 'appointments.id', '=', 'payments.appointment_id')
+                            ->sum('payments.amount');
                     }
                     break;
 
@@ -245,12 +310,14 @@ class DashboardController extends Controller
                         $timeLabels[] = 'Tháng ' . $i;
                         $timeBookings[] = Appointment::whereYear('appointment_time', now()->year)
                             ->whereMonth('appointment_time', $i)
+                            ->whereIn('status', ['completed', 'pending', 'confirmed'])
                             ->count();
+
                         $timeRevenues[] = Appointment::whereYear('appointment_time', now()->year)
                             ->whereMonth('appointment_time', $i)
-                            ->where('appointments.status', 'completed')
-                            ->join('services', 'appointments.service_id', '=', 'services.id')
-                            ->sum('services.price');
+                            ->whereIn('appointments.status', ['completed', 'pending', 'confirmed'])
+                            ->join('payments', 'appointments.id', '=', 'payments.appointment_id')
+                            ->sum('payments.amount');
                     }
                     break;
 
@@ -258,11 +325,14 @@ class DashboardController extends Controller
                     $startYear = now()->year - 4;
                     for ($i = $startYear; $i <= now()->year; $i++) {
                         $timeLabels[] = 'Năm ' . $i;
-                        $timeBookings[] = Appointment::whereYear('appointment_time', $i)->count();
+                        $timeBookings[] = Appointment::whereYear('appointment_time', $i)
+                            ->whereIn('status', ['completed', 'pending', 'confirmed'])
+                            ->count();
+
                         $timeRevenues[] = Appointment::whereYear('appointment_time', $i)
-                            ->where('appointments.status', 'completed')
-                            ->join('services', 'appointments.service_id', '=', 'services.id')
-                            ->sum('services.price');
+                            ->whereIn('appointments.status', ['completed', 'pending', 'confirmed'])
+                            ->join('payments', 'appointments.id', '=', 'payments.appointment_id')
+                            ->sum('payments.amount');
                     }
                     break;
             }
@@ -285,7 +355,7 @@ class DashboardController extends Controller
         $todayAppointmentsConfirmed = Appointment::whereDate('appointment_time', $today)->where('status', 'confirmed')->count();
 
         // Thống kê bệnh nhân
-        $patientRole = Role::where('name', 'patient')->first();
+        $patientRole = Role::where('name', 'nurse')->first();
         $patientRoleId = $patientRole?->id;
 
         $newThisWeek = User::where('role_id', $patientRoleId)
@@ -351,6 +421,9 @@ class DashboardController extends Controller
         $cancelRate = $totalAppointments > 0
             ? round($appointments->where('status', 'cancelled')->count() / $totalAppointments * 100, 1)
             : 0;
+        $completedRate = $totalAppointments > 0
+            ? round($appointments->where('status', 'completed')->count() / $totalAppointments * 100, 1)
+            : 0;
 
         $appointments = Appointment::where('status', 'completed')
             ->whereNotNull('check_in_time')
@@ -380,14 +453,13 @@ class DashboardController extends Controller
 
         $performanceStats = [
             'cancel_rate' => $cancelRate,
-            'on_time_rate' => $onTimeRate,
+            'completed_rate' => $completedRate,
             'avg_waiting_time' => $avgWaiting,
         ];
 
         return view('admin.dashboard.index', [
             'dailyStat' => $dailyStat,
             'globalStat' => $globalStat,
-            'monthlyStat' => $monthlyStat,
             'yearlyStat' => $yearlyStat,
             'selectedMonth' => $month,
             'selectedYear' => $year,
@@ -396,8 +468,16 @@ class DashboardController extends Controller
             'timeLabels' => $timeLabels,
             'timeBookings' => $timeBookings,
             'timeRevenues' => $timeRevenues,
+            'month' => $month,
+            'year' => $year,
+            'bookingCurrent' => $bookingCurrent,
+            'bookingPrevious' => $bookingPrevious,
             'bookingGrowthValue' => $bookingGrowthValue,
             'bookingGrowthLabel' => $bookingGrowthLabel,
+            'revenueCurrent' => $revenueCurrent,
+            'revenuePrevious' => $revenuePrevious,
+            'revenueGrowthValue' => $revenueGrowthValue,
+            'revenueGrowthLabel' => $revenueGrowthLabel,
             'todayAppointmentsTotal' => $todayAppointmentsTotal,
             'todayAppointmentsCompleted' => $todayAppointmentsCompleted,
             'todayAppointmentsCancelled' => $todayAppointmentsCancelled,
@@ -633,12 +713,12 @@ class DashboardController extends Controller
     private function getDashboardData(Request $request)
     {
         $today = Carbon::today();
-        $patientRole = Role::where('name', 'patient')->first();
+        $patientRole = Role::where('name', 'nurse')->first();
 
         // Thống kê hôm nay
         $dailyStat = (object)[
             'total_revenue' => Appointment::whereDate('appointment_time', $today)
-                ->where('appointments.status', 'completed')
+                ->whereIn('appointments.status', 'completed')
                 ->join('services', 'appointments.service_id', '=', 'services.id')
                 ->sum('services.price'),
             'total_doctors' => Doctor::count(),
@@ -652,7 +732,7 @@ class DashboardController extends Controller
 
         // Thống kê toàn hệ thống
         $globalStat = (object)[
-            'total_revenue' => Appointment::where('appointments.status', 'completed')
+            'total_revenue' => Appointment::whereIn('appointments.status', 'completed')
                 ->join('services', 'appointments.service_id', '=', 'services.id')
                 ->sum('services.price'),
 
@@ -698,7 +778,7 @@ class DashboardController extends Controller
                 $timeLabels[] = $date;
                 $timeBookings[] = Appointment::whereDate('appointment_time', now()->subDays($i))->count();
                 $timeRevenues[] = Appointment::whereDate('appointment_time', now()->subDays($i))
-                    ->where('appointments.status', 'completed')
+                    ->whereIn('appointments.status', ['completed', 'pending', 'confirmed'])
                     ->join('services', 'appointments.service_id', '=', 'services.id')
                     ->sum('services.price');
             }
@@ -713,7 +793,7 @@ class DashboardController extends Controller
                 $timeRevenues[] = Appointment::whereBetween('appointment_time', [
                     now()->subWeeks($i)->startOfWeek(),
                     now()->subWeeks($i)->endOfWeek()
-                ])->where('appointments.status', 'completed')
+                ])->whereIn('appointments.status', ['completed', 'pending', 'confirmed'])
                     ->join('services', 'appointments.service_id', '=', 'services.id')
                     ->sum('services.price');
             }
@@ -723,7 +803,7 @@ class DashboardController extends Controller
                 $timeLabels[] = 'Năm ' . $year;
                 $timeBookings[] = Appointment::whereYear('appointment_time', $year)->count();
                 $timeRevenues[] = Appointment::whereYear('appointment_time', $year)
-                    ->where('appointments.status', 'completed')
+                    ->whereIn('appointments.status', ['completed', 'pending', 'confirmed'])
                     ->join('services', 'appointments.service_id', '=', 'services.id')
                     ->sum('services.price');
             }
@@ -739,7 +819,7 @@ class DashboardController extends Controller
 
                 $timeBookings[] = Appointment::whereDate('appointment_time', $startDate)->count();
                 $timeRevenues[] = Appointment::whereDate('appointment_time', $startDate)
-                    ->where('appointments.status', 'completed')
+                    ->whereIn('appointments.status', ['completed', 'pending', 'confirmed'])
                     ->join('services', 'appointments.service_id', '=', 'services.id')
                     ->sum('services.price');
 
@@ -753,7 +833,7 @@ class DashboardController extends Controller
                     ->count();
                 $timeRevenues[] = Appointment::whereYear('appointment_time', now()->year)
                     ->whereMonth('appointment_time', $i)
-                    ->where('appointments.status', 'completed')
+                    ->whereIn('appointments.status', ['completed', 'pending', 'confirmed'])
                     ->join('services', 'appointments.service_id', '=', 'services.id')
                     ->sum('services.price');
             }
