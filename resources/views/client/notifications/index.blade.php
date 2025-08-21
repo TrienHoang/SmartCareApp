@@ -138,7 +138,7 @@
                             @endif
                         </div>
                     @endforeach
-                <
+                
                 {{-- Modal xem chi tiết thông báo --}}
                 <div x-show="open" x-cloak class="fixed z-50 inset-0 overflow-y-auto" aria-labelledby="modal-title"
                     role="dialog" aria-modal="true">
