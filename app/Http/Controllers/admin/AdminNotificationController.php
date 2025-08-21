@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Admin_notification; 
+use App\Models\Admin_notification;
 use App\Models\Role;
-use App\Models\User; 
-use App\Notifications\AdminPanelNotification; 
+use App\Models\User;
+use App\Notifications\AdminPanelNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -27,7 +27,7 @@ class AdminNotificationController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', '%' . $search . '%')
-                  ->orWhere('content', 'like', '%' . $search . '%');
+                    ->orWhere('content', 'like', '%' . $search . '%');
             });
         }
 
@@ -118,7 +118,7 @@ class AdminNotificationController extends Controller
             'scheduled_at' => 'nullable|date|after_or_equal:now',
             'send_now_checkbox' => 'nullable|boolean',
         ];
-    
+
         $messages = [
             'title.required' => 'Tiêu đề là bắt buộc.',
             'title.string' => 'Tiêu đề phải là chuỗi ký tự.',
@@ -140,11 +140,11 @@ class AdminNotificationController extends Controller
             'scheduled_at.after_or_equal' => 'Thời gian gửi phải lớn hơn hoặc bằng thời gian hiện tại.',
             'send_now_checkbox.boolean' => 'Giá trị gửi ngay phải là true hoặc false.',
         ];
-    
+
         $validated = $request->validate($rules, $messages);
 
         try {
-            DB::beginTransaction(); 
+            DB::beginTransaction();
             $status = 'draft';
             $sentAt = null;
 
@@ -240,21 +240,21 @@ class AdminNotificationController extends Controller
             'title.required' => 'Tiêu đề là bắt buộc.',
             'title.string' => 'Tiêu đề phải là chuỗi.',
             'title.max' => 'Tiêu đề không được vượt quá 255 ký tự.',
-        
+
             'content.required' => 'Nội dung là bắt buộc.',
             'content.string' => 'Nội dung phải là chuỗi.',
-        
+
             'type.required' => 'Loại thông báo là bắt buộc.',
             'type.string' => 'Loại thông báo phải là chuỗi.',
             'type.in' => 'Loại thông báo không hợp lệ.',
-        
+
             'recipient_type.required' => 'Loại người nhận là bắt buộc.',
             'recipient_type.string' => 'Loại người nhận phải là chuỗi.',
             'recipient_type.in' => 'Loại người nhận không hợp lệ.',
-        
+
             'recipient_ids.array' => 'Danh sách người nhận phải là một mảng.',
             'recipient_ids.*.integer' => 'ID người nhận phải là số nguyên.',
-        
+
             'scheduled_at.date' => 'Thời gian gửi phải là một ngày hợp lệ.',
             'scheduled_at.after_or_equal' => 'Thời gian gửi phải từ hiện tại trở đi.',
         ]);
@@ -369,7 +369,8 @@ class AdminNotificationController extends Controller
         }
     }
 
-    public function getUsers (Request $request){
+    public function getUsers(Request $request)
+    {
         $search = $request->query('search');
         $users = User::when($search, function ($query, $search) {
             return $query->where('full_name', 'like', '%' . $search . '%')
@@ -385,13 +386,35 @@ class AdminNotificationController extends Controller
         return response()->json(['results' => $results]);
     }
 
-    public function getRoles (Request $request){
+    public function getRoles(Request $request)
+    {
         $search = $request->query('search');
         $roles = Role::when($search, function ($query, $search) {
             return $query->where('name', 'like', '%' . $search . '%');
         })->limit(20)->get(['id', 'name as text']);
-        
+
         return response()->json(['results' => $roles]);
     }
 
+    public function markAllRead(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user || $user->role->name !== 'admin') {
+            abort(403, 'Bạn không có quyền thực hiện thao tác này');
+        }
+
+        $user->unreadNotifications->markAsRead();
+
+        return redirect()->back()->with('success', 'Tất cả thông báo đã được đánh dấu là đã đọc.');
+    }
+
+    public function history()
+    {
+        $user = auth()->user();
+
+        $notifications = $user->notifications()->orderByDesc('created_at')->paginate(20);
+
+        return view('admin.notifications.history', compact('notifications'));
+    }
 }
