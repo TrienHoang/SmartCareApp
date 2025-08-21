@@ -102,18 +102,18 @@ Route::get('/vnpay/return', [PaymentHistoryController::class, 'vnpayReturn'])
     ->name('vnpay.return');
 
 
-// Route::group([
-//     'prefix' => 'admin',
-//     'as' => 'admin.',
-//     'middleware' => 'checkAdmin'
-// ], function () {
-//     // Dashboard
-//     Route::get('/dashboard', function () {
-//         return view(view: 'admin.dashboard');
-//     })->name('dashboard');
-//     Route::get('dashboard/export-excel', [DashboardController::class, 'exportExcel']);
-//     Route::get('dashboard/export-pdf', [DashboardController::class, 'exportPdf']);
-// });
+Route::group([
+    'prefix' => 'admin',
+    'as' => 'admin.',
+    'middleware' => 'checkAdmin'
+], function () {
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return view(view: 'admin.dashboard');
+    })->name('dashboard');
+    Route::get('dashboard/export-excel', [DashboardController::class, 'exportExcel']);
+    Route::get('dashboard/export-pdf', [DashboardController::class, 'exportPdf']);
+});
 
 
 // Nhóm users

@@ -693,22 +693,266 @@ class DashboardController extends Controller
     }
     public function exportPdf(Request $request)
     {
-        $data = $this->getDashboardData($request);
+        // Lấy các thống kê giống hàm index
+        $doctorStats = Doctor::with('user')
+            ->withCount([
+                'appointments as completedAppointmentsCount' => function ($q) {
+                    $q->where('status', 'completed');
+                },
+                'appointments as totalAppointmentsCount'
+            ])
+            ->withAvg('reviews as average_rating', 'rating')
+            ->orderByDesc('totalAppointmentsCount')
+            ->get()
+            ->map(function ($doctor) {
+                return [
+                    'name' => $doctor->user->full_name ?? 'Không có tên',
+                    'avatar' => $doctor->user->avatar ?? 'default.png',
+                    'specialization' => $doctor->specialization ?? 'Chưa cập nhật',
+                    'completed_appointments' => $doctor->completedAppointmentsCount ?? 0,
+                    'total_appointments' => $doctor->totalAppointmentsCount ?? 0,
+                    'average_rating' => number_format($doctor->average_rating ?? 0, 1)
+                ];
+            });
 
-        $pdf = Pdf::loadView('admin.dashboard.pdf_export', $data)
-            ->setPaper('a4', 'portrait')
-            ->setOptions([
-                'dpi' => 150,
-                'defaultFont' => 'dejavusans',
-                'isHtml5ParserEnabled' => true,
-                'isRemoteEnabled' => true,
-            ]);
+        $serviceStats = Appointment::join('services', 'appointments.service_id', '=', 'services.id')
+            ->select('services.name', DB::raw('COUNT(*) as bookings'))
+            ->whereYear('appointment_time', now()->year)
+            ->groupBy('services.name')
+            ->orderByDesc('bookings')
+            ->limit(10)
+            ->get();
+        $topService = $serviceStats->sortByDesc('bookings')->first();
 
+        $today = Carbon::today();
+        $month = $request->input('month', now()->month);
+        $year = $request->input('year', now()->year);
 
-        $fileName = 'dashboard_report_' . Carbon::now()->format('Y_m_d_H_i_s') . '.pdf';
+        // Thống kê hôm nay
+        $patientRole = Role::where('name', 'patient')->first();
 
-        return $pdf->download($fileName);
-    }
+        $dailyStat = (object)[
+            'total_revenue' => Appointment::whereDate('appointment_time', $today)
+                ->whereIn('appointments.status', ['completed', 'pending', 'confirmed'])
+                ->join('payments', 'appointments.id', '=', 'payments.appointment_id')
+                ->sum('payments.amount'),
+            'total_doctors' => Doctor::count(),
+            'total_patients' => $patientRole
+                ? User::where('role_id', $patientRole->id)->count()
+                : 0,
+            'total_appointments' => Appointment::whereDate('appointment_time', $today)->count(),
+            'appointments_pending' => Appointment::whereDate('appointment_time', $today)
+                ->where('appointments.status', 'pending')->count(),
+            'appointments_completed' => Appointment::whereDate('appointment_time', $today)
+                ->where('appointments.status', 'completed')->count(),
+            'appointments_cancelled' => Appointment::whereDate('appointment_time', $today)
+                ->where('appointments.status', 'cancelled')->count(),
+            'appointments_confirmed' => Appointment::whereDate('appointment_time', $today)
+                ->where('appointments.status', 'confirmed')->count(),
+        ];
+
+        // Thống kê toàn bộ hệ thống
+        $globalStat = (object)[
+            'total_revenue' => Payment::where('status', 'paid')
+                ->where(function ($q) {
+                    $q->where('refund_status', 'none')
+                        ->orWhere('refund_status', 'failed')
+                        ->orWhereNull('refund_status');
+                })
+                ->sum('amount'),
+            'total_doctors' => Doctor::count(),
+            'total_patients' => $patientRole
+                ? User::where('role_id', $patientRole->id)->count()
+                : 0,
+            'total_appointments' => Appointment::count(),
+            'appointments_pending' => Appointment::where('status', 'pending')->count(),
+            'appointments_confirmed' => Appointment::where('status', 'confirmed')->count(),
+            'appointments_completed' => Appointment::where('status', 'completed')->count(),
+            'appointments_cancelled' => Appointment::where('status', 'cancelled')->count(),
+        ];
+
+        // Thống kê tăng trưởng
+        $prevMonth = Carbon::create($year, $month, 1)->subMonth();
+
+        // Lượt đặt lịch
+        $bookingCurrent = Appointment::whereMonth('appointment_time', $month)
+            ->whereYear('appointment_time', $year)
+            ->where('status', '!=', 'cancelled')
+            ->count();
+
+        $bookingPrevious = Appointment::whereMonth('appointment_time', $prevMonth->month)
+            ->whereYear('appointment_time', $prevMonth->year)
+            ->where('status', '!=', 'cancelled')
+            ->count();
+
+        $bookingGrowthValue = $bookingPrevious > 0
+            ? round((($bookingCurrent - $bookingPrevious) / $bookingPrevious) * 100)
+            : ($bookingCurrent > 0 ? 100 : 0);
+        $bookingGrowthLabel = "So với {$prevMonth->month}/{$prevMonth->year}";
+
+        // Doanh thu
+        $revenueCurrent = Payment::whereMonth('paid_at', $month)
+            ->whereYear('paid_at', $year)
+            ->where('status', 'paid')
+            ->where('refund_status', 'none')
+            ->sum('amount');
+
+        $revenuePrevious = Payment::whereMonth('paid_at', $prevMonth->month)
+            ->whereYear('paid_at', $prevMonth->year)
+            ->where('status', 'paid')
+            ->where('refund_status', 'none')
+            ->sum('amount');
+
+        $revenueGrowthValue = $revenuePrevious > 0
+            ? round((($revenueCurrent - $revenuePrevious) / $revenuePrevious) * 100)
+            : ($revenueCurrent > 0 ? 100 : 0);
+        $revenueGrowthLabel = "So với {$prevMonth->month}/{$prevMonth->year}";
+
+        // Thống kê hiệu suất
+        $appointments = Appointment::whereYear('appointment_time', now()->year)->get();
+        $totalAppointments = $appointments->count();
+
+        $cancelRate = $totalAppointments > 0
+            ? round($appointments->where('status', 'cancelled')->count() / $totalAppointments * 100, 1)
+            : 0;
+        $completedRate = $totalAppointments > 0
+            ? round($appointments->where('status', 'completed')->count() / $totalAppointments * 100, 1)
+            : 0;
+
+        $onTimeAppointments = Appointment::where('status', 'completed')
+            ->whereNotNull('check_in_time')
+            ->where('appointment_time', '<=', now())
+            ->get();
+
+        $total = $onTimeAppointments->count();
+        $onTimeCount = $onTimeAppointments->filter(function ($a) {
+            return Carbon::parse($a->check_in_time)
+                ->diffInMinutes(Carbon::parse($a->appointment_time), false) <= 5;
+        })->count();
+
+        $onTimeRate = $total > 0 ? round($onTimeCount / $total * 100, 1) : 0;
+
+        $waitingTimes = $onTimeAppointments->filter(fn($a) => $a->check_in_time)
+            ->map(fn($a) => abs(Carbon::parse($a->check_in_time)->diffInMinutes(Carbon::parse($a->appointment_time))));
+
+        $avgWaiting = $waitingTimes->count() > 0 ? round($waitingTimes->avg(), 1) : null;
+
+        $performanceStats = [
+            'cancel_rate' => $cancelRate,
+            'completed_rate' => $completedRate,
+            'on_time_rate' => $onTimeRate,
+            'avg_waiting_time' => $avgWaiting,
+        ];
+
+        // Thống kê bệnh nhân
+        $patientRole = Role::where('name', 'patient')->first();
+        $patientRoleId = $patientRole?->id;
+
+        $newThisWeek = User::where('role_id', $patientRoleId)
+            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+            ->count();
+
+        $returningPatients = Appointment::select('patient_id')
+            ->whereNotNull('patient_id')
+            ->groupBy('patient_id')
+            ->havingRaw('COUNT(*) >= 2')
+            ->pluck('patient_id');
+
+        $returnCount = User::whereIn('id', $returningPatients)
+            ->where('role_id', $patientRoleId)
+            ->count();
+
+        $totalPatients = User::where('role_id', $patientRoleId)->count();
+        $returnRate = $totalPatients > 0 ? round(($returnCount / $totalPatients) * 100, 1) : 0;
+
+        $patientStats = [
+            'new_this_week' => $newThisWeek,
+            'return_rate' => $returnRate,
+            'total_patients' => $totalPatients
+        ];
+
+        // Chuẩn bị dữ liệu cho PDF
+        $data = [
+            'title' => 'Báo cáo thống kê hệ thống',
+            'generated_at' => now()->format('d/m/Y H:i:s'),
+            'period' => "Tháng {$month}/{$year}",
+            'dailyStat' => $dailyStat,
+            'globalStat' => $globalStat,
+            'bookingCurrent' => $bookingCurrent,
+            'bookingGrowthValue' => $bookingGrowthValue,
+            'bookingGrowthLabel' => $bookingGrowthLabel,
+            'revenueCurrent' => $revenueCurrent,
+            'revenueGrowthValue' => $revenueGrowthValue,
+            'revenueGrowthLabel' => $revenueGrowthLabel,
+            'serviceStats' => $serviceStats->take(5), // Chỉ lấy top 5 cho PDF
+            'topService' => $topService,
+            'doctorStats' => $doctorStats->take(10), // Top 10 bác sĩ
+            'performanceStats' => $performanceStats,
+            'patientStats' => $patientStats,
+        ];
+
+        // Tạo PDF
+        $pdf = PDF::loadView('admin.dashboard.pdf_export', $data);
+    
+    // Cấu hình PDF để hỗ trợ UTF-8
+    $pdf->getDomPDF()->set_option('isPhpEnabled', true);
+    $pdf->getDomPDF()->set_option('isRemoteEnabled', true);
+    $pdf->getDomPDF()->set_option('isHtml5ParserEnabled', true);
+    $pdf->getDomPDF()->set_option('isFontSubsettingEnabled', true);
+    
+    // Cấu hình paper và DPI
+    $pdf->setPaper('A4', 'portrait');
+    $pdf->setOptions([
+        'dpi' => 150,
+        'defaultFont' => 'Arial',
+        'defaultMediaType' => 'screen',
+        'isFontSubsettingEnabled' => true,
+    ]);
+
+    // Tạo tên file không dấu
+    $filename = 'bao-cao-thong-ke-' . $month . '-' . $year . '-' . now()->format('YmdHis') . '.pdf';
+
+    return $pdf->download($filename);
+}
+
+// Hàm helper để chuyển đổi tiếng Việt có dấu thành không dấu
+private function removeAccents($str) {
+    $accents = array(
+        'à','á','ạ','ả','ã','â','ầ','ấ','ậ','ẩ','ẫ','ă','ằ','ắ','ặ','ẳ','ẵ',
+        'è','é','ẹ','ẻ','ẽ','ê','ề','ế','ệ','ể','ễ',
+        'ì','í','ị','ỉ','ĩ',
+        'ò','ó','ọ','ỏ','õ','ô','ồ','ố','ộ','ổ','ỗ','ơ','ờ','ớ','ợ','ở','ỡ',
+        'ù','ú','ụ','ủ','ũ','ư','ừ','ứ','ự','ử','ữ',
+        'ỳ','ý','ỵ','ỷ','ỹ',
+        'đ',
+        'À','Á','Ạ','Ả','Ã','Â','Ầ','Ấ','Ậ','Ẩ','Ẫ','Ă','Ằ','Ắ','Ặ','Ẳ','Ẵ',
+        'È','É','Ẹ','Ẻ','Ẽ','Ê','Ề','Ế','Ệ','Ể','Ễ',
+        'Ì','Í','Ị','Ỉ','Ĩ',
+        'Ò','Ó','Ọ','Ỏ','Õ','Ô','Ồ','Ố','Ộ','Ổ','Ỗ','Ơ','Ờ','Ớ','Ợ','Ở','Ỡ',
+        'Ù','Ú','Ụ','Ủ','Ũ','Ư','Ừ','Ứ','Ự','Ử','Ữ',
+        'Ỳ','Ý','Ỵ','Ỷ','Ỹ',
+        'Đ'
+    );
+    
+    $noAccents = array(
+        'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a',
+        'e','e','e','e','e','e','e','e','e','e','e',
+        'i','i','i','i','i',
+        'o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o',
+        'u','u','u','u','u','u','u','u','u','u','u',
+        'y','y','y','y','y',
+        'd',
+        'A','A','A','A','A','A','A','A','A','A','A','A','A','A','A','A','A',
+        'E','E','E','E','E','E','E','E','E','E','E',
+        'I','I','I','I','I',
+        'O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O',
+        'U','U','U','U','U','U','U','U','U','U','U',
+        'Y','Y','Y','Y','Y',
+        'D'
+    );
+    
+    return str_replace($accents, $noAccents, $str);
+}
 
     private function getDashboardData(Request $request)
     {
