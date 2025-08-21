@@ -119,7 +119,7 @@ class AdminNotificationController extends Controller
             'scheduled_at' => 'nullable|date|after_or_equal:now',
             'send_now_checkbox' => 'nullable|boolean',
         ];
-    
+
         $messages = [
             'title.required' => 'Tiêu đề là bắt buộc.',
             'title.string' => 'Tiêu đề phải là chuỗi ký tự.',
@@ -141,7 +141,7 @@ class AdminNotificationController extends Controller
             'scheduled_at.after_or_equal' => 'Thời gian gửi phải lớn hơn hoặc bằng thời gian hiện tại.',
             'send_now_checkbox.boolean' => 'Giá trị gửi ngay phải là true hoặc false.',
         ];
-    
+
         $validated = $request->validate($rules, $messages);
 
         try {
@@ -405,5 +405,27 @@ class AdminNotificationController extends Controller
         })->limit(20)->get(['id', 'name as text']);
 
         return response()->json(['results' => $roles]);
+    }
+
+    public function markAllRead(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user || $user->role->name !== 'admin') {
+            abort(403, 'Bạn không có quyền thực hiện thao tác này');
+        }
+
+        $user->unreadNotifications->markAsRead();
+
+        return redirect()->back()->with('success', 'Tất cả thông báo đã được đánh dấu là đã đọc.');
+    }
+
+    public function history()
+    {
+        $user = auth()->user();
+
+        $notifications = $user->notifications()->orderByDesc('created_at')->paginate(20);
+
+        return view('admin.notifications.history', compact('notifications'));
     }
 }
