@@ -103,44 +103,53 @@
                 </li>
 
                 <!-- Notification -->
-                <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
-                    <a class="nav-link dropdown-toggle hide-arrow" href="#" data-bs-toggle="dropdown"
-                        data-bs-auto-close="outside">
-                        <i class="bx bx-bell bx-sm"></i>
-                        @if ($unreadNotifications)
-                            <span
-                                class="badge bg-danger rounded-pill badge-notifications">{{ $unreadNotifications }}</span>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle position-relative" href="#" id="notificationDropdown"
+                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        @if (auth()->user()->unreadNotifications->count() > 0)
+                            <span class="badge bg-danger rounded-pill">
+                                {{ auth()->user()->unreadNotifications->count() }}
+                            </span>
                         @endif
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end py-0">
-                        <li class="dropdown-menu-header border-bottom">
-                            <div class="dropdown-header d-flex align-items-center py-3">
-                                <h5 class="text-body mb-0 me-auto">Thông báo</h5>
-                                <a href="{{ route('admin.notifications.index') }}" class="text-body"><i
-                                        class="bx fs-4 bx-envelope-open"></i></a>
-                            </div>
+
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown"
+                        style="width: 320px; max-height: 400px; overflow-y: auto;">
+                        <li class="dropdown-header d-flex justify-content-between align-items-center">
+                            <span>Thông báo</span>
+                            @if (auth()->user()->unreadNotifications->count() > 0)
+                                <form action="{{ route('admin.notifications.markAllRead') }}" method="POST"
+                                    class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="small text-decoration-none btn btn-link p-0 m-0">Đánh
+                                        dấu đã đọc</button>
+                                </form>
+                            @endif
                         </li>
-                        <li class="dropdown-notifications-list scrollable-container">
-                            <ul class="list-group list-group-flush">
-                                @forelse($admin->unreadNotifications->take(5) as $notify)
-                                    <li class="list-group-item list-group-item-action dropdown-notifications-item">
-                                        <div class="d-flex">
-                                            <div class="flex-grow-1">
-                                                <h6 class="mb-1">{{ $notify->data['title'] ?? 'Thông báo' }}</h6>
-                                                <p class="mb-0 small">{{ $notify->data['body'] ?? '' }}</p>
-                                                <small
-                                                    class="text-muted">{{ $notify->created_at->diffForHumans() }}</small>
-                                            </div>
-                                        </div>
-                                    </li>
-                                @empty
-                                    <li class="list-group-item text-center text-muted">Không có thông báo mới</li>
-                                @endforelse
-                            </ul>
+                        <li>
+                            <hr class="dropdown-divider">
                         </li>
-                        <li class="dropdown-menu-footer border-top">
-                            <a href="{{ route('admin.notifications.index') }}"
-                                class="dropdown-item d-flex justify-content-center p-3">Xem tất cả thông báo</a>
+
+                        @forelse(auth()->user()->unreadNotifications->take(5) as $notify)
+                            <li class="px-3 py-2">
+                                <h6 class="mb-1 fw-bold">{{ $notify->data['title'] ?? 'Thông báo' }}</h6>
+                                <p class="mb-0 small text-muted">{{ $notify->data['content'] ?? '' }}</p>
+                                <small class="text-muted">{{ $notify->created_at->diffForHumans() }}</small>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                        @empty
+                            <li class="px-3 py-2 text-center text-muted">
+                                Không có thông báo mới
+                            </li>
+                        @endforelse
+
+                        <li class="text-center">
+                            <a href="{{ route('admin.notifications.history') }}" class="small text-decoration-none">Xem
+                                tất
+                                cả</a>
                         </li>
                     </ul>
                 </li>

@@ -1,6 +1,6 @@
 @extends('admin.dashboard')
 
-@section('title', 'Chỉnh sửa Template Chat')
+@section('title', 'Chỉnh sửa kịch bản chat')
 
 @section('content')
     <div class="container-fluid">
@@ -8,7 +8,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="card-title">Chỉnh sửa Template: {{ $template->keyword }}</h3>
+                        <h3 class="card-title">Chỉnh sửa kịch bản: {{ $template->keyword }}</h3>
                         <a href="{{ route('admin.chat.templates') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Quay lại
                         </a>
@@ -84,7 +84,7 @@
 
                                     <div class="card">
                                         <div class="card-header">
-                                            <h5 class="card-title mb-0">Thông tin Template</h5>
+                                            <h5 class="card-title mb-0">Thông tin</h5>
                                         </div>
                                         <div class="card-body">
                                             <p><strong>Trạng thái:</strong>
@@ -109,7 +109,7 @@
 
                             <hr>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Cập nhật Template
+                                <i class="fas fa-save"></i> Cập nhật
                             </button>
                             <a href="{{ route('admin.chat.templates') }}" class="btn btn-secondary ml-2">
                                 <i class="fas fa-times"></i> Hủy bỏ

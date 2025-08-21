@@ -186,7 +186,7 @@
                             <i class="fas fa-sync-alt" id="refresh-icon"></i> Làm mới
                         </button>
                         <a href="{{ route('admin.chat.templates') }}" class="btn btn-primary">
-                            <i class="fas fa-cog"></i> Quản lý Templates
+                            <i class="fas fa-cog"></i> Quản lý
                         </a>
                     </div>
                 </div>
