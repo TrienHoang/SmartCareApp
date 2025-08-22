@@ -611,7 +611,7 @@
 
                     <!-- Back Button -->
                     <div class="text-center mt-4">
-                        <a href="{{ route('doctor.appointments.index') }}" class="btn-back">
+                        <a href="{{ route('doctor.calendar.index') }}" class="btn-back">
                             <i class="bx bx-arrow-back"></i>
                             Quay lại danh sách lịch hẹn
                         </a>
