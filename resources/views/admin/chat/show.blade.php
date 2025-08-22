@@ -1,6 +1,6 @@
 @extends('admin.dashboard')
 
-@section('title', 'Chi tiết Chat Session')
+@section('title', 'Chi tiết Chat')
 
 <head>
     <meta name="chat-session-id" content="{{ $session->session_id }}">

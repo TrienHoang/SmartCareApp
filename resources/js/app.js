@@ -11,6 +11,8 @@ Alpine.start();
 import { createIcons, icons } from 'lucide';
 createIcons({ icons });
 
+    initNotifications();
+
 const sessionId = localStorage.getItem('chat_session_id');
 // console.log("🔌 Joining channel: chat-session-" + sessionId);
 if (sessionId) {

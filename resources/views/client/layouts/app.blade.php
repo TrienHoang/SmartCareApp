@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="user-id" content="{{ auth()->id() }}">
     <title>@yield('title', 'SmartCare - Hệ thống Y tế')</title>
-
+    <link rel="icon" href="{{ asset('path/to/your-icon.png') }}" type="image/png">
     <!-- Google Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
 
@@ -135,11 +135,6 @@
                         data-message="Hướng dẫn đặt lịch hẹn khám">
                         📅 Hướng dẫn đặt lịch
                     </button>
-                    {{-- <button
-                    class="quick-action-btn bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs hover:bg-green-200 transition"
-                    data-message="Bảng giá dịch vụ">
-                    💰 Bảng giá
-                </button> --}}
                     <button
                         class="quick-action-btn bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs hover:bg-purple-200 transition"
                         data-message="Thông tin bác sĩ">
@@ -162,7 +157,6 @@
                                 Tôi có thể hỗ trợ bạn:<br>
                                 • Hướng dẫn Đặt lịch khám<br>
                                 • Tư vấn dịch vụ<br>
-                                • Thông tin bác sĩ<br>
                                 Bạn cần hỗ trợ gì ạ?
                             </p>
                         </div>
@@ -196,6 +190,14 @@
                                 class="w-full px-4 py-3 border border-gray-200 rounded-xl resize-none outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                 style="max-height: 120px;"></textarea>
                         </div>
+
+                        <!-- Nút Emoji -->
+                        <button id="emoji-button"
+                            class="bg-gray-100 text-gray-600 p-3 rounded-xl hover:bg-gray-200 transition flex items-center justify-center">
+                            <i class="fas fa-smile"></i>
+                        </button>
+
+                        <!-- Nút gửi -->
                         <button id="chatbox-send"
                             class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
                             <i class="fas fa-paper-plane"></i>
@@ -205,6 +207,25 @@
             </div>
         </div>
     @endauth
+    <!-- Emoji Picker Modal (Tailwind) -->
+    <div id="emojiModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl shadow-lg p-4 w-64">
+            <div class="flex justify-between items-center mb-3">
+                <h5 class="font-semibold">Chọn Emoji</h5>
+                <button id="emoji-close" class="text-gray-500 hover:text-gray-700">&times;</button>
+            </div>
+            <div class="grid grid-cols-8 gap-2 text-xl">
+                <span class="emoji-item cursor-pointer">😀</span>
+                <span class="emoji-item cursor-pointer">😊</span>
+                <span class="emoji-item cursor-pointer">👍</span>
+                <span class="emoji-item cursor-pointer">❤️</span>
+                <span class="emoji-item cursor-pointer">😢</span>
+                <span class="emoji-item cursor-pointer">😮</span>
+                <span class="emoji-item cursor-pointer">🙏</span>
+                <span class="emoji-item cursor-pointer">✨</span>
+            </div>
+        </div>
+    </div>
 
 
     {{-- Footer --}}
@@ -216,6 +237,7 @@
     <!-- Đặt sau lucide -->
 
     <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/js/splide.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -239,6 +261,39 @@
                 "positionClass": "toast-top-right",
                 "timeOut": "5000"
             };
+
+            const emojiBtn = document.getElementById("emoji-button");
+            const emojiModal = document.getElementById("emojiModal");
+            const emojiClose = document.getElementById("emoji-close");
+            const chatInput = document.getElementById("chatbox-input");
+
+            if (emojiBtn && emojiModal && chatInput) {
+                // mở modal
+                emojiBtn.addEventListener("click", function() {
+                    emojiModal.classList.remove("hidden");
+                });
+
+                // đóng modal
+                emojiClose.addEventListener("click", function() {
+                    emojiModal.classList.add("hidden");
+                });
+
+                // bấm emoji -> chèn vào input + ẩn modal
+                document.querySelectorAll(".emoji-item").forEach(el => {
+                    el.addEventListener("click", function() {
+                        chatInput.value += el.textContent;
+                        emojiModal.classList.add("hidden");
+                        chatInput.focus();
+                    });
+                });
+
+                // đóng khi click outside
+                emojiModal.addEventListener("click", function(e) {
+                    if (e.target === emojiModal) {
+                        emojiModal.classList.add("hidden");
+                    }
+                });
+            }
 
             // Hiển thị thông báo session
             @if (session('success'))

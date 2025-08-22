@@ -104,41 +104,41 @@
                     <p class="text-gray-500 text-sm">Hãy kiểm tra lại sau nhé!</p>
                 </div>
             @else
-                @foreach ($notifications as $notification)
-                    @php
-                        $userStatus = $notification->userStatuses->firstWhere('user_id', Auth::id());
-                    @endphp
+                    @foreach ($notifications as $notification)
+                        @php
+                            $userStatus = $notification->userStatuses->firstWhere('user_id', Auth::id());
+                        @endphp
 
-                    @if ($userStatus && $userStatus->is_deleted)
-                        @continue
-                    @endif
+                        @if ($userStatus && $userStatus->is_deleted)
+                            @continue
+                        @endif
 
-                    <div id="notification-{{ $notification->id }}" @click="openModal({{ $notification->id }})"
-                        class="bg-white p-5 rounded-lg shadow-md mb-4 flex justify-between items-start border-l-4
+                        <div id="notification-{{ $notification->id }}" @click="openModal({{ $notification->id }})"
+                            class="bg-white p-5 rounded-lg shadow-md mb-4 flex justify-between items-start border-l-4
         {{ $userStatus && $userStatus->is_read ? 'border-gray-300' : 'border-blue-500' }}
         hover:shadow-lg hover:bg-gray-50 cursor-pointer transition-all duration-200 relative"
-                        data-notification-id="{{ $notification->id }}">
-                        <div class="flex-grow pr-4">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-1 leading-tight">
-                                {{ $notification->title }}
-                            </h3>
-                            <p class="text-sm text-gray-600 mb-2">
-                                {{ \Illuminate\Support\Str::limit(strip_tags(html_entity_decode($notification->content)), 180) }}
-                            </p>
-                            <span class="text-xs text-gray-500 flex items-center">
-                                <i class="fas fa-clock mr-2"></i>Gửi lúc:
-                                {{ $notification->sent_at->format('d/m/Y H:i') }}
-                            </span>
+                            data-notification-id="{{ $notification->id }}">
+                            <div class="flex-grow pr-4">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-1 leading-tight">
+                                    {{ $notification->title }}
+                                </h3>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    {{ \Illuminate\Support\Str::limit(strip_tags(html_entity_decode($notification->content)), 180) }}
+                                </p>
+                                <span class="text-xs text-gray-500 flex items-center">
+                                    <i class="fas fa-clock mr-2"></i>Gửi lúc:
+                                    {{ $notification->sent_at->format('d/m/Y H:i') }}
+                                </span>
+                            </div>
+
+                            {{-- 🔴 Chấm đỏ chỉ báo chưa đọc --}}
+                            @if (!$userStatus || !$userStatus->is_read)
+                                <span
+                                    class="unread-indicator absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                            @endif
                         </div>
-
-                        {{-- 🔴 Chấm đỏ chỉ báo chưa đọc --}}
-                        @if (!$userStatus || !$userStatus->is_read)
-                            <span
-                                class="unread-indicator absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
-                        @endif
-                    </div>
-                @endforeach
-
+                    @endforeach
+                
                 {{-- Modal xem chi tiết thông báo --}}
                 <div x-show="open" x-cloak class="fixed z-50 inset-0 overflow-y-auto" aria-labelledby="modal-title"
                     role="dialog" aria-modal="true">
@@ -291,19 +291,24 @@
                             if (response.ok && data) {
                                 this.activeNotification = data;
 
-                                // Đánh dấu UI là đã đọc
+                                // Lấy element thông báo
                                 const notifEl = document.querySelector(
                                     `#notification-${notificationId}`);
                                 if (notifEl) {
-                                    notifEl.classList.remove('bg-blue-50', 'border-blue-500');
-                                    notifEl.classList.add('bg-white', 'border-gray-300');
+                                    // 🔑 Kiểm tra xem thông báo này có phải chưa đọc không
+                                    const isUnread = notifEl.classList.contains('border-blue-500');
+
+                                    // Chuyển giao diện sang "đã đọc"
+                                    notifEl.classList.remove('border-blue-500');
+                                    notifEl.classList.add('border-gray-300');
                                     notifEl.querySelector('.status-dot, .unread-indicator')?.remove();
+
+                                    // 👉 Chỉ giảm badge & gọi API nếu là thông báo chưa đọc
+                                    if (isUnread) {
+                                        this.decreaseUnread();
+                                        this.markAsRead(notificationId);
+                                    }
                                 }
-
-                                // ✅ Giảm biến toàn cục
-                                this.decreaseUnread();
-
-                                this.markAsRead(notificationId);
                             } else {
                                 alert(data.message || 'Không thể tải chi tiết thông báo.');
                                 this.open = false;
@@ -318,6 +323,7 @@
                             this.loading = false;
                         }
                     },
+
 
                     closeModal() {
                         this.open = false;

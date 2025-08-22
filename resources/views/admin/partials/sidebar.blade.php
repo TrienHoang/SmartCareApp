@@ -244,10 +244,18 @@
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Liên lạc</span></li>
 
         <li class="menu-item">
-            <a href="{{ route('admin.notifications.index') }}" class="menu-link">
+            <a href="{{ route('admin.notifications.index') }}" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-bell"></i>
                 <div>Thông báo</div>
             </a>
+            <ul class="menu-sub">
+                <li class="menu-item"><a href="{{ route('admin.notifications.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
+                <li class="menu-item"><a href="{{ route('admin.notifications.history') }}" class="menu-link">
+                        <div>Lịch sử thông báo</div>
+                    </a></li>
+            </ul>
         </li>
 
         <li class="menu-item">
