@@ -60,9 +60,9 @@ $query = Doctor::whereHas('user', function ($q) use ($request) {
             ->get();
 
         $departments = Department::all();
-        $services = Service::where('status', 'active')->orderBy('name')->get(); // 👈 sửa ở đây
+        // $services = Service::where('status', 'active')->orderBy('name')->get(); // 👈 sửa ở đây
 
-        return view('admin.doctors.create', compact('availableUsers', 'departments', 'services'));
+        return view('admin.doctors.create', compact('availableUsers', 'departments'));
     }
 
 
@@ -92,7 +92,7 @@ $query = Doctor::whereHas('user', function ($q) use ($request) {
             'password'        => 'required|string|min:6',
             'avatar'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'department_id'   => 'required|exists:departments,id',
-            'service_id'      => 'required|exists:services,id', // sửa từ service_ids sang service_id
+            // 'service_id'      => 'required|exists:services,id', // sửa từ service_ids sang service_id
         ], [
             'full_name.required'     => 'Họ và tên không được để trống.',
             'username.required'      => 'Tên đăng nhập không được để trống.',
@@ -106,8 +106,8 @@ $query = Doctor::whereHas('user', function ($q) use ($request) {
             'avatar.mimes'           => 'Ảnh đại diện phải có định dạng: jpeg, png, jpg, gif.',
             'department_id.required' => 'Vui lòng chọn phòng ban.',
             'department_id.exists'   => 'Phòng ban đã chọn không hợp lệ.',
-            'service_id.required'    => 'Vui lòng chọn dịch vụ.',
-            'service_id.exists'      => 'Dịch vụ đã chọn không hợp lệ.',
+            // 'service_id.required'    => 'Vui lòng chọn dịch vụ.',
+            // 'service_id.exists'      => 'Dịch vụ đã chọn không hợp lệ.',
         ]);
 
         $avatarPath = null;
@@ -132,7 +132,7 @@ $query = Doctor::whereHas('user', function ($q) use ($request) {
         ]);
 
         // Gán một dịch vụ cho bác sĩ
-        $doctor->services()->attach([$request->service_id]);
+        // $doctor->services()->attach([$request->service_id]);
 
 
         return redirect()->route('admin.doctors.index')->with('success', 'Đã thêm bác sĩ mới thành công.');

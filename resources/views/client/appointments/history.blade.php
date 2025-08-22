@@ -53,7 +53,7 @@
                                 </a>
 
                                 <div class="mt-4">
-                                    <a href="{{ route('doctor.show', $appointment->doctor->id) }}"
+                                    <a href="{{ route('doctor.show', $appointment->doctor->id) }}?tab=reviews"
                                         class="inline-block text-sm font-medium bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md transition">
                                         <i class="bx bx-star mr-1"></i> Đánh giá bác sĩ
                                     </a>
@@ -62,7 +62,6 @@
                         @endforeach
                     @endif
                 </div>
-
             </div>
 
     {{-- Load Boxicons --}}

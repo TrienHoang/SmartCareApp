@@ -50,17 +50,22 @@ class RoomController extends Controller
         return view('admin.rooms.edit', compact('room', 'departments'));
     }
 
-    public function update(Request $request, Room $room)
+    public function update(Request $request, $id)
     {
+        // validate input
         $request->validate([
             'name' => 'nullable|string|max:100',
             'department_id' => 'nullable|exists:departments,id',
             'description' => 'nullable|string',
             'status' => 'nullable|in:active,inactive',
         ]);
-
-        $room->update($request->all());
-
+    
+        // lấy room theo id
+        $room = Room::findOrFail($id);
+    
+        // update với field cho phép
+        $room->update($request->only(['name', 'department_id', 'description', 'status']));
+    
         return redirect()->route('admin.rooms.index')->with('success', 'Cập nhật phòng thành công!');
     }
 
