@@ -226,7 +226,7 @@
             <span class="font-semibold">Quay lại xác nhận đặt lịch</span>
         </div>
     </a>
-</div>3
+</div>
     <div class="container mx-auto px-4 section-compact">
         
         {{-- DANH SÁCH MÃ CÓ THỂ DÙNG --}}

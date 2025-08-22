@@ -71,11 +71,18 @@ class AdminChatController extends Controller
         return redirect()->back()->with('success', 'Tin nhắn đã được gửi!');
     }
 
-    public function templates()
+    public function templates(Request $request)
     {
-        $templates = ChatTemplate::orderBy('priority', 'desc')
+        $query = ChatTemplate::query();
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('keyword', 'like', "%{$search}%");
+        }
+
+        $templates = $query->orderBy('priority', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate(10);
         return view('admin.chat.templates', compact('templates'));
     }
 

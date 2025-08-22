@@ -9,7 +9,16 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h3 class="card-title">Mẫu kịch bản chat</h3>
-                        <div>
+                        <div class="d-flex align-items-center">
+                            <!-- Form Search -->
+                            <form action="{{ route('admin.chat.templates') }}" method="GET" class="form-inline mr-2">
+                                <input type="text" name="search" class="form-control form-control-sm mr-2"
+                                    placeholder="Tìm theo từ khóa..." value="{{ request('search') }}">
+                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </form>
+
                             <a href="{{ route('admin.chat.index') }}" class="btn btn-secondary mr-2">
                                 <i class="fas fa-comments"></i> Quản lý Chat
                             </a>
@@ -46,7 +55,8 @@
                                 <tbody>
                                     @forelse ($templates as $key => $template)
                                         <tr>
-                                            <td>{{ $loop->iteration + ($templates->currentPage() - 1) * $templates->perPage() }}</td>
+                                            <td>{{ $loop->iteration + ($templates->currentPage() - 1) * $templates->perPage() }}
+                                            </td>
                                             <td>
                                                 <strong>{{ $template->keyword }}</strong>
                                             </td>
@@ -122,8 +132,8 @@
                         </div>
 
                         @if ($templates->hasPages())
-                            <div class="d-flex justify-content-center">
-                                {{ $templates->links() }}
+                            <div class="d-flex justify-content-end mt-3">
+                                {{ $templates->onEachSide(1)->links('pagination::bootstrap-4') }}
                             </div>
                         @endif
                     </div>
