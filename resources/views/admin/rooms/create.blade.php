@@ -1,6 +1,6 @@
 @extends('admin.dashboard')
 
-@section('title', 'Quản lý Đánh giá')
+@section('title', 'Thêm phòng')
 
 @section('content')
     <div class="max-w-xl mx-auto p-6">

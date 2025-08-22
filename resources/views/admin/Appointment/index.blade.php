@@ -376,7 +376,7 @@
                                         <td>
                                             <div class="room-info">
                                                 <span class="badge badge-outline-info">
-                                                    {{ $appointment->doctor->room->name ?? 'N/A' }}
+                                                    {{ $appointment->doctor->department->room->name ?? 'N/A' }}
                                                 </span>
                                                 <br><small
                                                     class="text-muted">{{ $appointment->doctor->department->name ?? '' }}</small>

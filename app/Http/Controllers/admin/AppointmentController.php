@@ -43,7 +43,9 @@ class AppointmentController extends Controller
             'doctor.user:id,full_name',
             'doctor.department:id,name',
             'doctor.room:id,name',
-            'service:id,name,price',
+            'service:id,name,price,room_id',
+            'service.room:id,name,department_id',
+            'service.room.department:id,name',
             'payment' => fn($q) => $q->orderBy('paid_at', 'desc'),
             'order:id,appointment_id,status',
         ]);
