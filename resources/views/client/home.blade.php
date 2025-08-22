@@ -25,6 +25,11 @@
             background-position: top center;
         }
 
+                .bg-vipro {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url({{ asset('LayoutClient/img/khambenh.png') }});
+            background-size: cover;
+            background-position: center;
+        }
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             top: 50%;
             transform: translateY(-50%);
@@ -168,11 +173,7 @@
             margin-bottom: 1rem;
         }
 
-        .bg-vipro {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(https://i.ibb.co/Z1MF5LzK/khambenh.png);
-            background-size: cover;
-            background-position: center;
-        }
+
     </style>
 @endpush
 
@@ -198,7 +199,7 @@
                             chuyên nghiệp.
                         </p>
                         <div class="flex flex-col sm:flex-row gap-4">
-                            <a href="{{ url('/dat-lich') }}"
+                            <a href="{{ url('/dich-vu') }}"
                                 class="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-8 py-4 rounded-full font-semibold shadow-lg hover:from-blue-600 hover:to-blue-800 transition-all flex items-center justify-center scale-100 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400">
                                 Đặt Lịch Ngay
                                 <i data-lucide="arrow-right" class="ml-2 w-5 h-5"></i>
