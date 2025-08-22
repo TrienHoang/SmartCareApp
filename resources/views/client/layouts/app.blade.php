@@ -61,6 +61,39 @@
         #chatbox-content {
             scroll-behavior: smooth;
         }
+
+        .article-content {
+            /* Reset tất cả về mặc định của browser */
+            all: revert;
+
+            /* Cho phép text tự động xuống dòng */
+            white-space: normal;
+
+            /* Fix mấy chỗ bị bootstrap override */
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #222;
+        }
+
+        /* Nếu muốn format lại heading */
+        .article-content h1,
+        .article-content h2,
+        .article-content h3 {
+            margin: 1em 0 0.5em;
+            font-weight: bold;
+        }
+
+        /* Paragraph */
+        .article-content p {
+            margin: 0 0 1em;
+        }
+
+        /* List */
+        .article-content ul,
+        .article-content ol {
+            padding-left: 2em;
+            margin: 0 0 1em;
+        }
     </style>
 
     @stack('styles')
