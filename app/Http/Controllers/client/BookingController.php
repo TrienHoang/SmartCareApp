@@ -417,10 +417,10 @@ class BookingController extends Controller
 
     public function confirm(Request $request)
     {
-        if (!session()->has('selected_promotion_code')) {
-            session()->forget('selected_promotion_code');
-            session()->forget('selected_promotion_discount');
-        }
+        // if (!session()->has('selected_promotion_code')) {
+        //     session()->forget('selected_promotion_code');
+        //     session()->forget('selected_promotion_discount');
+        // }
         $booking_data = $request->session()->get('booking_data');
         $booking_confirm = $request->session()->get('booking_confirm');
 
@@ -432,7 +432,30 @@ class BookingController extends Controller
         $doctor = Doctor::with('user')->findOrFail($booking_confirm['doctor_id']);
         $appointment_time = Carbon::parse($booking_confirm['appointment_time']);
         $user = auth()->user();
+        $promotionId = session('selected_promotion_id');
+        $discountPercentage = 0;
 
+        if ($promotionId) {
+            $promotion = Promotion::find($promotionId);
+
+            // Nếu promotion không tồn tại hoặc đã hết hạn -> xoá session
+            if (
+                !$promotion ||
+                $promotion->valid_until < now() ||
+                $promotion->valid_from > now() ||
+               PromotionUserUsage::where('user_id', $user->id)
+                ->where('promotion_id', $promotionId)
+                ->exists()
+            ) {
+                $request->session()->forget([
+                    'selected_promotion_code',
+                    'selected_promotion_id',
+                    'selected_promotion_discount'
+                ]);
+            } else {
+                $discountPercentage = $promotion->discount_percentage;
+            }
+        }
         // ✅ Tính giá và khuyến mãi
         $originalPrice = $service->price;
         $discountPercentage = session('selected_promotion_discount', 0); // Ví dụ: 10 (%)
@@ -557,15 +580,34 @@ class BookingController extends Controller
             }
 
             $finalPrice = max(0, $service->price - $discountAmount);
+            if ($promotion) {
+                // ✅ Lưu vào promotion_user_usages
+                PromotionController::confirmUsage($user->id, $promotion->id);
+
+                // ✅ Xóa session để tránh reuse
+                $request->session()->forget([
+                    'selected_promotion_code',
+                    'selected_promotion_id',
+                    'selected_promotion_discount'
+                ]);
+            }
 
             if ($validated['payment_method'] === 'wallet') {
                 $this->processWalletPayment($user, $appointment, $finalPrice);
+                if ($promotion) {
+                    PromotionController::confirmUsage($user->id, $promotion->id);
+                    $request->session()->forget(['selected_promotion_code', 'selected_promotion_id', 'selected_promotion_discount']);
+                }
                 DB::commit();
                 $request->session()->forget(['booking_data', 'booking_confirm']);
                 return redirect()->route('booking.success')
                     ->with('success', 'Thanh toán bằng ví thành công! Lịch hẹn của bạn đã được ghi nhận.');
             } else {
                 $vnpayUrl = $this->initiateVNPayPayment($appointment, $service, $finalPrice, $promotion);
+                if ($promotion) {
+                    PromotionController::confirmUsage($user->id, $promotion->id);
+                    $request->session()->forget(['selected_promotion_code', 'selected_promotion_id', 'selected_promotion_discount']);
+                }
                 DB::commit();
                 $request->session()->forget(['booking_data', 'booking_confirm']);
                 return redirect($vnpayUrl);
