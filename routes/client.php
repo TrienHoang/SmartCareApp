@@ -98,15 +98,10 @@ Route::prefix('chat')->name('chat.')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    // Gửi đánh giá
-    Route::post('/doctors/{doctor}/reviews', [ReviewReplyController::class, 'store'])->name('reviews.store');
-
-    // Gửi phản hồi đánh giá
-    Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
-    Route::post('/reviews/{review}/replies', [ReviewReplyController::class, 'storeReply'])->name('reviews.replies.store');
-
-    // Đánh dấu đánh giá là hữu ích
-    Route::post('/reviews/{review}/useful', [ReviewReplyController::class, 'markUseful'])->name('reviews.useful');
+        Route::post('/doctors/{doctor}/reviews', [ReviewReplyController::class, 'store'])->name('reviews.store');
+        Route::put('/doctors/{doctor}/reviews/{review}/update', [ReviewReplyController::class, 'update'])->name('reviews.update');
+        Route::post('/reviews/{id}/useful', [ReviewReplyController::class, 'markUseful'])
+        ->name('reviews.useful');
 });
 
 // Route hiển thị chi tiết bác sĩ (không yêu cầu đăng nhập)
@@ -135,19 +130,11 @@ Route::prefix('client/payment_history')->name('client.payment_history.')->middle
     Route::get('/', [PaymentHistoryClientController::class, 'index'])->name('index');
     Route::get('/{id}', [PaymentHistoryClientController::class, 'show'])->name('show');
 });
-Route::get('/test-payment', function () {
-    return view('test-payment');
-});
 
 // Danh sách bình luận của người dùng (client)
 Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->group(function () {
     Route::get('/', [ReviewReplyController::class, 'index'])->name('index');
     Route::get('show/{id}', [ReviewReplyController::class, 'show'])->name('show');
-});
-
-// Danh sách bình luận của người dùng (client)
-Route::prefix('client/review')->name('client.review.')->middleware(['auth'])->group(function () {
-    Route::get('/', [ReviewReplyController::class, 'index'])->name('index');
 });
 
 
@@ -195,7 +182,6 @@ Route::prefix('client/appointments')->name('client.appointments.')->middleware([
     Route::delete('/{appointment}/cancel', [AppointmentClientController::class, 'cancel'])->name('cancel');
     // Hủy lịch hẹn
 });
-// Sửa lại routes của bạn như sau:
 
 Route::prefix('client/notifications')->middleware('auth')->name('client.notifications.')->group(function () {
     Route::get('/', [ClientNotificationController::class, 'index'])->name('index');
@@ -209,8 +195,6 @@ Route::prefix('client/notifications')->middleware('auth')->name('client.notifica
     Route::post('/{notification}/mark-as-read', [ClientNotificationController::class, 'markAsRead'])->name('mark-as-read');
 });
 
-// giảm kịch khung
-// Thêm vào file routes/web.php
 
 Route::middleware(['auth'])->group(function () {
     // Routes cho promotion (phù hợp với view có sẵn)
