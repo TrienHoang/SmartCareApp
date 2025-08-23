@@ -292,13 +292,13 @@
 @push('styles')
     <style>
         .bg-img-new {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url(https://i.ibb.co/QF9ds29h/kham-benh.jpg);
+            background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url({{asset('LayoutClient/img/kham-benh.jpeg')}});
             background-size: cover;
             background-position: center;
         }
 
         .bg-banner-new {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.1)), url('https://i.ibb.co/zTttNWPW/bg-new.jpg');
+            background-image: linear-gradient(rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.1)), url({{asset('LayoutClient/img/bg-new.jpg')}});
             background-size: cover;
             background-position: center;
         }

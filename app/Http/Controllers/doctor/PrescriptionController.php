@@ -181,7 +181,7 @@ class PrescriptionController extends Controller
             return [
                 'id' => $record->id,
                 'text' => "#{$record->code} - {$record->appointment->patient->full_name}",
-                'diagnosis' => $record->diagnosis
+                'symptom_note' => $record->appointment->symptom_note
             ];
         }));
     }

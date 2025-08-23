@@ -55,8 +55,8 @@
                                 </div>
 
                                 <div class="col-md-12">
-                                    <label for="diagnosis_display" class="form-label fw-semibold">Chuẩn đoán bệnh</label>
-                                    <textarea id="diagnosis_display" class="form-control" rows="3" readonly placeholder="Chưa có thông tin..."></textarea>
+                                    <label for="symptom_display" class="form-label fw-semibold">Triệu chứng</label>
+                                    <textarea id="symptom_display" class="form-control" rows="3" readonly placeholder="Chưa có thông tin..."></textarea>
                                 </div>
 
                                 <div class="col-12">
@@ -159,7 +159,7 @@
                                 label: item.text,
                                 value: item.text,
                                 id: item.id,
-                                diagnosis: item.diagnosis
+                                symptom_note: item.symptom_note
                             })));
                         },
                         error: function(xhr) {
@@ -172,7 +172,7 @@
                 select: function(event, ui) {
                     $recordInput.val(ui.item.label); // Gán hiển thị
                     $recordId.val(ui.item.id); // Gán ID vào input ẩn
-                    $('#diagnosis_display').val(ui.item.diagnosis || 'Không có thông tin chẩn đoán.');
+                    $('#symptom_display').val(ui.item.symptom_note || 'Không có thông tin chẩn đoán.');
                     return false;
                 }
             });
@@ -188,8 +188,8 @@
                         const match = data.find(item => item.id == $recordId.val());
                         if (match) {
                             $recordInput.val(match.text);
-                            $('#diagnosis_display').val(match.diagnosis ||
-                                'Không có thông tin chẩn đoán.');
+                            $('#symptom_display').val(match.symptom_note ||
+                                'Không có thông tin triệu chứng.');
                         }
                     }
                 });

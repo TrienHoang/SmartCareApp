@@ -57,4 +57,9 @@ class Department extends Model
     {
         return $this->hasMany(Service::class)->where('status', 'active');
     }
+
+    public function room()
+    {
+        return $this->hasOne(Room::class);
+    }
 }

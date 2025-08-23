@@ -108,11 +108,6 @@
             /* Align with text */
         }
 
-        /* Override Tailwind's default list-style for cleaner look */
-        ul {
-            list-style: none;
-            padding-left: 0;
-        }
     </style>
 @endpush
 
@@ -164,7 +159,7 @@
             {{-- Content grid: details + banner --}}
             <div id="content" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {{-- Left Column: Package Details --}}
-                <div class="lg:col-span-8 prose">
+                <div class="lg:col-span-8 article-content ">
                     {!! $service->content !!}
                 </div>
                 
