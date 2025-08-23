@@ -24,7 +24,6 @@
                     <p><strong>Email:</strong> {{ $doctor->user->email ?? 'N/A' }}</p>
                     <p><strong>Tên đăng nhập:</strong> {{ $doctor->user->username ?? 'N/A' }}</p>
                     <p><strong>Phòng ban:</strong> {{ $doctor->department->name ?? 'Chưa phân công' }}</p>
-                    <p><strong>Chuyên khoa:</strong> {{ $doctor->specialization ?? 'Chưa cập nhật' }}</p>
                     <p><strong>Trạng thái:</strong> 
                         <span class="badge bg-{{ $doctor->user->status === 'online' ? 'success' : 'secondary' }}">
                             {{ ucfirst($doctor->user->status) }}
