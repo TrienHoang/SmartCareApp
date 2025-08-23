@@ -554,7 +554,7 @@
 
                                     {{-- Nội dung đánh giá --}}
                                     <p class="text-gray-600 mb-6 italic">
-                                        "{{ $testimonial->comment }}"
+                                        {{ $testimonial->comment ?? 'Đánh giá này chưa có nội dung.' }}
                                     </p>
 
                                     <div>

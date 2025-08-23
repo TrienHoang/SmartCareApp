@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('service_id');
             $table->unsignedTinyInteger('rating');
             $table->unsignedInteger('useful_count')->default(0);
-            $table->text('comment');
+            $table->text('comment')->nullable();
             $table->boolean('is_visible')->default(true);
             $table->timestamps();
 
