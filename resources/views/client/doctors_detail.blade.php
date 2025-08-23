@@ -834,7 +834,12 @@
                                                 </form>
                                             @else
                                                 <p class="text-gray-700 mb-2">
-                                                    {{ $review->comment ?? 'Không có nhận xét' }}
+                                                    @if ($review->comment)
+                                                        {{ $review->comment }}
+                                                    @else
+                                                        {{ $review->created_at }}
+                                                    @endif
+
                                                 </p>
                                             @endif
 
@@ -1081,7 +1086,7 @@
                                 if (data.success) {
                                     // update số count ngay tại chỗ
                                     this.querySelector('.useful-count').textContent = data
-                                    .new_count;
+                                        .new_count;
                                 } else {
                                     alert(data.message || 'Có lỗi xảy ra');
                                 }
