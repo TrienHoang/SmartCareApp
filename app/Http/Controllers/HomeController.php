@@ -123,6 +123,7 @@ class HomeController extends Controller
 
         $workingSchedules = WorkingSchedule::with('shift')
             ->where('day', $date->toDateString())
+            ->where('status','Đã xét duyệt')
             ->whereIn('doctor_id', $doctors->pluck('id'))
             ->get()
             ->groupBy('doctor_id');
@@ -156,7 +157,7 @@ class HomeController extends Controller
                             $query->whereBetween('appointment_time', [$slotTime, $slotEndTime->subSecond()])
                                 ->orWhereBetween('end_time', [$slotTime->addSecond(), $slotEndTime]);
                         })
-                        ->exists();
+                        ->exists(); 
 
                     // Kiểm tra lịch nghỉ
                     $isOnLeave = DoctorLeave::where('doctor_id', $doctor->id)

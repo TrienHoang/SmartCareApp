@@ -4,6 +4,7 @@
 @section('title', 'Chi tiết thanh toán')
 
 @section('profile-content')
+@push('styles')
 <style>
     body {
         background-color: #f0f8ff;

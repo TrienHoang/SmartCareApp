@@ -49,9 +49,7 @@ Route::get('/dat-lich', function () {
     return view('client.booking.');
 })->name('booking');
 
-Route::get('/lien-he', function () {
-    return view('client.contact');
-})->name('contact');
+Route::get('/lien-he', [ContactController::class, 'showForm'])->name('contact');
 
 Route::get('/home/search', [HomeController::class, 'searchAvailableSlots'])->name('home.search');
 Route::get('/home/search-services', [HomeController::class, 'searchServices'])->name('home.searchServices');
@@ -62,8 +60,8 @@ Route::get('/chi-tiet-tin-tuc/{id}', function ($id) {
 
 // Thông tin cá nhân
 Route::prefix('client/profile')->name('client.profile.')->group(function () {
-    Route::get('/', [ProfileController::class, 'show'])->name('show'); // tên đầy đủ: client.profile.show
-    Route::patch('/update', [ProfileController::class, 'update'])->name('update'); // client.profile.update
+    Route::get('/', [ProfileController::class, 'show'])->name('show'); 
+    Route::patch('/update', [ProfileController::class, 'update'])->name('update'); 
 });
 
 

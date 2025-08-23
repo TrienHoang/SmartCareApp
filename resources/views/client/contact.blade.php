@@ -194,26 +194,19 @@
                     <div class="bg-white rounded-xl shadow-lg p-8">
                         <h3 class="text-2xl font-bold mb-6 gradient-text">Câu Hỏi Thường Gặp</h3>
                         <div class="space-y-4">
-                            <div>
-                                <h4 class="font-semibold mb-2">Làm thế nào để đặt lịch hẹn?</h4>
-                                <p class="text-gray-600 text-sm">
-                                    Bạn có thể đặt lịch qua website, gọi điện hoặc đến trực tiếp phòng khám.
-                                </p>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold mb-2">Có cần thanh toán trước không?</h4>
-                                <p class="text-gray-600 text-sm">
-                                    Không cần thanh toán trước. Bạn chỉ thanh toán sau khi khám xong.
-                                </p>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold mb-2">Có thể hủy lịch hẹn không?</h4>
-                                <p class="text-gray-600 text-sm">
-                                    Có thể hủy hoặc đổi lịch trước 24h qua điện thoại hoặc website.
-                                </p>
-                            </div>
+                            @forelse($faqs as $faq)
+                                <div>
+                                    <h4 class="font-semibold mb-2">{{ $faq->question }}</h4>
+                                    <p class="text-gray-600 text-sm">
+                                        {{ $faq->answer }}
+                                    </p>
+                                </div>
+                            @empty
+                                <p class="text-gray-500 text-sm">Chưa có câu hỏi nào được đăng.</p>
+                            @endforelse
                         </div>
                     </div>
+                    
                 </div>
             </div>
 
