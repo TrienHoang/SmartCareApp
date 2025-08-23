@@ -83,13 +83,20 @@ class PromotionController extends Controller
     public static function confirmUsage($userId, $promotionId)
     {
         if ($promotionId) {
-            PromotionUserUsage::create([
-                'user_id' => $userId,
-                'promotion_id' => $promotionId,
-                'used_at' => Carbon::now(),
-            ]);
+            $exists = PromotionUserUsage::where('user_id', $userId)
+                ->where('promotion_id', $promotionId)
+                ->exists();
+
+            if (!$exists) {
+                PromotionUserUsage::create([
+                    'user_id' => $userId,
+                    'promotion_id' => $promotionId,
+                    'used_at' => now(),
+                ]);
+            }
         }
     }
+
 
     /**
      * Kiểm tra user có thể sử dụng mã giảm giá không
