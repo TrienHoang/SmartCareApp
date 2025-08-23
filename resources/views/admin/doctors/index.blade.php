@@ -269,12 +269,7 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        {{-- <td>
-                                            <span class="badge badge-info badge-pill">
-                                                <i class="bx bx-star mr-1"></i>
-                                                {{ $doctor->specialization }}
-                                            </span>
-                                        </td> --}}
+  
                                         <td>
                                             <span class="badge badge-success badge-pill">
                                                 <i class="bx bx-building mr-1"></i>
