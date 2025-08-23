@@ -176,9 +176,25 @@ public function update(Request $request, Doctor $doctor)
         'email'           => 'required|email|unique:users,email,' . $doctor->user_id,
         'avatar'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'department_id'   => 'required|exists:departments,id',
-        'service_id'      => 'required|exists:services,id', // đồng bộ với store
-        'specialization'  => 'nullable|string|max:100',
         'biography'       => 'nullable|string|max:1000',
+    ], [
+        'full_name.required'      => 'Vui lòng nhập họ và tên.',
+        'full_name.string'        => 'Họ và tên phải là chuỗi ký tự.',
+        'full_name.max'           => 'Họ và tên không được vượt quá 100 ký tự.',
+
+        'email.required'          => 'Vui lòng nhập địa chỉ email.',
+        'email.email'             => 'Địa chỉ email không hợp lệ.',
+        'email.unique'            => 'Email này đã được sử dụng.',
+
+        'avatar.image'            => 'Ảnh đại diện phải là một tệp hình ảnh.',
+        'avatar.mimes'            => 'Ảnh đại diện chỉ chấp nhận các định dạng: jpeg, png, jpg, gif.',
+        'avatar.max'              => 'Ảnh đại diện không được vượt quá 2MB.',
+
+        'department_id.required'  => 'Vui lòng chọn khoa.',
+        'department_id.exists'    => 'Khoa đã chọn không tồn tại.',
+
+        'biography.string'        => 'Tiểu sử phải là chuỗi ký tự.',
+        'biography.max'           => 'Tiểu sử không được vượt quá 1000 ký tự.',
     ]);
 
     try {
@@ -196,23 +212,23 @@ public function update(Request $request, Doctor $doctor)
         ]);
 
         $doctor->update([
-            'department_id'  => $request->department_id,
-            'specialization' => $request->specialization,
-            'biography'      => $request->biography,
+            'department_id' => $request->department_id,
+            'biography'     => $request->biography,
         ]);
 
-        // Gán lại dịch vụ (một dịch vụ duy nhất)
-        $doctor->services()->sync([$request->service_id]);
+        // Nếu bạn vẫn muốn sync dịch vụ thì giữ lại, còn nếu bỏ luôn thì xóa dòng này
+        // $doctor->services()->sync([$request->service_id]);
 
         DB::commit();
 
         return redirect()->route('admin.doctors.index')->with('success', 'Cập nhật thông tin bác sĩ thành công.');
     } catch (\Exception $e) {
         DB::rollBack();
-        Log::error('Lỗi khi cập nhật bác sĩ: ' . $e->getMessage());
+        Log::error('Lỗi khi cập nhật bác sĩ: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
         return back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật. Vui lòng thử lại.');
     }
 }
+
 
 
 
