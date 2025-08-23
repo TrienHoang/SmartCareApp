@@ -144,7 +144,7 @@
                                                     <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">
                                                         Chuyên khoa</p>
                                                     <p class="text-sm font-semibold text-gray-900">
-                                                        {{ $item->doctor->specialization ?? '---' }}</p>
+                                                        {{ $item->doctor->department->name ?? '---' }}</p>
                                                 </div>
                                             </div>
 

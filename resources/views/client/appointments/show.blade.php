@@ -140,7 +140,7 @@
                             <div>
                                 <div class="text-sm text-gray-500 mb-1">Chuyên khoa</div>
                                 <div class="font-medium text-gray-800">
-                                    {{ $appointment->doctor->specialization ?? 'Nội tổng quát' }}</div>
+                                    {{ $appointment->doctor->department->name ?? 'Nội tổng quát' }}</div>
                             </div>
                         </div>
 
@@ -149,7 +149,7 @@
                             <div>
                                 <div class="text-sm text-gray-500 mb-1">Giới tính</div>
                                 <div class="font-medium text-gray-800">
-                                    {{ $appointment->doctor->gender ?? 'Nữ' }}</div>
+                                    {{ $appointment->doctor->user->gender ?? 'Nữ' }}</div>
                             </div>
                         </div>
 
@@ -188,9 +188,9 @@
                         <div class="flex items-start">
                             <i class="fas fa-money-bill-wave text-gray-400 mr-3 mt-1"></i>
                             <div>
-                                <div class="text-sm text-gray-500 mb-1">Giá dịch vụ</div>
+                                <div class="text-sm text-gray-500 mb-1">Đã thanh toán</div>
                                 <div class="font-semibold text-green-600 text-lg">
-                                    {{ number_format($appointment->service->price ?? 500000, 0, ',', '.') }}₫
+                                    {{ number_format($appointment->payment->amount ?? 500000, 0, ',', '.') }}₫
                                 </div>
                             </div>
                         </div>
@@ -200,58 +200,77 @@
                             <div>
                                 <div class="text-sm text-gray-500 mb-1">Chuyên khoa</div>
                                 <div class="font-medium text-gray-800">
-                                    {{ $appointment->doctor->specialization ?? 'Nội tổng quát' }}</div>
+                                    {{ $appointment->doctor->department->name ?? 'Nội tổng quát' }}</div>
                             </div>
                         </div>
-                    </div>
+                        @if ($appointment->symptom_note)
+                            <div class="flex items-start">
+                                <i class="fas fa-money-bill-wave text-gray-400 mr-3 mt-1"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500 mb-1">Chuẩn đoán</div>
+                                    <div class="font-medium text-gray-800">
 
+                                        {{ $appointment->symptom_note ?? 'Khám tổng quát' }}
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        @endif
+
+                    </div>
                     @if ($appointment->service->description ?? 'Khám sức khỏe tổng quát bao gồm kiểm tra các chỉ số cơ bản')
-                        <div class="pt-4 border-t border-gray-100">
-                            <div class="text-sm text-gray-500 mb-2">Mô tả dịch vụ</div>
-                            <div class="text-gray-700 leading-relaxed">
-                                {{ $appointment->service->description ?? 'Khám sức khỏe tổng quát bao gồm kiểm tra các chỉ số cơ bản, đo huyết áp, cân nặng, và tư vấn sức khỏe.' }}
+                        <div class="flex items-start">
+                            <div class="pt-4 border-t border-gray-100">
+                                <div class="text-sm text-gray-500 mb-2">Mô tả dịch vụ</div>
+                                <div class="text-gray-700 leading-relaxed">
+                                    {{ $appointment->service->description ?? 'Khám sức khỏe tổng quát bao gồm kiểm tra các chỉ số cơ bản, đo huyết áp, cân nặng, và tư vấn sức khỏe.' }}
+                                </div>
                             </div>
                         </div>
                     @endif
                 </div>
-            </div>
 
-            <!-- Notes Section -->
-            @if ($appointment->reason ?? 'Khám tổng quát định kỳ')
-                <div class="mb-8">
-                    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-6">
-                        <div class="flex items-center mb-3">
-                            <i class="fas fa-sticky-note text-blue-500 mr-3"></i>
-                            <h3 class="text-lg font-semibold text-blue-800">Ghi chú khám bệnh</h3>
-                        </div>
-                        <p class="text-blue-700 leading-relaxed">
-                            {{ $appointment->reason ?? 'Khám tổng quát định kỳ' }}</p>
-                    </div>
-                </div>
-            @endif
-
-            <!-- Cancel Reason (if exists) -->
-            @if ($appointment->cancel_reason ?? false)
-                <div class="mb-8">
-                    <div class="bg-red-50 border border-red-200 rounded-2xl p-6">
-                        <div class="flex items-center mb-3">
-                            <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
-                            <h3 class="text-lg font-semibold text-red-800">Lý do hủy lịch hẹn</h3>
-                        </div>
-                        <p class="text-red-700 leading-relaxed">{{ $appointment->cancel_reason }}</p>
-                    </div>
-                </div>
-            @endif
-
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap gap-4 justify-center">
-                <a href="{{ route('client.appointments.index') ?? '#' }}"
-                    class="flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-200 transform hover:scale-105">
-                    <i class="fas fa-arrow-left mr-2"></i>
-                    Quay lại danh sách
-                </a>
             </div>
         </div>
+
+        <!-- Notes Section -->
+        @if ($appointment->reason)
+            <div class="mb-8">
+                <div class="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-sticky-note text-blue-500 mr-3"></i>
+                        <h3 class="text-lg font-semibold text-blue-800">Ghi chú khám bệnh</h3>
+                    </div>
+                    <p class="text-blue-700 leading-relaxed">
+                        {{ $appointment->reason }}</p>
+                </div>
+            </div>
+        @endif
+
+        <!-- Cancel Reason (if exists) -->
+        @if ($appointment->cancel_reason ?? false)
+            <div class="mb-8">
+                <div class="bg-red-50 border border-red-200 rounded-2xl p-6">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                        <h3 class="text-lg font-semibold text-red-800">Lý do hủy lịch hẹn</h3>
+                    </div>
+                    <p class="text-red-700 leading-relaxed">{{ $appointment->cancel_reason }}</p>
+                </div>
+            </div>
+        @endif
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-4 justify-center">
+            <a href="{{ route('client.appointments.index') ?? '#' }}"
+                class="flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-200 transform hover:scale-105">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Quay lại danh sách
+            </a>
+        </div>
+    </div>
     </div>
 
     <style>
