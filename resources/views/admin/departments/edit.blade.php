@@ -13,8 +13,8 @@
                                 <i class="fas fa-building text-white fa-lg"></i>
                             </div>
                             <div>
-                                <h3 class="mb-1 font-weight-bold">Cập nhật phòng ban</h3>
-                                <p class="mb-0 opacity-90">Chỉnh sửa thông tin phòng ban của bạn</p>
+                                <h3 class="mb-1 font-weight-bold">Cập nhật khoa</h3>
+                                <p class="mb-0 opacity-90">Chỉnh sửa thông tin khoa của bạn</p>
                             </div>
                         </div>
                     </div>
@@ -49,19 +49,19 @@
                         @csrf
                         @method('PUT')
 
-                        {{-- Tên phòng ban --}}
+                        {{-- Tên khoa --}}
                         <div class="form-floating mb-4">
                             <input type="text" 
                                    name="name" 
                                    id="name"
                                    class="form-control form-control-lg @error('name') is-invalid @enderror"
                                    value="{{ old('name', $department->name) }}" 
-                                   placeholder="Nhập tên phòng ban"
+                                   placeholder="Nhập tên khoa"
                                    required
                                    style="border-radius: 15px; border: 2px solid #e9ecef; transition: all 0.3s;">
                             <label for="name">
                                 <i class="fas fa-building me-2 text-primary"></i>
-                                Tên phòng ban <span class="text-danger">*</span>
+                                Tên khoa <span class="text-danger">*</span>
                             </label>
                             @error('name')
                                 <div class="invalid-feedback d-flex align-items-center">
@@ -76,12 +76,12 @@
                             <textarea name="description" 
                                       id="description"
                                       class="form-control @error('description') is-invalid @enderror"
-                                      placeholder="Nhập mô tả phòng ban"
+                                      placeholder="Nhập mô tả khoa"
                                       rows="4"
                                       style="border-radius: 15px; border: 2px solid #e9ecef; min-height: 120px; transition: all 0.3s;">{{ old('description', $department->description) }}</textarea>
                             <label for="description">
                                 <i class="fas fa-align-left me-2 text-info"></i>
-                                Mô tả phòng ban
+                                Mô tả khoa
                             </label>
                             @error('description')
                                 <div class="invalid-feedback d-flex align-items-center">
@@ -139,7 +139,7 @@
                         <div>
                             <h6 class="mb-1 text-dark">Lưu ý quan trọng</h6>
                             <small class="text-muted">
-                                Việc thay đổi trạng thái phòng ban có thể ảnh hưởng đến các nhân viên thuộc phòng ban này.
+                                Việc thay đổi trạng thái khoa có thể ảnh hưởng đến các nhân viên thuộc khoa này.
                             </small>
                         </div>
                     </div>
