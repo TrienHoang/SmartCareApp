@@ -56,7 +56,15 @@
                 @enderror
             </div>
 
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Lưu</button>
+            <button type="submit" 
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+            Lưu
+        </button>
+        
+        <a href="{{ route('admin.rooms.index') }}" 
+           class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded ml-2 inline-block">
+           Quay lại
+        </a>
         </form>
     </div>
 @endsection

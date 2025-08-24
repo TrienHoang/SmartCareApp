@@ -263,6 +263,9 @@
                                             <i class="bx bx-time mr-1"></i>Ca làm việc
                                         </th>
                                         <th class="border-top-0">
+                                            <i class="bx bx-time mr-1"></i>Phòng làm việc
+                                        </th>
+                                        <th class="border-top-0">
                                             <i class="bx bx-time-five mr-1"></i>Thời gian
                                         </th>
                                         <th class="border-top-0">
@@ -308,6 +311,19 @@
                                                     </div>
                                                 </div>
                                             </td>
+                                            <td>
+                                                <div class="room-info">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="icon-circle bg-gradient-warning text-white mr-2">
+                                                            <i class="bx bx-building-house"></i>
+                                                        </div>
+                                                        <div>
+                                                            <span class="font-weight-semibold">
+                                                                {{ $schedule->room->name ?? 'Chưa xác định' }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             <td>
                                                 <div class="time-info bg-light p-2 rounded">
                                                     <div class="d-flex align-items-center text-success">
