@@ -12,7 +12,7 @@
 
         .hero-background-image {
             height: 100%;
-            background-image: url(https://i.ibb.co/ZRQ9K48J/ace06379-7b9f-43a8-80eb-e0c72fc27839-frame-6-4.png);
+            background-image: url({{ asset('LayoutClient/img/bg-service-detail.png') }});
             background-size: cover;
             background-position: center;
             position: absolute;
@@ -108,11 +108,6 @@
             /* Align with text */
         }
 
-        /* Override Tailwind's default list-style for cleaner look */
-        ul {
-            list-style: none;
-            padding-left: 0;
-        }
     </style>
 @endpush
 
@@ -164,7 +159,7 @@
             {{-- Content grid: details + banner --}}
             <div id="content" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {{-- Left Column: Package Details --}}
-                <div class="lg:col-span-8 prose">
+                <div class="lg:col-span-8 article-content ">
                     {!! $service->content !!}
                 </div>
                 

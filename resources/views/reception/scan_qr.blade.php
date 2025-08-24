@@ -372,16 +372,20 @@
                     if (data.success && data.appointment) {
                         this.lastAppointmentData = data.appointment;
                         this.elements.appointmentDetails.innerHTML = `
-                            <p><strong>Mã cuộc hẹn:</strong> ${data.appointment.id}</p>
-                            <p><strong>Bệnh nhân:</strong> ${data.appointment.patient_name}</p>
-                            <p><strong>Số điện thoại:</strong> ${data.appointment.patient_phone}</p>
-                            <p><strong>Bác sĩ:</strong> ${data.appointment.doctor_name}</p>
-                            <p><strong>Dịch vụ:</strong> ${data.appointment.service_name}</p>
-                            <p><strong>Phòng khám:</strong> ${data.appointment.room}</p>
-                            <p><strong>Khoa:</strong> ${data.appointment.department}</p>
-                            <p><strong>Thời gian hẹn:</strong> ${data.appointment.appointment_time}</p>
-                            <p><strong>Trạng thái:</strong> <span class="text-green-600 font-semibold">${data.appointment.status}</span></p>
-                        `;
+    <p><strong>Mã cuộc hẹn:</strong> ${data.appointment.id}</p>
+    <p><strong>Bệnh nhân:</strong> ${data.appointment.patient_name}</p>
+    <p><strong>Tuổi:</strong> ${data.appointment.patient_age}</p>
+    <p><strong>Giới tính:</strong> ${data.appointment.patient_gender}</p>
+    <p><strong>Số điện thoại:</strong> ${data.appointment.patient_phone}</p>
+    <p><strong>Địa chỉ:</strong> ${data.appointment.patient_address}</p>
+    <p><strong>Email:</strong> ${data.appointment.patient_email}</p>
+    <p><strong>Bác sĩ:</strong> ${data.appointment.doctor_name}</p>
+    <p><strong>Dịch vụ:</strong> ${data.appointment.service_name}</p>
+    <p><strong>Phòng khám:</strong> ${data.appointment.room}</p>
+    <p><strong>Khoa:</strong> ${data.appointment.department}</p>
+    <p><strong>Thời gian hẹn:</strong> ${data.appointment.appointment_time}</p>
+    <p><strong>Trạng thái:</strong> <span class="text-green-600 font-semibold">${data.appointment.status}</span></p>
+`;
                         this.elements.printTicketBtn.classList.remove('hidden');
                     }
                 } catch (error) {
@@ -399,38 +403,76 @@
                     return;
                 }
 
-                const printWindow = window.open('', '', 'height=600,width=400');
+                const printWindow = window.open('', '', 'height=900,width=700');
                 printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Vé Khám Bệnh</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; padding: 20px; }
-                            .ticket { border: 1px solid #000; padding: 20px; max-width: 300px; margin: 0 auto; text-align: center; }
-                            .ticket h2 { font-size: 1.5rem; margin-bottom: 1rem; }
-                            .ticket p { margin: 0.5rem 0; font-size: 1rem; }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="ticket">
-                            <h2>Vé Khám Bệnh</h2>
-                            <p><strong>Bệnh nhân:</strong> ${this.lastAppointmentData.patient_name || 'N/A'}</p>
-                            <p><strong>Số điện thoại:</strong> ${this.lastAppointmentData.patient_phone || 'N/A'}</p>
-                            <p><strong>Bác sĩ:</strong> ${this.lastAppointmentData.doctor_name || 'N/A'}</p>
-                            <p><strong>Dịch vụ:</strong> ${this.lastAppointmentData.service_name || 'N/A'}</p>
-                            <p><strong>Phòng khám:</strong> ${this.lastAppointmentData.room}</p>
-                            <p><strong>Khoa:</strong> ${this.lastAppointmentData.department}</p>
-                            <p><strong>Thời gian hẹn:</strong> ${this.lastAppointmentData.appointment_time || 'N/A'}</p>
-                            <p><strong>Ngày in:</strong> ${new Date().toLocaleString('vi-VN')}</p>
-                        </div>
-                    </body>
-                    </html>
-                `);
+        <!DOCTYPE html>
+        <html lang="vi">
+        <head>
+            <meta charset="UTF-8">
+            <title>Phiếu Khám Bệnh</title>
+            <style>
+                body { font-family: "Times New Roman", serif; padding: 40px; }
+                h2 { text-align: center; text-transform: uppercase; margin-bottom: 20px; }
+                .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+                .section { margin-top: 15px; }
+                .line { border-bottom: 1px dotted #000; display: inline-block; min-width: 200px; }
+                .sign { text-align: right; margin-top: 40px; }
+                .bigbox { min-height: 200px; border: 1px dashed #000; margin-top: 10px; padding: 5px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div>
+                    Cơ sở KB, CB: ..................................<br>
+                    Khoa: ${this.lastAppointmentData.department || 'N/A'}
+                </div>
+                <div style="text-align:right">
+                    MS: PK-02<br>
+                    Số vào viện: ............<br>
+                    Mã người bệnh: ${this.lastAppointmentData.id || 'N/A'}
+                </div>
+            </div>
+
+            <h2>PHIẾU KHÁM BỆNH</h2>
+
+            <div class="section">
+                Họ và tên người bệnh: <span class="line">${this.lastAppointmentData.patient_name || 'N/A'}</span><br><br>
+                Tuổi: <span class="line">${this.lastAppointmentData.patient_age || 'N/A'}</span><br><br>
+                Giới tính: ${this.lastAppointmentData.patient_gender || 'N/A'}<br><br>
+                Số điện thoại: <span class="line">${this.lastAppointmentData.patient_phone || 'N/A'}</span><br><br>
+                Địa chỉ: <span class="line" style="min-width:400px">${this.lastAppointmentData.patient_address|| 'N/A'}</span><br><br>
+                Email: <span class="line" style="min-width:400px">${this.lastAppointmentData.patient_email|| 'N/A'}</span>
+            </div>
+
+            <div class="section">
+                Bác sĩ: <span class="line">${this.lastAppointmentData.doctor_name || 'N/A'}</span><br><br>
+                Dịch vụ: <span class="line">${this.lastAppointmentData.service_name || 'N/A'}</span><br><br>
+                Khoa: <span class="line">${this.lastAppointmentData.department || 'N/A'}</span>  
+                Phòng: <span class="line">${this.lastAppointmentData.room || 'N/A'}</span><br><br>
+                Thời gian hẹn: <span class="line">${this.lastAppointmentData.appointment_time || 'N/A'}</span><br><br>
+            </div>
+
+            <div class="section">
+                <strong>Kết quả khám chuyên khoa:</strong>
+                <div class="bigbox"></div>
+            </div>
+
+            <div class="sign">
+                Ngày ${new Date().getDate()} tháng ${new Date().getMonth()+1} năm ${new Date().getFullYear()}<br>
+                <strong>Bác sĩ khám bệnh</strong><br>
+                (Ký, ghi rõ họ tên)
+            </div>
+        </body>
+        </html>
+    `);
                 printWindow.document.close();
-                printWindow.focus();
-                printWindow.print();
-                printWindow.close();
+
+                // Đợi popup load xong rồi mới in
+                printWindow.onload = function() {
+                    printWindow.focus();
+                    printWindow.print();
+                    printWindow.close();
+                };
             }
 
             async confirmCheckin() {

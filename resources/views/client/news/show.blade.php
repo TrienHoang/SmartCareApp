@@ -135,21 +135,7 @@
                     <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-shadow duration-500">
                         <div class="p-6 lg:p-16 xl:p-20">
                             <!-- Content with enhanced styling -->
-                            <div class="prose prose-xl max-w-none 
-                                       prose-headings:text-gray-900 prose-headings:font-bold prose-headings:tracking-tight
-                                       prose-h1:text-4xl prose-h1:mb-8 prose-h1:pb-4 prose-h1:border-b prose-h1:border-gray-200
-                                       prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:text-blue-900
-                                       prose-h3:text-2xl prose-h3:mt-10 prose-h3:mb-4 prose-h3:text-gray-800
-                                       prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-p:text-lg
-                                       prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-a:font-medium
-                                       prose-strong:text-gray-900 prose-strong:font-bold
-                                       prose-em:text-gray-600 prose-em:italic
-                                       prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:rounded-r-lg prose-blockquote:p-6 prose-blockquote:my-8
-                                       prose-ul:space-y-2 prose-ol:space-y-2
-                                       prose-li:text-gray-700 prose-li:leading-relaxed
-                                       prose-img:rounded-2xl prose-img:shadow-xl prose-img:my-8
-                                       prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm
-                                       prose-pre:bg-gray-900 prose-pre:rounded-xl prose-pre:p-6">
+                            <div class="article-content">
                                 {!! $post->content !!}
                             </div>
                         </div>

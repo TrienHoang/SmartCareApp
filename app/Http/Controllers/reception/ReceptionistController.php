@@ -54,6 +54,12 @@ class ReceptionistController extends Controller
                     'id' => $appointment->id,
                     'patient_name' => $appointment->patient ? $appointment->patient->full_name : 'N/A',
                     'patient_phone' => $appointment->patient ? $appointment->patient->phone : 'N/A',
+                    'patient_gender' => $appointment->patient ? $appointment->patient->gender : 'N/A',
+                    'patient_address' => $appointment->patient ? $appointment->patient->address : 'N/A',
+                    'patient_email' => $appointment->patient ? $appointment->patient->email : 'N/A',
+                    'patient_age' => $appointment->patient && $appointment->patient->date_of_birth
+                    ? Carbon::parse($appointment->patient->date_of_birth)->age
+                    : 'N/A',
                     'doctor_name' => $appointment->doctor && $appointment->doctor->user ? $appointment->doctor->user->full_name : 'N/A',
                     'service_name' => $appointment->service ? $appointment->service->name : 'N/A',
                     'room' => $room,

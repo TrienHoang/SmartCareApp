@@ -5,13 +5,18 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Contact;
+use App\Models\Faq;
 
 class ContactController extends Controller
 {
     // Hiển thị form liên hệ
     public function showForm()
     {
-        return view('client.contact');
+        $faqs = Faq::where('is_active', 1)
+        ->orderBy('display_order', 'asc')
+        ->get();
+
+        return view('client.contact',compact('faqs'));
     }
 
     // Xử lý khi gửi form
@@ -75,4 +80,15 @@ class ContactController extends Controller
             'message' => 'Nội dung',
         ];
     }
+
+    // public function contact()
+    // {
+    //     // Lấy các câu hỏi đang active và sắp xếp theo display_order
+    //     $faqs = Faq::where('is_active', 1)
+    //                 ->orderBy('display_order', 'asc')
+    //                 ->get();
+
+    //     // Truyền dữ liệu sang contact.blade.php
+    //     return view('client.contact', compact('faqs'));
+    // }
 }

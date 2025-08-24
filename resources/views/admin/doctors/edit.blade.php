@@ -74,14 +74,14 @@
                 </div>
 
                 {{-- Chuyên khoa --}}
-                <div class="col-md-6 mb-3">
+                {{-- <div class="col-md-6 mb-3">
                     <label class="form-label fw-semibold">Chuyên khoa <span class="text-danger">*</span></label>
                     <input type="text" name="specialization" class="form-control @error('specialization') is-invalid @enderror"
                            value="{{ old('specialization', $doctor->specialization) }}">
                     @error('specialization')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
-                </div>
+                </div> --}}
 
                 {{-- Tiểu sử --}}
                 <div class="col-12 mb-3">
