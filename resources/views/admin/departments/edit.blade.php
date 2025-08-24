@@ -95,13 +95,13 @@
                         <div class="form-floating mb-5">
                             <select name="is_active" 
                                     id="is_active"
-                                    class="form-select form-select-lg @error('is_active') is-invalid @enderror"
-                                    style="border-radius: 15px; border: 2px solid #e9ecef; transition: all 0.3s;">
+                                    class="form-select form-select-lg @error('is_active') is-invalid  @enderror"
+                                    style="border-radius: 15px; border: 2px solid #e9ecef; transition: all 0.3s;    height: fit-content;">
                                 <option value="1" {{ old('is_active', $department->is_active) == 1 ? 'selected' : '' }}>
-                                    🟢 Đang hoạt động
+                                    Đang hoạt động
                                 </option>
                                 <option value="0" {{ old('is_active', $department->is_active) == 0 ? 'selected' : '' }}>
-                                    🔴 Ngừng hoạt động
+                                    Ngừng hoạt động
                                 </option>
                             </select>
                             <label for="is_active">
