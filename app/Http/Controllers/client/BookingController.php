@@ -26,8 +26,15 @@ use Illuminate\Support\Facades\Response;
 
 class BookingController extends Controller
 {
-    public function show($service_id)
+    public function show($service_id, Request $request)
     {
+            $request->session()->forget([
+        'selected_promotion_code',
+        'selected_promotion_id',
+        'selected_promotion_discount',
+        'applied_promotion_code',
+        'temp_booking_data'
+    ]);
         $service = Service::with(['category', 'department', 'doctors.user', 'doctors.reviews'])
             ->where('id', $service_id)
             ->firstOrFail();
@@ -417,10 +424,7 @@ class BookingController extends Controller
 
     public function confirm(Request $request)
     {
-        // if (!session()->has('selected_promotion_code')) {
-        //     session()->forget('selected_promotion_code');
-        //     session()->forget('selected_promotion_discount');
-        // }
+
         $booking_data = $request->session()->get('booking_data');
         $booking_confirm = $request->session()->get('booking_confirm');
 
@@ -812,6 +816,7 @@ class BookingController extends Controller
     // New method to handle VNPay return URL
     public function paymentReturn(Request $request)
     {
+
         $this->cleanExpiredPayments(); // Dọn dẹp trước khi xử lý
 
         $vnp_HashSecret = env('VNPAY_HASH_SECRET');
