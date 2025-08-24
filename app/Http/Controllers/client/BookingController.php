@@ -28,13 +28,13 @@ class BookingController extends Controller
 {
     public function show($service_id, Request $request)
     {
-            $request->session()->forget([
-        'selected_promotion_code',
-        'selected_promotion_id',
-        'selected_promotion_discount',
-        'applied_promotion_code',
-        'temp_booking_data'
-    ]);
+        $request->session()->forget([
+            'selected_promotion_code',
+            'selected_promotion_id',
+            'selected_promotion_discount',
+            'applied_promotion_code',
+            'temp_booking_data'
+        ]);
         $service = Service::with(['category', 'department', 'doctors.user', 'doctors.reviews'])
             ->where('id', $service_id)
             ->firstOrFail();
