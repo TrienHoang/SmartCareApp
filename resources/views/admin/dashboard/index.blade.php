@@ -211,6 +211,11 @@
                         </h5>
                         <div class="d-flex gap-2">
                             <form method="GET" id="timeFrameForm" class="d-inline-block">
+                                {{-- Giữ tham số cũ từ request --}}
+                                <input type="hidden" name="month1" value="{{ request('month1') }}">
+                                <input type="hidden" name="year1" value="{{ request('year1') }}">
+                                <input type="hidden" name="month2" value="{{ request('month2') }}">
+                                <input type="hidden" name="year2" value="{{ request('year2') }}">
                                 <select name="type" id="timeFrameSelect"
                                     class="form-select form-select-sm border-1 bg-light"
                                     onchange="toggleCustomDateRange()">
@@ -247,14 +252,22 @@
                 </div>
             </div>
         </div>
+
         <div class="row g-4">
             {{-- Bộ lọc tháng/năm --}}
-            <form method="GET" action="{{ route('admin.dashboard.index') }}" class="row g-3 align-items-end mb-4">
-                <div class="col-lg-6">
-                    <label for="month" class="form-label">Tháng</label>
-                    <select class="form-select" id="month" name="month">
+            <form method="GET" id="monthCompareForm" class="row g-3 mb-4">
+                {{-- Giữ tham số từ form khung thời gian --}}
+                <input type="hidden" name="type" value="{{ request('type') }}">
+                <input type="hidden" name="start_date" value="{{ request('start_date') }}">
+                <input type="hidden" name="end_date" value="{{ request('end_date') }}">
+                <input type="hidden" name="formType" value="month_compare">
+                {{-- Thời gian chính --}}
+                <div class="col-md-3">
+                    <label for="month1" class="form-label">Tháng (hiện tại)</label>
+                    <select name="month1" id="month1" class="form-select">
+                        <option value="">-- Chọn --</option>
                         @for ($m = 1; $m <= 12; $m++)
-                            <option value="{{ $m }}" {{ $m == $month ? 'selected' : '' }}>
+                            <option value="{{ $m }}" {{ request('month1') == $m ? 'selected' : '' }}>
                                 Tháng {{ $m }}
                             </option>
                         @endfor
@@ -262,22 +275,49 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label for="year" class="form-label">Năm</label>
-                    <select class="form-select" id="year" name="year">
+                    <label for="year1" class="form-label">Năm (hiện tại)</label>
+                    <select name="year1" id="year1" class="form-select">
                         @for ($y = now()->year; $y >= now()->year - 5; $y--)
-                            <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>
+                            <option value="{{ $y }}"
+                                {{ request('year1', now()->year) == $y ? 'selected' : '' }}>
                                 {{ $y }}
                             </option>
                         @endfor
                     </select>
                 </div>
 
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-filter me-1"></i> Lọc
+                {{-- Thời gian so sánh --}}
+                <div class="col-md-3">
+                    <label for="month2" class="form-label">Tháng (so sánh)</label>
+                    <select name="month2" id="month2" class="form-select">
+                        <option value="">-- Chọn --</option>
+                        @for ($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}" {{ request('month2') == $m ? 'selected' : '' }}>
+                                Tháng {{ $m }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="year2" class="form-label">Năm (so sánh)</label>
+                    <select name="year2" id="year2" class="form-select">
+                        @for ($y = now()->year; $y >= now()->year - 5; $y--)
+                            <option value="{{ $y }}"
+                                {{ request('year2', now()->year - 1) == $y ? 'selected' : '' }}>
+                                {{ $y }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+
+                <div class="col-md-12 text-end mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Lọc
                     </button>
                 </div>
             </form>
+
 
             {{-- Card tăng trưởng đặt lịch --}}
             <div class="col-lg-6">
@@ -293,19 +333,19 @@
                             @if ($bookingGrowthValue > 0)
                                 <div class="bg-success bg-opacity-10 p-4 rounded-3 mb-3">
                                     <i class="fas fa-arrow-up text-success fa-3x mb-2"></i>
-                                    <h3 class="text-success fw-bold mb-0">+{{ $bookingGrowthValue }}%</h3>
+                                    <h3 class="text-success fw-bold mb-0">{{ $bookingGrowthValue }} Lượt đặt</h3>
                                 </div>
                                 <p class="text-success fw-semibold mb-1">Tăng trưởng tích cực</p>
                             @elseif($bookingGrowthValue < 0)
                                 <div class="bg-danger bg-opacity-10 p-4 rounded-3 mb-3">
                                     <i class="fas fa-arrow-down text-danger fa-3x mb-2"></i>
-                                    <h3 class="text-danger fw-bold mb-0">{{ $bookingGrowthValue }}%</h3>
+                                    <h3 class="text-danger fw-bold mb-0">{{ $bookingGrowthValue }} Lượt đặt</h3>
                                 </div>
                                 <p class="text-danger fw-semibold mb-1">Giảm so với kỳ trước</p>
                             @else
                                 <div class="bg-secondary bg-opacity-10 p-4 rounded-3 mb-3">
                                     <i class="fas fa-minus text-secondary fa-3x mb-2"></i>
-                                    <h3 class="text-secondary fw-bold mb-0">0%</h3>
+                                    <h3 class="text-secondary fw-bold mb-0">0</h3>
                                 </div>
                                 <p class="text-secondary fw-semibold mb-1">Không thay đổi</p>
                             @endif
@@ -337,19 +377,19 @@
                             @if ($revenueGrowthValue > 0)
                                 <div class="bg-success bg-opacity-10 p-4 rounded-3 mb-3">
                                     <i class="fas fa-arrow-up text-success fa-3x mb-2"></i>
-                                    <h3 class="text-success fw-bold mb-0">+{{ $revenueGrowthValue }}%</h3>
+                                    <h3 class="text-success fw-bold mb-0">{{ $revenueGrowthValue }}đ</h3>
                                 </div>
                                 <p class="text-success fw-semibold mb-1">Tăng trưởng tích cực</p>
                             @elseif($revenueGrowthValue < 0)
                                 <div class="bg-danger bg-opacity-10 p-4 rounded-3 mb-3">
                                     <i class="fas fa-arrow-down text-danger fa-3x mb-2"></i>
-                                    <h3 class="text-danger fw-bold mb-0">{{ $revenueGrowthValue }}%</h3>
+                                    <h3 class="text-danger fw-bold mb-0">{{ $revenueGrowthValue }}đ</h3>
                                 </div>
                                 <p class="text-danger fw-semibold mb-1">Giảm so với kỳ trước</p>
                             @else
                                 <div class="bg-secondary bg-opacity-10 p-4 rounded-3 mb-3">
                                     <i class="fas fa-minus text-secondary fa-3x mb-2"></i>
-                                    <h3 class="text-secondary fw-bold mb-0">0%</h3>
+                                    <h3 class="text-secondary fw-bold mb-0">0</h3>
                                 </div>
                                 <p class="text-secondary fw-semibold mb-1">Không thay đổi</p>
                             @endif
@@ -556,7 +596,7 @@
                             <div class="col-6">
                                 <div class="text-center p-3 bg-success bg-opacity-10 rounded-3">
                                     <i class="fas fa-user-plus text-success fa-2x mb-2"></i>
-                                    <h4 class="fw-bold text-success mb-1">{{ $patientStats['new_this_week'] ?? '--' }}
+                                    <h4 class="fw-bold text-success mb-1">{{ $patientStats['new'] ?? '--' }}
                                     </h4>
                                     <small class="text-muted">Bệnh nhân mới</small>
                                 </div>
@@ -638,6 +678,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+      
             // Biểu đồ Đặt lịch & Doanh thu
             const bookingRevenueCtx = document.getElementById('bookingRevenueChart').getContext('2d');
             const bookingRevenueChart = new Chart(bookingRevenueCtx, {

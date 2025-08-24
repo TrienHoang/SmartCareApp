@@ -108,12 +108,13 @@ Route::group([
     'middleware' => 'checkAdmin'
 ], function () {
     // Dashboard
-    Route::get('/dashboard', function () {
-        return view(view: 'admin.dashboard');
-    })->name('dashboard');
-    Route::get('dashboard/export-excel', [DashboardController::class, 'exportExcel']);
-    Route::get('dashboard/export-pdf', [DashboardController::class, 'exportPdf']);
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('index'); // Trang chính
+        Route::get('/export-excel', [DashboardController::class, 'exportExcel'])->name('export-excel');
+        Route::get('/export-pdf', [DashboardController::class, 'exportPdf'])->name('export-pdf');
+    });
 });
+
 
 
 // Nhóm users

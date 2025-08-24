@@ -25,6 +25,30 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class DashboardController extends Controller
 {
+    // private function formatGrowth($current, $previous, $unit = '')
+    // {
+    //     if ($previous == 0) {
+    //         if ($current == 0) {
+    //             return "0 {$unit}";
+    //         }
+    //         return "+{$current} {$unit}";
+    //     }
+
+    //     $diff = $current - $previous;
+
+    //     if ($diff > 0) {
+    //         return "+" . number_format($diff) . " {$unit}";
+    //     }
+
+    //     if ($diff < 0) {
+    //         return number_format($diff) . " {$unit}"; // tự có dấu -
+    //     }
+
+    //     return "0 {$unit}";
+    // }
+
+
+
     public function index(Request $request)
     {
         $doctorStats = Doctor::with('user')
@@ -113,66 +137,72 @@ class DashboardController extends Controller
             'appointments_cancelled' => Appointment::where('status', 'cancelled')->count(),
         ];
 
-        // Lấy tháng/năm từ request, mặc định = hiện tại
-        $month = $request->input('month', Carbon::now()->month);
-        $year = $request->input('year', Carbon::now()->year);
+        // Thời gian chính
+        $month1 = $request->input('month1');
+        $year1  = $request->input('year1', Carbon::now()->year);
 
-        // Tháng trước
-        $prevMonth = Carbon::create($year, $month, 1)->subMonth();
+        // Thời gian so sánh
+        $month2 = $request->input('month2');
+        $year2  = $request->input('year2', $year1 - 1);
 
-        // ===============================
-        // 📊 1. Lượt đặt lịch
-        // ===============================
-        $bookingCurrent = Appointment::whereMonth('appointment_time', $month)
-            ->whereYear('appointment_time', $year)
-            ->where('status', '!=', 'cancelled')
-            ->count();
+        // Nếu có chọn tháng => so theo tháng
+        if ($month1 && $month2) {
+            // 📊 1. Lượt đặt lịch
+            $bookingCurrent = Appointment::whereMonth('appointment_time', $month1)
+                ->whereYear('appointment_time', $year1)
+                ->where('status', '!=', 'cancelled')
+                ->count();
 
-        $bookingPrevious = Appointment::whereMonth('appointment_time', $prevMonth->month)
-            ->whereYear('appointment_time', $prevMonth->year)
-            ->where('status', '!=', 'cancelled')
-            ->count();
+            $bookingPrevious = Appointment::whereMonth('appointment_time', $month2)
+                ->whereYear('appointment_time', $year2)
+                ->where('status', '!=', 'cancelled')
+                ->count();
 
-        if ($bookingPrevious > 0) {
-            $bookingGrowthValue = round((($bookingCurrent - $bookingPrevious) / $bookingPrevious) * 100);
+            $bookingGrowthValue = $bookingCurrent - $bookingPrevious;
+            $bookingGrowthLabel = "So với {$month2}/{$year2}";
+
+            // 💰 2. Doanh thu
+            $revenueCurrent = Payment::whereMonth('paid_at', $month1)
+                ->whereYear('paid_at', $year1)
+                ->where('status', 'paid')
+                ->where('refund_status', 'none')
+                ->sum('amount');
+
+            $revenuePrevious = Payment::whereMonth('paid_at', $month2)
+                ->whereYear('paid_at', $year2)
+                ->where('status', 'paid')
+                ->where('refund_status', 'none')
+                ->sum('amount');
+
+            $revenueGrowthValue = $revenueCurrent - $revenuePrevious;
+            $revenueGrowthLabel = "So với {$month2}/{$year2}";
         } else {
-            $bookingGrowthValue = $bookingCurrent > 0 ? 100 : 0;
+            // 📊 So sánh theo năm
+            $bookingCurrent = Appointment::whereYear('appointment_time', $year1)
+                ->where('status', '!=', 'cancelled')
+                ->count();
+
+            $bookingPrevious = Appointment::whereYear('appointment_time', $year2)
+                ->where('status', '!=', 'cancelled')
+                ->count();
+
+            $bookingGrowthValue = $bookingCurrent - $bookingPrevious;
+            $bookingGrowthLabel = "So với năm {$year2}";
+
+            // 💰 2. Doanh thu
+            $revenueCurrent = Payment::whereYear('paid_at', $year1)
+                ->where('status', 'paid')
+                ->where('refund_status', 'none')
+                ->sum('amount');
+
+            $revenuePrevious = Payment::whereYear('paid_at', $year2)
+                ->where('status', 'paid')
+                ->where('refund_status', 'none')
+                ->sum('amount');
+
+            $revenueGrowthValue = $revenueCurrent - $revenuePrevious;
+            $revenueGrowthLabel = "So với năm {$year2}";
         }
-        $bookingGrowthLabel = "So với {$prevMonth->month}/{$prevMonth->year}";
-
-        // ===============================
-        // 💰 2. Doanh thu
-        // ===============================
-
-
-        $revenueCurrent = Payment::whereMonth('paid_at', $month)
-            ->whereYear('paid_at', $year)
-            ->where('status', 'paid')
-            ->where('refund_status', 'none')
-            ->sum('amount');
-
-        $revenuePrevious = Payment::whereMonth('paid_at', $prevMonth->month)
-            ->whereYear('paid_at', $prevMonth->year)
-            ->where('status', 'paid')
-            ->where('refund_status', 'none')
-            ->sum('amount');
-
-        $revenueGrowthValue = $revenuePrevious > 0
-            ? round((($revenueCurrent - $revenuePrevious) / $revenuePrevious) * 100)
-            : ($revenueCurrent > 0 ? 100 : 0);
-
-        $revenueGrowthLabel = "So với {$prevMonth->month}/{$prevMonth->year}";
-
-
-
-
-        // Doanh thu
-        // $revenueCurrent = $monthlyStat->total_revenue ?? 0;
-        // $revenuePrevious = $prevMonthlyStat->total_revenue ?? 0;
-        // $revenueGrowthValue = $revenuePrevious > 0
-        //     ? round((($revenueCurrent - $revenuePrevious) / $revenuePrevious) * 100)
-        //     : 0;
-        // $revenueGrowthLabel = "So với {$prevMonth->month}/{$prevMonth->year}";
 
 
         // 3. Thống kê năm
@@ -358,12 +388,26 @@ class DashboardController extends Controller
         $patientRole = Role::where('name', 'nurse')->first();
         $patientRoleId = $patientRole?->id;
 
-        $newThisWeek = User::where('role_id', $patientRoleId)
-            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+        // Lấy kiểu lọc: week | month
+        $patientStatType = $request->query('patient_type', 'week');
+
+        if ($patientStatType === 'week') {
+            $start = now()->startOfWeek();
+            $end = now()->endOfWeek();
+        } else { // month
+            $start = now()->startOfMonth();
+            $end = now()->endOfMonth();
+        }
+
+        // Bệnh nhân mới trong khoảng
+        $newPatients = User::where('role_id', $patientRoleId)
+            ->whereBetween('created_at', [$start, $end])
             ->count();
 
+        // Bệnh nhân quay lại (đã khám >= 2 lần trong khoảng)
         $returningPatients = Appointment::select('patient_id')
             ->whereNotNull('patient_id')
+            ->whereBetween('appointment_time', [$start, $end])
             ->groupBy('patient_id')
             ->havingRaw('COUNT(*) >= 2')
             ->pluck('patient_id');
@@ -372,10 +416,16 @@ class DashboardController extends Controller
             ->where('role_id', $patientRoleId)
             ->count();
 
-        $totalPatients = User::where('role_id', $patientRoleId)->count();
+        // Tổng bệnh nhân trong khoảng
+        $totalPatients = User::where('role_id', $patientRoleId)
+            ->whereBetween('created_at', [$start, $end])
+            ->count();
+
         $returnRate = $totalPatients > 0 ? round(($returnCount / $totalPatients) * 100, 1) : 0;
 
+        // Thống kê khu vực
         $areaStatsRaw = User::where('role_id', $patientRoleId)
+            ->whereBetween('created_at', [$start, $end])
             ->whereNotNull('address')
             ->select(DB::raw("TRIM(SUBSTRING_INDEX(address, ',', -1)) as region"), DB::raw('COUNT(*) as total'))
             ->groupBy('region')
@@ -383,36 +433,22 @@ class DashboardController extends Controller
             ->toArray();
 
         $patientStats = [
-            'new_this_week' => $newThisWeek,
+            'new' => $newPatients,
             'return_rate' => $returnRate,
             'area' => $areaStatsRaw
         ];
 
-        $patientStatType = $request->query('patient_type', 'week');
+        // Label & data cho chart
         $patientStatLabels = [];
         $patientStatData = [];
 
-        switch ($patientStatType) {
-            case 'week':
-                $start = now()->startOfWeek();
-                $end = now()->endOfWeek();
-                $patientStatLabels[] = 'Tuần ' . $start->format('d/m') . ' - ' . $end->format('d/m');
-                $count = User::where('role_id', $patientRoleId)
-                    ->whereBetween('created_at', [$start, $end])
-                    ->count();
-                $patientStatData[] = $count;
-                break;
-
-            case 'month':
-                $label = 'Tháng ' . now()->month;
-                $patientStatLabels[] = $label;
-                $count = User::where('role_id', $patientRoleId)
-                    ->whereMonth('created_at', now()->month)
-                    ->whereYear('created_at', now()->year)
-                    ->count();
-                $patientStatData[] = $count;
-                break;
+        if ($patientStatType === 'week') {
+            $patientStatLabels[] = 'Tuần ' . $start->format('d/m') . ' - ' . $end->format('d/m');
+        } else {
+            $patientStatLabels[] = 'Tháng ' . now()->month;
         }
+        $patientStatData[] = $newPatients;
+
 
         // Thống kê hiệu suất
         $appointments = Appointment::whereYear('appointment_time', now()->year)->get();
@@ -893,66 +929,66 @@ class DashboardController extends Controller
 
         // Tạo PDF
         $pdf = PDF::loadView('admin.dashboard.pdf_export', $data);
-    
-    // Cấu hình PDF để hỗ trợ UTF-8
-    $pdf->getDomPDF()->set_option('isPhpEnabled', true);
-    $pdf->getDomPDF()->set_option('isRemoteEnabled', true);
-    $pdf->getDomPDF()->set_option('isHtml5ParserEnabled', true);
-    $pdf->getDomPDF()->set_option('isFontSubsettingEnabled', true);
-    
-    // Cấu hình paper và DPI
-    $pdf->setPaper('A4', 'portrait');
-    $pdf->setOptions([
-        'dpi' => 150,
-        'defaultFont' => 'Arial',
-        'defaultMediaType' => 'screen',
-        'isFontSubsettingEnabled' => true,
-    ]);
 
-    // Tạo tên file không dấu
-    $filename = 'bao-cao-thong-ke-' . $month . '-' . $year . '-' . now()->format('YmdHis') . '.pdf';
+        // Cấu hình PDF để hỗ trợ UTF-8
+        $pdf->getDomPDF()->set_option('isPhpEnabled', true);
+        $pdf->getDomPDF()->set_option('isRemoteEnabled', true);
+        $pdf->getDomPDF()->set_option('isHtml5ParserEnabled', true);
+        $pdf->getDomPDF()->set_option('isFontSubsettingEnabled', true);
 
-    return $pdf->download($filename);
-}
+        // Cấu hình paper và DPI
+        $pdf->setPaper('A4', 'portrait');
+        $pdf->setOptions([
+            'dpi' => 150,
+            'defaultFont' => 'Arial',
+            'defaultMediaType' => 'screen',
+            'isFontSubsettingEnabled' => true,
+        ]);
 
-// Hàm helper để chuyển đổi tiếng Việt có dấu thành không dấu
-private function removeAccents($str) {
-    $accents = array(
-        'à','á','ạ','ả','ã','â','ầ','ấ','ậ','ẩ','ẫ','ă','ằ','ắ','ặ','ẳ','ẵ',
-        'è','é','ẹ','ẻ','ẽ','ê','ề','ế','ệ','ể','ễ',
-        'ì','í','ị','ỉ','ĩ',
-        'ò','ó','ọ','ỏ','õ','ô','ồ','ố','ộ','ổ','ỗ','ơ','ờ','ớ','ợ','ở','ỡ',
-        'ù','ú','ụ','ủ','ũ','ư','ừ','ứ','ự','ử','ữ',
-        'ỳ','ý','ỵ','ỷ','ỹ',
-        'đ',
-        'À','Á','Ạ','Ả','Ã','Â','Ầ','Ấ','Ậ','Ẩ','Ẫ','Ă','Ằ','Ắ','Ặ','Ẳ','Ẵ',
-        'È','É','Ẹ','Ẻ','Ẽ','Ê','Ề','Ế','Ệ','Ể','Ễ',
-        'Ì','Í','Ị','Ỉ','Ĩ',
-        'Ò','Ó','Ọ','Ỏ','Õ','Ô','Ồ','Ố','Ộ','Ổ','Ỗ','Ơ','Ờ','Ớ','Ợ','Ở','Ỡ',
-        'Ù','Ú','Ụ','Ủ','Ũ','Ư','Ừ','Ứ','Ự','Ử','Ữ',
-        'Ỳ','Ý','Ỵ','Ỷ','Ỹ',
-        'Đ'
-    );
-    
-    $noAccents = array(
-        'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a',
-        'e','e','e','e','e','e','e','e','e','e','e',
-        'i','i','i','i','i',
-        'o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o',
-        'u','u','u','u','u','u','u','u','u','u','u',
-        'y','y','y','y','y',
-        'd',
-        'A','A','A','A','A','A','A','A','A','A','A','A','A','A','A','A','A',
-        'E','E','E','E','E','E','E','E','E','E','E',
-        'I','I','I','I','I',
-        'O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O',
-        'U','U','U','U','U','U','U','U','U','U','U',
-        'Y','Y','Y','Y','Y',
-        'D'
-    );
-    
-    return str_replace($accents, $noAccents, $str);
-}
+        // Tạo tên file không dấu
+        $filename = 'bao-cao-thong-ke-' . $month . '-' . $year . '-' . now()->format('YmdHis') . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    // Hàm helper để chuyển đổi tiếng Việt có dấu thành không dấu
+    // private function removeAccents($str) {
+    //     $accents = array(
+    //         'à','á','ạ','ả','ã','â','ầ','ấ','ậ','ẩ','ẫ','ă','ằ','ắ','ặ','ẳ','ẵ',
+    //         'è','é','ẹ','ẻ','ẽ','ê','ề','ế','ệ','ể','ễ',
+    //         'ì','í','ị','ỉ','ĩ',
+    //         'ò','ó','ọ','ỏ','õ','ô','ồ','ố','ộ','ổ','ỗ','ơ','ờ','ớ','ợ','ở','ỡ',
+    //         'ù','ú','ụ','ủ','ũ','ư','ừ','ứ','ự','ử','ữ',
+    //         'ỳ','ý','ỵ','ỷ','ỹ',
+    //         'đ',
+    //         'À','Á','Ạ','Ả','Ã','Â','Ầ','Ấ','Ậ','Ẩ','Ẫ','Ă','Ằ','Ắ','Ặ','Ẳ','Ẵ',
+    //         'È','É','Ẹ','Ẻ','Ẽ','Ê','Ề','Ế','Ệ','Ể','Ễ',
+    //         'Ì','Í','Ị','Ỉ','Ĩ',
+    //         'Ò','Ó','Ọ','Ỏ','Õ','Ô','Ồ','Ố','Ộ','Ổ','Ỗ','Ơ','Ờ','Ớ','Ợ','Ở','Ỡ',
+    //         'Ù','Ú','Ụ','Ủ','Ũ','Ư','Ừ','Ứ','Ự','Ử','Ữ',
+    //         'Ỳ','Ý','Ỵ','Ỷ','Ỹ',
+    //         'Đ'
+    //     );
+
+    //     $noAccents = array(
+    //         'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a',
+    //         'e','e','e','e','e','e','e','e','e','e','e',
+    //         'i','i','i','i','i',
+    //         'o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o',
+    //         'u','u','u','u','u','u','u','u','u','u','u',
+    //         'y','y','y','y','y',
+    //         'd',
+    //         'A','A','A','A','A','A','A','A','A','A','A','A','A','A','A','A','A',
+    //         'E','E','E','E','E','E','E','E','E','E','E',
+    //         'I','I','I','I','I',
+    //         'O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O',
+    //         'U','U','U','U','U','U','U','U','U','U','U',
+    //         'Y','Y','Y','Y','Y',
+    //         'D'
+    //     );
+
+    //     return str_replace($accents, $noAccents, $str);
+    // }
 
     private function getDashboardData(Request $request)
     {
