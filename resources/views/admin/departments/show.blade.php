@@ -1,6 +1,6 @@
 @extends('admin.dashboard')
 
-@section('title', 'Chi tiết phòng ban: ' . $department->name)
+@section('title', 'Chi tiết khoa: ' . $department->name)
 
 @section('content')
 <div class="container-fluid">
@@ -18,7 +18,7 @@
                                     </div>
                                     <div>
                                         <h2 class="mb-1 font-weight-bold">{{ $department->name }}</h2>
-                                        <p class="mb-0 opacity-90 fs-5">Chi tiết thông tin phòng ban</p>
+                                        <p class="mb-0 opacity-90 fs-5">Chi tiết thông tin khoa</p>
                                     </div>
                                 </div>
                                 
@@ -40,7 +40,7 @@
                                 @if($department->description)
                                     <p class="mb-0 opacity-90 fs-6">{{ $department->description }}</p>
                                 @else
-                                    <p class="mb-0 opacity-70 fs-6 fst-italic">Chưa có mô tả cho phòng ban này</p>
+                                    <p class="mb-0 opacity-70 fs-6 fst-italic">Chưa có mô tả cho khoa này</p>
                                 @endif
                             </div>
                             <div class="col-md-4 text-end">
@@ -131,7 +131,7 @@
                             @empty
                                 <div class="text-center py-5">
                                     <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
-                                    <p class="text-muted">Phòng ban này chưa có bác sĩ nào</p>
+                                    <p class="text-muted">khoa này chưa có bác sĩ nào</p>
                                 </div>
                             @endforelse
                         </div>
@@ -193,7 +193,7 @@
                                 </div>
                                 <div>
                                     <h5 class="mb-1 font-weight-bold text-dark">Phòng khám</h5>
-                                    <p class="mb-0 text-muted">{{ $department->rooms->count() }} phòng khám thuộc phòng ban</p>
+                                    <p class="mb-0 text-muted">{{ $department->rooms->count() }} phòng khám thuộc khoa</p>
                                 </div>
                             </div>
                         </div>
@@ -217,7 +217,7 @@
                             @empty
                                 <div class="text-center py-5">
                                     <i class="fas fa-door-closed fa-3x text-muted mb-3"></i>
-                                    <p class="text-muted">Chưa có phòng khám nào thuộc phòng ban này</p>
+                                    <p class="text-muted">Chưa có phòng khám nào thuộc khoa này</p>
                                 </div>
                             @endforelse
                         </div>
