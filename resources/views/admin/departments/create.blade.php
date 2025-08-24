@@ -13,8 +13,8 @@
                                 <i class="fas fa-plus-circle text-white fa-lg"></i>
                             </div>
                             <div>
-                                <h3 class="mb-1 font-weight-bold">Thêm phòng ban mới</h3>
-                                <p class="mb-0 opacity-90">Tạo phòng ban mới cho hệ thống</p>
+                                <h3 class="mb-1 font-weight-bold">Thêm khoa mới</h3>
+                                <p class="mb-0 opacity-90">Tạo khoa mới cho hệ thống</p>
                             </div>
                         </div>
                     </div>
@@ -62,19 +62,19 @@
                     <form action="{{ route('admin.departments.store') }}" method="POST" class="needs-validation" novalidate>
                         @csrf
 
-                        {{-- Tên phòng ban --}}
+                        {{-- Tên khoa --}}
                         <div class="form-floating mb-4">
                             <input type="text" 
                                    name="name" 
                                    id="name"
                                    class="form-control form-control-lg @error('name') is-invalid @enderror"
                                    value="{{ old('name') }}" 
-                                   placeholder="Nhập tên phòng ban"
+                                   placeholder="Nhập tên khoa"
                                    required
                                    style="border-radius: 15px; border: 2px solid #e9ecef; transition: all 0.3s;">
                             <label for="name">
                                 <i class="fas fa-building me-2 text-primary"></i>
-                                Tên phòng ban <span class="text-danger">*</span>
+                                Tên khoa <span class="text-danger">*</span>
                             </label>
                             @error('name')
                                 <div class="invalid-feedback d-flex align-items-center">
@@ -89,12 +89,12 @@
                             <textarea name="description" 
                                       id="description"
                                       class="form-control @error('description') is-invalid @enderror"
-                                      placeholder="Nhập mô tả phòng ban"
+                                      placeholder="Nhập mô tả khoa"
                                       rows="4"
                                       style="border-radius: 15px; border: 2px solid #e9ecef; min-height: 120px; transition: all 0.3s;">{{ old('description') }}</textarea>
                             <label for="description">
                                 <i class="fas fa-align-left me-2 text-info"></i>
-                                Mô tả phòng ban
+                                Mô tả khoa
                             </label>
                             @error('description')
                                 <div class="invalid-feedback d-flex align-items-center">
@@ -134,7 +134,7 @@
                         <div class="d-flex justify-content-center gap-3">
                             <button type="submit" class="btn btn-primary btn-lg px-5 py-3 shadow-lg" style="border-radius: 15px; background: linear-gradient(135deg, #667eea, #764ba2); border: none; transition: all 0.3s;">
                                 <i class="fas fa-save me-2"></i>
-                                Tạo phòng ban
+                                Tạo khoa
                             </button>
                             <a href="{{ route('admin.departments.index') }}" class="btn btn-outline-secondary btn-lg px-5 py-3 shadow-sm" style="border-radius: 15px; border: 2px solid #6c757d; transition: all 0.3s;">
                                 <i class="fas fa-arrow-left me-2"></i>
@@ -153,7 +153,7 @@
                         <div>
                             <h6 class="mb-1 text-dark">Mẹo hữu ích</h6>
                             <small class="text-muted">
-                                Tên phòng ban nên ngắn gọn, dễ hiểu và phản ánh đúng chức năng của phòng ban.
+                                Tên khoa nên ngắn gọn, dễ hiểu và phản ánh đúng chức năng của khoa.
                             </small>
                         </div>
                     </div>
