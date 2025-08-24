@@ -247,7 +247,7 @@
             </div>
 
             {{-- Certificates --}}
-            <div class="space-y-8">
+            {{-- <div class="space-y-8">
                 <h2 class="text-3xl font-bold text-center text-blue-800">Chứng Nhận & Giải Thưởng</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                     @php
@@ -266,7 +266,7 @@
                         </div>
                     @endforeach
                 </div>
-            </div>
+            </div> --}}
 
             {{-- Contact CTA --}}
             <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-2xl p-12 text-center space-y-6">
@@ -280,7 +280,7 @@
                     <div class="flex items-center justify-center gap-3"><i
                             class="fas fa-phone-alt"></i><span>0123.456.789</span></div>
                 </div>
-                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                {{-- <div class="flex flex-col sm:flex-row justify-center gap-4">
                     <a href="{{ url('/dat-lich') }}"
                         class="bg-white text-blue-700 px-8 py-4 rounded-full font-semibold hover:bg-blue-100 transition">
                         Đặt Lịch Ngay
@@ -289,7 +289,7 @@
                         class="border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-blue-700 transition">
                         Liên Hệ
                     </a>
-                </div>
+                </div> --}}
             </div>
 
         </div>

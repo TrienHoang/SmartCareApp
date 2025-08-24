@@ -376,7 +376,7 @@
                                         <td>
                                             <div class="room-info">
                                                 <span class="badge badge-outline-info">
-                                                    {{ $appointment->doctor->room->name ?? 'N/A' }}
+                                                    {{ $appointment->doctor->department->room->name ?? 'N/A' }}
                                                 </span>
                                                 <br><small
                                                     class="text-muted">{{ $appointment->doctor->department->name ?? '' }}</small>
@@ -502,24 +502,26 @@
                                                     @endif
                                                 @endif
 
+                                                <!-- Hủy lịch hẹn -->
                                                 @if (in_array($appointment->status, ['pending', 'confirmed']))
-                                                    <button class="btn btn-outline-danger"
+                                                    <button class="btn btn-sm btn-outline-danger"
                                                         onclick="showCancelModal({{ $appointment->id }})"
-                                                        data-toggle="tooltip" title="Hủy lịch hẹn">
+                                                        title="Hủy lịch hẹn">
                                                         <i class="bx bx-x-circle"></i>
                                                     </button>
                                                 @endif
 
-                                                @if (in_array($appointment->status, ['cancelled']) &&
-                                                        in_array(optional($appointment->payment)->status, ['paid']) &&
-                                                        !optional($appointment->payment)->is_refunded)
+                                                <!-- Hoàn tiền -->
+                                                @if (
+                                                    $appointment->status === 'cancelled' &&
+                                                        in_array(optional($appointment->payment)->status, ['paid', 'overpaid']) &&
+                                                        $appointment->payment->refund_status !== 'completed')
                                                     <form
                                                         action="{{ route('admin.appointments.refund', $appointment->id) }}"
                                                         method="POST" class="d-inline"
                                                         onsubmit="return confirm('Bạn chắc chắn muốn hoàn tiền? Hành động này không thể hoàn tác.')">
                                                         @csrf
-                                                        <button class="btn btn-outline-secondary" data-toggle="tooltip"
-                                                            title="Hoàn tiền VNPay">
+                                                        <button class="btn btn-sm btn-outline-danger" title="Hoàn tiền">
                                                             <i class="bx bx-undo"></i>
                                                         </button>
                                                     </form>

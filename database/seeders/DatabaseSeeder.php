@@ -18,69 +18,68 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RolePermissionSeeder::class,
 
-
-            TaskSeeder::class,
+            // TaskSeeder::class,
 
             UserSeeder::class,
-            DepartmentSeeder::class,
-            RoomSeeder::class,
+            // DepartmentSeeder::class,
+            // RoomSeeder::class,
 
-            DoctorSeeder::class,
-            DoctorDetailSeeder::class,
-            DoctorServiceSeeder::class,
-            WorkingScheduleSeeder::class,
-            DoctorLeaveSeeder::class,
+            // DoctorSeeder::class,
+            // DoctorDetailSeeder::class,
+            // DoctorServiceSeeder::class,
+            // WorkingScheduleSeeder::class,
+            // DoctorLeaveSeeder::class,
 
-            DoctorDetailSeeder::class,
-            DoctorServiceSeeder::class,
+            // DoctorDetailSeeder::class,
+            // DoctorServiceSeeder::class,
 
-            SpecialtySeeder::class,
-
-
-            ServiceCategorySeeder::class,
-            ServiceSeeder::class,
+            // SpecialtySeeder::class,
 
 
-            AppointmentSeeder::class,
-
-            AppointmentLogSeeder::class,
-            StatisticSeeder::class,
-
-            PromotionSeeder::class,
-            PaymentSeeder::class,
-            PaymentHistorySeeder::class,
-
-            MedicineSeeder::class,
-            MedicalRecordSeeder::class,
-            PrescriptionSeeder::class,
-            PrescriptionItemSeeder::class,
-
-             TreatmentPlanSeeder::class,
+            // ServiceCategorySeeder::class,
+            // ServiceSeeder::class,
 
 
-            FileUploadSeeder::class,
-            UploadHistorySeeder::class,
+            // AppointmentSeeder::class,
 
-            BlogSeeder::class,
+            // AppointmentLogSeeder::class,
+            // StatisticSeeder::class,
 
-            ContactSeeder::class,
-      
+            // PromotionSeeder::class,
+            // PaymentSeeder::class,
+            // PaymentHistorySeeder::class,
 
-             NotificationSeeder::class,
-            FaqSeeder::class,
-            OrderSeeder::class,
-            NotificationSeeder::class,
-            FaqSeeder::class,
-            ReviewSeeder::class,
-            DoctorServiceSeeder::class,
-            DoctorDetailSeeder::class,
+            // MedicineSeeder::class,
+            // MedicalRecordSeeder::class,
+            // PrescriptionSeeder::class,
+            // PrescriptionItemSeeder::class,
 
-        SpecialtySeeder::class,
-        DoctorSeeder::class,
-        DoctorDetailSeeder::class,
-        ChatTemplateSeeder::class,
+            // TreatmentPlanSeeder::class,
 
-        ReviewReplySeeder::class
+
+            // FileUploadSeeder::class,
+            // UploadHistorySeeder::class,
+
+            // BlogSeeder::class,
+
+            // ContactSeeder::class,
+
+
+            // NotificationSeeder::class,
+            // FaqSeeder::class,
+            // OrderSeeder::class,
+            // NotificationSeeder::class,
+            // FaqSeeder::class,
+            // ReviewSeeder::class,
+            // DoctorServiceSeeder::class,
+            // DoctorDetailSeeder::class,
+
+            // SpecialtySeeder::class,
+            // DoctorSeeder::class,
+            // DoctorDetailSeeder::class,
+            // ChatTemplateSeeder::class,
+
+            // ReviewReplySeeder::class
 
 
 

@@ -11,16 +11,20 @@ use App\Models\Department;
 
 class DoctorController extends Controller
 {
-    public function index(){
-        $doctors = Doctor::with([
-            'user',
-            'department',
-            'educations',
-            'experiences',
-            'achievements',
-            'specialties',
-            'services',
-        ])->get();
+    public function index()
+    {
+        $doctors = Doctor::withWhereHas('user', function ($query) {
+            $query->where('status', 'online');
+        })
+            ->with([
+                'department',
+                'educations',
+                'experiences',
+                'achievements',
+                'specialties',
+                'services',
+            ])
+            ->get();
 
         // Tính số năm kinh nghiệm cho từng bác sĩ
         foreach ($doctors as $doctor) {
@@ -39,6 +43,10 @@ class DoctorController extends Controller
         }
 
         $departments = Department::get();
+
+        \Log::info('Danh sách bác sĩ:', [
+            'count' => $doctors->count(),
+        ]);
 
         return view('client.doctors', compact('doctors', 'departments'));
     }
@@ -63,65 +71,64 @@ class DoctorController extends Controller
                     ]);
             },
         ])->findOrFail($id);
-
-        // Lấy năm bắt đầu sớm nhất
+    
+        // 🔹 Lấy năm bắt đầu sớm nhất
         $startYear = $doctor->experiences->min('start_year');
-
-        // Xử lý end_year: nếu có null => coi là năm hiện tại
+    
+        // 🔹 Xử lý end_year: nếu null thì coi là năm hiện tại
         $endYears = $doctor->experiences->map(function ($exp) {
             return $exp->end_year ?? now()->year;
         });
-
-        // Lấy năm kết thúc muộn nhất
+    
+        // 🔹 Lấy năm kết thúc muộn nhất
         $endYear = $endYears->max();
-
-        // Tính số năm kinh nghiệm
+    
+        // 🔹 Tính số năm kinh nghiệm
         $experienceYears = 0;
         if ($startYear) {
             $experienceYears = $endYear - $startYear;
         }
-
         $doctor->experience_years = $experienceYears > 0 ? $experienceYears : null;
-
-        // ✅ Tính điểm trung bình và phân bổ đánh giá
+    
+        // 🔹 Tính điểm trung bình & phân bổ đánh giá
         $visibleReviews = $doctor->reviews;
-        $doctor->average_rating = round($visibleReviews->avg('rating'), 1);
+        $doctor->average_rating = $visibleReviews->isNotEmpty()
+            ? round($visibleReviews->avg('rating'), 1)
+            : null;
         $doctor->review_count = $visibleReviews->count();
-
+    
         $ratingBreakdown = collect([5, 4, 3, 2, 1])->mapWithKeys(function ($star) use ($visibleReviews) {
             return [$star => $visibleReviews->where('rating', $star)->count()];
         });
-
-        // ✅ Kiểm tra người dùng đăng nhập và lấy lịch hẹn đã hoàn thành
-        $appointment = null;
-        $alreadyReviewed = false;
-        $userReview = null;
-
+    
+        $appointmentsToReview = collect();
+        $userReviews = collect();
+    
         if (Auth::check()) {
-            $appointment = Appointment::where('doctor_id', $doctor->id)
+            // 🔹 Lấy tất cả review của user với bác sĩ này
+            $userReviews = Review::where('doctor_id', $doctor->id)
+                ->where('patient_id', Auth::id())
+                ->with([
+                    'replies.user',
+                    'appointment.order.services'
+                ])
+                ->get();
+    
+            // 🔹 Lấy danh sách các cuộc hẹn hoàn thành
+            $completedAppointments = Appointment::where('doctor_id', $doctor->id)
                 ->where('patient_id', Auth::id())
                 ->where('status', 'completed')
-                ->latest()
-                ->first();
-
-            if ($appointment) {
-                $alreadyReviewed = Review::where('appointment_id', $appointment->id)
-                    ->where('patient_id', Auth::id())
-                    ->exists();
-
-                if ($alreadyReviewed) {
-                    $userReview = Review::where('appointment_id', $appointment->id)
-                        ->where('patient_id', Auth::id())
-                        ->with([
-                            'replies.user',
-                            'appointment.order.services'
-                        ])
-                        ->first();
-                }
-            }
+                ->with(['service', 'order.services'])
+                ->get();
+    
+            // 🔹 Lấy id các appointment đã được review
+            $reviewedAppointmentIds = $userReviews->pluck('appointment_id')->toArray();
+    
+            // 🔹 Lọc ra những appointment chưa được review
+            $appointmentsToReview = $completedAppointments->whereNotIn('id', $reviewedAppointmentIds);
         }
-
-        // Danh sách các bác sĩ cùng chuyên khoa
+    
+        // 🔹 Danh sách bác sĩ cùng chuyên khoa
         $doctor->related_doctors = Doctor::where('department_id', $doctor->department_id)
             ->where('id', '!=', $doctor->id)
             ->with([
@@ -131,14 +138,13 @@ class DoctorController extends Controller
             ])
             ->limit(4)
             ->get();
-
-
+    
         return view('client.doctors_detail', compact(
             'doctor',
             'ratingBreakdown',
-            'appointment',
-            'alreadyReviewed',
-            'userReview'
+            'appointmentsToReview', // 🔹 Các lịch hẹn hoàn thành nhưng chưa có review
+            'userReviews'           // 🔹 Tất cả review của user (theo từng appointment)
         ));
     }
+    
 }

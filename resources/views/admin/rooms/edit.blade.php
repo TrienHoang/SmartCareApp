@@ -1,6 +1,6 @@
 @extends('admin.dashboard')
 
-@section('title', 'Quản lý Đánh giá')
+@section('title', 'Sửa thông tin phòng')
 @section('content')
 <div class="max-w-xl mx-auto p-6">
     <h2 class="text-xl font-bold mb-4">Chỉnh sửa phòng</h2>

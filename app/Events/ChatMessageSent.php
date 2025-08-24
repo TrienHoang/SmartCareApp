@@ -14,23 +14,39 @@ class ChatMessageSent implements ShouldBroadcastNow
 
     public $message;
     public $sessionId;
+    public $sender_type;
+    public $sender_name;
 
-    public function __construct($message, $sessionId)
+    public function __construct($message, $sessionId, $sender_type, $sender_name)
     {
         $this->message = $message;
         $this->sessionId = $sessionId;
+        $this->sender_type = $sender_type;
+        $this->sender_name = $sender_name;
     }
 
-    // Private channel để match với channels.php
     public function broadcastOn()
     {
         \Log::info('📡 Sending broadcast on: chat-session-' . $this->sessionId);
-        return new PrivateChannel('chat-session-' . $this->sessionId);
+        return [
+            new PrivateChannel('chat-session-' . $this->sessionId),
+            new Channel('chat-global'),
+        ];
     }
 
-    // Custom event name (frontend sẽ lắng nghe tên này)
     public function broadcastAs()
     {
         return 'chat-message-sent';
+    }
+
+    public function broadcastWith()
+    {
+        return [
+            'id' => uniqid(),
+            'message' => $this->message,
+            'session_id' => $this->sessionId,
+            'sender_type' => $this->sender_type,
+            'sender_name' => $this->sender_name,
+        ];
     }
 }

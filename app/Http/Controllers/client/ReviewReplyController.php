@@ -13,6 +13,7 @@ use App\Models\ReviewReply;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
@@ -24,60 +25,76 @@ class ReviewReplyController extends Controller
      */
     public function store(Request $request, $doctorId)
     {
+        if (!Auth::check()) {
+            return back()->with('error', 'Vui lòng đăng nhập để gửi đánh giá.');
+        }
 
-        // dd($request->all());
         try {
-            // ✅ Tìm bác sĩ
             $doctor = Doctor::findOrFail($doctorId);
 
-            // ✅ Validate đầu vào
+            // Validate đầu vào
             $request->validate([
                 'rating' => 'required|integer|min:1|max:5',
-                'comment' => 'required|string|max:1000',
+                'comment' => 'nullable|string|max:1000',
                 'appointment_id' => [
                     'required',
                     Rule::exists('appointments', 'id')->where(function ($query) use ($doctor) {
                         $query->where('doctor_id', $doctor->id)
-                            ->where('patient_id', Auth::id());
+                            ->where('patient_id', Auth::id())
+                            ->where('status', 'completed');
                     }),
                 ],
-                'service_id' => 'nullable|exists:services,id',
+                'service_id' => [
+                    'required',
+                    Rule::exists('services', 'id')->where(function ($query) use ($request, $doctor) {
+                        $query->whereIn('id', Appointment::where('doctor_id', $doctor->id)
+                            ->where('patient_id', Auth::id())
+                            ->where('status', 'completed')
+                            ->where('id', $request->appointment_id)
+                            ->pluck('service_id'));
+                    }),
+                ],
             ]);
 
-            // ✅ Kiểm tra lại cuộc hẹn
+            // Kiểm tra lại cuộc hẹn
             $appointment = Appointment::where('id', $request->appointment_id)
                 ->where('doctor_id', $doctor->id)
                 ->where('patient_id', Auth::id())
+                ->where('status', 'completed')
                 ->first();
 
             if (!$appointment) {
                 return back()->with('error', 'Cuộc hẹn không hợp lệ hoặc không thuộc về bạn.');
             }
 
-            // ✅ Kiểm tra đã đánh giá chưa (chỉ 1 lần cho mỗi appointment)
-            $alreadyReviewed = Review::where('appointment_id', $appointment->id)
-                ->where('patient_id', Auth::id())
-                ->exists();
-
-            if ($alreadyReviewed) {
-                return back()->with('error', 'Bạn đã đánh giá cuộc hẹn này rồi.');
-            }
-
-            // ✅ Tạo đánh giá mới
             $review = Review::create([
                 'appointment_id' => $appointment->id,
-                'patient_id'     => Auth::id(),
-                'doctor_id'      => $doctor->id,
-                'service_id'     => $request->service_id,
-                'rating'         => $request->rating,
-                'comment'        => $request->comment,
-                'is_visible'     => true,
+                'patient_id' => Auth::id(),
+                'doctor_id' => $doctor->id,
+                'service_id' => $request->service_id,
+                'rating' => $request->rating,
+                'comment' => $request->comment ?? null,
+                'is_visible' => true,
             ]);
+
+            // Cập nhật average_rating và review_count
+            if (
+                Schema::hasColumn('doctors', 'average_rating') &&
+                Schema::hasColumn('doctors', 'review_count')
+            ) {
+                $doctor->average_rating = Review::where('doctor_id', $doctor->id)
+                    ->where('is_visible', true)
+                    ->avg('rating') ?? 5;
+                $doctor->review_count = Review::where('doctor_id', $doctor->id)
+                    ->where('is_visible', true)
+                    ->count();
+                $doctor->save();
+            }
 
             Log::info('Đánh giá được tạo', [
                 'review_id' => $review->id,
                 'doctor_id' => $doctor->id,
-                'user_id'   => Auth::id(),
+                'user_id' => Auth::id(),
             ]);
 
             return back()->with('success', 'Đánh giá của bạn đã được gửi thành công.');
@@ -90,51 +107,57 @@ class ReviewReplyController extends Controller
             return back()->with('error', 'Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.');
         }
     }
+
     /**
      * Đánh dấu đánh giá là hữu ích.
      */
-    public function markUseful($reviewId)
+    public function markUseful($id)
     {
-        try {
-            $review = Review::findOrFail($reviewId);
-            $review->useful_count = ($review->useful_count ?? 0) + 1;
-            $review->save();
-
-            return back()->with('success', 'Cảm ơn bạn đã đánh giá hữu ích.');
-        } catch (\Exception $e) {
-            Log::error('Lỗi khi đánh dấu hữu ích: ' . $e->getMessage());
-            return back()->with('error', 'Có lỗi xảy ra. Vui lòng thử lại.');
+        $review = Review::findOrFail($id);
+    
+        // Không cho user tự vote review của mình
+        if ($review->patient_id == Auth::id()) {
+            return response()->json(['message' => 'Không thể tự đánh dấu hữu ích review của mình'], 403);
         }
+    
+        $review->increment('useful_count'); // +1
+        return response()->json([
+            'success' => true,
+            'new_count' => $review->useful_count,
+        ]);
     }
-
     /**
      * Cập nhật bình luận đã chỉnh sửa trực tiếp tại trang chi tiết bác sĩ.
      * Đảm bảo nhận đúng $doctorId và $id từ route.
      */
     public function update(Request $request, $doctorId, $id)
     {
+        // dd($request->all());     
+        if (!Auth::check()) {
+            return back()->with('error', 'Vui lòng đăng nhập để chỉnh sửa đánh giá.');
+        }
+
         $review = Review::where('id', $id)
             ->where('doctor_id', $doctorId)
             ->where('patient_id', Auth::id())
+            ->where('is_visible', true)
             ->firstOrFail();
 
-        // Chỉ cho sửa trong 1 giờ đầu
         if (\Carbon\Carbon::parse($review->created_at)->diffInMinutes(now()) > 60) {
             return redirect()->back()->with('error', 'Thời gian chỉnh sửa đã hết.');
         }
 
         $request->validate([
-            'comment' => 'required|string|max:1000',
-            'rating'  => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:1000',
+            'rating' => 'required|integer|min:1|max:5',
         ]);
 
-        // Đảm bảo cập nhật đúng rating
         $review->comment = $request->comment;
-        $review->rating = intval($request->rating); // ép kiểu số nguyên
+        $review->rating = $request->rating;
+        $review->appointment_id = $request->appointment_id;
+        $review->service_id = $request->service_id;
         $review->save();
 
-        // Cập nhật lại rating trung bình cho bác sĩ (tính lại từ bảng reviews)
-        // Nếu chưa có cột average_rating và review_count thì bỏ qua cập nhật này
         if (
             Schema::hasColumn('doctors', 'average_rating') &&
             Schema::hasColumn('doctors', 'review_count')
@@ -149,9 +172,8 @@ class ReviewReplyController extends Controller
             $doctor->save();
         }
 
-        return redirect()->route('doctor.show', $doctorId)
-            ->with('success', 'Bình luận đã được cập nhật.')
-            ->with('tab', 'reviews');
+        return redirect()->route('doctor.show', ['id' => $doctorId, 'tab' => 'reviews'])
+            ->with('success', 'Cập nhật đánh giá thành công!');
     }
 
     /**
@@ -159,25 +181,38 @@ class ReviewReplyController extends Controller
      */
     public function show($id)
     {
-        $doctor = Doctor::with('specialty')->findOrFail($id); // load cả chuyên khoa nếu cần
-
+        $user = Auth::user();
+        $doctor = Doctor::with('specialty')->findOrFail($id);
         $reviews = Review::where('doctor_id', $doctor->id)
             ->where('is_visible', true)
-            ->with('patient')
+            ->with(['patient', 'service'])
             ->latest()
             ->get();
 
         $averageRating = $reviews->avg('rating');
         $reviewCount = $reviews->count();
 
-        $userReview = Review::where('doctor_id', $doctor->id)
-            ->where('patient_id', Auth::id())
-            ->latest()
-            ->first();
-
+        $userReview = null;
         $userReviewEditable = false;
-        if ($userReview) {
-            $userReviewEditable = \Carbon\Carbon::parse($userReview->created_at)->diffInMinutes(now()) <= 60;
+        $completedAppointments = collect();
+        $alreadyReviewed = false;
+
+        if ($user) {
+            $userReview = Review::where('doctor_id', $doctor->id)
+                ->where('patient_id', $user->id)
+                ->latest()
+                ->first();
+
+            if ($userReview) {
+                $userReviewEditable = \Carbon\Carbon::parse($userReview->created_at)->diffInMinutes(now()) <= 60;
+                $alreadyReviewed = true;
+            } else {
+                $completedAppointments = Appointment::where('doctor_id', $doctor->id)
+                    ->where('patient_id', $user->id)
+                    ->where('status', 'completed')
+                    ->with('service')
+                    ->get();
+            }
         }
 
         return view('client.doctors_detail', compact(
@@ -186,17 +221,19 @@ class ReviewReplyController extends Controller
             'averageRating',
             'reviewCount',
             'userReview',
-            'userReviewEditable'
+            'userReviewEditable',
+            'user',
+            'completedAppointments',
+            'alreadyReviewed'
         ));
     }
-
-
 
     /**
      * Hiển thị danh sách bình luận của người dùng (trang danh sách bình luận).
      */
     public function index()
     {
+        $user = Auth::user();
         $reviews = Review::where('patient_id', Auth::id())
             ->latest()
             ->get();
@@ -206,6 +243,6 @@ class ReviewReplyController extends Controller
             $review->editable = \Carbon\Carbon::parse($review->created_at)->diffInMinutes(now()) <= 60;
         }
 
-        return view('client.review.index', compact('reviews'));
+        return view('client.review.index', compact('reviews', 'user'));
     }
 }

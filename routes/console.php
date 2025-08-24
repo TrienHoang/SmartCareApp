@@ -18,8 +18,8 @@ app()->booted(function () {
     // Gửi thông báo lịch hẹn trước 1 ngày
     $schedule->command('appointments:notify-upcoming')->dailyAt('08:00');
 
-    // Nếu có thêm: Gửi trước 30 phút
-    // $schedule->command('appointments:notify-soon')->everyFiveMinutes();
+    // Gửi thông báo lịch hẹn sắp đến hạn (ví dụ trước 30 phút hoặc check liên tục)
+    $schedule->command('appointments:notify-upcoming-soon')->everyFiveMinutes();
 });
 
 // Câu lệnh truyền cảm hứng

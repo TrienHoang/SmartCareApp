@@ -1,6 +1,9 @@
-@extends('client.layouts.app')
+@extends('client.layouts.profile-layout')
+
 
 @section('title', 'Lịch sử thanh toán')
+
+
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -56,7 +59,7 @@
 </style>
 @endpush
 
-@section('content')
+@section('profile-content')
 <div class="container py-4">
     <h2 class="mb-4"><i class="fas fa-credit-card me-2"></i>Lịch sử thanh toán</h2>
 
@@ -82,11 +85,11 @@
             <table class="table table-bordered align-middle">
                 <thead class="text-center table-light">
                     <tr>
-                        <th>📅 Ngày thanh toán</th>
-                        <th>💳 Phương thức</th>
-                        <th>💰 Số tiền</th>
-                        <th>✅ Trạng thái</th>
-                        <th>🔍 Chi tiết</th>
+                        <th>Ngày thanh toán</th>
+                        <th>Phương thức</th>
+                        <th>Số tiền</th>
+                        <th>Trạng thái</th>
+                        {{-- <th>Chi tiết</th> --}}
                     </tr>
                 </thead>
                 <tbody>
@@ -102,11 +105,11 @@
                             <td class="text-center">
                                 <span class="badge bg-success">Thành công</span>
                             </td>
-                            <td class="text-center">
+                            {{-- <td class="text-center">
                                 <a href="{{ route('client.payment_history.show', $payment->id) }}" class="btn btn-sm btn-outline-info" title="Xem chi tiết">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                            </td>
+                            </td> --}}
                         </tr>
                     @empty
                         <tr>

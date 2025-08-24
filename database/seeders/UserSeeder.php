@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $doctorRoleId = Role::where('name', 'doctor')->value('id');
-        $patientRoleId = Role::where('name', 'patient')->value('id');
+        $patientRoleId = Role::where('name', 'nurse')->value('id');
 
         // Tạo 10 bác sĩ
         for ($i = 1; $i <= 10; $i++) {

@@ -12,7 +12,7 @@
 
         .hero-background-image {
             height: 100%;
-            background-image: url(https://i.ibb.co/ZRQ9K48J/ace06379-7b9f-43a8-80eb-e0c72fc27839-frame-6-4.png);
+            background-image: url({{ asset('LayoutClient/img/bg-service-detail.png') }});
             background-size: cover;
             background-position: center;
             position: absolute;
@@ -108,11 +108,6 @@
             /* Align with text */
         }
 
-        /* Override Tailwind's default list-style for cleaner look */
-        ul {
-            list-style: none;
-            padding-left: 0;
-        }
     </style>
 @endpush
 
@@ -161,15 +156,13 @@
                 </div>
             </div>
 
-            {{-- <hr class="my-5"> Divider --}}
-
             {{-- Content grid: details + banner --}}
             <div id="content" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {{-- Left Column: Package Details --}}
-                <div class="lg:col-span-8">
+                <div class="lg:col-span-8 article-content ">
                     {!! $service->content !!}
                 </div>
-
+                
                 {{-- Right Column: Doctor Selection --}}
                 <div class="lg:col-span-4 mt-8 lg:mt-0">
                     <div class="space-y-4 bg-blue-600 p-5 rounded-lg">
@@ -198,7 +191,8 @@
                                         class="doctor-card transform bg-white rounded-lg shadow p-4 flex items-center space-x-4 hover:shadow-md transition border-2 border-transparent duration-300 hover:scale-105 focus-within:border-blue-500  has-[:checked]:bg-[#FFB340]">
                                         <input type="radio" id="doctor_{{ $doctor->id }}" name="selected_doctor"
                                             value="{{ $doctor->id }}" class="sr-only" hidden>
-                                        <img src="{{ $doctor->user->avatar }}" alt="{{ $doctor->user->full_name }}"
+                                        <img src="{{ asset('storage/' . $doctor->user->avatar) }}"
+                                            alt="{{ $doctor->user->full_name }}"
                                             class="w-20 h-20 rounded-full object-cover">
                                         <div class="flex-1">
                                             <h4 class="text-lg font-semibold text-gray-800">{{ $doctor->user->full_name }}

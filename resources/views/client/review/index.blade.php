@@ -1,8 +1,9 @@
-@extends('client.layouts.app')
+@extends('client.layouts.profile-layout')
 
-@section('title', 'Bình luận của tôi')
 
-@section('content')
+@section('title', 'Danh sách đánh giá')
+
+@section('profile-content')
 <div class="container mx-auto px-4 py-8">
     <h2 class="text-2xl font-bold mb-6 gradient-text">Danh sách bình luận của bạn</h2>
     @if ($reviews->count())

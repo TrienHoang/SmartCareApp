@@ -8,9 +8,12 @@ use App\Models\Doctor;
 use App\Models\DoctorLeave;
 use App\Models\Review;
 use App\Models\Service;
+use App\Models\ServiceCategory;
 use App\Models\WorkingSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\View;
+
 
 class HomeController extends Controller
 {
@@ -30,7 +33,7 @@ class HomeController extends Controller
             ->orderByDesc('total_bookings')
             ->with(['service' => function ($query) {
                 $query->select('id', 'service_cate_id', 'department_id', 'name', 'description', 'image', 'price', 'duration', 'status')
-                ->where('status', 'active');
+                    ->where('status', 'active');
             }])
             ->limit(6)
             ->get();
@@ -67,7 +70,6 @@ class HomeController extends Controller
 
         $visibleReviews = $doctors->pluck('reviews')->flatten();
         $average_rating_all = round($visibleReviews->avg('rating'), 1);
-
 
         return view('client.home', compact('testimonials', 'departments', 'doctors', 'dich_vu'));
     }
@@ -121,6 +123,7 @@ class HomeController extends Controller
 
         $workingSchedules = WorkingSchedule::with('shift')
             ->where('day', $date->toDateString())
+            ->where('status','Đã xét duyệt')
             ->whereIn('doctor_id', $doctors->pluck('id'))
             ->get()
             ->groupBy('doctor_id');
@@ -154,7 +157,7 @@ class HomeController extends Controller
                             $query->whereBetween('appointment_time', [$slotTime, $slotEndTime->subSecond()])
                                 ->orWhereBetween('end_time', [$slotTime->addSecond(), $slotEndTime]);
                         })
-                        ->exists();
+                        ->exists(); 
 
                     // Kiểm tra lịch nghỉ
                     $isOnLeave = DoctorLeave::where('doctor_id', $doctor->id)
