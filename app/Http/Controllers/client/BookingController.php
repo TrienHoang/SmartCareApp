@@ -28,13 +28,13 @@ class BookingController extends Controller
 {
     public function show($service_id, Request $request)
     {
-            $request->session()->forget([
-        'selected_promotion_code',
-        'selected_promotion_id',
-        'selected_promotion_discount',
-        'applied_promotion_code',
-        'temp_booking_data'
-    ]);
+        $request->session()->forget([
+            'selected_promotion_code',
+            'selected_promotion_id',
+            'selected_promotion_discount',
+            'applied_promotion_code',
+            'temp_booking_data'
+        ]);
         $service = Service::with(['category', 'department', 'doctors.user', 'doctors.reviews'])
             ->where('id', $service_id)
             ->firstOrFail();
@@ -466,7 +466,9 @@ class BookingController extends Controller
         $discountAmount = ($originalPrice * $discountPercentage) / 100;
 
         $finalPrice = max(0, $originalPrice - $discountAmount); // để tránh âm
-
+        // if ($finalPrice < 5000) {
+        //    return redirect()->route('booking.confirm')->with('error', 'Áp dụng mã giảm giá thành công!');
+        // }
         return view('client.booking.confirm', compact(
             'service',
             'doctor',
@@ -563,6 +565,7 @@ class BookingController extends Controller
                 ->first();
 
             if ($promotion) {
+                $paymentMethod = $request->input('payment_method'); 
                 $discountAmount = round($service->price * ($promotion->discount_percentage / 100));
                 $discountAmount = min($discountAmount, $service->price);
                 $request->session()->put('applied_promotion_code', $promotionCode);
@@ -570,7 +573,10 @@ class BookingController extends Controller
         }
 
         $finalPrice = max(0, $service->price - $discountAmount);
-
+      if ($paymentMethod !== 'wallet' && $finalPrice < 5000) {
+    return redirect()->route('booking.confirm')
+        ->with('error', 'Số tiền thanh toán sau khi áp mã phải tối thiểu 5.000đ đối với phương thức này.');
+}
         // Lưu tạm dữ liệu booking vào session để sử dụng sau khi thanh toán thành công
         $tempBookingData = [
             'patient_id' => $user->id,
