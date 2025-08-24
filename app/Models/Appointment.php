@@ -184,7 +184,7 @@ class Appointment extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-        // ✅ Class CSS cho badge trạng thái
+    // ✅ Class CSS cho badge trạng thái
     public function statusClass()
     {
         return match ($this->status) {
@@ -196,4 +196,9 @@ class Appointment extends Model
         };
     }
 
+    public function schedule()
+    {
+        return $this->belongsTo(WorkingSchedule::class, 'doctor_id', 'doctor_id')
+            ->whereDate('day', $this->appointment_time);
+    }
 }

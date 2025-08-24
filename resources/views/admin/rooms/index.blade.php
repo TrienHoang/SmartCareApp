@@ -39,23 +39,23 @@
                         <td class="p-3">
                             @php
                                 $statusConfig = [
-                                    'active' => ['class' => 'success', 'icon' => 'check-circle'],
-                                    'inactive' => ['class' => 'secondary', 'icon' => 'x-circle'],
+                                    'active' => ['class' => 'success', 'icon' => 'check-circle', 'label' => 'Đang hoạt động'],
+                                    'inactive' => ['class' => 'secondary', 'icon' => 'x-circle', 'label' => 'Ngừng hoạt động'],
                                 ];
                                 $config = $statusConfig[$room->status] ?? $statusConfig['inactive'];
                             @endphp
-
-                            <form action="{{ route('admin.rooms.toggleStatus', $room->id) }}" method="POST"
-                                class="inline-block">
+                        
+                            <form action="{{ route('admin.rooms.toggleStatus', $room->id) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit"
                                     class="btn btn-sm btn-{{ $config['class'] }} rounded-full px-3 py-1 flex items-center gap-1">
                                     <i class="bx bx-{{ $config['icon'] }}"></i>
-                                    {{ ucfirst($room->status) }}
+                                    {{ $config['label'] }}
                                 </button>
                             </form>
                         </td>
+                        
                         <td class="p-3 text-right space-x-2">
                             <a href="{{ route('admin.rooms.show', $room->id) }}"
                                 class="text-blue-600 hover:underline">Xem</a>

@@ -245,6 +245,9 @@
                                         <i class="bx bx-time mr-1"></i>Ca làm việc
                                     </th>
                                     <th class="border-top-0">
+                                        <i class="bx bx-time mr-1"></i>Phòng làm việc
+                                    </th>
+                                    <th class="border-top-0">
                                         <i class="bx bx-clock mr-1"></i>Thời gian
                                     </th>
                                     <th class="border-top-0">
@@ -288,6 +291,10 @@
                                         </td>
                                         <td>
                                             <span class="badge badge-outline-primary">
+                                                {{ $schedule->room?->name ?? 'Chưa xác định' }}
+                                            </span>
+                                        <td>
+                                            <span class="badge badge-outline-primary">
                                                 {{ $schedule->shift?->name ?? 'Chưa xác định' }}
                                             </span>
                                         </td>
@@ -316,6 +323,7 @@
                                                 @endif
                                             </div>
                                         </td>
+
                                         <td>
                                             @if ($schedule->status === 'Đã xét duyệt')
                                                 <span class="badge badge-success badge-pill">

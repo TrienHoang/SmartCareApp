@@ -47,25 +47,6 @@
         </div>
 
         <div class="content-body">
-            <!-- Enhanced Alert Messages -->
-            {{-- @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
-                    <div class="d-flex align-items-center">
-                        <i class="bx bx-check-circle mr-2"></i>
-                        <strong>Thành công! </strong> {{ session('success') }}
-                    </div>
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
-                    <div class="d-flex align-items-center">
-                        <i class="bx bx-x-circle mr-2"></i>
-                        <strong>Lỗi! </strong> {{ session('error') }}
-                    </div>
-                </div>
-            @endif --}}
-
             <!-- Statistics Cards -->
             <div class="row mb-4">
                 <div class="col-lg-2 col-md-4 col-6">
@@ -376,10 +357,10 @@
                                         <td>
                                             <div class="room-info">
                                                 <span class="badge badge-outline-info">
-                                                    {{ $appointment->doctor->department->room->name ?? 'N/A' }}
+                                                    {{ $appointment->room_name }}
                                                 </span>
-                                                <br><small
-                                                    class="text-muted">{{ $appointment->doctor->department->name ?? '' }}</small>
+                                                <br>
+                                                <small class="text-muted">{{ $appointment->doctor->department->name ?? '' }}</small>
                                             </div>
                                         </td>
                                         <td>
