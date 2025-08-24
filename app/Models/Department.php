@@ -62,4 +62,6 @@ class Department extends Model
     {
         return $this->hasOne(Room::class);
     }
+
+    
 }

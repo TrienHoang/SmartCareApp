@@ -397,9 +397,9 @@ Route::group([
             ->middleware('check_permission:edit_departments')
             ->name('update');
 
-        Route::delete('/delete/{department}', [DepartmentController::class, 'destroy'])
-            ->middleware('check_permission:delete_departments')
-            ->name('destroy');
+// Route::prefix('admin')->name('admin.')->group(function () {
+//     Route::resource('departments', DepartmentController::class);
+// });
 
         Route::get('/{department}', [DepartmentController::class, 'show'])
             ->middleware('check_permission:view_departments')

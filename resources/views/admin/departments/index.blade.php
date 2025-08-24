@@ -287,10 +287,10 @@
                                                     class="btn btn-outline-info" data-toggle="tooltip" title="Xem chi tiết">
                                                     <i class="bx bx-show"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-outline-danger" data-toggle="tooltip"
+                                                {{-- <button type="button" class="btn btn-outline-danger" data-toggle="tooltip"
                                                     title="Xóa" onclick="deleteDepartment({{ $department->id }})">
                                                     <i class="bx bx-trash"></i>
-                                                </button>
+                                                </button> --}}
                                             </div>
                                         </td>
                                     </tr>
