@@ -49,7 +49,7 @@
                 <div class="mb-3">
                     <label for="day" class="form-label">Ngày làm việc</label>
                     <input type="date" id="day" name="day" class="form-control"
-                        value="{{ old('day', $schedule->day) }}" required>
+                        value="{{ old('day', \Carbon\Carbon::parse($schedule->day)->format('Y-m-d')) }}">
                 </div>
 
                 <div class="mb-3">

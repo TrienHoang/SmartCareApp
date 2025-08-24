@@ -97,7 +97,8 @@ class ReviewReplyController extends Controller
                 'user_id' => Auth::id(),
             ]);
 
-            return back()->with('success', 'Đánh giá của bạn đã được gửi thành công.');
+            return redirect()->route('doctor.show', ['id' => $doctorId, 'tab' => 'reviews'])
+                ->with('success', 'Thêm đánh giá thành công!');
         } catch (\Exception $e) {
             Log::error('Lỗi khi tạo đánh giá: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
@@ -114,12 +115,12 @@ class ReviewReplyController extends Controller
     public function markUseful($id)
     {
         $review = Review::findOrFail($id);
-    
+
         // Không cho user tự vote review của mình
         if ($review->patient_id == Auth::id()) {
             return response()->json(['message' => 'Không thể tự đánh dấu hữu ích review của mình'], 403);
         }
-    
+
         $review->increment('useful_count'); // +1
         return response()->json([
             'success' => true,

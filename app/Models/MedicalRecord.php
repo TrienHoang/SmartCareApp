@@ -41,6 +41,6 @@ public function doctor()
 
     public function prescription()
     {
-        return $this->hasOne(Prescription::class);
+        return $this->hasOne(Prescription::class, 'medical_record_id');
     }
 }
