@@ -466,9 +466,7 @@ class BookingController extends Controller
         $discountAmount = ($originalPrice * $discountPercentage) / 100;
 
         $finalPrice = max(0, $originalPrice - $discountAmount); // để tránh âm
-        // if ($finalPrice < 5000) {
-        //    return redirect()->route('booking.confirm')->with('error', 'Áp dụng mã giảm giá thành công!');
-        // }
+
         return view('client.booking.confirm', compact(
             'service',
             'doctor',
@@ -565,7 +563,6 @@ class BookingController extends Controller
                 ->first();
 
             if ($promotion) {
-                $paymentMethod = $request->input('payment_method'); 
                 $discountAmount = round($service->price * ($promotion->discount_percentage / 100));
                 $discountAmount = min($discountAmount, $service->price);
                 $request->session()->put('applied_promotion_code', $promotionCode);
@@ -573,10 +570,7 @@ class BookingController extends Controller
         }
 
         $finalPrice = max(0, $service->price - $discountAmount);
-      if ($paymentMethod !== 'wallet' && $finalPrice < 5000) {
-    return redirect()->route('booking.confirm')
-        ->with('error', 'Số tiền thanh toán sau khi áp mã phải tối thiểu 5.000đ đối với phương thức này.');
-}
+
         // Lưu tạm dữ liệu booking vào session để sử dụng sau khi thanh toán thành công
         $tempBookingData = [
             'patient_id' => $user->id,

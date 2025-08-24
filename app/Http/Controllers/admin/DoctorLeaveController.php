@@ -70,24 +70,24 @@ class DoctorLeaveController extends Controller
     }
     public function edit($id)
     {
-        // Kiểm tra quyền truy cập
-        $leave = DoctorLeave::findOrFail($id);
+        $leave = DoctorLeave::with(['doctor.user', 'replacementDoctor.user'])->findOrFail($id);
 
-        // Nếu đã duyệt thì không cho truy cập trang chỉnh sửa
-        if ($leave->approved == 1) {
-            return redirect()->route('admin.doctor_leaves.index')->with('error', 'Lịch nghỉ đã được duyệt và không thể chỉnh sửa.');
+        if ((int) $leave->approved === 1) {
+            return redirect()->route('admin.doctor_leaves.index')
+                ->with('error', 'Lịch nghỉ đã được duyệt và không thể chỉnh sửa.');
         }
 
-        $doctors = Doctor::all();
-        $rooms = Room::all(); // Assuming you want to show a list of rooms for selection
+        $replacementDoctors = Doctor::with('user')
+            ->where('id', '!=', $leave->doctor_id) // loại trừ chính bác sĩ đó
+            ->get();
 
-        return view('admin.doctor_leaves.edit', compact('leave', 'doctors', 'rooms'));
+        return view('admin.doctor_leaves.edit', compact('leave', 'replacementDoctors'));
     }
-
     public function update(Request $request, $id)
     {
         $request->validate([
             'approved' => 'required|in:0,1',
+            'replacement_doctor_id' => 'nullable|exists:doctors,id',
         ]);
 
         $leave = DoctorLeave::with('doctor')->findOrFail($id);
@@ -100,38 +100,28 @@ class DoctorLeaveController extends Controller
 
         $oldApproved = $leave->approved;
 
-        // Cập nhật trạng thái
+        // Cập nhật trạng thái & bác sĩ thay thế
         $leave->approved = $request->approved;
+        $leave->replacement_doctor_id = $request->replacement_doctor_id;
         $leave->save();
 
         // Nếu đơn mới được duyệt
         if ($oldApproved == 0 && $leave->approved == 1) {
-
-            // Gửi thông báo cho bác sĩ xin nghỉ
-            $leave->doctor->user->notify(new DoctorLeaveApproved($leave));
 
             // Nếu có bác sĩ thay thế thì chuyển lịch hẹn
             if ($leave->replacement_doctor_id) {
                 DB::transaction(function () use ($leave) {
                     $replacement = Doctor::find($leave->replacement_doctor_id);
 
-                    $appointments = Appointment::where('doctor_id', $leave->doctor_id)
-                        ->whereBetween(DB::raw('DATE(appointment_time)'), [$leave->start_date, $leave->end_date])
+                    Appointment::where('doctor_id', $leave->doctor_id)
+                        ->whereBetween('appointment_time', [
+                            Carbon::parse($leave->start_date)->startOfDay(),
+                            Carbon::parse($leave->end_date)->endOfDay(),
+                        ])
                         ->where('status', '!=', 'cancelled')
-                        ->get();
-
-                    foreach ($appointments as $appointment) {
-                        $appointment->doctor_id = $replacement->id;
-                        $appointment->save();
-
-                        // Thông báo cho bệnh nhân về sự thay đổi
-                        $appointment->user?->notify(
-                            new \App\Notifications\AppointmentReassigned(
-                                $appointment,
-                                "Cuộc hẹn đã được chuyển sang bác sĩ {$replacement->name} do bác sĩ {$leave->doctor->name} nghỉ."
-                            )
-                        );
-                    }
+                        ->update([
+                            'doctor_id' => $replacement->id
+                        ]);
                 });
             }
         }
