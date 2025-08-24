@@ -85,11 +85,11 @@
             <table class="table table-bordered align-middle">
                 <thead class="text-center table-light">
                     <tr>
-                        <th>📅 Ngày thanh toán</th>
-                        <th>💳 Phương thức</th>
-                        <th>💰 Số tiền</th>
-                        <th>✅ Trạng thái</th>
-                        <th>🔍 Chi tiết</th>
+                        <th>Ngày thanh toán</th>
+                        <th>Phương thức</th>
+                        <th>Số tiền</th>
+                        <th>Trạng thái</th>
+                        {{-- <th>Chi tiết</th> --}}
                     </tr>
                 </thead>
                 <tbody>
@@ -105,11 +105,11 @@
                             <td class="text-center">
                                 <span class="badge bg-success">Thành công</span>
                             </td>
-                            <td class="text-center">
+                            {{-- <td class="text-center">
                                 <a href="{{ route('client.payment_history.show', $payment->id) }}" class="btn btn-sm btn-outline-info" title="Xem chi tiết">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                            </td>
+                            </td> --}}
                         </tr>
                     @empty
                         <tr>

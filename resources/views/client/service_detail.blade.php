@@ -12,7 +12,7 @@
 
         .hero-background-image {
             height: 100%;
-            background-image: url(https://i.ibb.co/ZRQ9K48J/ace06379-7b9f-43a8-80eb-e0c72fc27839-frame-6-4.png);
+            background-image: url({{ asset('LayoutClient/img/bg-service-detail.png') }});
             background-size: cover;
             background-position: center;
             position: absolute;
