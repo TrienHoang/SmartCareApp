@@ -570,7 +570,11 @@ class BookingController extends Controller
         }
 
         $finalPrice = max(0, $service->price - $discountAmount);
-
+        $paymentMethod = $request->input('payment_method');
+        if ($paymentMethod !== 'wallet' && $finalPrice > 0 && $finalPrice < 5000) {
+            return redirect()->route('booking.confirm')
+                ->with('error', 'Số tiền thanh toán sau khi áp mã phải tối thiểu 5.000đ đối với phương thức này.');
+        }
         // Lưu tạm dữ liệu booking vào session để sử dụng sau khi thanh toán thành công
         $tempBookingData = [
             'patient_id' => $user->id,
