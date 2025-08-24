@@ -11,7 +11,8 @@
                         <ol class="flex items-center space-x-2 text-sky-100">
                             <li class="flex items-center">
                                 <i data-lucide="chevron-right" class="w-4 h-4 mx-2"></i>
-                                <a href="{{ route('client.services') }}" class="hover:text-white transition-colors duration-200">
+                                <a href="{{ route('client.services') }}"
+                                    class="hover:text-white transition-colors duration-200">
                                     Dịch vụ
                                 </a>
                             </li>
@@ -23,7 +24,8 @@
                     </nav>
 
                     {{-- Category Icon --}}
-                    <div class="w-24 h-24 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-8 backdrop-blur-sm border border-white/10">
+                    <div
+                        class="w-24 h-24 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-8 backdrop-blur-sm border border-white/10">
                         @php
                             $iconMap = [
                                 'Nội khoa' => 'stethoscope',
@@ -66,19 +68,23 @@
 
                     {{-- Stats --}}
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
-                        <div class="bg-white/15 rounded-2xl p-6 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-all duration-300">
+                        <div
+                            class="bg-white/15 rounded-2xl p-6 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-all duration-300">
                             <div class="text-3xl font-bold mb-2">{{ $category->services->count() }}</div>
                             <div class="text-sm text-sky-100">Dịch vụ</div>
                         </div>
-                        <div class="bg-white/15 rounded-2xl p-6 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-all duration-300">
+                        <div
+                            class="bg-white/15 rounded-2xl p-6 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-all duration-300">
                             <div class="text-3xl font-bold mb-2">24/7</div>
                             <div class="text-sm text-sky-100">Hỗ trợ</div>
                         </div>
-                        <div class="bg-white/15 rounded-2xl p-6 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-all duration-300">
+                        <div
+                            class="bg-white/15 rounded-2xl p-6 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-all duration-300">
                             <div class="text-3xl font-bold mb-2">15+</div>
                             <div class="text-sm text-sky-100">Năm KN</div>
                         </div>
-                        <div class="bg-white/15 rounded-2xl p-6 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-all duration-300">
+                        <div
+                            class="bg-white/15 rounded-2xl p-6 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-all duration-300">
                             <div class="text-3xl font-bold mb-2">100%</div>
                             <div class="text-sm text-sky-100">Tận tâm</div>
                         </div>
@@ -92,7 +98,8 @@
             @if ($category->services->isEmpty())
                 {{-- Empty State --}}
                 <div class="text-center py-20">
-                    <div class="w-32 h-32 bg-sky-50 rounded-full flex items-center justify-center mx-auto mb-8 border-4 border-sky-100">
+                    <div
+                        class="w-32 h-32 bg-sky-50 rounded-full flex items-center justify-center mx-auto mb-8 border-4 border-sky-100">
                         <i data-lucide="calendar-x" class="w-16 h-16 text-sky-400"></i>
                     </div>
                     <h3 class="text-3xl font-bold text-gray-900 mb-6">Chưa có dịch vụ</h3>
@@ -111,26 +118,32 @@
                 <div class="mb-16">
                     <div class="text-center mb-16">
                         <h2 class="text-4xl font-bold text-gray-900 mb-6">Các Dịch Vụ Có Sẵn</h2>
-                        <p class="text-gray-600 text-lg max-w-2xl mx-auto">Khám phá danh sách đầy đủ các dịch vụ chất lượng cao trong chuyên khoa {{ $category->name }}</p>
+                        <p class="text-gray-600 text-lg max-w-2xl mx-auto">Khám phá danh sách đầy đủ các dịch vụ chất lượng
+                            cao trong chuyên khoa {{ $category->name }}</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                         @foreach ($category->services as $service)
-                            <div class="group bg-white rounded-3xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+                            <div
+                                class="group bg-white rounded-3xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden">
                                 <a href="{{ route('booking.showService', $service->id) }}" class="block">
                                     {{-- Service Header --}}
                                     <div class="p-8 pb-4">
                                         <div class="flex items-start justify-between mb-6">
-                                            <div class="w-16 h-16 bg-gradient-to-br from-sky-400 to-sky-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                            <div
+                                                class="w-16 h-16 bg-gradient-to-br from-sky-400 to-sky-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
                                                 <i data-lucide="check-circle" class="w-8 h-8 text-white"></i>
                                             </div>
                                             <div class="flex items-center space-x-1 bg-yellow-50 px-3 py-1 rounded-full">
                                                 <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
-                                                <span class="text-sm text-yellow-700 font-medium">4.9</span>
+                                                <span class="text-sm text-yellow-700 font-medium">
+                                                    {{ $service->reviews_avg_rating ? number_format($service->reviews_avg_rating, 1) : 'Chưa có' }}
+                                                </span>
                                             </div>
                                         </div>
 
-                                        <h3 class="text-2xl font-bold text-gray-900 mb-4 group-hover:text-sky-600 transition-colors duration-300 leading-tight">
+                                        <h3
+                                            class="text-2xl font-bold text-gray-900 mb-4 group-hover:text-sky-600 transition-colors duration-300 leading-tight">
                                             {{ $service->name }}
                                         </h3>
 
@@ -138,8 +151,9 @@
                                             <span class="text-2xl font-bold text-sky-600">
                                                 {{ number_format($service->price, 0, ',', '.') }}₫
                                             </span>
-                                            @if($service->duration)
-                                                <span class="text-sm text-gray-500 flex items-center bg-gray-50 px-3 py-1 rounded-full">
+                                            @if ($service->duration)
+                                                <span
+                                                    class="text-sm text-gray-500 flex items-center bg-gray-50 px-3 py-1 rounded-full">
                                                     <i data-lucide="clock" class="w-4 h-4 mr-1"></i>
                                                     {{ $service->duration }}
                                                 </span>
@@ -156,21 +170,25 @@
                                     {{-- Service Features --}}
                                     <div class="px-8 pb-6">
                                         <div class="flex flex-wrap gap-2 mb-6">
-                                            <span class="px-4 py-2 bg-green-50 text-green-700 text-sm rounded-full font-medium border border-green-100">
+                                            <span
+                                                class="px-4 py-2 bg-green-50 text-green-700 text-sm rounded-full font-medium border border-green-100">
                                                 Chuyên nghiệp
                                             </span>
-                                            <span class="px-4 py-2 bg-sky-50 text-sky-700 text-sm rounded-full font-medium border border-sky-100">
+                                            <span
+                                                class="px-4 py-2 bg-sky-50 text-sky-700 text-sm rounded-full font-medium border border-sky-100">
                                                 Hiện đại
                                             </span>
                                         </div>
                                     </div>
                                 </a>
-                                
+
                                 {{-- Service Footer --}}
                                 <div class="px-8 pb-8">
-                                    <a href="{{ route('booking.showService', $service->id) }}" class="w-full bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white py-4 px-6 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center group/btn shadow-lg hover:shadow-xl text-lg">
+                                    <a href="{{ route('booking.showService', $service->id) }}"
+                                        class="w-full bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white py-4 px-6 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center group/btn shadow-lg hover:shadow-xl text-lg">
                                         <span class="mr-3">Xem chi tiết</span>
-                                        <i data-lucide="calendar-plus" class="w-6 h-6 group-hover/btn:translate-x-1 transition-transform duration-300"></i>
+                                        <i data-lucide="calendar-plus"
+                                            class="w-6 h-6 group-hover/btn:translate-x-1 transition-transform duration-300"></i>
                                     </a>
                                 </div>
                             </div>
@@ -183,7 +201,8 @@
             <div class="bg-gradient-to-r from-sky-500 to-sky-600 rounded-3xl p-12 text-white text-center shadow-2xl">
                 <h3 class="text-3xl font-bold mb-6">Cần tư vấn thêm?</h3>
                 <p class="text-sky-50 mb-10 max-w-3xl mx-auto text-lg leading-relaxed">
-                    Đội ngũ chuyên viên giàu kinh nghiệm của chúng tôi sẵn sàng hỗ trợ bạn lựa chọn dịch vụ phù hợp nhất với nhu cầu của bạn
+                    Đội ngũ chuyên viên giàu kinh nghiệm của chúng tôi sẵn sàng hỗ trợ bạn lựa chọn dịch vụ phù hợp nhất với
+                    nhu cầu của bạn
                 </p>
                 <div class="flex flex-col sm:flex-row gap-6 justify-center">
                     <a href="tel:+84123456789"
