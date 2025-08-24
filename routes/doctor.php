@@ -122,8 +122,8 @@ Route::prefix('doctor')
 // Nhóm route dành riêng cho bác sĩ
 Route::prefix('doctor')->name('doctor.')->middleware(['auth', 'checkRole:doctor'])->group(function () {
 
-    Route::get('/', [DoctorController::class, 'index'])->name('index');
-    Route::get('/list/{id}', [DoctorController::class, 'show'])->name('list.show');
+    // Route::get('/', [DoctorController::class, 'index'])->name('index');
+    // Route::get('/list/{id}', [DoctorController::class, 'show'])->name('list.show');
     Route::get('/history', [DoctorController::class, 'history'])->name('history.index');
     Route::get('/history/{appointment}', [DoctorController::class, 'historyShow'])->name('history.show');
     // Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
