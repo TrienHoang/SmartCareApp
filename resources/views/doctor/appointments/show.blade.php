@@ -494,6 +494,16 @@
                             </div>
                             <div class="info-value">{{ $appointment->reason ?? 'Không có' }}</div>
                         </div>
+
+                        @if ($appointment->status == 'completed')
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="bx bx-message-detail icon-wrapper"></i>
+                                    Triệu chứng
+                                </div>
+                                <div class="info-value">{{ $appointment->symptom_note ?? 'Không có' }}</div>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Status Section -->
@@ -565,35 +575,25 @@
                                             <option value="completed">Hoàn tất khám</option>
                                             <option value="cancelled">Hủy lịch hẹn</option>
                                         </select>
-                                        <button type="submit" class="btn-update">
-                                            <i class="bx bx-save"></i>
-                                            Cập nhật
-                                        </button>
                                     </div>
                                 </div>
-                            </form>
-                        </div>
-                    @elseif ($appointment->status == 'confirmed')
-                        <div class="action-form">
-                            <form action="{{ route('doctor.appointments.updateStatus', $appointment->id) }}" method="POST">
-                                @csrf
-                                @method('PUT')
-                                <div class="mb-3">
-                                    <label for="status" class="form-label">
-                                        <i class="bx bx-x-circle icon-wrapper"></i>
-                                        Hủy lịch hẹn đã xác nhận
+
+                                {{-- Triệu chứng bệnh - chỉ hiện khi chọn completed --}}
+                                <div class="mb-3" id="symptom-wrapper" style="display:none;">
+                                    <label for="symptom_note" class="form-label">
+                                        <i class="bx bx-notepad icon-wrapper"></i>
+                                        Triệu chứng bệnh
                                     </label>
-                                    <div class="d-flex align-items-center gap-3 flex-wrap">
-                                        <select name="status" id="status" class="form-select"
-                                            style="width: auto; min-width: 200px;">
-                                            <option value="cancelled">Hủy lịch hẹn</option>
-                                        </select>
-                                        <button type="submit" class="btn-cancel">
-                                            <i class="bx bx-trash"></i>
-                                            Hủy lịch
-                                        </button>
-                                    </div>
+                                    <textarea name="symptom_note" id="symptom_note" class="form-control" rows="3">{{ old('symptom_note', $appointment->symptom_note) }}</textarea>
+                                    @error('symptom_note')
+                                        <div class="text-danger mt-1">{{ $message }}</div>
+                                    @enderror
                                 </div>
+
+                                <button type="submit" class="btn-update">
+                                    <i class="bx bx-save"></i>
+                                    Cập nhật
+                                </button>
                             </form>
                         </div>
                     @endif
@@ -620,4 +620,21 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusSelect = document.getElementById('status');
+            const symptomWrapper = document.getElementById('symptom-wrapper');
+
+            function toggleSymptom() {
+                if (statusSelect.value === 'completed') {
+                    symptomWrapper.style.display = 'block';
+                } else {
+                    symptomWrapper.style.display = 'none';
+                }
+            }
+
+            statusSelect.addEventListener('change', toggleSymptom);
+            toggleSymptom(); // chạy lần đầu để set đúng trạng thái ban đầu
+        });
+    </script>
 @endsection

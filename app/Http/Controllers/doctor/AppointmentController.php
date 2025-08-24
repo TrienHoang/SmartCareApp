@@ -90,12 +90,21 @@ class AppointmentController extends Controller
             return redirect()->back()->with('error', 'Không thể cập nhật trạng thái ở trạng thái hiện tại.');
         }
 
-        $request->validate([
+        // Validate trạng thái + symptom_note nếu completed
+        $rules = [
             'status' => ['required', Rule::in($validTransitions)],
-        ], [
+        ];
+        $messages = [
             'status.required' => 'Vui lòng chọn trạng thái.',
             'status.in' => 'Trạng thái không hợp lệ.',
-        ]);
+        ];
+
+        if ($request->status === 'completed') {
+            $rules['symptom_note'] = 'required|string';
+            $messages['symptom_note.required'] = 'Vui lòng nhập triệu chứng bệnh.';
+        }
+
+        $request->validate($rules, $messages);
 
         $newStatus = $request->status;
         $now = Carbon::now();
@@ -110,19 +119,22 @@ class AppointmentController extends Controller
             }
         }
 
-        // 3. Không cho hoàn thành (completed) nếu chưa đến giờ khám
         if ($newStatus === 'completed' && $now->lt($appointmentTime)) {
             return redirect()->back()->with('error', 'Không thể hoàn thành lịch hẹn trước thời gian khám.');
         }
 
-        // 4. Nếu chưa checked_in và đã quá giờ -> không cho completed
         if ($newStatus === 'completed' && $appointment->status !== 'checked_in' && $now->gt($appointmentTime)) {
             return redirect()->back()->with('error', 'Không thể hoàn thành lịch hẹn vì bệnh nhân chưa đến và đã quá giờ hẹn.');
         }
 
+        // Lưu trạng thái + symptom_note
         $appointment->status = $newStatus;
+        if ($newStatus === 'completed') {
+            $appointment->symptom_note = $request->symptom_note;
+        }
         $appointment->save();
 
+        // Tạo Medical Record nếu chưa có
         if ($newStatus === 'completed') {
             $existing = MedicalRecord::where('appointment_id', $appointment->id)->exists();
 
