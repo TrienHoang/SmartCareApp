@@ -12,27 +12,16 @@ class ServiceController extends Controller
     {
         $categories = ServiceCategory::where('status', 1)->get();
 
-        $danh_muc_dich_vu = ServiceCategory::withCount(['services' => function ($query) {
-            $query->where('status', 'active');
-        }])
-        ->where('status', 'active')
-        ->with(['services' => function ($query) {
-            $query->where('status', 'active')
-                ->select('id', 'service_cate_id', 'department_id', 'name', 'description', 'image', 'price', 'duration', 'status');
-        }])
-        ->orderByDesc('services_count') // sắp xếp theo số lượng dịch vụ
-        ->limit(6)
-        ->get();
-
-        return view('client.services.index', compact('categories','danh_muc_dich_vu'));
+        return view('client.services.index', compact('categories'   ));
     }
 
 
     public function show($id)
     {
-        $category = ServiceCategory::with(['services' => function ($query) {
-            $query->where('status', 1);
-        }])->findOrFail($id);
+    $category = ServiceCategory::with(['services' => function ($query) {
+        $query->where('status', 1)
+        ->withAvg('reviews', 'rating'); // 👈 lấy tổng số sao
+    }])->findOrFail($id);
 
         return view('client.services.show', compact('category'));
     }
