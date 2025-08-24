@@ -20,7 +20,7 @@ class PaymentHistoryClientController extends Controller
                 $query->where('patient_id', $userId);
             })
             ->whereHas('payment', function ($query) {
-                $query->where('status', 'paid');
+                $query->whereIn('status', ['paid', 'refunded']);
             })
             ->when($request->filled('payment_method'), function ($query) use ($request) {
                 $query->where('payment_method', $request->payment_method);
