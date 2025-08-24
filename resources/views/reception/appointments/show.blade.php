@@ -60,7 +60,7 @@
                                         <p class="text-dark mb-1">{{ $appointment->doctor->user->full_name ?? 'N/A' }}</p>
                                         <small class="text-muted">
                                             <i class="bx bx-map-pin me-1"></i>
-                                            {{ $appointment->doctor->room->name ?? 'N/A' }}
+                                            {{ $appointment->doctor->department->room->name ?? 'N/A' }}
                                         </small>
                                     </div>
                                 </div>
@@ -224,6 +224,8 @@
                                                 Tiền mặt
                                             @elseif ($appointment->payment->payment_method === 'bank')
                                                 Ngân hàng
+                                            @elseif ($appointment->payment->payment_method === 'vnpay')
+                                                Ngân hàng VNPay
                                             @else
                                                 {{ ucfirst($appointment->payment->method ?? 'Không xác định') }}
                                             @endif

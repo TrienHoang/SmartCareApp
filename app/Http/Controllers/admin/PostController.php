@@ -43,7 +43,7 @@ class PostController extends Controller
                     return $query->where('slug', Str::slug($request->title));
                 }),
             ],
-            'excerpt' => 'nullable|string|max:255', // ✅ THÊM DÒNG NÀY
+            'excerpt' => 'nullable|string|max:255', 
             'content' => 'required',
             'service_cate_id' => 'required|exists:service_categories,id',
             'status' => 'required|in:draft,published,archived',

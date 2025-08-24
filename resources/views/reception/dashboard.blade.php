@@ -17,6 +17,8 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
+    @vite('resources/js/reception-chat.js')
+
     @include('reception.partials.header')
 
     <style>

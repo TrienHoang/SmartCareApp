@@ -16,6 +16,8 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
+    @vite('resources/js/admin-chat.js')
+
     @include('admin.partials.header')
 
     <style>

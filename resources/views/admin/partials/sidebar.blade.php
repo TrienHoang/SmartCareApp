@@ -4,7 +4,7 @@
             <span class="app-brand-logo demo">
                 <!-- SVG logo giữ nguyên -->
             </span>
-            <span class="app-brand-text demo menu-text fw-bold mt-3 ms-2">SmartCare</span>
+          <a href="/admin/dashboard" class="mt-3 ms-2"><span class="app-brand-text demo menu-text fw-bold ">SmartCare</span></a>  
         </a>
     </div>
 
@@ -233,14 +233,29 @@
             </ul>
         </li>
 
+        <li class="menu-item">
+            <a href="{{ route('admin.wallet.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-wallet"></i>
+                <div>Quản lý ví</div>
+            </a>
+        </li>
+
         <!-- Liên lạc -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Liên lạc</span></li>
 
         <li class="menu-item">
-            <a href="{{ route('admin.notifications.index') }}" class="menu-link">
+            <a href="{{ route('admin.notifications.index') }}" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-bell"></i>
                 <div>Thông báo</div>
             </a>
+            <ul class="menu-sub">
+                <li class="menu-item"><a href="{{ route('admin.notifications.index') }}" class="menu-link">
+                        <div>Danh sách</div>
+                    </a></li>
+                <li class="menu-item"><a href="{{ route('admin.notifications.history') }}" class="menu-link">
+                        <div>Lịch sử thông báo</div>
+                    </a></li>
+            </ul>
         </li>
 
         <li class="menu-item">
@@ -253,12 +268,10 @@
 
 
         <li class="menu-item">
-            <a href="app-chat.html" class="menu-link">
+            <a href="{{ route('admin.chat.templates') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-chat"></i>
-                <div>Chat</div>
+                <div>Hộp Thoại Bệnh Nhân</div>
             </a>
         </li>
-
-
     </ul>
 </aside>

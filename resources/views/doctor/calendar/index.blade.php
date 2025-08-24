@@ -14,25 +14,19 @@
             --ocean-border: rgba(255, 255, 255, 0.9);
             --ocean-border-light: #dbeafe;
 
-            /* Event Status Colors */
+            /* Event Status Colors - Dark text for better readability */
             --color-pending-bg: #fef3c7;
             --color-pending-border: #f59e0b;
-            --color-pending-text: #b45309;
+            --color-pending-text: #92400e;
             --color-confirmed-bg: #dcfce7;
             --color-confirmed-border: #16a34a;
-            --color-confirmed-text: #15803d;
-            --color-completed-bg: #e0f2fe;
-            --color-completed-border: #0284c7;
-            --color-completed-text: #0369a1;
-            --color-cancelled-bg: #fee2e2;
-            --color-cancelled-border: #dc2626;
-            --color-cancelled-text: #b91c1c;
-            --color-no-show-bg: #e9d5ff;
-            --color-no-show-border: #6f42c1;
-            --color-no-show-text: #5b21b6;
-            --color-rescheduled-bg: #ffedd5;
-            --color-rescheduled-border: #fd7e14;
-            --color-rescheduled-text: #c05621;
+            --color-confirmed-text: #166534;
+            --color-checked-in-bg: #e0f2fe;
+            --color-checked-in-border: #0284c7;
+            --color-checked-in-text: #075985;
+            --color-completed-bg: #f3e8ff;
+            --color-completed-border: #7c3aed;
+            --color-completed-text: #6d28d9;
 
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.07);
             --shadow-lg-ocean: 0 10px 15px -3px rgba(37, 99, 235, 0.1), 0 4px 6px -4px rgba(37, 99, 235, 0.1);
@@ -334,7 +328,7 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
         }
 
-        /* Status-specific Event Colors */
+        /* Status-specific Event Colors - Using darker text colors */
         .fc-event.event-pending {
             background-color: var(--color-pending-bg) !important;
             border: 1px solid var(--color-pending-border) !important;
@@ -347,28 +341,16 @@
             color: var(--color-confirmed-text) !important;
         }
 
+        .fc-event.event-checked-in {
+            background-color: var(--color-checked-in-bg) !important;
+            border: 1px solid var(--color-checked-in-border) !important;
+            color: var(--color-checked-in-text) !important;
+        }
+
         .fc-event.event-completed {
             background-color: var(--color-completed-bg) !important;
             border: 1px solid var(--color-completed-border) !important;
             color: var(--color-completed-text) !important;
-        }
-
-        .fc-event.event-cancelled {
-            background-color: var(--color-cancelled-bg) !important;
-            border: 1px solid var(--color-cancelled-border) !important;
-            color: var(--color-cancelled-text) !important;
-        }
-
-        .fc-event.event-no-show {
-            background-color: var(--color-no-show-bg) !important;
-            border: 1px solid var(--color-no-show-border) !important;
-            color: var(--color-no-show-text) !important;
-        }
-
-        .fc-event.event-rescheduled {
-            background-color: var(--color-rescheduled-bg) !important;
-            border: 1px solid var(--color-rescheduled-border) !important;
-            color: var(--color-rescheduled-text) !important;
         }
 
         /* View-specific Adjustments */
@@ -394,6 +376,7 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
+            color: red;
         }
 
         /* Responsive Adjustments */
@@ -462,10 +445,8 @@
                         <option value="">Tất cả trạng thái</option>
                         <option value="pending">Chờ xử lý</option>
                         <option value="confirmed">Đã xác nhận</option>
+                        <option value="checked_in">Đã check-in</option>
                         <option value="completed">Hoàn thành</option>
-                        <option value="cancelled">Đã hủy</option>
-                        <option value="no_show">Không đến</option>
-                        <option value="rescheduled">Đã dời lịch</option>
                     </select>
                 </div>
                 <div class="btn-group">
@@ -578,7 +559,14 @@
 
                     axios.get("{{ route('doctor.calendar.events') }}", { params })
                         .then(response => {
-                            successCallback(response.data);
+                            // Filter out cancelled events
+                            const filteredEvents = response.data.filter(event => {
+                                const eventStatus = event.extendedProps?.status;
+                                return eventStatus !== 'cancelled' && 
+                                       eventStatus !== 'Đã hủy';
+                            });
+                            
+                            successCallback(filteredEvents);
                             errorDiv.classList.add('d-none');
                         })
                         .catch(error => {
@@ -592,23 +580,21 @@
                 eventDataTransform: function (eventInfo) {
                     let statusClass = '';
                     switch (eventInfo.extendedProps.status) {
+                        case 'pending':
                         case 'Chờ xử lý':
                             statusClass = 'event-pending';
                             break;
+                        case 'confirmed':
                         case 'Đã xác nhận':
                             statusClass = 'event-confirmed';
                             break;
+                        case 'checked_in':
+                        case 'Đã check-in':
+                            statusClass = 'event-checked-in';
+                            break;
+                        case 'completed':
                         case 'Hoàn thành':
                             statusClass = 'event-completed';
-                            break;
-                        case 'Đã hủy':
-                            statusClass = 'event-cancelled';
-                            break;
-                        case 'Không đến':
-                            statusClass = 'event-no-show';
-                            break;
-                        case 'Đã dời lịch':
-                            statusClass = 'event-rescheduled';
                             break;
                         default:
                             statusClass = 'event-pending';

@@ -1,6 +1,6 @@
 @extends('admin.dashboard')
 
-@section('title', 'Quản lý Phòng ban')
+@section('title', 'Quản lý khoa')
 
 @section('content')
     <div class="content-wrapper">
@@ -14,8 +14,8 @@
                                 <i class="bx bx-building text-white "></i>
                             </div>
                             <div>
-                                <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý Phòng ban</h2>
-                                <p class="text-muted mb-0">Quản lý và theo dõi tất cả phòng ban trong hệ thống</p>
+                                <h2 class="content-header-title mb-0 text-primary font-weight-bold">Quản lý khoa</h2>
+                                <p class="text-muted mb-0">Quản lý và theo dõi tất cả khoa trong hệ thống</p>
                             </div>
                         </div>
                         <div class="breadcrumb-wrapper col-12">
@@ -27,7 +27,7 @@
                                         </a>
                                     </li>
                                     <li class="breadcrumb-item active text-primary font-weight-semibold">
-                                        Phòng ban
+                                        khoa
                                     </li>
                                 </ol>
                             </nav>
@@ -38,7 +38,7 @@
             <div class="content-header-right col-md-4 col-12 text-md-right">
                 <div class="form-group breadcrum-right">
                     <a href="{{ route('admin.departments.create') }}" class="btn btn-gradient-primary btn-lg waves-effect waves-light shadow-lg  text-white">
-                        Thêm phòng ban mới
+                        Thêm khoa mới
                     </a>
                 </div>
             </div>
@@ -77,7 +77,7 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white mb-0">{{ $departments->total() }}</h4>
-                                    <small class="text-white">Tổng phòng ban</small>
+                                    <small class="text-white">Tổng khoa</small>
                                 </div>
                             </div>
                         </div>
@@ -92,10 +92,10 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
                             <i class="bx bx-list mr-2"></i>
-                            <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách Phòng ban</h4>
+                            <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách khoa</h4>
                         </div>
                         <div class="card-tools">
-                            <span class="badge badge-light">{{ $departments->total() }} phòng ban</span>
+                            <span class="badge badge-light">{{ $departments->total() }} khoa</span>
                         </div>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                                         <i class="bx bx-search text-primary mr-1"></i> Tìm kiếm
                                     </label>
                                     <input type="text" name="search" class="form-control"
-                                        placeholder="Tên phòng ban, mô tả..." value="{{ request('search') }}">
+                                        placeholder="Tên khoa, mô tả..." value="{{ request('search') }}">
                                 </div>
 
                                 <!-- Trạng thái -->
@@ -130,7 +130,7 @@
                                     </select>
                                 </div>
 
-                                <!-- Phòng ban trống -->
+                                <!-- khoa trống -->
                                 <div class="col-lg-2 col-md-6 mb-3">
                                     <label class="form-label font-weight-semibold">
                                         <i class="bx bx-user-x text-danger mr-1"></i> Trống bác sĩ
@@ -182,7 +182,7 @@
                                         <i class="bx bx-hash text-muted mr-1"></i> ID
                                     </th>
                                     <th class="border-top-0">
-                                        <i class="bx bx-building-house text-primary mr-1"></i> Tên phòng ban
+                                        <i class="bx bx-building-house text-primary mr-1"></i> Tên khoa
                                     </th>
                                     <th class="border-top-0">
                                         <i class="bx bx-detail text-secondary mr-1"></i> Mô tả
@@ -287,10 +287,10 @@
                                                     class="btn btn-outline-info" data-toggle="tooltip" title="Xem chi tiết">
                                                     <i class="bx bx-show"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-outline-danger" data-toggle="tooltip"
+                                                {{-- <button type="button" class="btn btn-outline-danger" data-toggle="tooltip"
                                                     title="Xóa" onclick="deleteDepartment({{ $department->id }})">
                                                     <i class="bx bx-trash"></i>
-                                                </button>
+                                                </button> --}}
                                             </div>
                                         </td>
                                     </tr>
@@ -299,11 +299,11 @@
                                         <td colspan="8" class="text-center py-5">
                                             <div class="empty-state">
                                                 <i class="bx bx-building text-muted" style="font-size: 48px;"></i>
-                                                <h5 class="mt-3 text-muted">Không có phòng ban nào</h5>
-                                                <p class="text-muted">Chưa có phòng ban nào được tạo hoặc không tìm thấy kết quả
+                                                <h5 class="mt-3 text-muted">Không có khoa nào</h5>
+                                                <p class="text-muted">Chưa có khoa nào được tạo hoặc không tìm thấy kết quả
                                                     phù hợp.</p>
                                                 <a href="{{ route('admin.departments.create') }}" class="btn btn-primary">
-                                                    <i class="bx bx-plus mr-1"></i> Tạo phòng ban đầu tiên
+                                                    <i class="bx bx-plus mr-1"></i> Tạo khoa đầu tiên
                                                 </a>
                                             </div>
                                         </td>
@@ -527,7 +527,7 @@
         function deleteDepartment(id) {
             Swal.fire({
                 title: 'Xác nhận xóa',
-                text: 'Bạn có chắc chắn muốn xóa phòng ban này? Hành động này không thể hoàn tác!',
+                text: 'Bạn có chắc chắn muốn xóa khoa này? Hành động này không thể hoàn tác!',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',

@@ -1,6 +1,6 @@
 @extends('admin.dashboard')
 
-@section('title', 'Quản lý Đánh giá')
+@section('title', 'Quản lý Phòng')
 
 @section('content')
 

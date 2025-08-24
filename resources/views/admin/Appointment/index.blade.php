@@ -376,7 +376,7 @@
                                         <td>
                                             <div class="room-info">
                                                 <span class="badge badge-outline-info">
-                                                    {{ $appointment->doctor->room->name ?? 'N/A' }}
+                                                    {{ $appointment->doctor->department->room->name ?? 'N/A' }}
                                                 </span>
                                                 <br><small
                                                     class="text-muted">{{ $appointment->doctor->department->name ?? '' }}</small>
@@ -480,7 +480,7 @@
                                                     </a>
                                                 @endif
 
-                                                @if (in_array($appointment->status, ['confirmed', 'checked_in']))
+                                                @if ($appointment->status === 'checked_in')
                                                     <button class="btn btn-outline-success"
                                                         onclick="updateStatus({{ $appointment->id }}, 'completed')"
                                                         data-toggle="tooltip" title="Hoàn thành">
@@ -502,24 +502,26 @@
                                                     @endif
                                                 @endif
 
+                                                <!-- Hủy lịch hẹn -->
                                                 @if (in_array($appointment->status, ['pending', 'confirmed']))
-                                                    <button class="btn btn-outline-danger"
+                                                    <button class="btn btn-sm btn-outline-danger"
                                                         onclick="showCancelModal({{ $appointment->id }})"
-                                                        data-toggle="tooltip" title="Hủy lịch hẹn">
+                                                        title="Hủy lịch hẹn">
                                                         <i class="bx bx-x-circle"></i>
                                                     </button>
                                                 @endif
 
-                                                @if (in_array($appointment->status, ['cancelled']) &&
-                                                        in_array(optional($appointment->payment)->status, ['paid']) &&
-                                                        !optional($appointment->payment)->is_refunded)
+                                                <!-- Hoàn tiền -->
+                                                @if (
+                                                    $appointment->status === 'cancelled' &&
+                                                        in_array(optional($appointment->payment)->status, ['paid', 'overpaid']) &&
+                                                        $appointment->payment->refund_status !== 'completed')
                                                     <form
                                                         action="{{ route('admin.appointments.refund', $appointment->id) }}"
                                                         method="POST" class="d-inline"
                                                         onsubmit="return confirm('Bạn chắc chắn muốn hoàn tiền? Hành động này không thể hoàn tác.')">
                                                         @csrf
-                                                        <button class="btn btn-outline-secondary" data-toggle="tooltip"
-                                                            title="Hoàn tiền VNPay">
+                                                        <button class="btn btn-sm btn-outline-danger" title="Hoàn tiền">
                                                             <i class="bx bx-undo"></i>
                                                         </button>
                                                     </form>
@@ -871,9 +873,8 @@
                 });
             });
 
-            // Update status function
             function updateStatus(id, status) {
-                Swal.fire({
+                let swalOptions = {
                     title: 'Xác nhận cập nhật trạng thái',
                     text: `Bạn có chắc chắn muốn ${status === 'completed' ? 'hoàn thành' : 'cập nhật'} lịch hẹn này?`,
                     icon: 'question',
@@ -881,8 +882,28 @@
                     confirmButtonColor: '#667eea',
                     cancelButtonColor: '#6c757d',
                     confirmButtonText: 'Xác nhận',
-                    cancelButtonText: 'Hủy'
-                }).then((result) => {
+                    cancelButtonText: 'Hủy',
+                };
+
+                // Nếu là hoàn thành thì yêu cầu nhập triệu chứng
+                if (status === 'completed') {
+                    swalOptions = {
+                        ...swalOptions,
+                        input: 'textarea',
+                        inputLabel: 'Triệu chứng bệnh',
+                        inputPlaceholder: 'Nhập triệu chứng của bệnh nhân...',
+                        inputAttributes: {
+                            'aria-label': 'Nhập triệu chứng'
+                        },
+                        inputValidator: (value) => {
+                            if (!value || value.trim() === '') {
+                                return 'Vui lòng nhập triệu chứng';
+                            }
+                        }
+                    };
+                }
+
+                Swal.fire(swalOptions).then((result) => {
                     if (result.isConfirmed) {
                         // Create and submit form
                         const form = document.createElement('form');
@@ -907,11 +928,21 @@
                         statusField.value = status;
                         form.appendChild(statusField);
 
+                        // Nếu là completed thì thêm field triệu chứng
+                        if (status === 'completed' && result.value) {
+                            const symptomsField = document.createElement('input');
+                            symptomsField.type = 'hidden';
+                            symptomsField.name = 'symptom_note'; // đổi thành symptom_note
+                            symptomsField.value = result.value.trim();
+                            form.appendChild(symptomsField);
+                        }
+
                         document.body.appendChild(form);
                         form.submit();
                     }
                 });
             }
+
 
             // Show cancel modal
             function showCancelModal(id) {

@@ -60,7 +60,7 @@
                                         <p class="text-dark mb-1">{{ $appointment->doctor->user->full_name ?? 'N/A' }}</p>
                                         <small class="text-muted">
                                             <i class="bx bx-map-pin me-1"></i>
-                                            {{ $appointment->doctor->room->name ?? 'N/A' }}
+                                            {{ $appointment->doctor->department->room->name ?? 'N/A' }}
                                         </small>
                                     </div>
                                 </div>
@@ -151,6 +151,16 @@
                                     <p class="mb-0 text-success">{{ $completionNote }}</p>
                                 </div>
                             @endif
+                        @endif
+
+                        @if ($appointment->status === 'completed')
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="bx bx-message-detail icon-wrapper"></i>
+                                    Triệu chứng
+                                </div>
+                                <div class="info-value">{{ $appointment->symptom_note ?? 'Không có' }}</div>
+                            </div>
                         @endif
                     </div>
                     <div class="card shadow-sm border-0 mb-4">
@@ -388,10 +398,30 @@
                                                     </span>
                                                 </small>
 
-                                                @if ($payment->note)
+                                                @php
+                                                    // Kiểm tra xem note có phải JSON không
+                                                    $note = $payment->note;
+                                                    $decodedNote = json_decode($note, true);
+                                                @endphp
+
+                                                @if (is_array($decodedNote))
+                                                    @php
+                                                        unset($decodedNote['transaction_date']);
+                                                    @endphp
+
+                                                    @if (!empty($decodedNote))
+                                                        <small class="text-muted d-block mt-1">
+                                                            <i class="bx bx-info-circle me-1"></i>
+                                                            Ghi chú:
+                                                            {{ collect($decodedNote)->map(function ($v, $k) {
+                                                                    return ucfirst($k) . ': ' . $v;
+                                                                })->implode(' | ') }}
+                                                        </small>
+                                                    @endif
+                                                @elseif (!empty($note))
                                                     <small class="text-muted d-block mt-1">
                                                         <i class="bx bx-info-circle me-1"></i>
-                                                        Ghi chú: {{ $payment->note }}
+                                                        Ghi chú: {{ $note }}
                                                     </small>
                                                 @endif
                                             </div>

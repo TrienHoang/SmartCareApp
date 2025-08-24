@@ -22,7 +22,8 @@
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb bg-transparent p-0">
                                     <li class="">
-                                    <a href="{{ route('admin.dashboard.index') }}" class="text-decoration-none">Trang chủ</a>
+                                        <a href="{{ route('admin.dashboard.index') }}" class="text-decoration-none">Trang
+                                            chủ</a>
 
                                     </li>
 
@@ -34,11 +35,12 @@
             </div>
             <div class="content-header-right col-md-4 col-12">
                 <div class="btn-group float-md-right">
-                    <button type="button" class="btn btn-gradient-primary" data-bs-toggle="modal" data-bs-target="#createDoctorModal">
-                                        <a href="{{ route('admin.doctors.create') }}"
-                                            class="btn btn-success btn-lg waves-effect waves-light shadow-lg text-white">
-                                            <i class="bx bx-plus me-2"></i> Thêm bác sĩ mới
-                                        </a>
+                    <button type="button" class="btn btn-gradient-primary" data-bs-toggle="modal"
+                        data-bs-target="#createDoctorModal">
+                        <a href="{{ route('admin.doctors.create') }}"
+                            class="btn btn-success btn-lg waves-effect waves-light shadow-lg text-white">
+                            <i class="bx bx-plus me-2"></i> Thêm bác sĩ mới
+                        </a>
                     </button>
                 </div>
             </div>
@@ -47,8 +49,9 @@
         <div class="content-body">
             <!-- Enhanced Alert Messages -->
             @foreach (['success', 'error'] as $msg)
-                @if(session($msg))
-                    <div class="alert alert-{{ $msg == 'error' ? 'danger' : $msg }} alert-dismissible fade show border-0 shadow-sm" role="alert">
+                @if (session($msg))
+                    <div class="alert alert-{{ $msg == 'error' ? 'danger' : $msg }} alert-dismissible fade show border-0 shadow-sm"
+                        role="alert">
                         <div class="d-flex align-items-center">
                             <i class="bx bx-{{ $msg == 'success' ? 'check-circle' : 'x-circle' }} mr-2"></i>
                             <strong>{{ $msg == 'success' ? 'Thành công!' : 'Lỗi!' }} </strong> {{ session($msg) }}
@@ -157,8 +160,9 @@
                                     </label>
                                     <select name="department_id" class="form-control custom-select">
                                         <option value="">Tất cả phòng ban</option>
-                                        @foreach($departments as $dept)
-                                            <option value="{{ $dept->id }}" {{ request('department_id') == $dept->id ? 'selected' : '' }}>
+                                        @foreach ($departments as $dept)
+                                            <option value="{{ $dept->id }}"
+                                                {{ request('department_id') == $dept->id ? 'selected' : '' }}>
                                                 {{ $dept->name }}
                                             </option>
                                         @endforeach
@@ -170,9 +174,9 @@
                                     </label>
                                     <div class="input-group">
                                         <input type="text" name="specialization" class="form-control"
-                                               placeholder="Nhập chuyên Khoa..." value="{{ request('specialization') }}">
+                                            placeholder="Nhập chuyên Khoa..." value="{{ request('specialization') }}">
                                     </div>
-            
+
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
                                     <label class="form-label font-weight-semibold">
@@ -180,7 +184,7 @@
                                     </label>
                                     <div class="input-group">
                                         <input type="text" name="name" class="form-control"
-                                               placeholder="Nhập tên bác sĩ..." value="{{ request('name') }}">
+                                            placeholder="Nhập tên bác sĩ..." value="{{ request('name') }}">
                                     </div>
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
@@ -212,11 +216,11 @@
                                     <th class="border-top-0">
                                         <i class="bx bx-user mr-1"></i>Thông tin bác sĩ
                                     </th>
-                                    <th class="border-top-0">
+                                    {{-- <th class="border-top-0">
                                         <i class="bx bx-star mr-1"></i>Chuyên Khoa
-                                    </th>
+                                    </th> --}}
                                     <th class="border-top-0">
-                                        <i class="bx bx-building mr-1"></i>Phòng ban
+                                        <i class="bx bx-building mr-1"></i>Chuyên Khoa
                                     </th>
                                     <th class="border-top-0">
                                         <i class="bx bx-phone mr-1"></i>Liên hệ
@@ -236,7 +240,8 @@
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" class="custom-control-input doctor-checkbox"
                                                     id="doctor-{{ $doctor->id }}" value="{{ $doctor->id }}">
-                                                <label class="custom-control-label" for="doctor-{{ $doctor->id }}"></label>
+                                                <label class="custom-control-label"
+                                                    for="doctor-{{ $doctor->id }}"></label>
                                             </div>
                                         </td>
                                         <td class="font-weight-bold text-primary">
@@ -245,12 +250,13 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar-wrapper mr-3">
-                                                    @if($doctor->user && $doctor->user->avatar)
-                                                        <img src="{{ asset('storage/' . $doctor->user->avatar) }}" alt="Avatar"
-                                                             class="rounded-circle shadow" style="width: 50px; height: 50px; object-fit: cover;">
+                                                    @if ($doctor->user && $doctor->user->avatar)
+                                                        <img src="{{ asset('storage/' . $doctor->user->avatar) }}"
+                                                            alt="Avatar" class="rounded-circle shadow"
+                                                            style="width: 50px; height: 50px; object-fit: cover;">
                                                     @else
                                                         <div class="rounded-circle bg-light d-flex justify-content-center align-items-center"
-                                                             style="width: 50px; height: 50px;">
+                                                            style="width: 50px; height: 50px;">
                                                             <i class="bx bx-user-circle text-muted fs-4"></i>
                                                         </div>
                                                     @endif
@@ -263,12 +269,7 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
-                                            <span class="badge badge-info badge-pill">
-                                                <i class="bx bx-star mr-1"></i>
-                                                {{ $doctor->specialization }}
-                                            </span>
-                                        </td>
+  
                                         <td>
                                             <span class="badge badge-success badge-pill">
                                                 <i class="bx bx-building mr-1"></i>
@@ -277,44 +278,45 @@
                                         </td>
                                         <td>
                                             <div class="contact-info">
-                                                @if($doctor->user && $doctor->user->phone)
+                                                @if ($doctor->user && $doctor->user->phone)
                                                     <div class="d-flex align-items-center text-muted mb-1">
                                                         <i class="bx bx-phone mr-1"></i>
                                                         <small>{{ $doctor->user->phone }}</small>
                                                     </div>
                                                 @endif
-                                                @if($doctor->user && $doctor->user->email)
+                                                @if ($doctor->user && $doctor->user->email)
                                                     <div class="d-flex align-items-center text-muted">
                                                         <i class="bx bx-envelope mr-1"></i>
                                                         <small>{{ $doctor->user->email }}</small>
                                                     </div>
                                                 @endif
-                                                @if(!$doctor->user || (!$doctor->user->phone && !$doctor->user->email))
+                                                @if (!$doctor->user || (!$doctor->user->phone && !$doctor->user->email))
                                                     <small class="text-muted">Chưa có thông tin</small>
                                                 @endif
                                             </div>
                                         </td>
 
-<td>
-    <button class="btn btn-sm toggle-status-btn {{ $doctor->user->status === 'online' ? 'btn-success' : 'btn-secondary' }}"
-        data-user-id="{{ $doctor->user->id }}"
-        data-status="{{ $doctor->user->status }}">
-        <i class="bx {{ $doctor->user->status === 'online' ? 'bx-check-circle' : 'bx-power-off' }}"></i>
-        {{ ucfirst($doctor->user->status) }}
-    </button>
-</td>
-
-
+                                        <td>
+                                            <button
+                                                class="btn btn-sm toggle-status-btn {{ $doctor->user->status === 'online' ? 'btn-success' : 'btn-secondary' }}"
+                                                data-user-id="{{ $doctor->user->id }}"
+                                                data-status="{{ $doctor->user->status }}">
+                                                <i
+                                                    class="bx {{ $doctor->user->status === 'online' ? 'bx-check-circle' : 'bx-power-off' }}"></i>
+                                                {{ ucfirst($doctor->user->status) }}
+                                            </button>
+                                        </td>
 
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
                                                 {{-- Thiếu show --}}
-                                                <a href="{{ route('admin.doctors.show', $doctor->id) }}" 
-                                                   class="btn btn-outline-info" data-toggle="tooltip" title="Chi tiết">
+                                                <a href="{{ route('admin.doctors.show', $doctor->id) }}"
+                                                    class="btn btn-outline-info" data-toggle="tooltip" title="Chi tiết">
                                                     <i class="bx bx-show-alt"></i>
                                                 </a>
                                                 <a href="{{ route('admin.doctors.edit', $doctor->id) }}"
-                                                   class="btn btn-outline-warning" data-toggle="tooltip" title="Chỉnh sửa">
+                                                    class="btn btn-outline-warning" data-toggle="tooltip"
+                                                    title="Chỉnh sửa">
                                                     <i class="bx bx-edit"></i>
                                                 </a>
 
@@ -328,8 +330,10 @@
                                             <div class="empty-state">
                                                 <i class="bx bx-user-x text-muted" style="font-size: 48px;"></i>
                                                 <h5 class="mt-3 text-muted">Không có bác sĩ nào</h5>
-                                                <p class="text-muted">Chưa có bác sĩ nào được tạo hoặc không tìm thấy kết quả phù hợp.</p>
-                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createDoctorModal">
+                                                <p class="text-muted">Chưa có bác sĩ nào được tạo hoặc không tìm thấy kết
+                                                    quả phù hợp.</p>
+                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                                    data-bs-target="#createDoctorModal">
                                                     <i class="bx bx-plus mr-1"></i>Thêm bác sĩ đầu tiên
                                                 </button>
                                             </div>
@@ -341,7 +345,7 @@
                     </div>
 
                     <!-- Enhanced Pagination -->
-                    @if(method_exists($doctors, 'hasPages') && $doctors->hasPages())
+                    @if (method_exists($doctors, 'hasPages') && $doctors->hasPages())
                         <div class="pagination-wrapper bg-light p-3 border-top">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="pagination-info">
@@ -363,18 +367,18 @@
 
 
 
-                                    @endsection
+@endsection
 
 
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const buttons = document.querySelectorAll('.toggle-status-btn');
 
             buttons.forEach(button => {
-                button.addEventListener('click', function () {
+                button.addEventListener('click', function() {
                     const userId = this.dataset.userId;
                     const btn = this;
                     const currentStatus = btn.dataset.status;
@@ -390,42 +394,46 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             fetch(`/admin/doctors/${userId}/toggle-status`, {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                    'Content-Type': 'application/json'
-                                }
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    btn.classList.toggle('btn-success', data.status === 'online');
-                                    btn.classList.toggle('btn-secondary', data.status === 'offline');
-                                    btn.innerHTML = `<i class="bx ${data.status === 'online' ? 'bx-check-circle' : 'bx-power-off'}"></i> ${data.status.charAt(0).toUpperCase() + data.status.slice(1)}`;
-                                    btn.dataset.status = data.status;
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Content-Type': 'application/json'
+                                    }
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        btn.classList.toggle('btn-success', data
+                                            .status === 'online');
+                                        btn.classList.toggle('btn-secondary', data
+                                            .status === 'offline');
+                                        btn.innerHTML =
+                                            `<i class="bx ${data.status === 'online' ? 'bx-check-circle' : 'bx-power-off'}"></i> ${data.status.charAt(0).toUpperCase() + data.status.slice(1)}`;
+                                        btn.dataset.status = data.status;
 
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Thành công',
-                                        text: data.message,
-                                        timer: 1500,
-                                        showConfirmButton: false
-                                    });
-                                } else {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Thành công',
+                                            text: data.message,
+                                            timer: 1500,
+                                            showConfirmButton: false
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Lỗi',
+                                            text: data.message ||
+                                                'Không thể cập nhật trạng thái.'
+                                        });
+                                    }
+                                })
+                                .catch(() => {
                                     Swal.fire({
                                         icon: 'error',
-                                        title: 'Lỗi',
-                                        text: data.message || 'Không thể cập nhật trạng thái.'
+                                        title: 'Lỗi kết nối',
+                                        text: 'Không thể gửi yêu cầu tới máy chủ.'
                                     });
-                                }
-                            })
-                            .catch(() => {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Lỗi kết nối',
-                                    text: 'Không thể gửi yêu cầu tới máy chủ.'
                                 });
-                            });
                         }
                     });
                 });

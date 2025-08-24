@@ -107,5 +107,11 @@
             @endforeach
         @endif
     </script>
+    @if (request()->query('logged_out') == 1)
+        <script>
+            localStorage.removeItem('chat_session_id');
+            localStorage.removeItem('hasShownServices');
+        </script>
+    @endif
     <script src="{{ asset('js/login.js') }}"></script>
 </div>

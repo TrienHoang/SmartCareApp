@@ -11,6 +11,8 @@ class PaymentHistoryClientController extends Controller
 {
     public function index(Request $request)
     {
+        $user = Auth::user();
+
         $userId = Auth::id();
 
         $paymentHistories = PaymentHistory::with(['payment.appointment'])
@@ -29,10 +31,12 @@ class PaymentHistoryClientController extends Controller
             ->orderByDesc('payment_date')
             ->paginate(10);
 
-        return view('client.payment_history.index', compact('paymentHistories'));
+        return view('client.payment_history.index', compact('paymentHistories', 'user'));
     }
     public function show($id)
     {
+        $user = Auth::user();
+
         $userId = Auth::id();
 
         $paymentHistory = PaymentHistory::with([
@@ -48,6 +52,6 @@ class PaymentHistoryClientController extends Controller
         $patient = $appointment->patient;
         $doctorUser = optional($appointment->doctor)->user;
 
-        return view('client.payment_history.show', compact('paymentHistory', 'patient', 'doctorUser'));
+        return view('client.payment_history.show', compact('paymentHistory', 'patient', 'doctorUser', 'user'));
     }
 }

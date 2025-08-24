@@ -894,7 +894,10 @@ class ReceptionAppointmentController extends Controller
             return redirect()->back()->with('error', 'Chỉ có thể in phiếu thanh toán cho các lịch hẹn đã thanh toán.');
         }
 
-        return view('reception.appointments.payment-receipt', compact('appointment'));
+        return view('reception.appointments.payment-receipt', [
+            'appointment' => $appointment,
+            'payment' => $appointment->payment
+        ]);
     }
 
     public function printPaymentReceiptPDF($id)
@@ -918,7 +921,10 @@ class ReceptionAppointmentController extends Controller
             abort(403, 'Chỉ có thể in phiếu thanh toán cho các lịch hẹn đã thanh toán.');
         }
 
-        $pdf = Pdf::loadView('reception.appointments.payment-receipt-pdf', compact('appointment'));
+        $pdf = Pdf::loadView('reception.appointments.payment-receipt-pdf', [
+            'appointment' => $appointment,
+            'payment' => $appointment->payment
+        ]);
 
         $filename = 'phieu-thanh-toan-' . $appointment->id . '-' . date('Y-m-d') . '.pdf';
 

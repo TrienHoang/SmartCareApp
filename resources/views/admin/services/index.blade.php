@@ -141,6 +141,9 @@
                             <a href="{{ route('admin.services.create') }}" class="btn btn-light btn-sm">
                                 <i class="bx bx-plus mr-1"></i>Thêm dịch vụ
                             </a>
+                            <a href="{{ route('admin.services.trash') }}" class="btn btn-light btn-sm">
+                                <i class="bx bx-recycle mr-1"></i>Xem thùng rác
+                            </a>
                         </div>
                     </div>
                 </div>

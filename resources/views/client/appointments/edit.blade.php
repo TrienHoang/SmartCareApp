@@ -1,87 +1,9 @@
-@extends('client.layouts.app')
+@extends('client.layouts.profile-layout')
 
-@section('title', 'Lịch Hẹn Của Bạn')
+@section('title', 'Chi tiết khám bệnh')
 
-@section('content')
-    <div class="min-h-screen bg-gray-50 py-12">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col lg:flex-row gap-8">
-                {{-- Sidebar: KHÔNG THAY ĐỔI, GIỮ NGUYÊN TỪ LAYOUT CHUNG --}}
-                <div class="lg:w-1/4">
-                    <div class="bg-white rounded-xl shadow-lg p-6 sticky top-6">
-                        {{-- Profile Avatar --}}
-                        <div class="text-center mb-8">
-                            <div class="relative inline-block">
-                                <img id="profile-avatar" src="{{ auth()->user()->avatar ?? '/images/default-avatar.png' }}"
-                                    alt="Avatar"
-                                    class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-100 object-cover">
-                                <button onclick="openAvatarModal()"
-                                    class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 hover:bg-blue-700 transition-colors shadow-lg">
-                                    <i data-lucide="camera" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                            <h3 class="text-xl font-bold mb-2">{{ auth()->user()->name ?? 'Người dùng' }}</h3>
-                            <p class="text-gray-600">{{ auth()->user()->email ?? 'email@example.com' }}</p>
-                        </div>
-
-                        {{-- Menu --}}
-                        <nav class="space-y-2">
-                            <a href="{{ url('/thong-tin-ca-nhan') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="user" class="w-5 h-5"></i>
-                                <span>Thông Tin Cá Nhân</span>
-                            </a>
-                            <a href="{{ route('client.appointments.history') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="calendar" class="w-5 h-5"></i>
-                                <span>Lịch Sử Khám</span>
-                            </a>
-                            <a href="{{ route('client.prescriptions.index') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="clipboard-list" class="w-5 h-5"></i>
-                                <span>Đơn Thuốc</span>
-                            </a>
-                            <a href="{{ route('client.appointments.index') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 text-blue-600 border-l-4 border-blue-600">
-                                <i data-lucide="clock" class="w-5 h-5"></i>
-                                <span class="font-semibold">Lịch Hẹn</span>
-                            </a>
-                            <a href="#ho-so-y-te"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="file-text" class="w-5 h-5"></i>
-                                <span>Hồ Sơ Y Tế</span>
-                            </a>
-                            <a href="{{ route('client.uploads.index') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="upload" class="w-5 h-5"></i>
-                                <span>Upload File</span>
-                            </a>
-                                 <a href="{{ route('client.notifications.index') }}"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="bell" class="w-5 h-5"></i>
-                                <span>Thông Báo</span>
-                                @php
-                                    $currentUnreadCount = $notifications
-                                        ->where('userStatuses.0.is_read', false)
-                                        ->count();
-                                @endphp
-                                @if ($currentUnreadCount > 0)
-                                    <span id="unreadCount"
-                                        class="ml-2 px-2 py-0.5 bg-red-500 text-white rounded-full text-xs font-semibold">
-                                        {{ $currentUnreadCount }}
-                                    </span>
-                                @endif
-                            </a>
-                            <a href="#cai-dat"
-                                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
-                                <i data-lucide="settings" class="w-5 h-5"></i>
-                                <span>Cài Đặt</span>
-                            </a>
-                        </nav>
-                    </div>
-                </div>
-                {{-- Main Content: Lịch Hẹn Của Bạn --}}
-                <div class="lg:w-3/4">
+@section('profile-content')
+ <div class="lg:w-3/4">
                     <div class="gradient-bg text-white py-8 mb-8">
                         <div class="max-w-6xl mx-auto px-6">
                             <div class="flex items-center justify-between">
@@ -319,9 +241,6 @@
                         </form>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
     @push('styles')
         <style>

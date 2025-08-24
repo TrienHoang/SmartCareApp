@@ -9,6 +9,8 @@ use App\Models\Room;
 use App\Notifications\DoctorLeaveApproved;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\Appointment;
+use Illuminate\Support\Facades\DB;
 
 class DoctorLeaveController extends Controller
 {
@@ -88,7 +90,7 @@ class DoctorLeaveController extends Controller
             'approved' => 'required|in:0,1',
         ]);
 
-        $leave = DoctorLeave::findOrFail($id);
+        $leave = DoctorLeave::with('doctor')->findOrFail($id);
 
         // Nếu đã duyệt thì không được chỉnh sửa nữa
         if ($leave->approved == 1) {
@@ -102,9 +104,36 @@ class DoctorLeaveController extends Controller
         $leave->approved = $request->approved;
         $leave->save();
 
-        // Chỉ gửi thông báo nếu vừa chuyển sang trạng thái được duyệt
+        // Nếu đơn mới được duyệt
         if ($oldApproved == 0 && $leave->approved == 1) {
+
+            // Gửi thông báo cho bác sĩ xin nghỉ
             $leave->doctor->user->notify(new DoctorLeaveApproved($leave));
+
+            // Nếu có bác sĩ thay thế thì chuyển lịch hẹn
+            if ($leave->replacement_doctor_id) {
+                DB::transaction(function () use ($leave) {
+                    $replacement = Doctor::find($leave->replacement_doctor_id);
+
+                    $appointments = Appointment::where('doctor_id', $leave->doctor_id)
+                        ->whereBetween(DB::raw('DATE(appointment_time)'), [$leave->start_date, $leave->end_date])
+                        ->where('status', '!=', 'cancelled')
+                        ->get();
+
+                    foreach ($appointments as $appointment) {
+                        $appointment->doctor_id = $replacement->id;
+                        $appointment->save();
+
+                        // Thông báo cho bệnh nhân về sự thay đổi
+                        $appointment->user?->notify(
+                            new \App\Notifications\AppointmentReassigned(
+                                $appointment,
+                                "Cuộc hẹn đã được chuyển sang bác sĩ {$replacement->name} do bác sĩ {$leave->doctor->name} nghỉ."
+                            )
+                        );
+                    }
+                });
+            }
         }
 
         return redirect()->route('admin.doctor_leaves.index')

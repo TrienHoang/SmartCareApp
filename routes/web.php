@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminWalletController;
+use App\Events\ChatMessageSent;
+use App\Http\Controllers\admin\AdminChatController;
 use App\Http\Controllers\admin\AdminFileController;
 use App\Http\Controllers\admin\DoctorLeaveController;
 use App\Http\Controllers\Admin\AdminNotificationController;
@@ -34,6 +37,7 @@ use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\TreatmentPlanController;
 use App\Http\Controllers\Admin\RoomController;
+use App\Http\Controllers\client\ChatController;
 use App\Models\Admin_notification;
 use App\Models\Role;
 use App\Models\User;
@@ -42,10 +46,8 @@ use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Notifications\LateNotification;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 
-Route::get('/', function () {
-    return view('client.home');
-})->name('home');
 
 
 Route::middleware('guest')->group(function () {
@@ -73,6 +75,9 @@ Route::middleware('guest')->group(function () {
 });
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+
+
 // Trang nhập email để gửi link
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 // Gửi email chứa link reset
@@ -83,7 +88,12 @@ Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showRese
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 
-// ✅ VNPAY Routes (không cần auth - webhook từ VNPAY)
+// đăng nhập bằng google
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
+
+// VNPAY Routes
 Route::post('/vnpay/callback', [PaymentHistoryController::class, 'vnpayCallback'])
     ->name('vnpay.callback')
     ->withoutMiddleware([VerifyCsrfToken::class]); // Loại bỏ CSRF cho webhook
@@ -92,18 +102,18 @@ Route::get('/vnpay/return', [PaymentHistoryController::class, 'vnpayReturn'])
     ->name('vnpay.return');
 
 
-// Route::group([
-//     'prefix' => 'admin',
-//     'as' => 'admin.',
-//     'middleware' => 'checkAdmin'
-// ], function () {
-//     // Dashboard
-//     Route::get('/dashboard', function () {
-//         return view(view: 'admin.dashboard');
-//     })->name('dashboard');
-//     Route::get('dashboard/export-excel', [DashboardController::class, 'exportExcel']);
-//     Route::get('dashboard/export-pdf', [DashboardController::class, 'exportPdf']);
-// });
+Route::group([
+    'prefix' => 'admin',
+    'as' => 'admin.',
+    'middleware' => 'checkAdmin'
+], function () {
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return view(view: 'admin.dashboard');
+    })->name('dashboard');
+    Route::get('dashboard/export-excel', [DashboardController::class, 'exportExcel']);
+    Route::get('dashboard/export-pdf', [DashboardController::class, 'exportPdf']);
+});
 
 
 // Nhóm users
@@ -411,7 +421,7 @@ Route::group([
             ->middleware('check_permission:create_rooms')->name('store');
 
         Route::get('trash', [RoomController::class, 'trash'])->name('trash');
-        
+
         Route::get('/edit/{id}', [RoomController::class, 'edit'])
             ->middleware('check_permission:edit_rooms')->name('edit');
 
@@ -469,11 +479,13 @@ Route::patch('admin/categories/toggle-status/{id}', [ServiceCategoryController::
 // quản lý dịch vụ
 Route::get('admin/services', [ServiceController::class, 'index'])->name('admin.services.index');
 Route::get('admin/services/create', [ServiceController::class, 'create'])->name('admin.services.create');
+Route::get('admin/services/trash', [ServiceController::class, 'trash'])->name('admin.services.trash');
 Route::post('admin/services', [ServiceController::class, 'store'])->name('admin.services.store'); // Sửa ở đây
 Route::get('admin/services/{id}', [ServiceController::class, 'show'])->name('admin.services.show');
 Route::get('admin/services/{id}/edit', [ServiceController::class, 'edit'])->name('admin.services.edit');
 Route::put('admin/services/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
 Route::delete('admin/services/{id}', [ServiceController::class, 'destroy'])->name('admin.services.destroy');
+Route::post('admin/services/{id}/restore', [ServiceController::class, 'restore'])->name('admin.services.restore');
 Route::get('/admin/doctors-by-department/{departmentId}', [ServiceController::class, 'getDoctorsByDepartment'])->name('admin.doctors.byDepartment');
 
 
@@ -754,15 +766,48 @@ Route::post('/admin/doctors/{user}/toggle-status', [DoctorController::class, 'to
 
 
 
-Route::middleware(['auth', 'checkAdmin'])->group(function () {
-    Route::get('/admin/system-notifications', [AdminNotificationController::class, 'index'])
+Route::prefix('admin')->middleware(['auth','checkAdmin'])->group(function() {
+    Route::get('/system-notifications', [AdminNotificationController::class, 'index'])
         ->name('admin.system_notifications.index');
+    Route::get('/history', [AdminNotificationController::class,'history'])->name('admin.notifications.history');
+    Route::post('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllRead'])->name('admin.notifications.markAllRead');
 });
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::resource('shifts', ShiftsController::class);
 });
 
+Route::middleware(['auth', 'checkAdmin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::prefix('chat')->name('chat.')->group(function () {
+            Route::get('/', [AdminChatController::class, 'index'])->name('index');
+            Route::get('/services/search', [AdminChatController::class, 'searchServices'])->name('services.search');
+            Route::get('/session/{session}', [AdminChatController::class, 'show'])->name('show');
+            Route::post('/session/{session}/send', [AdminChatController::class, 'sendMessage'])->name('send');
+            Route::get('/templates', [AdminChatController::class, 'templates'])->name('templates');
+            Route::get('/templates/create', [AdminChatController::class, 'createTemplate'])->name('templates.create');
+            Route::post('/templates', [AdminChatController::class, 'storeTemplate'])->name('templates.store');
+            Route::get('/templates/{template}/edit', [AdminChatController::class, 'editTemplate'])->name('templates.edit');
+            Route::put('/templates/{template}', [AdminChatController::class, 'updateTemplate'])->name('templates.update');
+            Route::delete('/templates/{template}', [AdminChatController::class, 'destroyTemplate'])->name('templates.destroy');
+            Route::post('/templates/{template}/toggle', [AdminChatController::class, 'toggleTemplate'])->name('templates.toggle');
+        });
+    });
 
+
+
+Route::middleware(['auth', 'checkAdmin'])->prefix('admin')->group(function () {
+    Route::get('/wallet', [AdminWalletController::class, 'index'])->name('admin.wallet.index');
+    Route::post('/wallet/{transactionId}/update-status', [AdminWalletController::class, 'updateStatus'])->name('admin.wallet.updateStatus');
+});
+
+// Route::get('/test-broadcast', function () {
+//     broadcast(new ChatMessageSent('Hello from server!', 123))->toOthers();
+//     return 'Event đã được gửi!';
+// });
+
+Broadcast::routes(['middleware' => ['web']]);
 
 
 require __DIR__ . '/client.php';

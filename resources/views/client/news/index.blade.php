@@ -6,8 +6,7 @@
 @section('content')
     <div class="min-h-screen bg-gray-50">
         {{-- Header Section with improved gradient and animation --}}
-        <section
-            class="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white py-20 lg:py-24">
+        <section class="relative overflow-hidden bg-banner-new  text-white py-20 lg:py-24">
             <div class="absolute inset-0 bg-black/10"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-transparent to-blue-900/20"></div>
 
@@ -67,7 +66,7 @@
                                         {{-- Kiểm tra nếu category hiện tại được chọn thì highlight --}}
                                         <a href="{{ route('client.news.category', ['id' => $category->id]) }}"
                                             class="px-4 py-2 rounded-full text-sm font-medium transition-colors
-                                            {{ (request('category_id') == $category->id) || (request()->route('id') == $category->id) ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                                            {{ request('category_id') == $category->id || request()->route('id') == $category->id ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                                             {{ $category->name }}
                                         </a>
                                     @endforeach
@@ -75,13 +74,16 @@
 
                                 <form method="GET" action="{{ route('client.news.index') }}">
                                     {{-- Giữ lại category_id khi sort --}}
-                                    @if(request('category_id') || request()->route('id'))
-                                        <input type="hidden" name="category_id" value="{{ request('category_id') ?? request()->route('id') }}">
+                                    @if (request('category_id') || request()->route('id'))
+                                        <input type="hidden" name="category_id"
+                                            value="{{ request('category_id') ?? request()->route('id') }}">
                                     @endif
                                     <select name="sort" onchange="this.form.submit()"
                                         class="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                        <option value="desc" {{ request('sort', 'desc') == 'desc' ? 'selected' : '' }}>Mới nhất</option>
-                                        <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Cũ nhất</option>
+                                        <option value="desc" {{ request('sort', 'desc') == 'desc' ? 'selected' : '' }}>Mới
+                                            nhất</option>
+                                        <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Cũ nhất
+                                        </option>
                                     </select>
                                 </form>
                             </div>
@@ -185,22 +187,25 @@
                                             {{ !request('category_id') && !request()->route('id') ? 'bg-blue-200' : 'bg-blue-100 group-hover:bg-blue-200' }}">
                                             <i data-lucide="grid-3x3" class="w-5 h-5 text-blue-600"></i>
                                         </div>
-                                        <span class="font-medium {{ !request('category_id') && !request()->route('id') ? 'text-blue-700' : 'text-gray-700' }}">Tất cả</span>
+                                        <span
+                                            class="font-medium {{ !request('category_id') && !request()->route('id') ? 'text-blue-700' : 'text-gray-700' }}">Tất
+                                            cả</span>
                                     </div>
                                 </a>
 
                                 @foreach ($serviceCategories as $category)
                                     <a href="{{ route('client.news.category', $category->id) }}"
                                         class="group flex items-center justify-between p-4 rounded-xl transition-all duration-200 hover:shadow-sm
-                                        {{ (request('category_id') == $category->id) || (request()->route('id') == $category->id) ? 'bg-blue-50 border border-blue-200' : 'hover:bg-blue-50' }}">
+                                        {{ request('category_id') == $category->id || request()->route('id') == $category->id ? 'bg-blue-50 border border-blue-200' : 'hover:bg-blue-50' }}">
                                         <div class="flex items-center">
                                             <div
                                                 class="w-10 h-10 rounded-lg flex items-center justify-center mr-3 transition-colors
-                                                {{ (request('category_id') == $category->id) || (request()->route('id') == $category->id) ? 'bg-blue-200' : 'bg-blue-100 group-hover:bg-blue-200' }}">
+                                                {{ request('category_id') == $category->id || request()->route('id') == $category->id ? 'bg-blue-200' : 'bg-blue-100 group-hover:bg-blue-200' }}">
                                                 <i data-lucide="{{ $category->icon ?? 'folder' }}"
                                                     class="w-5 h-5 text-blue-600"></i>
                                             </div>
-                                            <span class="font-medium {{ (request('category_id') == $category->id) || (request()->route('id') == $category->id) ? 'text-blue-700' : 'text-gray-700' }}">{{ $category->name }}</span>
+                                            <span
+                                                class="font-medium {{ request('category_id') == $category->id || request()->route('id') == $category->id ? 'text-blue-700' : 'text-gray-700' }}">{{ $category->name }}</span>
                                         </div>
                                     </a>
                                 @endforeach
@@ -248,8 +253,8 @@
 
         {{-- Enhanced Newsletter Section --}}
         <section class="relative py-16 lg:py-20 overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800"></div>
-            <div class="absolute inset-0 bg-black/10"></div>
+            <div class="absolute inset-0 bg-img-new "></div>
+            {{-- <div class="absolute inset-0 bg-black/10"></div> --}}
             <div
                 class="absolute top-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-3xl transform -translate-x-32 -translate-y-16">
             </div>
@@ -286,6 +291,18 @@
 
 @push('styles')
     <style>
+        .bg-img-new {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url({{asset('LayoutClient/img/kham-benh.jpeg')}});
+            background-size: cover;
+            background-position: center;
+        }
+
+        .bg-banner-new {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.1)), url({{asset('LayoutClient/img/bg-new.jpg')}});
+            background-size: cover;
+            background-position: center;
+        }
+
         /* Line clamp utilities */
         .line-clamp-2 {
             display: -webkit-box;
@@ -322,9 +339,12 @@
 
         /* Enhanced hover animations */
         @keyframes float {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translateY(0px);
             }
+
             50% {
                 transform: translateY(-10px);
             }
