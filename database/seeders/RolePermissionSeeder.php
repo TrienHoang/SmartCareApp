@@ -28,10 +28,9 @@ class RolePermissionSeeder extends Seeder
                 43, 44,            // Treatment Plans
                 45, 47, 74,        // Files
                 57,                // Statistics
-                62, 63, 64, 65     // Doctor Leaves
-                                   
+                62, 63, 64, 65     // Doctor Leaves       
             ];
-            $doctor->permissions()->sync($doctorPermissionIds);
+            $doctor- >permissions()->sync($doctorPermissionIds);
         }
     }
 }

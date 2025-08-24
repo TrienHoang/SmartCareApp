@@ -47,8 +47,21 @@ class DoctorLeaveController extends Controller
         $sameDepartmentDoctors = Doctor::where('department_id', $currentDoctor->department_id)
             ->where('id', '!=', $currentDoctor->id)
             ->whereHas('workingSchedules', function ($query) {
-                $query->whereDate('day', '>=', now())   // chỉ lấy lịch từ hiện tại trở đi
-                    ->whereNotNull('shift_id');       // đảm bảo có ca làm
+                $query->whereDate('day', '>=', now()) // Chỉ lấy lịch từ hiện tại trở đi
+                    ->whereNotNull('shift_id');       // Đảm bảo có ca làm
+            })
+            ->whereDoesntHave('appointments', function ($query) {
+                $query->whereExists(function ($subQuery) {
+                    $subQuery->select(\DB::raw(1))
+                        ->from('working_schedules')
+                        ->join('shifts', 'working_schedules.shift_id', '=', 'shifts.id')
+                        ->whereColumn('working_schedules.doctor_id', 'doctors.id')
+                        ->whereDate('working_schedules.day', '>=', now())
+                        ->whereNotNull('working_schedules.shift_id')
+                        ->whereRaw('appointments.appointment_time BETWEEN
+                        DATE_ADD(working_schedules.day, INTERVAL HOUR(shifts.start_time) HOUR) AND
+                        DATE_ADD(working_schedules.day, INTERVAL HOUR(shifts.end_time) HOUR)');
+                });
             })
             ->get();
 
@@ -56,8 +69,6 @@ class DoctorLeaveController extends Controller
             'doctors' => $sameDepartmentDoctors
         ]);
     }
-
-
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -81,31 +92,31 @@ class DoctorLeaveController extends Controller
             'leave_type' => ['required', Rule::in(['emergency', 'vacation', 'normal'])],
         ];
 
-        // Add validation for replacement doctor if provided for emergency leave
-        if ($leaveType === 'emergency' && $request->filled('replacement_doctor_id')) {
-            $rules['replacement_doctor_id'] = [
-                'exists:doctors,id',
-                function ($attribute, $value, $fail) use ($doctor, $start, $end) {
+        // Thêm validation cho replacement_doctor_id nếu là emergency
+        if ($leaveType === 'emergency') {
+            $rules['replacement_doctor_id'] = ['nullable', 'exists:doctors,id', function ($attribute, $value, $fail) use ($doctor, $start, $end) {
+                if ($value) {
                     $replacementDoctor = Doctor::find($value);
-                    if (!$replacementDoctor) {
-                        $fail('Bác sĩ thay thế không tồn tại.');
-                    } elseif ($replacementDoctor->department_id !== $doctor->department_id) {
+                    if ($replacementDoctor->department_id !== $doctor->department_id) {
                         $fail('Bác sĩ thay thế phải cùng khoa.');
-                    } elseif (DoctorLeave::where('doctor_id', $value)
+                    }
+                    if (DoctorLeave::where('doctor_id', $value)
                         ->where('approved', true)
                         ->whereDate('start_date', '<=', $end)
                         ->whereDate('end_date', '>=', $start)
                         ->exists()
                     ) {
                         $fail('Bác sĩ thay thế đã có lịch nghỉ trong khoảng thời gian này.');
-                    } elseif (!WorkingSchedule::where('doctor_id', $value)
+                    }
+                    if (!WorkingSchedule::where('doctor_id', $value)
                         ->whereBetween('day', [$start, $end])
                         ->exists()) {
                         $fail('Bác sĩ thay thế không có lịch làm việc trong khoảng thời gian này.');
                     }
-                },
-            ];
+                }
+            }];
         }
+
         // Additional validation based on leave type
         if ($leaveType === 'normal') {
             $minDate = $today->copy()->addDays(2)->format('Y-m-d');
@@ -155,38 +166,8 @@ class DoctorLeaveController extends Controller
             }
         }
 
-        // Check work schedule conflict and availability of other doctors in the same department
-        if ($leaveType === 'emergency') {
-            $conflictWork = WorkingSchedule::where('doctor_id', $doctorId)
-                ->whereBetween('day', [$start, $end])
-                ->exists();
-
-            if ($conflictWork && !$request->filled('replacement_doctor_id')) {
-                // Check if there are other doctors in the same department who are available (not on approved leave) and have a work schedule on the requested days
-                $availableDoctors = Doctor::where('department_id', $doctor->department_id)
-                    ->where('id', '!=', $doctorId)
-                    ->whereNotExists(function ($query) use ($start, $end) {
-                        $query->select(DB::raw(1))
-                            ->from('doctor_leaves')
-                            ->whereColumn('doctor_leaves.doctor_id', 'doctors.id')
-                            ->where('approved', true)
-                            ->whereDate('start_date', '<=', $end)
-                            ->whereDate('end_date', '>=', $start);
-                    })
-                    ->whereExists(function ($query) use ($start, $end) {
-                        $query->select(DB::raw(1))
-                            ->from('working_schedules')
-                            ->whereColumn('working_schedules.doctor_id', 'doctors.id')
-                            ->whereBetween('day', [$start, $end]);
-                    })
-                    ->exists();
-
-                if (!$availableDoctors) {
-                    return back()->withErrors(['start_date' => 'Không có bác sĩ cùng khoa nào có lịch làm việc và sẵn sàng để thay thế trong khoảng thời gian này.'])->withInput();
-                }
-            }
-        } else {
-            // For non-emergency leaves, maintain the original conflict check
+        // Check work schedule conflict (bỏ qua nếu là emergency)
+        if ($leaveType !== 'emergency') {
             $conflictWork = WorkingSchedule::where('doctor_id', $doctorId)
                 ->whereBetween('day', [$start, $end])
                 ->exists();
@@ -196,15 +177,15 @@ class DoctorLeaveController extends Controller
             }
         }
 
-        // Create leave
+        // Create leave with initial status
         $leave = DoctorLeave::create([
             'doctor_id'            => $doctorId,
             'start_date'           => $start,
             'end_date'             => $end,
             'reason'               => $request->reason,
             'urgent'               => $leaveType === 'emergency' ? 1 : 0,
-            'approved'             => 0, // All leaves require admin approval
-            'replacement_doctor_id' => $leaveType === 'emergency' ? $request->replacement_doctor_id : null,
+            'approved'             => 0, // Default to unapproved, admin will approve
+            'replacement_doctor_id' => $leaveType === 'emergency' ? $request->replacement_doctor_id : null, // Gán nếu là emergency
         ]);
 
         // Notify admins
@@ -213,17 +194,8 @@ class DoctorLeaveController extends Controller
             $admin->notify(new DoctorLeaveCreated($leave, false));
         }
 
-        // Handle emergency leave
-        if ($leaveType === 'emergency') {
-            $period = Carbon::parse($request->start_date)->daysUntil(Carbon::parse($request->end_date)->copy()->addDay());
-            foreach ($period as $date) {
-                $this->handleUrgentReplacementOrCancel($doctor, $date, $request->replacement_doctor_id);
-            }
-        }
-
         return redirect()->route('doctor.leaves.index')->with('success', 'Đơn nghỉ đã gửi đến quản trị viên.');
     }
-
     public function show($id)
     {
         $user = Auth::user();

@@ -25,7 +25,7 @@ class RoomController extends Controller
     {
         $request->validate(
             [
-                'name' => 'required|string|max:100',
+                'name' => 'required|string|max:100|unique:rooms,name',
                 'department_id' => 'required|exists:departments,id',
                 'description' => 'nullable|string',
                 'status' => 'nullable|in:active,inactive',
@@ -33,15 +33,17 @@ class RoomController extends Controller
             [
                 'name.required' => 'Tên phòng là bắt buộc.',
                 'name.max' => 'Tên phòng không được vượt quá 100 ký tự.',
+                'name.unique' => 'Tên phòng đã tồn tại, vui lòng chọn tên khác.',
                 'department_id.required' => 'Phòng phải thuộc một khoa.',
                 'department_id.exists' => 'Phòng phải thuộc một khoa hợp lệ.',
             ]
         );
-
+    
         Room::create($request->all());
-
+    
         return redirect()->route('admin.rooms.index')->with('success', 'Tạo phòng thành công!');
     }
+    
 
     public function edit($id)
     {
@@ -54,10 +56,14 @@ class RoomController extends Controller
     {
         // validate input
         $request->validate([
-            'name' => 'nullable|string|max:100',
+            'name' => 'nullable|string|max:100|unique:rooms,name,' . $id,
             'department_id' => 'nullable|exists:departments,id',
             'description' => 'nullable|string',
             'status' => 'nullable|in:active,inactive',
+        ], [
+            'name.max' => 'Tên phòng không được vượt quá 100 ký tự.',
+            'name.unique' => 'Tên phòng đã tồn tại, vui lòng chọn tên khác.',
+            'department_id.exists' => 'Phòng phải thuộc một khoa hợp lệ.',
         ]);
     
         // lấy room theo id
@@ -68,6 +74,7 @@ class RoomController extends Controller
     
         return redirect()->route('admin.rooms.index')->with('success', 'Cập nhật phòng thành công!');
     }
+    
 
     public function show($id)
     {
