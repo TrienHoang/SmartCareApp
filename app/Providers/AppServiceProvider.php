@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Http\View\Composers\NotificationComposer;
+use App\Http\View\Composers\ServiceCategoryComposer;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        
+        config(['app.timezone' => 'Asia/Ho_Chi_Minh']);
+        date_default_timezone_set('Asia/Ho_Chi_Minh');
+        Carbon::setLocale('vi');
+        View::composer('client.*', NotificationComposer::class);
+        View::composer('client.partials.footer', ServiceCategoryComposer::class);
     }
 }

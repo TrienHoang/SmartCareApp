@@ -1,0 +1,117 @@
+{{-- resources/views/auth/login.blade.php --}}
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+</head>
+
+<div class="container" data-form-type="{{ session('form_type') ?? old('form_type') }}">
+    <div class="singin-singup">
+        <form action="{{ route('postLogin') }}" method="POST" class="sign-in-form">
+            @csrf
+
+            <input type="hidden" name="form_type" value="login">
+
+            <h2 class="title">SmartCare | Đăng nhập</h2>
+
+            <div class="input-field">
+                <i class="fas fa-user-md"></i>
+                <input type="text" name="username" placeholder="Tên đăng nhập" value="{{ old('username') }}">
+            </div>
+            <div class="input-field">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" placeholder="Mật khẩu">
+            </div>
+            <input type="submit" value="Đăng nhập" class="btn">
+
+            <div style="text-align: right; margin-top: 10px;">
+                <a href="{{ route('password.request') }}" style="color: #0d6efd;">Quên mật khẩu?</a>
+            </div>
+
+            <p class="social-text">Hoặc đăng nhập bằng nền tảng</p>
+            <div class="social-media">
+                <a href="{{ route('facebook.login') }}" class="social-icon"><i class="fab fa-facebook"></i></a>
+                <a href="{{ route('google.login') }}" class="social-icon"><i class="fab fa-google"></i></a>
+            </div>
+
+            <p class="account-text">Chưa có tài khoản? - <a href="#" id="sign-up-btn2">Đăng ký</a></p>
+        </form>
+
+        <form action="{{ route('postRegister') }}" method="POST" class="sign-up-form">
+            @csrf
+
+            <input type="hidden" name="form_type" value="register">
+            <h2 class="title">SmartCare | Đăng ký</h2>
+
+            <div class="input-field">
+                <i class="fas fa-id-card"></i>
+                <input type="text" name="fullname" placeholder="Họ và tên" value="{{ old('fullname') }}">
+            </div>
+            <div class="input-field">
+                <i class="fas fa-user-md"></i>
+                <input type="text" name="username" placeholder="Tên đăng nhập" value="{{ old('username') }}">
+            </div>
+            <div class="input-field">
+                <i class="fas fa-envelope" style="color: #5a8dee;"></i>
+                <input type="email" name="email" placeholder="Email" value="{{ old('email') }}">
+            </div>
+            <div class="input-field">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" placeholder="Mật khẩu">
+            </div>
+            <input type="submit" value="Đăng ký" class="btn">
+
+            <p class="social-text">Hoặc đăng nhập bằng nền tảng</p>
+            <div class="social-media">
+                <a href="{{ route('facebook.login') }}" class="social-icon"><i class="fab fa-facebook"></i></a>
+                <a href="{{ route('google.login') }}" class="social-icon"><i class="fab fa-google"></i></a>
+            </div>
+        </form>
+    </div>
+
+    <div class="panels-container">
+        <div class="panel left-panel">
+            <div class="content">
+                <h3>Đã có tài khoản?</h3>
+                <p>Chào mừng đến với SmartCare - dịch vụ đặt lịch khám số 1 tại Việt Nam.</p>
+                <button class="btn" id="sign-in-btn">Đăng nhập</button>
+            </div>
+            <img src="{{ asset('LayoutClient/img/icon1.png') }}" alt="" class="image">
+        </div>
+
+        <div class="panel right-panel">
+            <div class="content">
+                <h3>Chưa có tài khoản?</h3>
+                <p>Chào mừng đến với SmartCare - dịch vụ đặt lịch khám số 1 tại Việt Nam.</p>
+                <button class="btn" id="sign-up-btn">Đăng ký</button>
+            </div>
+            <img src="{{ asset('LayoutClient/img/icon2.png') }}" alt="" class="image">
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        @if (session('success'))
+            toastr.success("{{ session('success') }}");
+        @endif
+
+        @if (session('error'))
+            toastr.error("{{ session('error') }}");
+        @endif
+
+        @if ($errors->any())
+            @foreach ($errors->all() as $error)
+                toastr.error("{{ $error }}");
+            @endforeach
+        @endif
+    </script>
+    @if (request()->query('logged_out') == 1)
+        <script>
+            localStorage.removeItem('chat_session_id');
+            localStorage.removeItem('hasShownServices');
+        </script>
+    @endif
+    <script src="{{ asset('js/login.js') }}"></script>
+</div>

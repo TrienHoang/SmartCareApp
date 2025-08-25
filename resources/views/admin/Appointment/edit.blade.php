@@ -1,0 +1,252 @@
+@extends('admin.dashboard')
+@section('title', 'Chỉnh sửa lịch hẹn khám')
+
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+    <style>
+        .vacation-notice {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .vacation-notice .icon {
+            color: #856404;
+        }
+
+        .vacation-notice .text {
+            color: #856404;
+            font-size: 0.875rem;
+        }
+
+        .flatpickr-day.vacation-day {
+            background-color: #ffebee !important;
+            color: #c62828 !important;
+            border-color: #f48fb1 !important;
+        }
+
+        .flatpickr-day.vacation-day:hover {
+            background-color: #ffcdd2 !important;
+            color: #c62828 !important;
+        }
+    </style>
+@endpush
+
+@section('content')
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="py-3 breadcrumb-wrapper mb-4">
+            <span class="text-muted fw-light">Appointments /</span> Chỉnh sửa lịch hẹn khám
+        </h4>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Chỉnh sửa lịch hẹn</h5>
+            </div>
+
+            @if (session('error'))
+                <script>
+                    toastr.error("{{ session('error') }}", "Lỗi");
+                </script>
+            @endif
+
+            <div class="card-body">
+                <div id="vacation-notice" class="vacation-notice d-none">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle icon me-2"></i>
+                        <div class="text">
+                            <strong>Thông báo:</strong> <span id="vacation-text"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <form action="{{ route('admin.appointments.update', $appointment->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="status" value="{{ $appointment->status }}">
+                    <input type="hidden" id="doctorServicesUrl"
+                        value="{{ url('admin/appointments/doctor') }}/:id/services">
+                    <input type="hidden" id="doctorWorkingDaysUrl"
+                        value="{{ url('admin/appointments/doctor') }}/:id/working-days">
+                    <input type="hidden" id="treatmentPlanDetailsUrl"
+                        value="{{ url('admin/appointments/treatment-plans') }}/:id/details">
+
+                    <div class="row g-3">
+                        {{-- Bệnh nhân --}}
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">Bệnh nhân</label>
+                            <select disabled class="form-select">
+                                @foreach ($patients as $patient)
+                                    <option value="{{ $patient->id }}"
+                                        {{ $appointment->patient_id == $patient->id ? 'selected' : '' }}>
+                                        {{ $patient->full_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <input type="hidden" name="patient_id" value="{{ $appointment->patient_id }}">
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="treatment_plan_id" class="form-label">Kế hoạch điều trị</label>
+                            <select name="treatment_plan_id" id="treatment_plan_id" class="form-select"
+                                @if ($appointment->treatment_plan_id) disabled @endif>
+                                <option value="">-- Không chọn --</option>
+                            </select>
+
+                            @if ($appointment->treatment_plan_id)
+                                <input type="hidden" name="treatment_plan_id"
+                                    value="{{ $appointment->treatment_plan_id }}">
+                            @endif
+
+                            <input type="hidden" id="patient_id" value="{{ $appointment->patient_id }}">
+                            <input type="hidden" id="selected_treatment_plan_id"
+                                value="{{ $appointment->treatment_plan_id }}">
+                            <input type="hidden" id="treatmentPlanDetailsUrl"
+                                value="{{ url('admin/appointments/treatment-plans') }}/:id/details">
+
+                            <small class="text-muted d-block mt-1">
+                                Khi chọn kế hoạch điều trị, bác sĩ tương ứng sẽ tự động được chọn và không thể thay đổi.
+                            </small>
+
+                            <small class="text-info d-block mt-1">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Kế hoạch điều trị sẽ tự động chuyển sang <strong>Hoàn thành</strong> khi tất cả lịch hẹn
+                                thuộc kế hoạch đã hoàn tất.
+                            </small>
+                        </div>
+
+                        {{-- Dịch vụ --}}
+                        <input type="hidden" name="service_id" value="{{ $appointment->service_id }}">
+
+                        <div class="col-12 col-md-6">
+                            <label for="service_id_display" class="form-label">Dịch vụ</label>
+                            <select id="service_id_display" class="form-select" disabled>
+                                <option value="">Chọn dịch vụ</option>
+                                @foreach ($services as $service)
+                                    <option value="{{ $service->id }}"
+                                        {{ $appointment->service_id == $service->id ? 'selected' : '' }}>
+                                        {{ $service->name }} - {{ $service->department?->name ?? 'Không rõ khoa' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Bác sĩ --}}
+                        <div class="col-12 col-md-6">
+                            <label for="doctor_id" class="form-label">Bác sĩ</label>
+                            <select name="doctor_id" id="doctor_id"
+                                class="form-select @error('doctor_id') is-invalid @enderror"
+                                @if ($appointment->treatment_plan_id) disabled @endif>
+                                <option value="">Chọn bác sĩ</option>
+                            </select>
+                            @error('doctor_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            @if ($appointment->treatment_plan_id)
+                                <input type="hidden" name="doctor_id" value="{{ $appointment->doctor_id }}">
+                            @endif
+                        </div>
+
+                        <!-- Giá dịch vụ -->
+                        <div class="col-12 col-md-6">
+                            <label for="service_price" class="form-label">Giá dịch vụ</label>
+                            <input type="text" id="service_price" class="form-control" readonly
+                                value="{{ number_format($appointment->service->price) }} ₫">
+                        </div>
+
+                        {{-- Ngày khám --}}
+                        <div class="col-12 col-md-6">
+                            <label for="appointment_date" class="form-label">Ngày khám</label>
+                            <input type="text" id="appointment_date" name="appointment_date"
+                                class="form-control @error('appointment_date') is-invalid @enderror"
+                                placeholder="Chọn ngày khám" readonly
+                                value="{{ old('appointment_date', \Carbon\Carbon::parse($appointment->appointment_time)->format('Y-m-d')) }}">
+                            @error('appointment_date')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        {{-- Giờ khám --}}
+                        <div class="col-12 col-md-6">
+                            <label for="appointment_slot" class="form-label">Giờ khám</label>
+                            <select id="appointment_slot" name="appointment_time"
+                                class="form-select @error('appointment_time') is-invalid @enderror">
+                                <option value="">Chọn giờ</option>
+                                @php
+                                    $selectedTime = \Carbon\Carbon::parse($appointment->appointment_time)->format(
+                                        'H:i',
+                                    );
+                                @endphp
+                                @if (old('appointment_date') === null)
+                                    <option value="{{ $appointment->appointment_time }}" selected>{{ $selectedTime }}
+                                    </option>
+                                @elseif(old('appointment_time'))
+                                    <option value="{{ old('appointment_time') }}" selected>
+                                        {{ \Carbon\Carbon::parse(old('appointment_time'))->format('H:i') }}</option>
+                                @endif
+                            </select>
+                            @error('appointment_time')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        {{-- Trạng thái --}}
+                        <div class="col-12 col-md-6">
+                            <label for="status" class="form-label">Trạng thái</label>
+                            <select name="status" id="status"
+                                class="form-select @error('status') is-invalid @enderror">
+                                <option value="pending" {{ $appointment->status === 'pending' ? 'selected' : '' }}
+                                    disabled>Chờ xác nhận</option>
+                                <option value="confirmed" {{ $appointment->status === 'confirmed' ? 'selected' : '' }}
+                                    {{ !in_array($appointment->status, ['pending']) ? 'disabled' : '' }}>Đã xác nhận
+                                </option>
+                                <option value="completed" {{ $appointment->status === 'completed' ? 'selected' : '' }}
+                                    {{ $appointment->status !== 'confirmed' ? 'disabled' : '' }}>Hoàn thành</option>
+                                <option value="cancelled" {{ $appointment->status === 'cancelled' ? 'selected' : '' }}
+                                    {{ !in_array($appointment->status, ['pending', 'confirmed']) ? 'disabled' : '' }}>Đã
+                                    hủy</option>
+                            </select>
+                            @error('status')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        {{-- Lý do --}}
+                        <div class="col-12">
+                            <label for="reason" class="form-label">Lý do khám (nếu có)</label>
+                            <input type="text" name="reason" id="reason"
+                                value="{{ old('reason', $appointment->reason) }}"
+                                class="form-control @error('reason') is-invalid @enderror">
+                            @error('reason')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        {{-- Nút --}}
+                        <div class="col-12 d-flex justify-content-between mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Cập nhật
+                            </button>
+                            <a href="{{ route('admin.appointments.index') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Hủy
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="{{ asset('js/Appointment/edit.js') }}"></script>
+    <script>
+        window.selectedPlanId = '{{ $appointment->treatment_plan_id }}';
+        window.selectedDoctorId = '{{ $appointment->doctor_id }}';
+    </script>
+@endpush

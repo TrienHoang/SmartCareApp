@@ -35,4 +35,32 @@ return [
         ],
     ],
 
+    'facebook' => [
+        'client_id' => '602049758990374',
+        'client_secret' => '9c78ec92dee6fe1b75097d632ccc6cf1',
+        'redirect' => 'http://localhost:8000/auth/facebook/callback',
+    ],
+
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
+    ],
+
+    'onesignal' => [
+        'app_id' => env('ONESIGNAL_APP_ID'),
+        'rest_api_key' => env('ONESIGNAL_REST_API_KEY'),
+        'user_auth_key' => env('ONESIGNAL_USER_AUTH_KEY'),
+        'guzzle_client_timeout' => env('ONESIGNAL_TIMEOUT', 10),
+        'rest_api_url' => env('ONESIGNAL_REST_API_URL', 'https://onesignal.com/api/v1'), // 👈 dòng mới cần có
+    ],
+
+    'vnpay' => [
+        'tmn_code' => env('VNPAY_TMNCODE'),
+        'hash_secret' => env('VNPAY_HASH_SECRET'),
+        'url' => env('VNPAY_URL'),
+        'return_url' => env('VNPAY_RETURN_URL'),
+        'ipn_url' => env('VNPAY_IPN_URL'),
+        'refund_url'   => env('PAYMENT_REFUND_URL'),
+    ],
 ];

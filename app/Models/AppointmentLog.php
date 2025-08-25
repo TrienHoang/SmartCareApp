@@ -14,5 +14,11 @@ class AppointmentLog extends Model
         'change_time', 'note'
     ];
     public $timestamps = false;
+    protected $casts = [
+        'change_time' => 'datetime',
+    ];
+    public function user(){
+        return $this->belongsTo(User::class, 'changed_by');
+    }
 }
 

@@ -10,8 +10,21 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "bacon/bacon-qr-code": "^2.0",
+        "barryvdh/laravel-dompdf": "^3.1",
+        "berkayk/onesignal-laravel": "^2.4",
+        "box/spout": "^3.3",
+        "chillerlan/php-qrcode": "^5.0",
+        "doctrine/dbal": "^4.2",
+        "khanamiryan/qrcode-detector-decoder": "^2.0",
         "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10.1"
+        "laravel/socialite": "^5.21",
+        "laravel/tinker": "^2.10.1",
+        "maatwebsite/excel": "^3.1",
+        "nesbot/carbon": "^3.10",
+        "pusher/pusher-php-server": "^7.2",
+        "simplesoftwareio/simple-qrcode": "4.2",
+        "spatie/laravel-permission": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -27,7 +40,12 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Helpers/PermissionHelper.php",
+                    "app/Helpers/TimeHelper.php"
+
+        ]
     },
     "autoload-dev": {
         "psr-4": {

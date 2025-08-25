@@ -4,14 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class Promotion extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'code', 'description', 'discount_percentage',
-        'valid_from', 'valid_until'
+        'code',
+        'description',
+        'discount_percentage',
+        'valid_from',
+        'valid_until'
     ];
-    public $timestamps = false;
-}
+    protected $casts = [
+        'valid_from' => 'date',
+        'valid_until' => 'date',
+    ];
 
+    public $timestamps = false;
+    // Trong model Promotion.php
+    public function usages()
+    {
+        return $this->hasMany(PromotionUserUsage::class);
+    }
+}

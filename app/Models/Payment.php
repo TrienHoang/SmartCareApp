@@ -4,15 +4,73 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 class Payment extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'appointment_id', 'promotion_id',
-        'amount', 'payment_method',
-        'status', 'paid_at'
-    ];
-    public $timestamps = false;
-}
 
+    protected $fillable = [
+        'appointment_id',
+        'promotion_id',
+        'amount',
+        'payment_method',
+        'status',
+        'note',
+        'refund_status',
+        'paid_at',
+        'expires_at',
+        'vnp_txn_ref',
+        'vnp_transaction_no',
+        'vnp_response_code',
+        'refunded_at',
+        'refund_status',
+    ];
+
+    protected $casts = [
+        'paid_at' => 'datetime',
+        'expires_at' => 'datetime', // Cast expires_at to datetime
+    ];
+
+    public $timestamps = false;
+
+    public function appointment(): BelongsTo
+    {
+        return $this->belongsTo(Appointment::class);
+    }
+
+    public function promotion(): BelongsTo
+    {
+        return $this->belongsTo(Promotion::class);
+    }
+
+    public function paymentHistories(): HasMany
+    {
+        return $this->hasMany(PaymentHistory::class);
+    }
+
+    // Accessor: lấy thông tin bệnh nhân thông qua cuộc hẹn
+    public function getPatientAttribute()
+    {
+        return optional($this->appointment)->patient;
+    }
+
+    // Accessor: lấy bác sĩ
+    public function getDoctorAttribute()
+    {
+        return optional($this->appointment)->doctor;
+    }
+
+    // Accessor: lấy dịch vụ
+    public function getServiceAttribute()
+    {
+        return optional($this->appointment)->service;
+    }
+
+    public function histories()
+    {
+        return $this->hasMany(PaymentHistory::class);
+    }
+}
