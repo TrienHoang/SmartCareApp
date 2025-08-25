@@ -30,7 +30,7 @@ class AppointmentHelper
             ->exists();
 
         // Lấy room_id của bác sĩ
-        $roomId = Doctor::findOrFail($doctorId)->room_id;
+        // $roomId = Doctor::findOrFail($doctorId)->room_id;
 
         // Kiểm tra trùng lịch phòng
         $roomConflict = Appointment::whereHas('doctor.workingSchedules', function ($q) use ($startTime, $endTime) {

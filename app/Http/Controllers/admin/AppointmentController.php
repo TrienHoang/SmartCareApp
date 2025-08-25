@@ -46,42 +46,42 @@ class AppointmentController extends Controller
             'payment' => fn($q) => $q->orderBy('paid_at', 'desc'),
             'order:id,appointment_id,status',
         ]);
-    
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-    
+
         if ($request->filled('doctor_id')) {
             $query->where('doctor_id', $request->doctor_id);
         }
-    
+
         if ($request->filled('department_id')) {
             $query->whereHas('doctor', function ($q) use ($request) {
                 $q->where('department_id', $request->department_id);
             });
         }
-    
+
         if ($request->filled('service_id')) {
             $query->where('service_id', $request->service_id);
         }
-    
+
         $from_input = $request->date_from;
         $to_input = $request->date_to;
-    
+
         if ($request->filled('date_from') || $request->filled('date_to')) {
             $from = $request->filled('date_from') ? Carbon::parse($request->date_from)->startOfDay() : null;
             $to = $request->filled('date_to') ? Carbon::parse($request->date_to)->endOfDay() : null;
-    
+
             if ($from && $to && $from->gt($to)) {
                 [$from, $to] = [$to, $from];
                 [$from_input, $to_input] = [$to_input, $from_input];
-    
+
                 return redirect()->route('admin.appointments.index', [
                     'date_from' => $from_input,
                     'date_to' => $to_input,
                 ])->with('date_swapped', true);
             }
-    
+
             if ($from && $to) {
                 $query->whereBetween('appointment_time', [$from, $to]);
             } elseif ($from) {
@@ -90,39 +90,39 @@ class AppointmentController extends Controller
                 $query->where('appointment_time', '<=', $to);
             }
         }
-    
+
         if ($request->filled('search')) {
             $query->whereHas('patient', function ($q) use ($request) {
                 $q->where('full_name', 'like', '%' . $request->search . '%')
                     ->orWhere('phone', 'like', '%' . $request->search . '%');
             });
         }
-    
+
         $sortBy = $request->get('sort_by', 'appointment_time');
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
-    
+
         $perPage = $request->get('per_page', 15);
         $appointments = $query->paginate($perPage)->appends($request->all());
-    
+
         // 👉 Gắn phòng từ WorkingSchedule cho từng appointment
         $appointments->getCollection()->transform(function ($appointment) {
             $schedule = WorkingSchedule::with('room')
                 ->where('doctor_id', $appointment->doctor_id)
                 ->whereDate('day', Carbon::parse($appointment->appointment_time)->toDateString())
                 ->first();
-    
+
             $appointment->room_name = $schedule && $schedule->room
                 ? $schedule->room->name
                 : 'Chưa xác định';
-    
+
             return $appointment;
         });
-    
+
         $doctors = Doctor::with('user:id,full_name')->get();
         $departments = Department::all();
         $services = Service::where('status', 'active')->get();
-    
+
         $stats = [
             'total' => Appointment::count(),
             'pending' => Appointment::where('status', 'pending')->count(),
@@ -131,7 +131,7 @@ class AppointmentController extends Controller
             'cancelled' => Appointment::where('status', 'cancelled')->count(),
             'today' => Appointment::whereDate('appointment_time', Carbon::today())->count(),
         ];
-    
+
         return view('admin.Appointment.index', compact(
             'appointments',
             'doctors',
@@ -142,7 +142,7 @@ class AppointmentController extends Controller
             'to_input',
         ));
     }
-    
+
 
     public function create()
     {
@@ -775,24 +775,24 @@ class AppointmentController extends Controller
             'treatmentPlan.doctor.user',
             'payment.histories',
         ])->findOrFail($id);
-    
+
 
         $schedule = WorkingSchedule::with('room')
             ->where('doctor_id', $appointment->doctor_id)
-            ->whereDate('day', Carbon::parse($appointment->appointment_time)->toDateString()) 
+            ->whereDate('day', Carbon::parse($appointment->appointment_time)->toDateString())
             ->first();
-    
+
         $appointment->room_name = $schedule && $schedule->room
             ? $schedule->room->name
             : 'Chưa xác định';
-    
+
         $payment = $appointment->payment;
-    
+
         $totalAmount = $payment->amount ?? 0;
         $paidAmount = $payment?->histories->sum('amount') ?? 0;
         $remainingAmount = max($totalAmount - $paidAmount, 0);
         $overpaidAmount = max($paidAmount - $totalAmount, 0);
-    
+
         return view('admin.Appointment.show', compact(
             'appointment',
             'totalAmount',
@@ -801,7 +801,7 @@ class AppointmentController extends Controller
             'overpaidAmount'
         ));
     }
-    
+
 
     public function updateStatus(UpdateStatusAppointmentRequest $request, $id)
     {
