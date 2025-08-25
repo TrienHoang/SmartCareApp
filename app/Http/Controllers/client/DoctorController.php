@@ -13,10 +13,11 @@ class DoctorController extends Controller
 {
     public function index()
     {
-        $doctors = Doctor::withWhereHas('user', function ($query) {
-            $query->where('status', 'online');
-        })
+        $doctors = Doctor::whereHas('user', function ($query) {
+                $query->where('status', 'online'); // chỉ lấy user online
+            })
             ->with([
+                'user',
                 'department',
                 'educations',
                 'experiences',
@@ -25,31 +26,29 @@ class DoctorController extends Controller
                 'services',
             ])
             ->get();
-
-        // Tính số năm kinh nghiệm cho từng bác sĩ
+    
+        // Tính số năm kinh nghiệm
         foreach ($doctors as $doctor) {
             $startYear = $doctor->experiences->min('start_year');
-            $endYears = $doctor->experiences->map(function ($exp) {
-                return $exp->end_year ?? now()->year;
-            });
+            $endYears = $doctor->experiences->map(fn($exp) => $exp->end_year ?? now()->year);
             $endYear = $endYears->max();
             $experienceYears = 0;
-
+    
             if ($startYear) {
                 $experienceYears = $endYear - $startYear;
             }
-
+    
             $doctor->experience_years = $experienceYears > 0 ? $experienceYears : null;
         }
-
+    
         $departments = Department::get();
-
-        \Log::info('Danh sách bác sĩ:', [
+    
+        \Log::info('Danh sách bác sĩ online:', [
             'count' => $doctors->count(),
         ]);
-
+    
         return view('client.doctors', compact('doctors', 'departments'));
-    }
+    }  
 
     public function show($id)
     {

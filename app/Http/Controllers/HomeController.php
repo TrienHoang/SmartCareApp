@@ -40,11 +40,10 @@ class HomeController extends Controller
             ->get();
 
         $doctors = Doctor::whereHas('user', function ($query) {
-            $query->where('role_id', 2);
+            $query->where('role_id', 2)->where('status', 'online');
         })
             ->with(['user', 'department', 'reviews'])
             ->withCount('reviews')
-            // ->having('reviews_count', '>', 0) // Chỉ lấy bác sĩ có đánh giá
             ->get()
             ->map(function ($doctor) {
                 $doctor->average_rating = round($doctor->reviews->avg('rating'), 1);
