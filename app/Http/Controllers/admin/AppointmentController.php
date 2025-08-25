@@ -690,6 +690,7 @@ class AppointmentController extends Controller
             if ($appointment->status === 'confirmed') {
                 if ($this->checkDoctorUnavailable($appointment)) {
                     $appointment->status = 'cancelled';
+                    $appointment->canceled_at = now();
                     $appointment->save();
 
                     $result = $this->refund($id); // Use wallet refund
@@ -705,6 +706,7 @@ class AppointmentController extends Controller
                 }
 
                 $appointment->status = 'cancelled';
+                $appointment->canceled_at = now();
                 $appointment->save();
 
                 $payment->refund_status = 'none';
@@ -717,6 +719,7 @@ class AppointmentController extends Controller
 
             if ($appointment->status === 'pending') {
                 $appointment->status = 'cancelled';
+                $appointment->canceled_at = now();
                 $appointment->save();
 
                 return $this->refund($id);
@@ -725,6 +728,7 @@ class AppointmentController extends Controller
 
         if (in_array($appointment->status, ['pending', 'confirmed'])) {
             $appointment->status = 'cancelled';
+            $appointment->canceled_at = now();
             $appointment->save();
 
             return redirect()->route('admin.appointments.index')->with('success', 'Hủy lịch hẹn thành công.');
