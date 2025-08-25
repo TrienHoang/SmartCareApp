@@ -541,6 +541,15 @@ class ReceptionAppointmentController extends Controller
         $doctor = $appointment->doctor;
         $service = $appointment->service;
 
+        $schedule = WorkingSchedule::with('room')
+            ->where('doctor_id', $appointment->doctor_id)
+            ->whereDate('day', Carbon::parse($appointment->appointment_time)->toDateString()) 
+            ->first();
+    
+        $appointment->room_name = $schedule && $schedule->room
+            ? $schedule->room->name
+            : 'Chưa xác định';
+
         return view('reception.appointments.show', compact('appointment', 'doctor', 'service'));
     }
 

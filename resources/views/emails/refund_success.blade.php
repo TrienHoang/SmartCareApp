@@ -19,7 +19,7 @@
         <li><strong>Số tiền hoàn lại:</strong> {{ number_format($appointment->payment->amount, 0, ',', '.') }} đ</li>
         <li><strong>Dịch vụ:</strong> {{ $appointment->service->name ?? 'Không xác định' }}</li>
         <li><strong>Bác sĩ:</strong> {{ $appointment->doctor->user->full_name ?? 'Không xác định' }}</li>
-        <li><strong>Phòng khám:</strong> {{ $appointment->doctor->room->name ?? 'Không xác định' }}</li>
+        <li><strong>Phòng khám:</strong>  {{ $appointment->schedule->room->name ?? 'Chưa xác định' }}</li>
         <li><strong>Trạng thái lịch hẹn:</strong> Đã hoàn tiền</li>
     </ul>
 

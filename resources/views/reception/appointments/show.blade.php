@@ -60,7 +60,7 @@
                                         <p class="text-dark mb-1">{{ $appointment->doctor->user->full_name ?? 'N/A' }}</p>
                                         <small class="text-muted">
                                             <i class="bx bx-map-pin me-1"></i>
-                                            {{ $appointment->doctor->department->room->name ?? 'N/A' }}
+                                            {{ $appointment->schedule->room->name ?? 'Chưa xác định' }}
                                         </small>
                                     </div>
                                 </div>
