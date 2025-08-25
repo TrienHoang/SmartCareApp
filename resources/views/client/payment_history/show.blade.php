@@ -341,7 +341,7 @@
             <div class="header-icon">
                 <i class="fas fa-file-medical-alt"></i>
             </div>
-            Chi tiết thanh toán y tế
+            Chi tiết thanh toán
         </h1>
     </div>
 
