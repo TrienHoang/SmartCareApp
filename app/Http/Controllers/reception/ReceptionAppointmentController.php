@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class ReceptionAppointmentController extends Controller
 {
@@ -472,6 +473,18 @@ class ReceptionAppointmentController extends Controller
                 ]);
             }
 
+            // ✅ Sinh mã QR khi trạng thái đã xác nhận
+            if ($appointment->status === 'confirmed') {
+                $appointment->update([
+                    'qr_code' => (string) Str::uuid(),
+                ]);
+
+                $patient = User::find($appointment->patient_id);
+                if ($patient && $patient->email) {
+                    Mail::to($patient->email)->send(new AppointmentConfirmed($appointment));
+                }
+            }
+
             DB::commit();
 
             return redirect()->route('receptionist.appointments.index')
@@ -802,6 +815,13 @@ class ReceptionAppointmentController extends Controller
                 'status' => $newStatus,
                 'updated_by' => auth()->id(),
             ]);
+
+            // ✅ Nếu lịch hẹn được xác nhận thì sinh QR code
+            if ($appointment->status === 'confirmed') {
+                $appointment->update([
+                    'qr_code' => (string) Str::uuid(),
+                ]);
+            }
 
             if ($appointment->payment && $appointment->payment->status !== 'paid') {
                 $appointment->payment->update([
