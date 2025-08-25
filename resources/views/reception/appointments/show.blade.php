@@ -248,6 +248,22 @@
                             </div>
                         </div>
 
+                        <!-- QR Code -->
+                        @if ($appointment->qr_code)
+                            <div class="mb-4 text-center">
+                                <label class="form-label fw-semibold d-block">Mã QR Check-in</label>
+
+                                <div class="flex justify-center">
+                                    <img src="{{ route('qr.generate', ['data' => $appointment->qr_code]) }}"
+                                        alt="Mã QR Check-in" class="border border-gray-300 rounded-lg shadow-md"
+                                        style="width: 200px; height: 200px;">
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">Quét mã QR để check-in nhanh</small>
+                                </div>
+                            </div>
+                        @endif
+
                         <!-- Timestamps -->
                         <div class="border-top pt-3">
                             <div class="row g-3">
