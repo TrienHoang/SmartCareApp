@@ -18,20 +18,31 @@ class AppointmentClientController extends Controller
      */
     public function index()
     {
-         $user = Auth::user();
+        $user = Auth::user();
+
         $appointments = Appointment::where('patient_id', Auth::id())
-            ->latest('appointment_time')
+            // Ẩn các lịch hẹn đã hủy quá 7 ngày
+            ->where(function ($query) {
+                $query->whereNull('canceled_at')
+                    ->orWhere('canceled_at', '>=', now()->subDays(7));
+            })
+            // Sắp xếp: lịch chưa hủy trước, lịch đã hủy sau
+            ->orderByRaw("CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END ASC")
+            // Sắp xếp theo ngày gần nhất
+            ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, appointment_time, NOW())) ASC')
             ->get();
 
-        return view('client.appointments.index', compact('appointments','user'));
+        return view('client.appointments.index', compact('appointments', 'user'));
     }
+
+
 
     /**
      * Chi tiết lịch hẹn
      */
     public function show($id)
     {
-         $user = Auth::user();
+        $user = Auth::user();
         $appointment = Appointment::where('id', $id)
             ->where('patient_id', Auth::id())
             ->first();
@@ -41,7 +52,7 @@ class AppointmentClientController extends Controller
                 ->with('error', 'Không tìm thấy lịch hẹn.');
         }
 
-        return view('client.appointments.show', compact('appointment','user'));
+        return view('client.appointments.show', compact('appointment', 'user'));
     }
 
     /**
@@ -80,7 +91,9 @@ class AppointmentClientController extends Controller
 
             // Cập nhật trạng thái appointment
             $appointment->status = is_numeric($appointment->status) ? 2 : 'cancelled';
+            $appointment->canceled_at = now();
             $appointment->save();
+
 
             // Cập nhật trạng thái payment nếu có
             if ($payment) {
