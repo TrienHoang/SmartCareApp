@@ -46,13 +46,13 @@
             {{-- Notes Section --}}
             @if ($prescription->notes)
                 <div class="bg-blue-50 border-l-4 border-blue-400 text-blue-700 p-4 mb-8 rounded-lg">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0 text-xl mr-3">
+                    <div class="flex ">
+                        <div class=" text-xl mr-3">
                             <i class="fas fa-sticky-note"></i>
                         </div>
                         <div>
                             <h6 class="font-semibold mb-1">Ghi chú từ bác sĩ:</h6>
-                            <p class="text-sm">{{ $prescription->notes }}</p>
+                            <p  class="text-sm">{{ $prescription->notes }}</p>
                         </div>
                     </div>
                 </div>
@@ -98,7 +98,7 @@
                                 @if ($item->notes)
                                     <div class="flex items-center space-x-1">
                                         <span class="font-medium text-gray-500">Ghi chú thuốc:</span>
-                                        <span class="text-gray-700">{{ $item->notes }}</span>
+                                        <span class="text-black-700">{{ $item->notes }}</span>
                                     </div>
                                 @endif
                             </div>
@@ -115,7 +115,7 @@
         </div>
 
         {{-- Quick Actions & Summary moved to main content area as suggested by original layout --}}
-        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+        {{-- <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
             <h3 class="text-xl font-bold text-gray-900 mb-6">Thao tác nhanh</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                 <a href="{{ route('client.prescriptions.index') }}"
@@ -150,9 +150,13 @@
                         {{ \Carbon\Carbon::parse($prescription->created_at)->format('d/m/Y') }}</p>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
-
+    <div class="flex-col grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+  <a style="background:rgb(59, 59, 197); color: seashell;" href="{{ route('client.prescriptions.index') }}"
+                    class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Quay lại
+                </a>    </div>
     @push('styles')
         <style>
             /* Các CSS tùy chỉnh của bạn */

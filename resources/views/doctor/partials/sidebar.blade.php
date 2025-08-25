@@ -57,12 +57,12 @@
                 </a>
             </li>
 
-            <li class="menu-item">
+            {{-- <li class="menu-item">
                 <a href="{{ route('doctor.treatment-plans.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-notepad"></i>
                     <div>Kế hoạch điều trị</div>
                 </a>
-            </li>
+            </li> --}}
 
             <li class="menu-item">
                 <a href="{{ route('doctor.leaves.index') }}" class="menu-link">

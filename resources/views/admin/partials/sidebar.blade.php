@@ -112,12 +112,12 @@
             </ul>
         </li>
 
-        <li class="menu-item">
+        {{-- <li class="menu-item">
             <a href="{{ route('admin.treatment-plans.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-notepad"></i> <!-- Icon phù hợp với "kế hoạch điều trị" -->
                 <div>Quản lý kế hoạch điều trị</div>
             </a>
-        </li>
+        </li> --}}
 
         <!-- Dịch vụ & đơn thuốc -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Dịch vụ & đơn thuốc</span></li>

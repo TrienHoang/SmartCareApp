@@ -360,9 +360,9 @@
                                                 <p class="text-muted">Chưa có lịch làm việc nào được tạo hoặc không tìm
                                                     thấy
                                                     kết quả phù hợp.</p>
-                                                <a href="{{ route('admin.schedules.create') }}" class="btn btn-primary">
+                                                {{-- <a href="{{ route('admin.schedules.create') }}" class="btn btn-primary">
                                                     <i class="bx bx-plus mr-1"></i>Tạo lịch làm việc đầu tiên
-                                                </a>
+                                                </a> --}}
                                             </div>
                                         </td>
                                     </tr>
