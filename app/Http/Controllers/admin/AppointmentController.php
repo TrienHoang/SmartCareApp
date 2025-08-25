@@ -751,7 +751,7 @@ class AppointmentController extends Controller
             ->exists();
     }
 
-    protected function logRefundResult($payment, $result, $reason)
+    public function logRefundResult($payment, $result, $reason)
     {
         if ($result['success']) {
             $payment->refund_status = 'completed';
@@ -1037,72 +1037,78 @@ class AppointmentController extends Controller
         try {
             $appointment = Appointment::with(['payment', 'patient'])->findOrFail($appointmentId);
             $payment = $appointment->payment;
-
+    
             Log::info('Refund attempt for Appointment ID: ' . $appointmentId . ', Payment Status: ' . optional($payment)->status);
-
+    
+            // Check payment tồn tại và đã thanh toán
             if (!$payment || $payment->status !== 'paid') {
                 Log::warning('Refund failed: No payment or not paid', ['appointment_id' => $appointmentId]);
                 return back()->withErrors(['error' => 'Lịch hẹn chưa được thanh toán.']);
             }
-
+    
+            // Check nếu đã refund rồi thì không cho refund lại
             if ($payment->refund_status === 'completed') {
                 Log::warning('Refund failed: Already refunded', ['appointment_id' => $appointmentId]);
                 return back()->withErrors(['error' => 'Giao dịch đã được hoàn tiền trước đó.']);
             }
-
+    
+            // Lấy ví bệnh nhân
             $wallet = Wallet::where('user_id', $appointment->patient_id)->first();
             if (!$wallet) {
                 Log::error('Refund failed: Wallet not found', ['user_id' => $appointment->patient_id]);
                 return back()->withErrors(['error' => 'Không tìm thấy ví của người dùng.']);
             }
-
+    
             $refundAmount = $payment->amount;
-            if ($wallet->balance < $refundAmount) {
-                Log::error('Refund failed: Insufficient balance', ['balance' => $wallet->balance, 'amount' => $refundAmount]);
-                return back()->withErrors(['error' => 'Số dư ví không đủ để hoàn tiền: ' . number_format($refundAmount) . '₫']);
-            }
-
-            $wallet->balance += $refundAmount; // Giảm số dư ví (sửa logic nếu cần cộng tiền)
+    
+            // ✅ Cộng tiền vào ví bệnh nhân
+            $wallet->balance += $refundAmount;
             $wallet->save();
-
+    
+            // Cập nhật payment
             $payment->update([
                 'status' => 'refunded',
                 'refund_status' => 'completed',
                 'refunded_at' => now(),
                 'note' => 'Hoàn tiền vào ví người dùng cho lịch hẹn #' . $appointment->id,
             ]);
-
+    
+            // Ghi lịch sử thanh toán (refund)
             PaymentHistory::create([
-                'payment_id' => $payment->id,
-                'amount' => -1 * $refundAmount,
+                'payment_id'     => $payment->id,
+                'amount'         => $refundAmount, // để dương để thể hiện tiền vào
                 'payment_method' => 'wallet_refund',
-                'payment_date' => now(),
+                'payment_date'   => now(),
+                'note'           => 'Hoàn tiền vào ví bệnh nhân cho lịch hẹn #' . $appointment->id,
             ]);
-
+    
+            // Ghi giao dịch ví
             WalletTransaction::create([
-                'wallet_id' => $wallet->id,
-                'amount' => $refundAmount, // Cộng tiền vào ví
-                'type' => 'refund',
+                'wallet_id'   => $wallet->id,
+                'amount'      => $refundAmount,
+                'type'        => 'refund',
                 'description' => 'Hoàn tiền cho lịch hẹn #' . $appointment->id,
-                'created_at' => now(),
+                'created_at'  => now(),
             ]);
-
+    
+            // Gửi mail thông báo
             try {
                 $reason = 'Hoàn tiền vào ví người dùng do hủy lịch hẹn.';
                 Mail::to($appointment->patient->email)->send(new RefundSuccessfulMail($appointment, $reason));
             } catch (\Throwable $e) {
                 Log::error('Failed to send refund email', ['appointment_id' => $appointment->id, 'error' => $e->getMessage()]);
             }
-
+    
             DB::commit();
             return back()->with('success', 'Hoàn tiền thành công vào ví người dùng: ' . number_format($refundAmount) . '₫');
+    
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Refund error', ['appointment_id' => $appointmentId, 'error' => $e->getMessage()]);
             return back()->withErrors(['error' => 'Có lỗi xảy ra khi hoàn tiền: ' . $e->getMessage()]);
         }
     }
-
+    
     public function performVnpayRefund($payment)
     {
         if (app()->environment(['local', 'testing'])) {

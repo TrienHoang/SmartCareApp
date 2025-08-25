@@ -33,9 +33,10 @@ class AppointmentHelper
         $roomId = Doctor::findOrFail($doctorId)->room_id;
 
         // Kiểm tra trùng lịch phòng
-        $roomConflict = Appointment::whereHas('doctor', function ($q) use ($roomId) {
-                $q->where('room_id', $roomId);
-            })
+        $roomConflict = Appointment::whereHas('doctor.workingSchedules', function ($q) use ($startTime, $endTime) {
+            $q->where('day', ' <= ', $startTime)
+                ->where('day', '>=', $endTime);
+        })
             ->where('appointment_time', '<', $endTime)
             ->whereNotIn('status', ['cancelled'])
             ->whereHas('service', function ($q) use ($startTime) {
