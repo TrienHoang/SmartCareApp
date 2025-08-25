@@ -3,11 +3,13 @@
 namespace App\Mail;
 
 use App\Models\Appointment;
+use App\Models\WorkingSchedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class AppointmentConfirmed extends Mailable
@@ -29,6 +31,15 @@ class AppointmentConfirmed extends Mailable
             'scale'      => 3,
             'imageBase64' => false,
         ]);
+
+        $schedule = WorkingSchedule::with('room')
+        ->where('doctor_id', $appointment->doctor_id)
+        ->whereDate('day', Carbon::parse($appointment->appointment_time)->toDateString()) 
+        ->first();
+
+    $appointment->room_name = $schedule && $schedule->room
+        ? $schedule->room->name
+        : 'Chưa xác định';
 
         $qrData = $appointment->qr_code ?? 'smartcare';
 
