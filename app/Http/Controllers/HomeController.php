@@ -33,7 +33,8 @@ class HomeController extends Controller
             ->orderByDesc('total_bookings')
             ->with(['service' => function ($query) {
                 $query->select('id', 'service_cate_id', 'department_id', 'name', 'description', 'image', 'price', 'duration', 'status')
-                    ->where('status', 'active');
+                    ->where('status', 'active')
+                    ->withAvg('reviews', 'rating');
             }])
             ->limit(6)
             ->get();
@@ -53,6 +54,7 @@ class HomeController extends Controller
             ->take(8)
             ->values()
             ->take(7);
+
         foreach ($doctors as $doctor) {
             $startYear = $doctor->experiences->min('start_year');
             $endYears = $doctor->experiences->map(function ($exp) {

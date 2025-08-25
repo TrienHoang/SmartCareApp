@@ -108,12 +108,13 @@ Route::group([
     'middleware' => 'checkAdmin'
 ], function () {
     // Dashboard
-    Route::get('/dashboard', function () {
-        return view(view: 'admin.dashboard');
-    })->name('dashboard');
-    Route::get('dashboard/export-excel', [DashboardController::class, 'exportExcel']);
-    Route::get('dashboard/export-pdf', [DashboardController::class, 'exportPdf']);
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('index'); // Trang chính
+        Route::get('/export-excel', [DashboardController::class, 'exportExcel'])->name('export-excel');
+        Route::get('/export-pdf', [DashboardController::class, 'exportPdf'])->name('export-pdf');
+    });
 });
+
 
 
 // Nhóm users
@@ -533,7 +534,9 @@ Route::group([
 
     Route::put('/update/{id}', [DoctorLeaveController::class, 'update'])
         ->middleware('check_permission:view_reviews')->name('update');
+    Route::post('/approve/{id}', [DoctorLeaveController::class, 'approve'])->name('approve');
 });
+
 
 
 Route::group([
@@ -766,10 +769,10 @@ Route::post('/admin/doctors/{user}/toggle-status', [DoctorController::class, 'to
 
 
 
-Route::prefix('admin')->middleware(['auth','checkAdmin'])->group(function() {
+Route::prefix('admin')->middleware(['auth', 'checkAdmin'])->group(function () {
     Route::get('/system-notifications', [AdminNotificationController::class, 'index'])
         ->name('admin.system_notifications.index');
-    Route::get('/history', [AdminNotificationController::class,'history'])->name('admin.notifications.history');
+    Route::get('/history', [AdminNotificationController::class, 'history'])->name('admin.notifications.history');
     Route::post('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllRead'])->name('admin.notifications.markAllRead');
 });
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {

@@ -489,7 +489,9 @@
                                         </div>
                                         <div class="flex items-center text-yellow-500">
                                             <i class="fas fa-star mr-1"></i>
-                                            <span class="text-gray-600">4.8</span>
+                                            <span class="text-gray-600">
+                                                {{ $item->service->reviews_avg_rating ? number_format($item->service->reviews_avg_rating, 1) : 'Chưa có' }}
+                                            </span>
                                         </div>
                                     </div>
 
