@@ -32,6 +32,15 @@ class AuthController extends Controller
         $credentials = $request->only('username', 'password');
 
         if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            
+            if ($user->status === 'offline') {
+                Auth::logout();
+                return redirect()->back()
+                    ->withInput($request->only('username', 'form_type'))
+                    ->withErrors(['username' => 'Tài khoản của bạn đang bị khóa (offline), không thể đăng nhập.']);
+            }
+
             session()->put('user_id', Auth::id());
 
             if (Auth::user()->role_id == 1) {
