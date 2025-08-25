@@ -35,7 +35,7 @@ class DepartmentController extends Controller
         }
 
         $departments = $query->orderBy('created_at', 'desc')
-            ->paginate(5)
+            ->paginate(10)
             ->withQueryString();
 
         return view('admin.departments.index', compact('departments'));
@@ -122,17 +122,17 @@ class DepartmentController extends Controller
         }
     }
 
-public function show(Department $department)
-{
-    $department->load([
-        'doctors.user',
-        'rooms',
-        'services' => function ($query) {
-            $query->where('status', 'active') // 👉 chỉ dịch vụ đang hoạt động
-                  ->orderBy('name');
-        },
-    ]);
+    public function show(Department $department)
+    {
+        $department->load([
+            'doctors.user',
+            'rooms',
+            'services' => function ($query) {
+                $query->where('status', 'active') // 👉 chỉ dịch vụ đang hoạt động
+                    ->orderBy('name');
+            },
+        ]);
 
-    return view('admin.departments.show', compact('department'));
-}
+        return view('admin.departments.show', compact('department'));
+    }
 }

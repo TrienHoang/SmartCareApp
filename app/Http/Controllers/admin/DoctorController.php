@@ -22,14 +22,14 @@ class DoctorController extends Controller
 {
     public function index(Request $request)
     {
-$query = Doctor::whereHas('user', function ($q) use ($request) {
-    $q->where('role_id', 2);
+        $query = Doctor::whereHas('user', function ($q) use ($request) {
+            $q->where('role_id', 2);
 
-    // Nếu có từ khóa tìm kiếm
-    if ($request->filled('search')) {
-        $q->where('full_name', 'like', '%' . $request->search . '%');
-    }
-})->with(['user', 'department', 'room', 'services']);
+            // Nếu có từ khóa tìm kiếm
+            if ($request->filled('search')) {
+                $q->where('full_name', 'like', '%' . $request->search . '%');
+            }
+        })->with(['user', 'department', 'room', 'services']);
 
         // Lọc theo phòng ban
         if ($request->filled('department_id')) {
@@ -42,6 +42,9 @@ $query = Doctor::whereHas('user', function ($q) use ($request) {
                 $q->where('services.id', $request->service_id);
             });
         }
+
+        // 👉 Sắp xếp mới nhất đến cũ nhất
+        $query->orderBy('created_at', 'desc');
 
         $doctors = $query->paginate(10);
         $departments = Department::all();
@@ -158,76 +161,76 @@ $query = Doctor::whereHas('user', function ($q) use ($request) {
         return $username;
     }
 
-public function edit(Doctor $doctor)
-{
-    $departments = Department::all();
-    $services = Service::where('status', 'active')->orderBy('name')->get();
+    public function edit(Doctor $doctor)
+    {
+        $departments = Department::all();
+        $services = Service::where('status', 'active')->orderBy('name')->get();
 
-    // chỉ 1 dịch vụ (service_id), lấy ID đầu tiên nếu có
-    $selectedServiceId = $doctor->services()->pluck('services.id')->first();
+        // chỉ 1 dịch vụ (service_id), lấy ID đầu tiên nếu có
+        $selectedServiceId = $doctor->services()->pluck('services.id')->first();
 
-    return view('admin.doctors.edit', compact('doctor', 'departments', 'services', 'selectedServiceId'));
-}
-
-public function update(Request $request, Doctor $doctor)
-{
-    $request->validate([
-        'full_name'       => 'required|string|max:100',
-        'email'           => 'required|email|unique:users,email,' . $doctor->user_id,
-        'avatar'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'department_id'   => 'required|exists:departments,id',
-        'biography'       => 'nullable|string|max:1000',
-    ], [
-        'full_name.required'      => 'Vui lòng nhập họ và tên.',
-        'full_name.string'        => 'Họ và tên phải là chuỗi ký tự.',
-        'full_name.max'           => 'Họ và tên không được vượt quá 100 ký tự.',
-
-        'email.required'          => 'Vui lòng nhập địa chỉ email.',
-        'email.email'             => 'Địa chỉ email không hợp lệ.',
-        'email.unique'            => 'Email này đã được sử dụng.',
-
-        'avatar.image'            => 'Ảnh đại diện phải là một tệp hình ảnh.',
-        'avatar.mimes'            => 'Ảnh đại diện chỉ chấp nhận các định dạng: jpeg, png, jpg, gif.',
-        'avatar.max'              => 'Ảnh đại diện không được vượt quá 2MB.',
-
-        'department_id.required'  => 'Vui lòng chọn khoa.',
-        'department_id.exists'    => 'Khoa đã chọn không tồn tại.',
-
-        'biography.string'        => 'Tiểu sử phải là chuỗi ký tự.',
-        'biography.max'           => 'Tiểu sử không được vượt quá 1000 ký tự.',
-    ]);
-
-    try {
-        DB::beginTransaction();
-
-        $avatarPath = $doctor->user->avatar;
-        if ($request->hasFile('avatar')) {
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
-        }
-
-        $doctor->user->update([
-            'full_name' => $request->full_name,
-            'email'     => $request->email,
-            'avatar'    => $avatarPath,
-        ]);
-
-        $doctor->update([
-            'department_id' => $request->department_id,
-            'biography'     => $request->biography,
-        ]);
-
-        // Nếu bạn vẫn muốn sync dịch vụ thì giữ lại, còn nếu bỏ luôn thì xóa dòng này
-        // $doctor->services()->sync([$request->service_id]);
-
-        DB::commit();
-
-        return redirect()->route('admin.doctors.index')->with('success', 'Cập nhật thông tin bác sĩ thành công.');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Lỗi khi cập nhật bác sĩ: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-        return back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật. Vui lòng thử lại.');
+        return view('admin.doctors.edit', compact('doctor', 'departments', 'services', 'selectedServiceId'));
     }
-}
+
+    public function update(Request $request, Doctor $doctor)
+    {
+        $request->validate([
+            'full_name'       => 'required|string|max:100',
+            'email'           => 'required|email|unique:users,email,' . $doctor->user_id,
+            'avatar'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'department_id'   => 'required|exists:departments,id',
+            'biography'       => 'nullable|string|max:1000',
+        ], [
+            'full_name.required'      => 'Vui lòng nhập họ và tên.',
+            'full_name.string'        => 'Họ và tên phải là chuỗi ký tự.',
+            'full_name.max'           => 'Họ và tên không được vượt quá 100 ký tự.',
+
+            'email.required'          => 'Vui lòng nhập địa chỉ email.',
+            'email.email'             => 'Địa chỉ email không hợp lệ.',
+            'email.unique'            => 'Email này đã được sử dụng.',
+
+            'avatar.image'            => 'Ảnh đại diện phải là một tệp hình ảnh.',
+            'avatar.mimes'            => 'Ảnh đại diện chỉ chấp nhận các định dạng: jpeg, png, jpg, gif.',
+            'avatar.max'              => 'Ảnh đại diện không được vượt quá 2MB.',
+
+            'department_id.required'  => 'Vui lòng chọn khoa.',
+            'department_id.exists'    => 'Khoa đã chọn không tồn tại.',
+
+            'biography.string'        => 'Tiểu sử phải là chuỗi ký tự.',
+            'biography.max'           => 'Tiểu sử không được vượt quá 1000 ký tự.',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $avatarPath = $doctor->user->avatar;
+            if ($request->hasFile('avatar')) {
+                $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            }
+
+            $doctor->user->update([
+                'full_name' => $request->full_name,
+                'email'     => $request->email,
+                'avatar'    => $avatarPath,
+            ]);
+
+            $doctor->update([
+                'department_id' => $request->department_id,
+                'biography'     => $request->biography,
+            ]);
+
+            // Nếu bạn vẫn muốn sync dịch vụ thì giữ lại, còn nếu bỏ luôn thì xóa dòng này
+            // $doctor->services()->sync([$request->service_id]);
+
+            DB::commit();
+
+            return redirect()->route('admin.doctors.index')->with('success', 'Cập nhật thông tin bác sĩ thành công.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Lỗi khi cập nhật bác sĩ: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật. Vui lòng thử lại.');
+        }
+    }
 
 
 

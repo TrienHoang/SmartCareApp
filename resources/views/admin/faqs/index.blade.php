@@ -147,7 +147,7 @@
                             <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách Câu hỏi thường gặp</h4>
                         </div>
                         <div class="card-tools">
-                            <span class="badge badge-light">{{ $faqs->total() }} câu hỏi</span>
+                            <span class="badge badge-light text-dark">{{ $faqs->total() }} câu hỏi</span>
                         </div>
                     </div>
                 </div>

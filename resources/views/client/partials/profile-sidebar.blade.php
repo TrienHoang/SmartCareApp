@@ -69,7 +69,7 @@
             <a href="{{ route('client.review.index') }}"
                 class="flex items-center space-x-3 p-3 rounded-lg {{ request()->routeIs('client.review.index') ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : 'hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors' }}">
                 <i data-lucide="message-square" class="w-5 h-5"></i>
-                <span>Bình luận của tôi</span>
+                <span>Đánh giá của tôi</span>
             </a>
         </nav>
     </div>

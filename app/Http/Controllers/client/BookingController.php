@@ -28,13 +28,13 @@ class BookingController extends Controller
 {
     public function show($service_id, Request $request)
     {
-            $request->session()->forget([
-        'selected_promotion_code',
-        'selected_promotion_id',
-        'selected_promotion_discount',
-        'applied_promotion_code',
-        'temp_booking_data'
-    ]);
+        $request->session()->forget([
+            'selected_promotion_code',
+            'selected_promotion_id',
+            'selected_promotion_discount',
+            'applied_promotion_code',
+            'temp_booking_data'
+        ]);
         $service = Service::with(['category', 'department', 'doctors.user', 'doctors.reviews'])
             ->where('id', $service_id)
             ->firstOrFail();
@@ -235,7 +235,7 @@ class BookingController extends Controller
         // Lấy danh sách bác sĩ và số lịch hẹn (nếu random)
         $doctor_appointments = [];
         if (!$doctor_id) {
-            $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(7)])
+            $doctor_appointments = Appointment::whereBetween('appointment_time', [now(), now()->addDays(30)])
                 ->where('status', '!=', 'cancelled')
                 ->groupBy('doctor_id')
                 ->select('doctor_id', \DB::raw('count(*) as appointment_count'))
@@ -382,7 +382,7 @@ class BookingController extends Controller
         }
 
         $validated = $request->validate([
-            'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(7)->toDateString(),
+            'date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(30)->toDateString(),
             'slot_start' => 'required|date_format:H:i',
             'reason' => 'nullable|string|max:255',
         ]);

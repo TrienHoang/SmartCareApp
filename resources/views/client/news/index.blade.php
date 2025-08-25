@@ -122,9 +122,7 @@
                                             class="text-xl font-bold mb-3 text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2">
                                             {{ $post->title }}
                                         </h3>
-                                        <p class="text-gray-600 mb-6 line-clamp-3 leading-relaxed">
-                                            {{ Str::limit(strip_tags($post->content), 120) }}
-                                        </p>
+
                                         <div class="flex items-center justify-between">
                                             <a href="{{ route('client.news.show', $post->slug) }}"
                                                 class="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors group/link">
@@ -292,13 +290,13 @@
 @push('styles')
     <style>
         .bg-img-new {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url({{asset('LayoutClient/img/kham-benh.jpeg')}});
+            background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url({{ asset('LayoutClient/img/kham-benh.jpeg') }});
             background-size: cover;
             background-position: center;
         }
 
         .bg-banner-new {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.1)), url({{asset('LayoutClient/img/bg-new.jpg')}});
+            background-image: linear-gradient(rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.1)), url({{ asset('LayoutClient/img/bg-new.jpg') }});
             background-size: cover;
             background-position: center;
         }

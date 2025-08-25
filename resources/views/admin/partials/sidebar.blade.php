@@ -4,7 +4,8 @@
             <span class="app-brand-logo demo">
                 <!-- SVG logo giữ nguyên -->
             </span>
-          <a href="/admin/dashboard" class="mt-3 ms-2"><span class="app-brand-text demo menu-text fw-bold ">SmartCare</span></a>  
+            <a href="/admin/dashboard" class="mt-3 ms-2"><span
+                    class="app-brand-text demo menu-text fw-bold ">SmartCare</span></a>
         </a>
     </div>
 
@@ -62,6 +63,7 @@
                 <li class="menu-item"><a href="{{ route('admin.schedules.index') }}" class="menu-link">
                         <div>Lịch làm việc bác sĩ</div>
                     </a></li>
+
                 <li class="menu-item"><a href="{{ route('admin.shifts.index') }}" class="menu-link">
                         <div>Ca làm việc </div>
                     </a></li>

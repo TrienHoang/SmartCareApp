@@ -152,7 +152,7 @@ class DoctorProfileController extends Controller
             'experiences.*.end_year.gte' => 'Năm kết thúc phải lớn hơn hoặc bằng năm bắt đầu.',
             'experiences.*.institution.required' => 'Vui lòng nhập nơi làm việc.',
             'experiences.*.description.string' => 'Mô tả kinh nghiệm phải là chuỗi văn bản.',
-            
+
         ]);
 
         try {

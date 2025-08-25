@@ -158,7 +158,8 @@
                             <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách Lịch làm việc</h4>
                         </div>
                         <div class="card-tools d-flex align-items-center">
-                            <span class="badge badge-light mr-2">{{ $workingSchedules->total() }} lịch làm việc</span>
+                            <span class="badge badge-light mr-2 text-dark">{{ $workingSchedules->total() }} lịch làm
+                                việc</span>
                             <button type="button" class="btn btn-sm btn-success" id="bulk-approve-btn"
                                 data-toggle="tooltip" title="Duyệt tất cả lịch được chọn">
                                 <i class="bx bx-check-double"></i> Duyệt tất cả

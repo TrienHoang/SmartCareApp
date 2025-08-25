@@ -3,213 +3,207 @@
 @section('title', 'Hồ sơ cá nhân')
 
 @section('profile-content')
- {{-- <div class="lg:w-3/4 space-y-8"> --}}
-                    {{-- Personal Information --}}
-                    <div id="thong-tin-ca-nhan" class="bg-white rounded-xl shadow-lg p-8">
-                        <div class="flex items-center justify-between mb-6">
-                            <h1 class="text-3xl font-bold text-gray-800">Thông Tin Cá Nhân</h1>
-                            <button onclick="openEditModal()"
-                                class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors flex items-center space-x-2 shadow-lg hover:shadow-xl">
-                                <i data-lucide="edit" class="w-4 h-4"></i>
-                                <span>Chỉnh Sửa</span>
-                            </button>
-                        </div>
+    {{-- <div class="lg:w-3/4 space-y-8"> --}}
+    {{-- Personal Information --}}
+    <div id="thong-tin-ca-nhan" class="bg-white rounded-xl shadow-lg p-8">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Thông Tin Cá Nhân</h1>
+            <button onclick="openEditModal()"
+                class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors flex items-center space-x-2 shadow-lg hover:shadow-xl">
+                <i data-lucide="edit" class="w-4 h-4"></i>
+                <span>Chỉnh Sửa</span>
+            </button>
+        </div>
 
-                        {{-- Personal Information Form --}}
-                        <form action="{{ route('client.profile.update') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            @method('PATCH')
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                {{-- Full Name --}}
-                                <div>
-                                    <label class="block font-medium text-gray-700 mb-2">Họ tên</label>
-                                    <div class="p-3 bg-gray-50 rounded-lg border">
-                                        <p class="text-gray-900">{{ $user->full_name ?? 'Chưa cập nhật' }}</p>
-                                    </div>
-                                </div>
-
-                                {{-- Email --}}
-                                <div>
-                                    <label class="block font-medium text-gray-700 mb-2">Email</label>
-                                    <div class="p-3 bg-gray-50 rounded-lg border">
-                                        <p class="text-gray-900">{{ $user->email ?? 'Chưa cập nhật' }}</p>
-                                    </div>
-                                </div>
-
-                                {{-- Phone --}}
-                                <div>
-                                    <label class="block font-medium text-gray-700 mb-2">Số điện thoại</label>
-                                    <div class="p-3 bg-gray-50 rounded-lg border">
-                                        <p class="text-gray-900">{{ $user->phone ?? 'Chưa cập nhật' }}</p>
-                                    </div>
-                                </div>
-
-                                {{-- Gender --}}
-                                <div>
-                                    <label class="block font-medium text-gray-700 mb-2">Giới tính</label>
-                                    <div class="p-3 bg-gray-50 rounded-lg border">
-                                        <p class="text-gray-900">{{ $user->gender ?? 'Chưa cập nhật' }}</p>
-                                    </div>
-                                </div>
-
-                                {{-- Date of Birth --}}
-                                <div>
-                                    <label class="block font-medium text-gray-700 mb-2">Ngày sinh</label>
-                                    <div class="p-3 bg-gray-50 rounded-lg border">
-                                        <p class="text-gray-900">
-                                            {{ optional($user->date_of_birth)->format('d/m/Y') ?? 'Chưa cập nhật' }}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {{-- Address --}}
-                                <div>
-                                    <label class="block font-medium text-gray-700 mb-2">Địa chỉ</label>
-                                    <div class="p-3 bg-gray-50 rounded-lg border">
-                                        <p class="text-gray-900">{{ $user->address ?? 'Chưa cập nhật' }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Quick Actions - Moved to bottom with improved design --}}
-                            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                                <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
-                                    <h2 class="text-2xl font-bold text-white flex items-center">
-                                        <i data-lucide="zap" class="w-6 h-6 mr-2"></i>
-                                        Thao Tác Nhanh
-                                    </h2>
-                                    <p class="text-blue-100 mt-1">Truy cập nhanh các chức năng chính</p>
-                                </div>
-
-                                <div class="p-8">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {{-- Đặt Lịch Khám --}}
-                                        <a href="{{ url('/dat-lich') }}"
-                                            class="group relative bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200 hover:from-blue-100 hover:to-blue-200 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
-                                            <div class="flex items-start justify-between mb-4">
-                                                <div
-                                                    class="p-3 bg-blue-600 rounded-lg group-hover:bg-blue-700 transition-colors">
-                                                    <i data-lucide="calendar-plus" class="w-6 h-6 text-white"></i>
-                                                </div>
-                                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <i data-lucide="arrow-right" class="w-5 h-5 text-blue-600"></i>
-                                                </div>
-                                            </div>
-                                            <h3 class="text-lg font-bold text-blue-900 mb-2">Đặt Lịch Khám</h3>
-                                            <p class="text-blue-700 text-sm">Đặt lịch hẹn khám bệnh với bác sĩ chuyên khoa
-                                            </p>
-                                            <div
-                                                class="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-5 rounded-xl transition-opacity">
-                                            </div>
-                                        </a>
-
-                                        {{-- Xem Hồ Sơ --}}
-                                        <a href="{{ route('client.appointments.history') }}"
-                                            class="group relative bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 hover:from-green-100 hover:to-green-200 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
-                                            <div class="flex items-start justify-between mb-4">
-                                                <div
-                                                    class="p-3 bg-green-600 rounded-lg group-hover:bg-green-700 transition-colors">
-                                                    <i data-lucide="file-text" class="w-6 h-6 text-white"></i>
-                                                </div>
-                                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <i data-lucide="arrow-right" class="w-5 h-5 text-green-600"></i>
-                                                </div>
-                                            </div>
-                                            <h3 class="text-lg font-bold text-green-900 mb-2">Xem Hồ Sơ</h3>
-                                            <p class="text-green-700 text-sm">Xem lịch sử khám bệnh và các kết quả điều trị
-                                            </p>
-                                            <div
-                                                class="absolute inset-0 bg-gradient-to-r from-green-600 to-green-700 opacity-0 group-hover:opacity-5 rounded-xl transition-opacity">
-                                            </div>
-                                        </a>
-
-                                        {{-- Đơn Thuốc --}}
-                                        <a href="{{ route('client.prescriptions.index') }}"
-                                            class="group relative bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
-                                            <div class="flex items-start justify-between mb-4">
-                                                <div
-                                                    class="p-3 bg-purple-600 rounded-lg group-hover:bg-purple-700 transition-colors">
-                                                    <i data-lucide="clipboard-list" class="w-6 h-6 text-white"></i>
-                                                </div>
-                                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <i data-lucide="arrow-right" class="w-5 h-5 text-purple-600"></i>
-                                                </div>
-                                            </div>
-                                            <h3 class="text-lg font-bold text-purple-900 mb-2">Đơn Thuốc</h3>
-                                            <p class="text-purple-700 text-sm">Xem và quản lý các đơn thuốc được kê</p>
-                                            <div
-                                                class="absolute inset-0 bg-gradient-to-r from-purple-600 to-purple-700 opacity-0 group-hover:opacity-5 rounded-xl transition-opacity">
-                                            </div>
-                                        </a>
-
-                                        {{-- Thanh Toán --}}
-                                        <a href="{{ route('client.payment_history.index') }}"
-                                            class="group relative bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl border border-orange-200 hover:from-orange-100 hover:to-orange-200 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
-                                            <div class="flex items-start justify-between mb-4">
-                                                <div
-                                                    class="p-3 bg-orange-600 rounded-lg group-hover:bg-orange-700 transition-colors">
-                                                    <i data-lucide="credit-card" class="w-6 h-6 text-white"></i>
-                                                </div>
-                                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <i data-lucide="arrow-right" class="w-5 h-5 text-orange-600"></i>
-                                                </div>
-                                            </div>
-                                            <h3 class="text-lg font-bold text-orange-900 mb-2">Thanh Toán</h3>
-                                            <p class="text-orange-700 text-sm">Xem lịch sử thanh toán và hóa đơn</p>
-                                            <div
-                                                class="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 opacity-0 group-hover:opacity-5 rounded-xl transition-opacity">
-                                            </div>
-                                        </a>
-
-                                        {{-- Thông Báo --}}
-                                        <a href="{{ route('client.notifications.index') }}"
-                                            class="group relative bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border border-red-200 hover:from-red-100 hover:to-red-200 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
-                                            <div class="flex items-start justify-between mb-4">
-                                                <div
-                                                    class="p-3 bg-red-600 rounded-lg group-hover:bg-red-700 transition-colors relative">
-                                                    <i data-lucide="bell" class="w-6 h-6 text-white"></i>
-                                                    @if ($currentUnreadCount > 0)
-                                                        <span
-                                                            class="absolute -top-1 -right-1 bg-yellow-400 text-red-800 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                                            {{ $currentUnreadCount > 9 ? '9+' : $currentUnreadCount }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <i data-lucide="arrow-right" class="w-5 h-5 text-red-600"></i>
-                                                </div>
-                                            </div>
-                                            <h3 class="text-lg font-bold text-red-900 mb-2">Thông Báo</h3>
-                                            <p class="text-red-700 text-sm">Xem các thông báo và cập nhật mới nhất</p>
-                                            <div
-                                                class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-700 opacity-0 group-hover:opacity-5 rounded-xl transition-opacity">
-                                            </div>
-                                        </a>
-
-                                        {{-- Liên Hệ --}}
-                                        <a href="{{ url('/lien-he') }}"
-                                            class="group relative bg-gradient-to-br from-teal-50 to-teal-100 p-6 rounded-xl border border-teal-200 hover:from-teal-100 hover:to-teal-200 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
-                                            <div class="flex items-start justify-between mb-4">
-                                                <div
-                                                    class="p-3 bg-teal-600 rounded-lg group-hover:bg-teal-700 transition-colors">
-                                                    <i data-lucide="phone" class="w-6 h-6 text-white"></i>
-                                                </div>
-                                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <i data-lucide="arrow-right" class="w-5 h-5 text-teal-600"></i>
-                                                </div>
-                                            </div>
-                                            <h3 class="text-lg font-bold text-teal-900 mb-2">Liên Hệ</h3>
-                                            <p class="text-teal-700 text-sm">Hỗ trợ khách hàng 24/7</p>
-                                            <div
-                                                class="absolute inset-0 bg-gradient-to-r from-teal-600 to-teal-700 opacity-0 group-hover:opacity-5 rounded-xl transition-opacity">
-                                            </div>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
+        {{-- Personal Information Form --}}
+        <form action="{{ route('client.profile.update') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PATCH')
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {{-- Full Name --}}
+                <div>
+                    <label class="block font-medium text-gray-700 mb-2">Họ tên</label>
+                    <div class="p-3 bg-gray-50 rounded-lg border">
+                        <p class="text-gray-900">{{ $user->full_name ?? 'Chưa cập nhật' }}</p>
                     </div>
-                {{-- </div> --}}
+                </div>
+
+                {{-- Email --}}
+                <div>
+                    <label class="block font-medium text-gray-700 mb-2">Email</label>
+                    <div class="p-3 bg-gray-50 rounded-lg border">
+                        <p class="text-gray-900">{{ $user->email ?? 'Chưa cập nhật' }}</p>
+                    </div>
+                </div>
+
+                {{-- Phone --}}
+                <div>
+                    <label class="block font-medium text-gray-700 mb-2">Số điện thoại</label>
+                    <div class="p-3 bg-gray-50 rounded-lg border">
+                        <p class="text-gray-900">{{ $user->phone ?? 'Chưa cập nhật' }}</p>
+                    </div>
+                </div>
+
+                {{-- Gender --}}
+                <div>
+                    <label class="block font-medium text-gray-700 mb-2">Giới tính</label>
+                    <div class="p-3 bg-gray-50 rounded-lg border">
+                        <p class="text-gray-900">{{ $user->gender ?? 'Chưa cập nhật' }}</p>
+                    </div>
+                </div>
+
+                {{-- Date of Birth --}}
+                <div>
+                    <label class="block font-medium text-gray-700 mb-2">Ngày sinh</label>
+                    <div class="p-3 bg-gray-50 rounded-lg border">
+                        <p class="text-gray-900">
+                            {{ optional($user->date_of_birth)->format('d/m/Y') ?? 'Chưa cập nhật' }}
+                        </p>
+                    </div>
+                </div>
+
+                {{-- Address --}}
+                <div>
+                    <label class="block font-medium text-gray-700 mb-2">Địa chỉ</label>
+                    <div class="p-3 bg-gray-50 rounded-lg border">
+                        <p class="text-gray-900">{{ $user->address ?? 'Chưa cập nhật' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Quick Actions - Moved to bottom with improved design --}}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
+                    <h2 class="text-2xl font-bold text-white flex items-center">
+                        <i data-lucide="zap" class="w-6 h-6 mr-2"></i>
+                        Thao Tác Nhanh
+                    </h2>
+                    <p class="text-blue-100 mt-1">Truy cập nhanh các chức năng chính</p>
+                </div>
+
+                <div class="p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {{-- Đặt Lịch Khám --}}
+                        <a href="/dich-vu"
+                            class="group relative bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200 hover:from-blue-100 hover:to-blue-200 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="p-3 bg-blue-600 rounded-lg group-hover:bg-blue-700 transition-colors">
+                                    <i data-lucide="calendar-plus" class="w-6 h-6 text-white"></i>
+                                </div>
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i data-lucide="arrow-right" class="w-5 h-5 text-blue-600"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-bold text-blue-900 mb-2">Đặt Lịch Khám</h3>
+                            <p class="text-blue-700 text-sm">Đặt lịch hẹn khám bệnh với bác sĩ chuyên khoa
+                            </p>
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-5 rounded-xl transition-opacity">
+                            </div>
+                        </a>
+
+                        {{-- Xem Hồ Sơ --}}
+                        <a href="{{ route('client.appointments.history') }}"
+                            class="group relative bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 hover:from-green-100 hover:to-green-200 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="p-3 bg-green-600 rounded-lg group-hover:bg-green-700 transition-colors">
+                                    <i data-lucide="file-text" class="w-6 h-6 text-white"></i>
+                                </div>
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i data-lucide="arrow-right" class="w-5 h-5 text-green-600"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-bold text-green-900 mb-2">Xem Hồ Sơ</h3>
+                            <p class="text-green-700 text-sm">Xem lịch sử khám bệnh và các kết quả điều trị
+                            </p>
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-green-600 to-green-700 opacity-0 group-hover:opacity-5 rounded-xl transition-opacity">
+                            </div>
+                        </a>
+
+                        {{-- Đơn Thuốc --}}
+                        <a href="{{ route('client.prescriptions.index') }}"
+                            class="group relative bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="p-3 bg-purple-600 rounded-lg group-hover:bg-purple-700 transition-colors">
+                                    <i data-lucide="clipboard-list" class="w-6 h-6 text-white"></i>
+                                </div>
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i data-lucide="arrow-right" class="w-5 h-5 text-purple-600"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-bold text-purple-900 mb-2">Đơn Thuốc</h3>
+                            <p class="text-purple-700 text-sm">Xem và quản lý các đơn thuốc được kê</p>
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-purple-600 to-purple-700 opacity-0 group-hover:opacity-5 rounded-xl transition-opacity">
+                            </div>
+                        </a>
+
+                        {{-- Thanh Toán --}}
+                        <a href="{{ route('client.payment_history.index') }}"
+                            class="group relative bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl border border-orange-200 hover:from-orange-100 hover:to-orange-200 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="p-3 bg-orange-600 rounded-lg group-hover:bg-orange-700 transition-colors">
+                                    <i data-lucide="credit-card" class="w-6 h-6 text-white"></i>
+                                </div>
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i data-lucide="arrow-right" class="w-5 h-5 text-orange-600"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-bold text-orange-900 mb-2">Thanh Toán</h3>
+                            <p class="text-orange-700 text-sm">Xem lịch sử thanh toán và hóa đơn</p>
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 opacity-0 group-hover:opacity-5 rounded-xl transition-opacity">
+                            </div>
+                        </a>
+
+                        {{-- Thông Báo --}}
+                        <a href="{{ route('client.notifications.index') }}"
+                            class="group relative bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border border-red-200 hover:from-red-100 hover:to-red-200 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="p-3 bg-red-600 rounded-lg group-hover:bg-red-700 transition-colors relative">
+                                    <i data-lucide="bell" class="w-6 h-6 text-white"></i>
+                                    @if ($currentUnreadCount > 0)
+                                        <span
+                                            class="absolute -top-1 -right-1 bg-yellow-400 text-red-800 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                            {{ $currentUnreadCount > 9 ? '9+' : $currentUnreadCount }}
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i data-lucide="arrow-right" class="w-5 h-5 text-red-600"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-bold text-red-900 mb-2">Thông Báo</h3>
+                            <p class="text-red-700 text-sm">Xem các thông báo và cập nhật mới nhất</p>
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-700 opacity-0 group-hover:opacity-5 rounded-xl transition-opacity">
+                            </div>
+                        </a>
+
+                        {{-- Liên Hệ --}}
+                        <a href="{{ url('/lien-he') }}"
+                            class="group relative bg-gradient-to-br from-teal-50 to-teal-100 p-6 rounded-xl border border-teal-200 hover:from-teal-100 hover:to-teal-200 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="p-3 bg-teal-600 rounded-lg group-hover:bg-teal-700 transition-colors">
+                                    <i data-lucide="phone" class="w-6 h-6 text-white"></i>
+                                </div>
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i data-lucide="arrow-right" class="w-5 h-5 text-teal-600"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-bold text-teal-900 mb-2">Liên Hệ</h3>
+                            <p class="text-teal-700 text-sm">Hỗ trợ khách hàng 24/7</p>
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-teal-600 to-teal-700 opacity-0 group-hover:opacity-5 rounded-xl transition-opacity">
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    {{-- </div> --}}
 
 
     {{-- Edit Profile Modal --}}
@@ -261,7 +255,8 @@
                     {{-- Email --}}
                     <div>
                         <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
-                        <input type="email" id="email" name="email" value="{{ old('email', $user->email ?? '') }}"
+                        <input type="email" id="email" name="email"
+                            value="{{ old('email', $user->email ?? '') }}"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                         @error('email')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -272,7 +267,8 @@
                     <div>
                         <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Số Điện
                             Thoại</label>
-                        <input type="tel" id="phone" name="phone" value="{{ old('phone', $user->phone ?? '') }}"
+                        <input type="tel" id="phone" name="phone"
+                            value="{{ old('phone', $user->phone ?? '') }}"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                         @error('phone')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>

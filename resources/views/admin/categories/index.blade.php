@@ -147,8 +147,11 @@
                             <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách Danh mục</h4>
                         </div>
                         <div class="card-tools">
-                            <span class="badge badge-light">{{ $categories->total() }} danh mục</span>
+                            <span class="badge badge-light text-dark">
+                                {{ $categories->total() }} danh mục
+                            </span>
                         </div>
+
                     </div>
                 </div>
 

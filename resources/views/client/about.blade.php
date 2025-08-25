@@ -23,7 +23,7 @@
                     <p class="text-lg text-blue-700">Chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe toàn diện, chuyên
                         nghiệp và hiện đại nhất. Với phương châm "Sức khỏe là vàng", chúng tôi nỗ lực để trở thành địa chỉ
                         tin cậy của mọi gia đình Việt Nam.</p>
-                    <a href="{{ url('/dat-lich') }}"
+                    <a href="/dich-vu"
                         class="inline-block bg-blue-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-blue-700 transition">
                         Đặt Lịch Khám Ngay
                     </a>

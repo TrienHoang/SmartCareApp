@@ -72,7 +72,8 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <form action="{{ route('admin.posts.store') }}" method="POST" enctype="multipart/form-data" class="form-modern">
+                    <form action="{{ route('admin.posts.store') }}" method="POST" enctype="multipart/form-data"
+                        class="form-modern">
                         @csrf
 
                         <div class="row">
@@ -87,10 +88,10 @@
                                     <input type="text" name="title" value="{{ old('title') }}"
                                         class="form-control form-control-lg @error('title') is-invalid @enderror"
                                         placeholder="Nhập tiêu đề bài viết...">
-                                    @error('title') 
+                                    @error('title')
                                         <div class="invalid-feedback">
                                             <i class="bx bx-error-circle mr-1"></i>{{ $message }}
-                                        </div> 
+                                        </div>
                                     @enderror
                                 </div>
 
@@ -100,38 +101,40 @@
                                         <i class="bx bx-category mr-2 text-info"></i>Danh mục dịch vụ
                                         <span class="text-danger">*</span>
                                     </label>
-                                    <select name="service_cate_id" class="form-control custom-select @error('service_cate_id') is-invalid @enderror">
+                                    <select name="service_cate_id"
+                                        class="form-control custom-select @error('service_cate_id') is-invalid @enderror">
                                         <option value="">-- Chọn danh mục --</option>
                                         @foreach ($categories as $cate)
-                                            <option value="{{ $cate->id }}" {{ old('service_cate_id') == $cate->id ? 'selected' : '' }}>
+                                            <option value="{{ $cate->id }}"
+                                                {{ old('service_cate_id') == $cate->id ? 'selected' : '' }}>
                                                 {{ $cate->name }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('service_cate_id') 
+                                    @error('service_cate_id')
                                         <div class="invalid-feedback">
                                             <i class="bx bx-error-circle mr-1"></i>{{ $message }}
-                                        </div> 
+                                        </div>
                                     @enderror
                                 </div>
 
                                 <!-- Excerpt Field -->
-                                <div class="form-group mb-4">
+                                {{-- <div class="form-group mb-4">
                                     <label class="form-label font-weight-semibold">
                                         <i class="bx bx-text mr-2 text-warning"></i>Mô tả ngắn
                                     </label>
-                                    <textarea name="excerpt" rows="3" 
-                                        class="form-control @error('excerpt') is-invalid @enderror"
+                                    <textarea name="excerpt" rows="3" class="form-control @error('excerpt') is-invalid @enderror"
                                         placeholder="Nhập mô tả ngắn cho bài viết...">{{ old('excerpt') }}</textarea>
-                                    @error('excerpt') 
+                                    @error('excerpt')
                                         <div class="invalid-feedback">
                                             <i class="bx bx-error-circle mr-1"></i>{{ $message }}
-                                        </div> 
+                                        </div>
                                     @enderror
                                     <small class="form-text text-muted">
-                                        <i class="bx bx-info-circle mr-1"></i>Mô tả ngắn sẽ được hiển thị trong danh sách bài viết
+                                        <i class="bx bx-info-circle mr-1"></i>Mô tả ngắn sẽ được hiển thị trong danh sách
+                                        bài viết
                                     </small>
-                                </div>
+                                </div> --}}
 
                                 <!-- Content Field -->
                                 <div class="form-group mb-4">
@@ -139,13 +142,12 @@
                                         <i class="bx bx-detail mr-2 text-success"></i>Nội dung bài viết
                                         <span class="text-danger">*</span>
                                     </label>
-                                    <textarea name="content" rows="6" id="content-editor"
-                                        class="form-control @error('content') is-invalid @enderror"
+                                    <textarea name="content" rows="6" id="content-editor" class="form-control @error('content') is-invalid @enderror"
                                         placeholder="Nhập nội dung bài viết...">{{ old('content') }}</textarea>
-                                    @error('content') 
+                                    @error('content')
                                         <div class="invalid-feedback">
                                             <i class="bx bx-error-circle mr-1"></i>{{ $message }}
-                                        </div> 
+                                        </div>
                                     @enderror
                                 </div>
                             </div>
@@ -165,21 +167,24 @@
                                             <label class="form-label font-weight-semibold">
                                                 <i class="bx bx-activity mr-2 text-success"></i>Trạng thái
                                             </label>
-                                            <select name="status" class="form-control custom-select @error('status') is-invalid @enderror">
+                                            <select name="status"
+                                                class="form-control custom-select @error('status') is-invalid @enderror">
                                                 <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>
                                                     <i class="bx bx-edit"></i> Nháp
                                                 </option>
-                                                <option value="published" {{ old('status') == 'published' ? 'selected' : '' }}>
+                                                <option value="published"
+                                                    {{ old('status') == 'published' ? 'selected' : '' }}>
                                                     <i class="bx bx-check-circle"></i> Xuất bản
                                                 </option>
-                                                <option value="archived" {{ old('status') == 'archived' ? 'selected' : '' }}>
+                                                <option value="archived"
+                                                    {{ old('status') == 'archived' ? 'selected' : '' }}>
                                                     <i class="bx bx-archive"></i> Lưu trữ
                                                 </option>
                                             </select>
-                                            @error('status') 
+                                            @error('status')
                                                 <div class="invalid-feedback">
                                                     <i class="bx bx-error-circle mr-1"></i>{{ $message }}
-                                                </div> 
+                                                </div>
                                             @enderror
                                         </div>
                                     </div>
@@ -192,51 +197,61 @@
                                             <i class="bx bx-image mr-2 text-warning"></i>Ảnh đại diện
                                         </h6>
                                     </div>
-                                    <div class="card-body">
-                                        <div class="form-group mb-0">
-                                            <div class="custom-file">
-                                                <input type="file" name="thumbnail" id="thumbnail" 
-                                                    class="custom-file-input @error('thumbnail') is-invalid @enderror"
-                                                    accept="image/*">
-                                                <label class="custom-file-label" for="thumbnail">Chọn ảnh...</label>
-                                            </div>
-                                            @error('thumbnail') 
-                                                <div class="invalid-feedback d-block">
-                                                    <i class="bx bx-error-circle mr-1"></i>{{ $message }}
-                                                </div> 
-                                            @enderror
-                                            <small class="form-text text-muted">
-                                                <i class="bx bx-info-circle mr-1"></i>Định dạng: JPG, JPEG, PNG. Tối đa 2MB
-                                            </small>
-                                            
-                                            <!-- Image Preview -->
-                                            <div id="image-preview" class="mt-3" style="display: none;">
-                                                <img id="preview-img" src="" class="img-fluid rounded shadow-sm" style="max-height: 200px;">
-                                                <button type="button" id="remove-image" class="btn btn-sm btn-outline-danger mt-2">
-                                                    <i class="bx bx-trash mr-1"></i>Xóa ảnh
-                                                </button>
-                                            </div>
-                                        </div>
+                                    <div class="card-body text-center">
+                                        <img src="{{ $user->avatar ?? 'default.jpg' }}" alt="Ảnh đại diện"
+                                            class="img-fluid rounded"
+                                            style="max-width: 150px; max-height: 150px; object-fit: cover;">
                                     </div>
                                 </div>
 
-                                <!-- Action Buttons -->
-                                <div class="card border-0 shadow-sm">
-                                    <div class="card-body text-center">
-                                        <button type="submit" class="btn btn-primary btn-lg btn-block mb-2">
-                                            <i class="bx bx-save mr-2"></i>Lưu bài viết
-                                        </button>
-                                        <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary btn-block">
-                                            <i class="bx bx-arrow-back mr-2"></i>Quay lại danh sách
-                                        </a>
+                                <div class="card-body">
+                                    <div class="form-group mb-0">
+                                        <div class="custom-file">
+                                            <input type="file" name="thumbnail" id="thumbnail"
+                                                class="custom-file-input @error('thumbnail') is-invalid @enderror"
+                                                accept="image/*">
+                                            <label class="custom-file-label" for="thumbnail">Chọn ảnh...</label>
+                                        </div>
+                                        @error('thumbnail')
+                                            <div class="invalid-feedback d-block">
+                                                <i class="bx bx-error-circle mr-1"></i>{{ $message }}
+                                            </div>
+                                        @enderror
+                                        <small class="form-text text-muted">
+                                            <i class="bx bx-info-circle mr-1"></i>Định dạng: JPG, JPEG, PNG. Tối đa 2MB
+                                        </small>
+
+                                        <!-- Image Preview -->
+                                        <div id="image-preview" class="mt-3" style="display: none;">
+                                            <img id="preview-img" src="" class="img-fluid rounded shadow-sm"
+                                                style="max-height: 200px;">
+                                            <button type="button" id="remove-image"
+                                                class="btn btn-sm btn-outline-danger mt-2">
+                                                <i class="bx bx-trash mr-1"></i>Xóa ảnh
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Action Buttons -->
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <button type="submit" class="btn btn-primary btn-lg btn-block mb-2">
+                                        <i class="bx bx-save mr-2"></i>Lưu bài viết
+                                    </button>
+                                    <a href="{{ route('admin.posts.index') }}"
+                                        class="btn btn-outline-secondary btn-block">
+                                        <i class="bx bx-arrow-back mr-2"></i>Quay lại danh sách
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                    </form>
                 </div>
+                </form>
             </div>
         </div>
+    </div>
     </div>
 @endsection
 
@@ -257,7 +272,7 @@
 
         .form-control:focus,
         .custom-select:focus,
-        .custom-file-input:focus ~ .custom-file-label {
+        .custom-file-input:focus~.custom-file-label {
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
@@ -320,13 +335,30 @@
         // Initialize CKEditor
         CKEDITOR.replace('content-editor', {
             height: 300,
-            toolbar: [
-                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike'] },
-                { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'] },
-                { name: 'links', items: ['Link', 'Unlink'] },
-                { name: 'insert', items: ['Image', 'Table'] },
-                { name: 'styles', items: ['Format'] },
-                { name: 'tools', items: ['Maximize'] }
+            toolbar: [{
+                    name: 'basicstyles',
+                    items: ['Bold', 'Italic', 'Underline', 'Strike']
+                },
+                {
+                    name: 'paragraph',
+                    items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent']
+                },
+                {
+                    name: 'links',
+                    items: ['Link', 'Unlink']
+                },
+                {
+                    name: 'insert',
+                    items: ['Image', 'Table']
+                },
+                {
+                    name: 'styles',
+                    items: ['Format']
+                },
+                {
+                    name: 'tools',
+                    items: ['Maximize']
+                }
             ]
         });
 
@@ -374,7 +406,7 @@
         $('form').on('submit', function(e) {
             const title = $('input[name="title"]').val().trim();
             const category = $('select[name="service_cate_id"]').val();
-            
+
             if (!title) {
                 e.preventDefault();
                 $('input[name="title"]').focus();
@@ -385,7 +417,7 @@
                 });
                 return false;
             }
-            
+
             if (!category) {
                 e.preventDefault();
                 $('select[name="service_cate_id"]').focus();

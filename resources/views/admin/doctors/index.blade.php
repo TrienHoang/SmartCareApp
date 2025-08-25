@@ -144,7 +144,8 @@
                             <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách Bác sĩ</h4>
                         </div>
                         <div class="card-tools">
-                            <span class="badge badge-light">{{ $doctors->total() ?? $doctors->count() }} bác sĩ</span>
+                            <span class="badge badge-light text-dark">{{ $doctors->total() ?? $doctors->count() }} bác
+                                sĩ</span>
                         </div>
                     </div>
                 </div>
@@ -269,7 +270,7 @@
                                                 </div>
                                             </div>
                                         </td>
-  
+
                                         <td>
                                             <span class="badge badge-success badge-pill">
                                                 <i class="bx bx-building mr-1"></i>

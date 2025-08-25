@@ -1,8 +1,5 @@
 @extends('admin.dashboard')
 @section('title', 'Chỉnh sửa Danh mục Dịch vụ')
-
-@section('title', 'Chỉnh sửa Danh mục Dịch vụ')
-
 @section('content')
     <div class="content-wrapper">
         <div class="content-header row">

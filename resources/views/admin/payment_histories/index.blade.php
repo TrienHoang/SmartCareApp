@@ -46,7 +46,7 @@
         <div class="content-body">
             {{-- Thông báo --}}
             @foreach (['success', 'error'] as $msg)
-                @if(session($msg))
+                @if (session($msg))
                     <div class="alert alert-{{ $msg == 'error' ? 'danger' : $msg }} alert-dismissible fade show border-0 "
                         role="alert">
                         <div class="d-flex align-items-center">
@@ -191,8 +191,9 @@
                             <label for="service_id" class="form-label fw-semibold">Dịch vụ</label>
                             <select name="service_id" id="service_id" class="form-select input-3d">
                                 <option value="">Tất cả</option>
-                                @foreach($services as $service)
-                                    <option value="{{ $service->id }}" {{ request('service_id') == $service->id ? 'selected' : '' }}>
+                                @foreach ($services as $service)
+                                    <option value="{{ $service->id }}"
+                                        {{ request('service_id') == $service->id ? 'selected' : '' }}>
                                         {{ $service->name }}
                                     </option>
                                 @endforeach
@@ -204,8 +205,9 @@
                             <label for="doctor_id" class="form-label fw-semibold">Bác sĩ</label>
                             <select name="doctor_id" id="doctor_id" class="form-select input-3d">
                                 <option value="">Tất cả</option>
-                                @foreach($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}" {{ request('doctor_id') == $doctor->id ? 'selected' : '' }}>
+                                @foreach ($doctors as $doctor)
+                                    <option value="{{ $doctor->id }}"
+                                        {{ request('doctor_id') == $doctor->id ? 'selected' : '' }}>
                                         {{ $doctor->user->full_name }}
                                     </option>
                                 @endforeach
@@ -217,8 +219,9 @@
                             <label for="payment_method" class="form-label fw-semibold">Phương thức</label>
                             <select name="payment_method" id="payment_method" class="form-select input-3d">
                                 <option value="">Tất cả</option>
-                                @foreach($paymentMethods as $method)
-                                    <option value="{{ $method }}" {{ request('payment_method') == $method ? 'selected' : '' }}>
+                                @foreach ($paymentMethods as $method)
+                                    <option value="{{ $method }}"
+                                        {{ request('payment_method') == $method ? 'selected' : '' }}>
                                         {{ ucfirst($method) }}
                                     </option>
                                 @endforeach
@@ -230,13 +233,17 @@
                             <label for="payment_status" class="form-label fw-semibold">Trạng thái</label>
                             <select name="payment_status" id="payment_status" class="form-select input-3d">
                                 <option value="">Tất cả</option>
-                                <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Đã thanh toán
+                                <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Đã
+                                    thanh toán
                                 </option>
-                                <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Chờ xử
+                                <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Chờ
+                                    xử
                                     lý</option>
-                                <option value="failed" {{ request('payment_status') == 'failed' ? 'selected' : '' }}>Thất bại
+                                <option value="failed" {{ request('payment_status') == 'failed' ? 'selected' : '' }}>Thất
+                                    bại
                                 </option>
-                                <option value="refunded" {{ request('payment_status') == 'refunded' ? 'selected' : '' }}>Hoàn
+                                <option value="refunded" {{ request('payment_status') == 'refunded' ? 'selected' : '' }}>
+                                    Hoàn
                                     tiền</option>
                             </select>
                         </div>
@@ -268,7 +275,7 @@
                             <h4 class="card-title mb-0 text-white font-weight-bold">Danh sách giao dịch</h4>
                         </div>
                         <div class="card-tools">
-                            <span class="badge badge-light badge-3d">{{ $histories->total() }} giao dịch</span>
+                            <span class="badge badge-light badge-3d text-dark">{{ $histories->total() }} giao dịch</span>
                         </div>
                     </div>
                 </div>
@@ -308,8 +315,14 @@
                                             'failed' => ['label' => 'Hoàn thất bại', 'class' => 'bg-danger'],
                                         ];
 
-                                        $statusLabel = $statusMap[$status] ?? ['label' => 'Không xác định', 'class' => 'bg-dark'];
-                                        $refundLabel = $refundMap[$refundStatus] ?? ['label' => 'Không xác định', 'class' => 'bg-dark'];
+                                        $statusLabel = $statusMap[$status] ?? [
+                                            'label' => 'Không xác định',
+                                            'class' => 'bg-dark',
+                                        ];
+                                        $refundLabel = $refundMap[$refundStatus] ?? [
+                                            'label' => 'Không xác định',
+                                            'class' => 'bg-dark',
+                                        ];
                                     @endphp
                                     <tr class="row-3d">
                                         <td>{{ $loop->iteration + ($histories->currentPage() - 1) * $histories->perPage() }}
@@ -331,12 +344,12 @@
                                         </td>
                                         <td>{{ optional($history->payment_date)->format('d/m/Y H:i') ?? 'Chưa TT' }}</td>
 
-<td>
-    <span class="badge {{ $statusLabel['class'] }} badge-3d me-1">
-        {{ $statusLabel['label'] }}
-    </span>
+                                        <td>
+                                            <span class="badge {{ $statusLabel['class'] }} badge-3d me-1">
+                                                {{ $statusLabel['label'] }}
+                                            </span>
 
-</td>
+                                        </td>
                                         <td>
                                             <strong class="text-success amount-3d">
                                                 {{ number_format($history->amount, 0, ',', '.') }}₫
@@ -365,12 +378,13 @@
                     </div>
 
                     {{-- Phân trang --}}
-                    @if($histories->hasPages())
+                    @if ($histories->hasPages())
                         <div class="pagination-wrapper bg-light p-3 border-top pagination-3d">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="pagination-info">
                                     <small class="text-muted">
-                                        Hiển thị {{ $histories->firstItem() }} - {{ $histories->lastItem() }} trong tổng số
+                                        Hiển thị {{ $histories->firstItem() }} - {{ $histories->lastItem() }} trong tổng
+                                        số
                                         {{ $histories->total() }} kết quả
                                     </small>
                                 </div>
@@ -661,16 +675,16 @@
                     padding: 1rem 0.75rem;
                 }
             </style>
-@endsection
+        @endsection
 
         @push('scripts')
             <script>
-                document.addEventListener('DOMContentLoaded', function () {
+                document.addEventListener('DOMContentLoaded', function() {
                     const fromInput = document.getElementById('date_from');
                     const toInput = document.getElementById('date_to');
 
                     // Khi chọn "Từ ngày" thì đặt min cho "Đến ngày"
-                    fromInput.addEventListener('change', function () {
+                    fromInput.addEventListener('change', function() {
                         if (fromInput.value) {
                             toInput.min = fromInput.value;
                         } else {
@@ -679,7 +693,7 @@
                     });
 
                     // Khi chọn "Đến ngày" thì đặt max cho "Từ ngày"
-                    toInput.addEventListener('change', function () {
+                    toInput.addEventListener('change', function() {
                         if (toInput.value) {
                             fromInput.max = toInput.value;
                         } else {
@@ -697,4 +711,3 @@
                 });
             </script>
         @endpush
-

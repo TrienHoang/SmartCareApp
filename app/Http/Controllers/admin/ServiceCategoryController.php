@@ -38,11 +38,11 @@ class ServiceCategoryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:100', 'unique:service_categories,name,'],
+            'name' => ['required', 'string', 'max:100', 'unique:service_categories,name'],
             'description' => ['nullable', 'string'],
             'status' => ['nullable', 'in:active,inactive'],
         ], [
-            'name.sometimes' => 'Tên danh mục không bắt buộc, nhưng nếu có thì phải hợp lệ.',
+            'name.required' => 'Tên danh mục không được để trống.',
             'name.string' => 'Tên danh mục phải là chuỗi ký tự.',
             'name.max' => 'Tên danh mục không được vượt quá 100 ký tự.',
             'name.unique' => 'Tên danh mục đã tồn tại.',
@@ -51,7 +51,7 @@ class ServiceCategoryController extends Controller
         ]);
 
         ServiceCategory::create([
-            'name' => $validated['name'] ?? 'Không tên',
+            'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'status' => $validated['status'] ?? 'active',
         ]);
@@ -71,12 +71,14 @@ class ServiceCategoryController extends Controller
 
     public function update(Request $request, $id)
     {
+        $serviceCategory = ServiceCategory::findOrFail($id);
+
         $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:100', 'unique:service_categories,name,'],
+            'name' => ['required', 'string', 'max:100', 'unique:service_categories,name,' . $serviceCategory->id],
             'description' => ['nullable', 'string'],
             'status' => ['nullable', 'in:active,inactive'],
         ], [
-            'name.sometimes' => 'Tên danh mục không bắt buộc, nhưng nếu có thì phải hợp lệ.',
+            'name.required' => 'Tên danh mục không được để trống.',
             'name.string' => 'Tên danh mục phải là chuỗi ký tự.',
             'name.max' => 'Tên danh mục không được vượt quá 100 ký tự.',
             'name.unique' => 'Tên danh mục đã tồn tại.',
@@ -84,13 +86,7 @@ class ServiceCategoryController extends Controller
             'status.in' => 'Trạng thái phải là một trong các giá trị: active hoặc inactive.',
         ]);
 
-
-        $serviceCategory = ServiceCategory::findOrFail($id);
-        $serviceCategory->update([
-            'name' => $validated['name'] ?? $serviceCategory->name,
-            'description' => $validated['description'] ?? $serviceCategory->description,
-            'status' => $validated['status'] ?? $serviceCategory->status,
-        ]);
+        $serviceCategory->update($validated);
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'Cập nhật danh mục dịch vụ thành công!');

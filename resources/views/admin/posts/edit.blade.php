@@ -72,7 +72,8 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <form action="{{ route('admin.posts.update', $post->id) }}" method="POST" enctype="multipart/form-data" class="form-modern">
+                    <form action="{{ route('admin.posts.update', $post->id) }}" method="POST" enctype="multipart/form-data"
+                        class="form-modern">
                         @csrf
                         @method('PUT')
 
@@ -88,10 +89,10 @@
                                     <input type="text" name="title" value="{{ old('title', $post->title) }}"
                                         class="form-control form-control-lg @error('title') is-invalid @enderror"
                                         placeholder="Nhập tiêu đề bài viết...">
-                                    @error('title') 
+                                    @error('title')
                                         <div class="invalid-feedback">
                                             <i class="bx bx-error-circle mr-1"></i>{{ $message }}
-                                        </div> 
+                                        </div>
                                     @enderror
                                 </div>
 
@@ -101,23 +102,25 @@
                                         <i class="bx bx-category mr-2 text-info"></i>Danh mục dịch vụ
                                         <span class="text-danger">*</span>
                                     </label>
-                                    <select name="service_cate_id" class="form-control custom-select @error('service_cate_id') is-invalid @enderror">
+                                    <select name="service_cate_id"
+                                        class="form-control custom-select @error('service_cate_id') is-invalid @enderror">
                                         <option value="">-- Chọn danh mục --</option>
                                         @foreach ($categories as $cate)
-                                            <option value="{{ $cate->id }}" {{ old('service_cate_id', $post->service_cate_id) == $cate->id ? 'selected' : '' }}>
+                                            <option value="{{ $cate->id }}"
+                                                {{ old('service_cate_id', $post->service_cate_id) == $cate->id ? 'selected' : '' }}>
                                                 {{ $cate->name }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('service_cate_id') 
+                                    @error('service_cate_id')
                                         <div class="invalid-feedback">
                                             <i class="bx bx-error-circle mr-1"></i>{{ $message }}
-                                        </div> 
+                                        </div>
                                     @enderror
                                 </div>
 
                                 <!-- Excerpt Field -->
-                                <div class="form-group mb-4">
+                                {{-- <div class="form-group mb-4">
                                     <label class="form-label font-weight-semibold">
                                         <i class="bx bx-text mr-2 text-warning"></i>Mô tả ngắn
                                     </label>
@@ -132,7 +135,7 @@
                                     <small class="form-text text-muted">
                                         <i class="bx bx-info-circle mr-1"></i>Mô tả ngắn sẽ được hiển thị trong danh sách bài viết
                                     </small>
-                                </div>
+                                </div> --}}
 
                                 <!-- Content Field -->
                                 <div class="form-group mb-4">
@@ -140,13 +143,12 @@
                                         <i class="bx bx-detail mr-2 text-success"></i>Nội dung bài viết
                                         <span class="text-danger">*</span>
                                     </label>
-                                    <textarea name="content" rows="6" id="content-editor"
-                                        class="form-control @error('content') is-invalid @enderror"
+                                    <textarea name="content" rows="6" id="content-editor" class="form-control @error('content') is-invalid @enderror"
                                         placeholder="Nhập nội dung bài viết...">{{ old('content', $post->content) }}</textarea>
-                                    @error('content') 
+                                    @error('content')
                                         <div class="invalid-feedback">
                                             <i class="bx bx-error-circle mr-1"></i>{{ $message }}
-                                        </div> 
+                                        </div>
                                     @enderror
                                 </div>
                             </div>
@@ -166,21 +168,25 @@
                                             <label class="form-label font-weight-semibold">
                                                 <i class="bx bx-activity mr-2 text-success"></i>Trạng thái
                                             </label>
-                                            <select name="status" class="form-control custom-select @error('status') is-invalid @enderror">
-                                                <option value="draft" {{ old('status', $post->status) == 'draft' ? 'selected' : '' }}>
+                                            <select name="status"
+                                                class="form-control custom-select @error('status') is-invalid @enderror">
+                                                <option value="draft"
+                                                    {{ old('status', $post->status) == 'draft' ? 'selected' : '' }}>
                                                     📝 Nháp
                                                 </option>
-                                                <option value="published" {{ old('status', $post->status) == 'published' ? 'selected' : '' }}>
+                                                <option value="published"
+                                                    {{ old('status', $post->status) == 'published' ? 'selected' : '' }}>
                                                     ✅ Xuất bản
                                                 </option>
-                                                <option value="archived" {{ old('status', $post->status) == 'archived' ? 'selected' : '' }}>
+                                                <option value="archived"
+                                                    {{ old('status', $post->status) == 'archived' ? 'selected' : '' }}>
                                                     📦 Lưu trữ
                                                 </option>
                                             </select>
-                                            @error('status') 
+                                            @error('status')
                                                 <div class="invalid-feedback">
                                                     <i class="bx bx-error-circle mr-1"></i>{{ $message }}
-                                                </div> 
+                                                </div>
                                             @enderror
                                         </div>
                                     </div>
@@ -188,57 +194,61 @@
 
                                 <!-- Current Image Display Card -->
                                 @if ($post->thumbnail)
-                                <div class="card border-0 shadow-sm mb-4">
-                                    <div class="card-header bg-light border-0">
-                                        <h6 class="card-title mb-0 font-weight-semibold">
-                                            <i class="bx bx-image-alt mr-2 text-success"></i>Ảnh hiện tại
-                                        </h6>
-                                    </div>
-                                    <div class="card-body text-center">
-                                        <img src="{{ asset('storage/' . $post->thumbnail) }}" 
-                                             class="img-fluid rounded shadow-sm" 
-                                             style="max-height: 200px; object-fit: cover;"
-                                             alt="Ảnh hiện tại">
-                                        <div class="mt-2">
-                                            <span class="badge badge-success">
-                                                <i class="bx bx-check mr-1"></i>Đã có ảnh
-                                            </span>
+                                    <div class="card border-0 shadow-sm mb-4">
+                                        <div class="card-header bg-light border-0">
+                                            <h6 class="card-title mb-0 font-weight-semibold">
+                                                <i class="bx bx-image-alt mr-2 text-success"></i>Ảnh hiện tại
+                                            </h6>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <img src="{{ asset('storage/' . $post->thumbnail) }}"
+                                                class="img-fluid rounded shadow-sm"
+                                                style="max-height: 200px; object-fit: cover;" alt="Ảnh hiện tại">
+                                            <div class="mt-2">
+                                                <span class="badge badge-success">
+                                                    <i class="bx bx-check mr-1"></i>Đã có ảnh
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
                                 @endif
 
                                 <!-- Image Upload Card -->
                                 <div class="card border-0 shadow-sm mb-4">
                                     <div class="card-header bg-light border-0">
                                         <h6 class="card-title mb-0 font-weight-semibold">
-                                            <i class="bx bx-image mr-2 text-warning"></i>{{ $post->thumbnail ? 'Thay đổi ảnh đại diện' : 'Ảnh đại diện' }}
+                                            <i
+                                                class="bx bx-image mr-2 text-warning"></i>{{ $post->thumbnail ? 'Thay đổi ảnh đại diện' : 'Ảnh đại diện' }}
                                         </h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="form-group mb-0">
                                             <div class="custom-file">
-                                                <input type="file" name="thumbnail" id="thumbnail" 
+                                                <input type="file" name="thumbnail" id="thumbnail"
                                                     class="custom-file-input @error('thumbnail') is-invalid @enderror"
                                                     accept="image/*">
-                                                <label class="custom-file-label" for="thumbnail">{{ $post->thumbnail ? 'Chọn ảnh mới...' : 'Chọn ảnh...' }}</label>
+                                                <label class="custom-file-label"
+                                                    for="thumbnail">{{ $post->thumbnail ? 'Chọn ảnh mới...' : 'Chọn ảnh...' }}</label>
                                             </div>
-                                            @error('thumbnail') 
+                                            @error('thumbnail')
                                                 <div class="invalid-feedback d-block">
                                                     <i class="bx bx-error-circle mr-1"></i>{{ $message }}
-                                                </div> 
+                                                </div>
                                             @enderror
                                             <small class="form-text text-muted">
                                                 <i class="bx bx-info-circle mr-1"></i>Định dạng: JPG, JPEG, PNG. Tối đa 2MB
-                                                @if($post->thumbnail)
-                                                    <br><i class="bx bx-info-circle mr-1"></i>Để trống nếu không muốn thay đổi
+                                                @if ($post->thumbnail)
+                                                    <br><i class="bx bx-info-circle mr-1"></i>Để trống nếu không muốn thay
+                                                    đổi
                                                 @endif
                                             </small>
-                                            
+
                                             <!-- Image Preview -->
                                             <div id="image-preview" class="mt-3" style="display: none;">
-                                                <img id="preview-img" src="" class="img-fluid rounded shadow-sm" style="max-height: 200px;">
-                                                <button type="button" id="remove-image" class="btn btn-sm btn-outline-danger mt-2">
+                                                <img id="preview-img" src="" class="img-fluid rounded shadow-sm"
+                                                    style="max-height: 200px;">
+                                                <button type="button" id="remove-image"
+                                                    class="btn btn-sm btn-outline-danger mt-2">
                                                     <i class="bx bx-trash mr-1"></i>Xóa ảnh
                                                 </button>
                                             </div>
@@ -252,7 +262,8 @@
                                         <button type="submit" class="btn btn-primary btn-lg btn-block mb-2">
                                             <i class="bx bx-save mr-2"></i>Cập nhật bài viết
                                         </button>
-                                        <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary btn-block">
+                                        <a href="{{ route('admin.posts.index') }}"
+                                            class="btn btn-outline-secondary btn-block">
                                             <i class="bx bx-arrow-back mr-2"></i>Quay lại danh sách
                                         </a>
                                     </div>
@@ -283,7 +294,7 @@
 
         .form-control:focus,
         .custom-select:focus,
-        .custom-file-input:focus ~ .custom-file-label {
+        .custom-file-input:focus~.custom-file-label {
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
@@ -350,13 +361,30 @@
         // Initialize CKEditor
         CKEDITOR.replace('content-editor', {
             height: 300,
-            toolbar: [
-                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike'] },
-                { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'] },
-                { name: 'links', items: ['Link', 'Unlink'] },
-                { name: 'insert', items: ['Image', 'Table'] },
-                { name: 'styles', items: ['Format'] },
-                { name: 'tools', items: ['Maximize'] }
+            toolbar: [{
+                    name: 'basicstyles',
+                    items: ['Bold', 'Italic', 'Underline', 'Strike']
+                },
+                {
+                    name: 'paragraph',
+                    items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent']
+                },
+                {
+                    name: 'links',
+                    items: ['Link', 'Unlink']
+                },
+                {
+                    name: 'insert',
+                    items: ['Image', 'Table']
+                },
+                {
+                    name: 'styles',
+                    items: ['Format']
+                },
+                {
+                    name: 'tools',
+                    items: ['Maximize']
+                }
             ]
         });
 
@@ -381,7 +409,7 @@
                     reader.readAsDataURL(file);
                 }
             } else {
-                label.textContent = '{{ $post->thumbnail ? "Chọn ảnh mới..." : "Chọn ảnh..." }}';
+                label.textContent = '{{ $post->thumbnail ? 'Chọn ảnh mới...' : 'Chọn ảnh...' }}';
                 preview.style.display = 'none';
             }
         });
@@ -389,7 +417,8 @@
         // Remove image
         document.getElementById('remove-image').addEventListener('click', function() {
             document.getElementById('thumbnail').value = '';
-            document.querySelector('.custom-file-label').textContent = '{{ $post->thumbnail ? "Chọn ảnh mới..." : "Chọn ảnh..." }}';
+            document.querySelector('.custom-file-label').textContent =
+                '{{ $post->thumbnail ? 'Chọn ảnh mới...' : 'Chọn ảnh...' }}';
             document.getElementById('image-preview').style.display = 'none';
         });
 
@@ -404,7 +433,7 @@
         $('form').on('submit', function(e) {
             const title = $('input[name="title"]').val().trim();
             const category = $('select[name="service_cate_id"]').val();
-            
+
             if (!title) {
                 e.preventDefault();
                 $('input[name="title"]').focus();
@@ -419,7 +448,7 @@
                 }
                 return false;
             }
-            
+
             if (!category) {
                 e.preventDefault();
                 $('select[name="service_cate_id"]').focus();

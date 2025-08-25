@@ -15,10 +15,7 @@
                         </h1>
                         <p class="text-blue-100">Thông tin đầy đủ về cuộc hẹn của bạn</p>
                     </div>
-                    <div class="text-center md:text-right">
-                        <div class="text-sm text-blue-100">Mã lịch hẹn</div>
-                        <div class="text-2xl font-bold">#{{ $appointment->id ?? 'AP001' }}</div>
-                    </div>
+
                 </div>
             </div>
         </div>

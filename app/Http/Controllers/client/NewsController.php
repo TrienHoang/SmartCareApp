@@ -21,53 +21,52 @@ class NewsController extends Controller
             $keyword = $request->get('keyword');
             $query->where('title', 'like', '%' . $keyword . '%');
         }
-$popularArticles = Post::where('status', 'published')
-    ->orderByDesc('view_count') // Sắp xếp theo lượt xem nhiều nhất
-    ->take(5)
-    ->get(['title', 'slug', 'view_count', 'created_at']);
+        $popularArticles = Post::where('status', 'published')
+            ->orderByDesc('view_count') // Sắp xếp theo lượt xem nhiều nhất
+            ->take(5)
+            ->get(['title', 'slug', 'view_count', 'created_at']);
 
         // Sắp xếp mặc định: mới nhất lên đầu
         $query->orderBy('created_at', $sort);
 
         // Phân trang và giữ lại query string
-        $posts = $query->paginate(6)->appends($request->query());
+        $posts = $query->paginate(10)->appends($request->query());
 
         $serviceCategories = ServiceCategory::where('status', 'active')->get();
 
         return view('client.news.index', compact('posts', 'serviceCategories', 'popularArticles'));
     }
 
-   public function category($id, Request $request)
-{
-    $serviceCategories = ServiceCategory::where('status', 'active')->get(); // Danh mục filter
-    $category = ServiceCategory::findOrFail($id);
+    public function category($id, Request $request)
+    {
+        $serviceCategories = ServiceCategory::where('status', 'active')->get(); // Danh mục filter
+        $category = ServiceCategory::findOrFail($id);
 
-    $posts = Post::where('status', 'published')
-        ->where('service_cate_id', $id)
-        ->orderBy('created_at', 'desc')
-        ->paginate(6)
-        ->appends($request->query()); // giữ query string nếu có
+        $posts = Post::where('status', 'published')
+            ->where('service_cate_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(6)
+            ->appends($request->query()); // giữ query string nếu có
 
-    $popularArticles = Post::where('status', 'published')
-        ->orderByDesc('view_count')
-        ->take(5)
-        ->get(['title', 'slug', 'view_count', 'created_at']);
+        $popularArticles = Post::where('status', 'published')
+            ->orderByDesc('view_count')
+            ->take(5)
+            ->get(['title', 'slug', 'view_count', 'created_at']);
 
-    return view('client.news.index', compact('posts', 'serviceCategories', 'category', 'popularArticles'));
-}
+        return view('client.news.index', compact('posts', 'serviceCategories', 'category', 'popularArticles'));
+    }
 
 
     public function show($slug)
-{
-    $post = Post::where('slug', $slug)
-        ->where('status', 'published')
-        ->firstOrFail();
+    {
+        $post = Post::where('slug', $slug)
+            ->where('status', 'published')
+            ->firstOrFail();
 
-    // Tăng lượt xem
-    $post->increment('view_count');
+        // Tăng lượt xem
+        $post->increment('view_count');
 
 
-    return view('client.news.show', compact('post'));
-}
-
+        return view('client.news.show', compact('post'));
+    }
 }
